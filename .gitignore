@@ -1,0 +1,17 @@
+target/
+.vscode/
+.idea/
+*.iml
+mobile_app/build/
+mobile_app/.dart_tool/
+mobile_app/.flutter-plugins-dependencies
+mobile_app/android/local.properties
+mobile_app/ios/Flutter/Generated.xcconfig
+mobile_app/ios/Flutter/flutter_export_environment.sh
+mobile_app/ios/Pods/
+mobile_app/ios/.symlinks/
+.env
+.env.*
+!.env.example
+*.log
+.tools/
