@@ -123,16 +123,17 @@ flutter pub get
 flutter run -d chrome --web-port=3000
 ```
 
-API mặc định: Android emulator dùng `http://10.0.2.2:8080`; Web và iOS simulator
-dùng `http://localhost:8080`. Đổi địa chỉ cho điện thoại thật bằng địa chỉ LAN
-của máy backend:
+API mặc định của Flutter và APK từ GitHub Actions là `http://192.168.1.16:8080`.
+Các endpoint đã có tiền tố `/api`, nên không thêm `/api` vào Base URL.
+Điện thoại cần cùng mạng LAN với máy backend và truy cập được cổng 8080.
+Có thể thay địa chỉ lúc chạy hoặc build:
 
 ```powershell
 flutter run --dart-define=API_BASE_URL=https://api.example.com
 ```
 
-Thay URL minh họa bằng API đang chạy của bạn. Android debug cho phép HTTP để
-test local; bản phát hành dùng HTTPS. Android cần Android SDK và thiết bị/emulator.
+Thay URL minh họa bằng API đang chạy của bạn. Android cho phép HTTP tới riêng
+`192.168.1.16` trong `network_security_config.xml`. Android cần Android SDK và thiết bị/emulator.
 iOS cần macOS, Xcode và cấu hình ký ứng dụng. Android release trong repo dùng
 debug key để demo; cấu hình upload key riêng khi phát hành Play Store.
 

@@ -19,12 +19,10 @@ class ApiService extends ChangeNotifier {
   ApiService({http.Client? client, String? baseUrl})
     : _client = client ?? http.Client(),
       baseUrl = (baseUrl ?? _defaultBaseUrl).replaceFirst(RegExp(r'/+$'), '');
-  static const _configuredUrl = String.fromEnvironment('API_BASE_URL');
-  static String get _defaultBaseUrl => _configuredUrl.isNotEmpty
-      ? _configuredUrl
-      : !kIsWeb && defaultTargetPlatform == TargetPlatform.android
-      ? 'http://10.0.2.2:8080'
-      : 'http://localhost:8080';
+  static const _defaultBaseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'http://192.168.1.16:8080',
+  );
   static const _storageKey = 'thoxay.session';
   final http.Client _client;
   final String baseUrl;

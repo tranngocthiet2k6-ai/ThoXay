@@ -1,9 +1,10 @@
 # Thợ Xây Mobile
 
-Ứng dụng Flutter cho thợ và chủ thầu. Chạy `flutter pub get`, sau đó
-`flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8080` trên Android emulator.
-Chrome và iOS simulator dùng `http://localhost:8080`; thiết bị thật dùng địa chỉ LAN
-của máy chạy backend. Bản phát hành dùng API HTTPS.
+Ứng dụng Flutter cho thợ và chủ thầu. Chạy `flutter pub get`, sau đó `flutter run`.
+API mặc định là `http://192.168.1.16:8080`; các endpoint tự thêm tiền tố `/api`.
+Điện thoại cần cùng mạng LAN với máy chạy backend và truy cập được cổng 8080.
+Android cho phép HTTP tới riêng `192.168.1.16` qua `network_security_config.xml`.
+Có thể đổi API bằng `--dart-define=API_BASE_URL=https://api.example.com`.
 
 Kiểm tra bằng `flutter analyze`, `flutter test`, `flutter build web --release`.
 Android cần Android SDK; iOS cần macOS và Xcode. Cấu hình Android hiện ký bằng
@@ -18,5 +19,4 @@ trong `mobile_app/` trên Ubuntu.
 
 Khi lần chạy thành công, mở phần **Artifacts**, tải `tho-xay-release-apk` và giải
 nén để lấy `app-release.apk`. Artifact được giữ 30 ngày. APK dùng cấu hình ký demo
-hiện tại và API mặc định dành cho Android emulator; thiết bị thật cần build với
-`--dart-define=API_BASE_URL=<dia-chi-backend>` phù hợp.
+hiện tại và API mặc định `http://192.168.1.16:8080` được tích hợp từ mã nguồn.
