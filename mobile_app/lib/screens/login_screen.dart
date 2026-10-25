@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
+import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key, required this.api});
@@ -129,6 +130,15 @@ class _LoginScreenState extends State<LoginScreen> {
                                       child: CircularProgressIndicator(
                                           strokeWidth: 2))
                                   : const Text('Đăng nhập')),
+                          const SizedBox(height: 12),
+                          TextButton(
+                              onPressed: _busy
+                                  ? null
+                                  : () => Navigator.of(context).push(
+                                      MaterialPageRoute<void>(
+                                          builder: (_) =>
+                                              RegisterScreen(api: widget.api))),
+                              child: const Text('Chưa có tài khoản? Đăng ký')),
                         ])),
               )),
         ))),
