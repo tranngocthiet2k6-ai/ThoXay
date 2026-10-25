@@ -61,6 +61,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(api.decision, 'ACCEPTED');
     expect(find.text('Đã nhận 1 / 1 thợ'), findsOneWidget);
+    expect(find.text('Gọi thợ: 0900000003'), findsOneWidget);
     api.dispose();
   });
   testWidgets('post job form validates required fields', (tester) async {

@@ -5,6 +5,8 @@ import '../services/api_service.dart';
 import '../services/location_service.dart';
 import '../widgets/coordinates_dialog.dart';
 import '../widgets/job_card.dart';
+import '../widgets/call_button.dart';
+import 'profile_screen.dart';
 
 class WorkerHomeScreen extends StatefulWidget {
   const WorkerHomeScreen({super.key, required this.api, this.location});
@@ -19,6 +21,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
   List<JobApplication> _applications = [];
   GeoPoint? _position;
   double _radius = 10;
+  String _jobType = '', _sort = 'DISTANCE';
   int _tab = 0;
   int? _applying;
   bool _loading = false;
@@ -47,6 +50,8 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
         _position!.latitude,
         _position!.longitude,
         _radius,
+        jobType: _jobType.isEmpty ? null : _jobType,
+        sort: _sort,
       );
       if (mounted) setState(() => _jobs = jobs);
     } on ApiException catch (e) {
@@ -89,6 +94,15 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
     appBar: AppBar(
       title: const Text('Thợ Xây'),
       actions: [
+        IconButton(
+          tooltip: 'Hồ sơ & CCCD',
+          icon: const Icon(Icons.person_outline),
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => ProfileScreen(api: widget.api),
+            ),
+          ),
+        ),
         IconButton(
           tooltip: 'Làm mới',
           onPressed: _loading ? null : () => _refresh(),
@@ -161,6 +175,69 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                     ],
                   ),
                   const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: DropdownButtonFormField<String>(
+                          initialValue: _jobType,
+                          isExpanded: true,
+                          decoration: const InputDecoration(
+                            labelText: 'Loại công việc',
+                          ),
+                          items: ['', 'Thợ chính', 'Phụ hồ']
+                              .map(
+                                (type) => DropdownMenuItem(
+                                  value: type,
+                                  child: Text(
+                                    type.isEmpty ? 'Tất cả' : type,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: _loading
+                              ? null
+                              : (value) {
+                                  setState(() => _jobType = value!);
+                                  _refresh();
+                                },
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: DropdownButtonFormField<String>(
+                          initialValue: _sort,
+                          isExpanded: true,
+                          decoration: const InputDecoration(
+                            labelText: 'Sắp xếp',
+                          ),
+                          items: const [
+                            DropdownMenuItem(
+                              value: 'DISTANCE',
+                              child: Text(
+                                'Gần nhất',
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            DropdownMenuItem(
+                              value: 'SALARY_DESC',
+                              child: Text(
+                                'Lương cao nhất',
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                          onChanged: _loading
+                              ? null
+                              : (value) {
+                                  setState(() => _sort = value!);
+                                  _refresh();
+                                },
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
                 ],
                 if (_error != null)
                   Card(
@@ -210,16 +287,34 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                   for (final application in _applications)
                     JobCard(
                       job: application.job,
-                      action: Chip(
-                        label: Text(statusLabel(application.status)),
-                        avatar: Icon(
-                          application.status == 'ACCEPTED'
-                              ? Icons.check_circle_outline
-                              : application.status == 'REJECTED'
-                              ? Icons.cancel_outlined
-                              : Icons.schedule,
-                          size: 18,
-                        ),
+                      canContactContractor: application.status == 'ACCEPTED',
+                      action: Wrap(
+                        spacing: 12,
+                        runSpacing: 8,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          Chip(
+                            label: Text(statusLabel(application.status)),
+                            avatar: Icon(
+                              application.status == 'ACCEPTED'
+                                  ? Icons.check_circle_outline
+                                  : application.status == 'REJECTED'
+                                  ? Icons.cancel_outlined
+                                  : Icons.schedule,
+                              size: 18,
+                            ),
+                          ),
+                          if (application.jobRating != null)
+                            Text(
+                              'Đánh giá công trình: ${application.jobRating}/5 ★',
+                            ),
+                          if (application.status == 'ACCEPTED' &&
+                              application.job.contractorPhone != null)
+                            CallButton(
+                              phone: application.job.contractorPhone!,
+                              label: 'Gọi chủ thầu',
+                            ),
+                        ],
                       ),
                     ),
                 ],

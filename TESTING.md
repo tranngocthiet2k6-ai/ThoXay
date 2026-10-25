@@ -6,11 +6,16 @@
 .\mvnw.cmd -B verify
 ```
 
-12 kiểm thử JUnit/Spring Boot dùng H2 mặc định, chạy với Spring Security và JWT
+18 kiểm thử JUnit/Spring Boot dùng H2 mặc định, chạy với Spring Security và JWT
 thật: đăng ký/đăng nhập, BCrypt, chống đăng ký ADMIN, token giả/thiếu, tài khoản
 bị khóa, phân quyền, Haversine, dữ liệu sai, ứng tuyển trùng, lịch sử, duyệt,
 hai giao dịch duyệt đồng thời cho một vị trí, render Thymeleaf, CSRF, xác thực
 CCCD, khóa/mở tài khoản và xóa công trình có đơn ứng tuyển.
+
+Nâng cấp bao phủ cập nhật CCCD/đưa về chưa xác thực, chặn duyệt ảnh cũ,
+đánh giá sai điểm/sai người/sai chủ công trình, tính trung bình qua nhiều
+công trình, gửi lại yêu cầu hoàn thành, hoàn thành hai công trình đồng thời
+cho cùng thợ, tính lại điểm khi xóa và bộ lọc loại việc/lương.
 
 Để chạy cùng bộ kiểm thử trên PostgreSQL, dùng **database kiểm thử riêng**.
 Hibernate `create-drop` và các thao tác dọn dữ liệu trong test sẽ xóa dữ liệu
@@ -36,13 +41,15 @@ flutter test
 flutter build web --release
 ```
 
-7 kiểm thử Dart/widget: lưu/khôi phục phiên, đính JWT, xóa phiên khi 401,
+13 kiểm thử Dart/widget: lưu/khôi phục phiên, đính JWT, xóa phiên khi 401,
 validation đăng nhập/đăng ký, tìm việc theo vị trí được cấp cho test, ứng tuyển
 và lịch sử, duyệt thợ, validation form đăng công trình. Widget test dùng API
 và vị trí giả lập, không truy cập GPS thật hay gửi yêu cầu ra mạng.
+Nâng cấp kiểm tra thêm ACCOUNT_LOCKED 403, bộ lọc, liên hệ sau ACCEPTED,
+URI tel qua launcher giả, cập nhật CCCD và chọn điểm trước khi hoàn thành.
 
-Đã kiểm chứng trên Windows, Java 21, Flutter 3.47.8: Maven verify với cả 12 test
-trên H2 và PostgreSQL 17.11, Flutter analyzer, 7 test và Web release build.
+Đã kiểm chứng trên Windows, Java 21, Flutter 3.47.8: Maven verify với cả 18 test
+trên H2 và PostgreSQL 17.11, Flutter analyzer, 13 test và Web release build.
 Schema/seed và luồng HTTP đăng nhập →
 Haversine → đăng việc → ứng tuyển → nhận thợ → IN_PROGRESS đã chạy trên
 PostgreSQL 17.11 thật. Web Admin và Flutter đã được đăng nhập trên Chrome,

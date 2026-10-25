@@ -32,10 +32,11 @@
         <tr th:each="user : ${dashboard.users}">
           <td><strong th:text="${user.fullName}"></strong><div class="small text-secondary" th:text="${user.phoneNumber}"></div></td>
           <td th:text="${user.role == 'ROLE_ADMIN' ? 'Quản trị' : (user.role == 'ROLE_CONTRACTOR' ? 'Chủ thầu' : 'Thợ')}"></td>
-          <td><span th:if="${user.verified}" class="badge text-bg-success">Đã xác thực</span><span th:unless="${user.verified}" class="badge text-bg-light">Chưa xác thực</span><a th:if="${user.cccdImage != null}" th:href="${user.cccdImage}" target="_blank" rel="noopener noreferrer" class="d-block small mt-1">Xem ảnh CCCD ↗</a></td>
+          <td><span th:if="${user.verified}" class="badge text-bg-success">Đã xác thực</span><span th:unless="${user.verified}" class="badge text-bg-light">Chưa xác thực</span><div class="mt-2"><a th:if="${user.cccdImage != null}" th:href="${user.cccdImage}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-secondary">Xem CCCD ↗</a></div></td>
           <td><span th:class="${user.active ? 'badge text-bg-success' : 'badge text-bg-danger'}" th:text="${user.active ? 'Hoạt động' : 'Đã khóa'}"></span></td>
           <td class="text-end"><div class="d-flex gap-2 justify-content-end flex-wrap">
-            <form th:if="${!user.verified and user.cccdImage != null}" th:action="@{/admin/users/{id}/verify(id=${user.id})}" method="post"><button class="btn btn-sm btn-outline-primary">Xác thực</button></form>
+            <form th:if="${!user.verified and user.cccdImage != null}" th:action="@{/admin/users/{id}/verify(id=${user.id})}" method="post"><input type="hidden" name="cccdImage" th:value="${user.cccdImage}"><button class="btn btn-sm btn-outline-primary">Xác thực</button></form>
+            <button th:if="${!user.verified and user.cccdImage == null}" class="btn btn-sm btn-outline-primary" disabled title="Tài khoản chưa cung cấp ảnh CCCD">Xác thực</button>
             <form th:if="${user.role != 'ROLE_ADMIN'}" th:action="@{/admin/users/{id}/toggle-active(id=${user.id})}" method="post"><button class="btn btn-sm btn-outline-secondary" th:text="${user.active ? 'Khóa' : 'Mở khóa'}"></button></form>
           </div></td>
         </tr>

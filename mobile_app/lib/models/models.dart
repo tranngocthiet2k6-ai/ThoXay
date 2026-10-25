@@ -50,20 +50,15 @@ class Job {
     this.distanceKm,
   });
   final int id, contractorId, requiredWorkers;
-  final String contractorName,
-      contractorPhone,
-      title,
-      description,
-      jobType,
-      address,
-      status;
+  final String? contractorPhone;
+  final String contractorName, title, description, jobType, address, status;
   final double salaryPerDay, latitude, longitude;
   final double? distanceKm;
   factory Job.fromJson(Map<String, dynamic> json) => Job(
     id: (json['id'] as num).toInt(),
     contractorId: (json['contractorId'] as num).toInt(),
     contractorName: json['contractorName'] as String,
-    contractorPhone: json['contractorPhone'] as String,
+    contractorPhone: json['contractorPhone'] as String?,
     title: json['title'] as String,
     description: json['description'] as String? ?? '',
     jobType: json['jobType'] as String,
@@ -88,10 +83,13 @@ class JobApplication {
     required this.workerVerified,
     required this.workerActive,
     required this.status,
+    this.jobRating,
   });
   final int id, workerId;
   final Job job;
-  final String workerName, workerPhone, status;
+  final String workerName, status;
+  final String? workerPhone;
+  final int? jobRating;
   final double workerRating;
   final bool workerVerified, workerActive;
   factory JobApplication.fromJson(Map<String, dynamic> json) => JobApplication(
@@ -99,11 +97,38 @@ class JobApplication {
     job: Job.fromJson(json['job'] as Map<String, dynamic>),
     workerId: (json['workerId'] as num).toInt(),
     workerName: json['workerName'] as String,
-    workerPhone: json['workerPhone'] as String,
+    workerPhone: json['workerPhone'] as String?,
     workerRating: (json['workerRating'] as num).toDouble(),
     workerVerified: json['workerVerified'] as bool,
     workerActive: json['workerActive'] as bool,
     status: json['status'] as String,
+    jobRating: (json['jobRating'] as num?)?.toInt(),
+  );
+}
+
+class UserProfile {
+  const UserProfile({
+    required this.id,
+    required this.fullName,
+    required this.phoneNumber,
+    required this.role,
+    required this.verified,
+    required this.rating,
+    this.cccdImage,
+  });
+  final int id;
+  final String fullName, phoneNumber, role;
+  final bool verified;
+  final double rating;
+  final String? cccdImage;
+  factory UserProfile.fromJson(Map<String, dynamic> json) => UserProfile(
+    id: (json['id'] as num).toInt(),
+    fullName: json['fullName'] as String,
+    phoneNumber: json['phoneNumber'] as String,
+    role: json['role'] as String,
+    verified: json['verified'] as bool,
+    rating: (json['rating'] as num).toDouble(),
+    cccdImage: json['cccdImage'] as String?,
   );
 }
 

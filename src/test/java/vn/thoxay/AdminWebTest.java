@@ -47,7 +47,8 @@ class AdminWebTest {
             .andExpect(content().string(not(containsString("/admin/users/" + admin.getId() + "/toggle-active"))))
             .andExpect(content().string(containsString("/admin/users/" + worker.getId() + "/toggle-active")));
         mvc.perform(post("/admin/users/" + worker.getId() + "/verify")).andExpect(status().isForbidden());
-        mvc.perform(post("/admin/users/" + worker.getId() + "/verify").with(csrf())).andExpect(status().is3xxRedirection());
+        mvc.perform(post("/admin/users/" + worker.getId() + "/verify").with(csrf())
+            .param("cccdImage", worker.getCccdImage())).andExpect(status().is3xxRedirection());
         assertThat(users.findById(worker.getId()).orElseThrow().isVerified()).isTrue();
         mvc.perform(post("/admin/users/" + worker.getId() + "/toggle-active").with(csrf())).andExpect(status().is3xxRedirection());
         assertThat(users.findById(worker.getId()).orElseThrow().isActive()).isFalse();

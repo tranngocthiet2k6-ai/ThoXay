@@ -5,6 +5,9 @@ import '../services/api_service.dart';
 import '../services/location_service.dart';
 import '../widgets/coordinates_dialog.dart';
 import '../widgets/job_card.dart';
+import '../widgets/call_button.dart';
+import '../widgets/job_completion_dialog.dart';
+import 'profile_screen.dart';
 
 class ContractorHomeScreen extends StatefulWidget {
   const ContractorHomeScreen({super.key, required this.api});
@@ -64,11 +67,32 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
     if (mounted) await _refresh();
   }
 
+  Future<void> _complete(Job job) async {
+    final completed = await showJobCompletionDialog(context, widget.api, job);
+    if (completed == true && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Đã hoàn thành công trình và lưu đánh giá cho thợ.'),
+        ),
+      );
+      await _refresh();
+    }
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
       title: const Text('Công trình của tôi'),
       actions: [
+        IconButton(
+          tooltip: 'Hồ sơ & CCCD',
+          icon: const Icon(Icons.person_outline),
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => ProfileScreen(api: widget.api),
+            ),
+          ),
+        ),
         IconButton(
           tooltip: 'Làm mới',
           onPressed: _loading ? null : _refresh,
@@ -131,9 +155,21 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
                 for (final job in _jobs)
                   JobCard(
                     job: job,
-                    action: FilledButton.tonal(
-                      onPressed: () => _applicants(job),
-                      child: const Text('Xem & duyệt thợ'),
+                    action: Wrap(
+                      spacing: 12,
+                      runSpacing: 8,
+                      children: [
+                        FilledButton.tonal(
+                          onPressed: () => _applicants(job),
+                          child: const Text('Xem & duyệt thợ'),
+                        ),
+                        if (job.status == 'IN_PROGRESS')
+                          OutlinedButton.icon(
+                            onPressed: () => _complete(job),
+                            icon: const Icon(Icons.task_alt),
+                            label: const Text('Hoàn thành công trình'),
+                          ),
+                      ],
                     ),
                   ),
               ],
@@ -489,7 +525,12 @@ class _ApplicantsSheetState extends State<_ApplicantsSheet> {
                             style: Theme.of(context).textTheme.titleMedium,
                           ),
                           const SizedBox(height: 8),
-                          SelectableText(application.workerPhone),
+                          if (application.status == 'ACCEPTED' &&
+                              application.workerPhone != null)
+                            CallButton(
+                              phone: application.workerPhone!,
+                              label: 'Gọi thợ',
+                            ),
                           const SizedBox(height: 8),
                           Text(
                             'Đánh giá ${application.workerRating.toStringAsFixed(1)}/5 · ${application.workerVerified ? 'Đã xác thực CCCD' : 'Chưa xác thực CCCD'}',
@@ -501,6 +542,10 @@ class _ApplicantsSheetState extends State<_ApplicantsSheet> {
                             ),
                           const SizedBox(height: 8),
                           Chip(label: Text(statusLabel(application.status))),
+                          if (application.jobRating != null)
+                            Text(
+                              'Điểm công trình: ${application.jobRating}/5 ★',
+                            ),
                           if (application.status == 'PENDING')
                             Wrap(
                               spacing: 12,

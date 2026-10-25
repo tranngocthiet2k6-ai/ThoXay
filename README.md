@@ -157,8 +157,34 @@ công trình mẫu để kiểm tra trên máy tính.
   Admin không thể tự khóa tài khoản đang dùng.
 
 Trường `cccdImage` là liên kết ảnh HTTPS, đúng kiểu VARCHAR trong đặc tả.
-Liên kết tùy chọn được nhập khi đăng ký; chưa có ảnh thì chưa thể xác thực.
-Đánh giá khởi tạo 5.0; chức năng chấm điểm sau công việc không thuộc đặc tả này.
+Có thể bổ sung/thay ảnh trong mục **Hồ sơ & CCCD** ở thanh trên của Flutter.
+Mỗi lần cập nhật đều cần Admin xem ảnh và xác thực lại. Dashboard gửi kèm URL
+ảnh đã xem; nếu ảnh vừa bị thay đổi, hệ thống yêu cầu Admin tải lại trước khi duyệt.
+
+Chủ thầu bấm **Hoàn thành công trình** khi công trình đang thi công, chọn 1–5
+sao cho từng thợ đã được nhận, rồi xác nhận. Điểm được lưu tại
+`job_applications.worker_rating`; `users.rating` là trung bình các điểm thực tế
+từ công trình đã hoàn thành, không cộng điểm khởi tạo 5.0 vào mẫu số.
+Gửi lại cùng yêu cầu không tính điểm hai lần. Xóa công trình có đánh giá sẽ
+tính lại trung bình. Các đơn chờ còn lại được từ chối khi công trình hoàn thành.
+
+Đơn ACCEPTED hiển thị điện thoại và nút gọi qua `tel:` trên Flutter bằng
+[url_launcher](https://pub.dev/packages/url_launcher). Máy tính cần ứng dụng
+xử lý cuộc gọi; nếu không có, ứng dụng hiển thị số để liên hệ. API tìm việc và
+đơn chưa được nhận không trả số liên hệ của bên còn lại.
+
+Màn hình thợ có bộ lọc **Thợ chính / Phụ hồ / Tất cả** và sắp xếp **Gần nhất /
+Lương cao nhất**, áp dụng cùng bán kính GPS.
+
+Database đã tồn tại cần chạy migration giữ nguyên dữ liệu:
+
+```powershell
+psql -U postgres -d tho_xay_db -v ON_ERROR_STOP=1 -f migrations/002_worker_ratings.sql
+```
+
+Script khởi động local tự áp dụng migration này khi sử dụng PostgreSQL portable
+của workspace ở cổng 55432. PostgreSQL/Docker riêng cần chạy lệnh trên với cấu
+hình kết nối của bạn. Database mới đã có cột và ràng buộc trong `schema.sql`.
 
 ## REST API
 
@@ -169,9 +195,12 @@ cho các API nghiệp vụ. ID người thực hiện được lấy từ tài k
 | --- | --- | --- |
 | POST | `/api/auth/register` | Công khai; tạo tài khoản và JWT, 201 |
 | POST | `/api/auth/login` | Công khai; JWT và thông tin tài khoản, 200 |
+| GET | `/api/users/me` | Hồ sơ, xác thực và đánh giá của chính người đăng nhập |
+| PUT | `/api/users/me/cccd` | Body `{"cccdImage":"https://..."}`; lưu ảnh, verified=false |
 | POST | `/api/jobs` | Chủ thầu; tạo công trình, 201 |
 | GET | `/api/jobs/nearby?lat=10.7769&lng=106.7009&radius=10` | Thợ; công trình gần nhất trước, kèm distanceKm |
 | GET | `/api/jobs/contractor/{contractorId}` | Chủ thầu xem công trình của mình |
+| PUT | `/api/jobs/{id}/complete` | Chủ công trình; body `{"ratings":[{"workerId":3,"stars":5}]}` |
 | POST | `/api/applications/apply` | Thợ; body `{"jobId":1}`, 201 |
 | GET | `/api/applications/job/{jobId}` | Chủ thầu sở hữu công trình |
 | GET | `/api/applications/worker/{workerId}` | Thợ xem lịch sử của mình |
@@ -194,6 +223,9 @@ AuthResponse gồm `token`, `tokenType`, `expiresIn` (giây), `userId`, `phoneNu
 401 chưa đăng nhập/token hết hạn, 403 sai quyền hoặc tài khoản bị khóa, 404 không
 tìm thấy, 409 trùng hoặc xung đột nghiệp vụ. Bán kính từ 0.1 đến 200 km.
 Mật khẩu từ 8 ký tự và tối đa 72 byte UTF-8.
+`/api/jobs/nearby` nhận thêm `jobType` (Thợ chính/Phụ hồ, tùy chọn) và
+`sort=DISTANCE|SALARY_DESC` (mặc định DISTANCE). Tài khoản bị khóa trả
+403 cùng `code=ACCOUNT_LOCKED`; Flutter xóa phiên khi gặp mã này.
 
 ## Bảo mật quản trị
 

@@ -94,19 +94,43 @@ class ApiService extends ChangeNotifier {
     await prefs.remove(_storageKey);
   }
 
-  Future<List<Job>> nearby(double lat, double lng, double radius) async =>
-      _jobs(
-        await _request(
-          'GET',
-          '/api/jobs/nearby?lat=$lat&lng=$lng&radius=$radius',
-        ),
-      );
+  Future<List<Job>> nearby(
+    double lat,
+    double lng,
+    double radius, {
+    String? jobType,
+    String sort = 'DISTANCE',
+  }) async => _jobs(
+    await _request(
+      'GET',
+      '/api/jobs/nearby?${Uri(queryParameters: {'lat': '$lat', 'lng': '$lng', 'radius': '$radius', 'sort': sort, if (jobType != null && jobType.isNotEmpty) 'jobType': jobType}).query}',
+    ),
+  );
   Future<List<Job>> contractorJobs() async => _jobs(
     await _request('GET', '/api/jobs/contractor/${_requireSession().userId}'),
   );
   Future<Job> createJob(Map<String, dynamic> body) async => Job.fromJson(
     await _request('POST', '/api/jobs', body: body) as Map<String, dynamic>,
   );
+  Future<UserProfile> profile() async => UserProfile.fromJson(
+    await _request('GET', '/api/users/me') as Map<String, dynamic>,
+  );
+  Future<UserProfile> updateCccd(String imageUrl) async => UserProfile.fromJson(
+    await _request('PUT', '/api/users/me/cccd', body: {'cccdImage': imageUrl})
+        as Map<String, dynamic>,
+  );
+  Future<Job> completeJob(int jobId, Map<int, int> ratings) async =>
+      Job.fromJson(
+        await _request(
+          'PUT',
+          '/api/jobs/$jobId/complete',
+          body: {
+            'ratings': ratings.entries
+                .map((entry) => {'workerId': entry.key, 'stars': entry.value})
+                .toList(),
+          },
+        ) as Map<String, dynamic>,
+      );
   Future<JobApplication> apply(int jobId) async => JobApplication.fromJson(
     await _request('POST', '/api/applications/apply', body: {'jobId': jobId})
         as Map<String, dynamic>,
@@ -173,7 +197,13 @@ class ApiService extends ChangeNotifier {
         throw const ApiException('Máy chủ trả về dữ liệu không hợp lệ');
       }
       if (response.statusCode >= 200 && response.statusCode < 300) return data;
-      if (response.statusCode == 401 && authenticated) await logout();
+      if (authenticated &&
+          (response.statusCode == 401 ||
+              (response.statusCode == 403 &&
+                  data is Map &&
+                  data['code'] == 'ACCOUNT_LOCKED'))) {
+        await logout();
+      }
       throw ApiException(
         data is Map && data['message'] is String
             ? data['message'] as String

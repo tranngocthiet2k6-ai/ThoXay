@@ -18,8 +18,8 @@ public class AdminController {
     @GetMapping("/admin/dashboard") @PreAuthorize("hasRole('ADMIN')")
     public String dashboard(Model model) { model.addAttribute("dashboard", admin.dashboard()); return "admin-dashboard"; }
     @PostMapping("/admin/users/{id}/verify") @PreAuthorize("hasRole('ADMIN')")
-    public String verify(@PathVariable Long id, RedirectAttributes flash) {
-        admin.verify(id); flash.addFlashAttribute("success", "Đã xác thực CCCD cho tài khoản"); return "redirect:/admin/dashboard";
+    public String verify(@PathVariable Long id, @RequestParam(required = false) String cccdImage, RedirectAttributes flash) {
+        admin.verify(id, cccdImage); flash.addFlashAttribute("success", "Đã xác thực CCCD cho tài khoản"); return "redirect:/admin/dashboard";
     }
     @PostMapping("/admin/users/{id}/toggle-active") @PreAuthorize("hasRole('ADMIN')")
     public String toggle(@PathVariable Long id, RedirectAttributes flash) {

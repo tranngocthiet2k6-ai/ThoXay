@@ -9,6 +9,7 @@ import vn.thoxay.entity.*;
 import vn.thoxay.exception.ApiException;
 import vn.thoxay.repository.*;
 import vn.thoxay.security.CurrentUser;
+import vn.thoxay.service.WorkerRatingService;
 import java.util.List;
 
 @Service @RequiredArgsConstructor
@@ -17,6 +18,8 @@ public class AdminService {
     private final JobRepository jobs;
     private final JobApplicationRepository applications;
     private final CurrentUser current;
+    private final WorkerRatingService ratings;
+    private final jakarta.persistence.EntityManager entityManager;
 
     public record AdminUser(Long id, String fullName, String phoneNumber, String role,
         boolean verified, boolean active, double rating, String cccdImage) { }
@@ -35,10 +38,13 @@ public class AdminService {
     }
 
     @Transactional
-    public void verify(Long id) {
+    public void verify(Long id, String expectedImage) {
         current.require(Role.ROLE_ADMIN);
         User user = user(id);
+        entityManager.refresh(user, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
         if (!validImage(user.getCccdImage())) throw new ApiException(HttpStatus.BAD_REQUEST, "Tài khoản chưa cung cấp ảnh CCCD HTTPS hợp lệ");
+        if (!java.util.Objects.equals(expectedImage, user.getCccdImage()))
+            throw new ApiException(HttpStatus.CONFLICT, "Ảnh CCCD đã thay đổi. Hãy tải lại và kiểm tra ảnh mới trước khi xác thực.");
         user.setVerified(true);
     }
     @Transactional
@@ -54,7 +60,10 @@ public class AdminService {
     public void deleteJob(Long id) {
         current.require(Role.ROLE_ADMIN);
         Job job = jobs.findLockedById(id).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Công trình không tồn tại"));
+        List<User> workers = ratings.lockWorkers(applications.findByJobIdOrderByAppliedAtDesc(id).stream()
+            .filter(a -> a.getWorkerRating() != null).map(a -> a.getWorker().getId()).toList());
         applications.deleteByJobId(id); applications.flush(); jobs.delete(job);
+        ratings.recompute(workers);
     }
     private User user(Long id) {
         return users.findById(id).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Tài khoản không tồn tại"));

@@ -28,11 +28,28 @@ ROLE_ADMIN. Chỉ cho phép đăng ký công khai vai trò thợ hoặc chủ th
 - `job_applications`: `id BIGSERIAL PRIMARY KEY`, `job_id BIGINT REFERENCES jobs(id)`,
   `worker_id BIGINT REFERENCES users(id)`, `status VARCHAR(30) DEFAULT 'PENDING'`
   (PENDING, ACCEPTED, REJECTED), `applied_at TIMESTAMP`, UNIQUE(job_id, worker_id).
+  Nâng cấp nghiệp vụ bổ sung `worker_rating INTEGER NULL` (1–5, chỉ ACCEPTED).
 
 `schema.sql` chứa DDL và dữ liệu mẫu. Mật khẩu mẫu phải được băm BCrypt.
 JobRepository tìm việc OPEN bằng truy vấn native Haversine theo lat/lng/radiusKm.
 Khóa giao dịch công trình khi duyệt để tránh nhận vượt required_workers;
 khi đủ số ACCEPTED, chuyển công trình sang IN_PROGRESS.
+
+## Nghiệp vụ nâng cấp
+
+Tài khoản bị khóa trả 403 với code ACCOUNT_LOCKED cho đăng nhập và JWT cũ.
+Ẩn thao tác khóa mọi ROLE_ADMIN và chặn cùng thao tác ở service.
+`GET /api/users/me`, `PUT /api/users/me/cccd` chỉ xử lý hồ sơ đang đăng nhập.
+Đổi ảnh CCCD đưa verified về false. Admin xác nhận kèm URL ảnh đã xem để chặn
+xác thực nhầm ảnh bị thay đổi sau khi tải dashboard.
+`PUT /api/jobs/{id}/complete` nhận ratings gồm workerId/stars cho đúng toàn bộ
+thợ ACCEPTED, chỉ cho chủ công trình IN_PROGRESS; lưu điểm và COMPLETED cùng
+giao dịch. Gửi lại cùng đánh giá là idempotent; điểm đã chốt không sửa.
+Khóa các worker theo thứ tự ID trước khi tính trung bình từ điểm thực tế của
+các công trình COMPLETED. Xóa công trình có đánh giá phải tính lại trung bình.
+Thợ chưa có đánh giá giữ mặc định 5.0. Điện thoại liên lạc chỉ trả trong đơn
+ACCEPTED. Tìm gần hỗ trợ jobType và sort=DISTANCE|SALARY_DESC.
+Khi nâng cấp database hiện có, áp dụng `migrations/002_worker_ratings.sql`.
 
 ## Các tính năng phải hoàn thành theo thứ tự
 

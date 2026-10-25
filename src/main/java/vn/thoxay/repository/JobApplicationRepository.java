@@ -16,4 +16,8 @@ public interface JobApplicationRepository extends JpaRepository<JobApplication, 
     void deleteByJobId(Long jobId);
     @Query("select a.job.id from JobApplication a where a.id = :id")
     Optional<Long> findJobIdById(@Param("id") Long id);
+    @Query("select avg(a.workerRating) from JobApplication a where a.worker.id = :id "
+        + "and a.status = vn.thoxay.entity.ApplicationStatus.ACCEPTED "
+        + "and a.job.status = vn.thoxay.entity.JobStatus.COMPLETED")
+    Double averageRatingByWorkerId(@Param("id") Long id);
 }

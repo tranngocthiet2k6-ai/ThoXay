@@ -4,6 +4,7 @@ import 'package:tho_xay_mobile/models/models.dart';
 import 'package:tho_xay_mobile/screens/worker_home_screen.dart';
 import 'package:tho_xay_mobile/services/api_service.dart';
 import 'package:tho_xay_mobile/services/location_service.dart';
+import 'package:tho_xay_mobile/widgets/call_button.dart';
 
 class FixedLocation extends LocationService {
   @override
@@ -12,6 +13,9 @@ class FixedLocation extends LocationService {
 
 class WorkerApi extends ApiService {
   bool applied = false;
+  String applicationStatus = 'PENDING';
+  String? lastJobType;
+  String lastSort = 'DISTANCE';
   final job = const Job(
     id: 1,
     contractorId: 2,
@@ -37,12 +41,21 @@ class WorkerApi extends ApiService {
     workerRating: 5,
     workerVerified: false,
     workerActive: true,
-    status: 'PENDING',
+    status: applicationStatus,
   );
   @override
-  Future<List<Job>> nearby(double lat, double lng, double radius) async => [
-    job,
-  ];
+  Future<List<Job>> nearby(
+    double lat,
+    double lng,
+    double radius, {
+    String? jobType,
+    String sort = 'DISTANCE',
+  }) async {
+    lastJobType = jobType;
+    lastSort = sort;
+    return [job];
+  }
+
   @override
   Future<List<JobApplication>> workerApplications() async =>
       applied ? [application] : [];
@@ -66,13 +79,54 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Xây nhà phố'), findsOneWidget);
       await tester.ensureVisible(find.text('Nhận việc'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Nhận việc'));
       await tester.pumpAndSettle();
       expect(api.applied, isTrue);
       await tester.tap(find.text('Đã ứng tuyển').last);
       await tester.pumpAndSettle();
       expect(find.text('Chờ duyệt'), findsOneWidget);
+      expect(find.byType(CallButton), findsNothing);
       api.dispose();
     },
   );
+  testWidgets('worker filters type and requests highest salary order', (
+    tester,
+  ) async {
+    final api = WorkerApi();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: WorkerHomeScreen(api: api, location: FixedLocation()),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Tất cả'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Phụ hồ').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Gần nhất'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Lương cao nhất').last);
+    await tester.pumpAndSettle();
+    expect(api.lastJobType, 'Phụ hồ');
+    expect(api.lastSort, 'SALARY_DESC');
+    api.dispose();
+  });
+  testWidgets('accepted worker sees contractor phone and call action', (
+    tester,
+  ) async {
+    final api = WorkerApi()
+      ..applied = true
+      ..applicationStatus = 'ACCEPTED';
+    await tester.pumpWidget(
+      MaterialApp(
+        home: WorkerHomeScreen(api: api, location: FixedLocation()),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Đã ứng tuyển').last);
+    await tester.pumpAndSettle();
+    expect(find.text('Gọi chủ thầu: 0900000002'), findsOneWidget);
+    api.dispose();
+  });
 }

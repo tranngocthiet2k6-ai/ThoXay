@@ -48,14 +48,15 @@ class ApplicationApiTest {
         mvc.perform(get("/api/applications/worker/" + worker.getId()).header("Authorization", token(secondWorker)))
             .andExpect(status().isForbidden());
         mvc.perform(get("/api/applications/job/" + job.getId()).header("Authorization", token(owner)))
-            .andExpect(status().isOk()).andExpect(jsonPath("$[0].workerPhone").value(worker.getPhoneNumber()))
+            .andExpect(status().isOk()).andExpect(jsonPath("$[0].workerPhone").doesNotExist())
             .andExpect(jsonPath("$[0].password").doesNotExist());
         mvc.perform(put("/api/applications/" + id + "/status").header("Authorization", token(outsider))
             .contentType("application/json").content("{\"status\":\"ACCEPTED\"}")).andExpect(status().isForbidden());
         assertThat(decide(id, "ACCEPTED")).isEqualTo(200);
         assertThat(jobs.findById(job.getId()).orElseThrow().getStatus()).isEqualTo(JobStatus.IN_PROGRESS);
         mvc.perform(get("/api/applications/worker/" + worker.getId()).header("Authorization", token(worker)))
-            .andExpect(status().isOk()).andExpect(jsonPath("$[0].status").value("ACCEPTED"));
+            .andExpect(status().isOk()).andExpect(jsonPath("$[0].status").value("ACCEPTED"))
+            .andExpect(jsonPath("$[0].job.contractorPhone").value(owner.getPhoneNumber()));
         assertThat(decide(id, "REJECTED")).isEqualTo(409);
     }
 

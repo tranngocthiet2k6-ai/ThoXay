@@ -9,6 +9,44 @@ import 'package:tho_xay_mobile/services/api_service.dart';
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
   test(
+    'locked 403 clears session while ordinary permission 403 keeps it',
+    () async {
+      var locked = false;
+      final api = ApiService(
+        client: MockClient((request) async {
+          if (request.url.path == '/api/auth/login') {
+            return http.Response(
+              jsonEncode({
+                'token': 'jwt',
+                'userId': 3,
+                'fullName': 'A',
+                'phoneNumber': '0900000003',
+                'role': 'ROLE_WORKER',
+                'expiresIn': 3600,
+              }),
+              200,
+            );
+          }
+          return http.Response(
+            jsonEncode({
+              'status': 403,
+              'code': locked ? 'ACCOUNT_LOCKED' : 'FORBIDDEN',
+              'message': 'Forbidden',
+            }),
+            403,
+          );
+        }),
+      );
+      await api.login('0900000003', 'password');
+      await expectLater(api.nearby(10, 106, 10), throwsA(isA<ApiException>()));
+      expect(api.session, isNotNull);
+      locked = true;
+      await expectLater(api.nearby(10, 106, 10), throwsA(isA<ApiException>()));
+      expect(api.session, isNull);
+      api.dispose();
+    },
+  );
+  test(
     'saves session, sends JWT and clears it on unauthorized response',
     () async {
       var calls = 0;

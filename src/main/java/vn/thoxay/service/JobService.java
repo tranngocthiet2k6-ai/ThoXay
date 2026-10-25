@@ -8,6 +8,7 @@ import vn.thoxay.entity.*;
 import vn.thoxay.repository.JobRepository;
 import vn.thoxay.security.CurrentUser;
 import java.util.List;
+import java.util.Comparator;
 
 @Service @RequiredArgsConstructor
 public class JobService {
@@ -25,10 +26,14 @@ public class JobService {
         return JobResponse.of(jobs.save(job), null);
     }
     @Transactional(readOnly = true)
-    public List<JobResponse> nearby(double lat, double lng, double radius) {
+    public List<JobResponse> nearby(double lat, double lng, double radius, String jobType, String sort) {
         current.require(Role.ROLE_WORKER);
-        return jobs.findNearby(lat, lng, radius).stream()
-            .map(j -> JobResponse.of(j, distance(lat, lng, j.getLatitude(), j.getLongitude()))).toList();
+        var results = jobs.findNearby(lat, lng, radius).stream()
+            .filter(j -> jobType == null || jobType.equals(j.getJobType()))
+            .map(j -> JobResponse.of(j, distance(lat, lng, j.getLatitude(), j.getLongitude()), false));
+        if ("SALARY_DESC".equals(sort)) results = results.sorted(Comparator.comparingDouble(JobResponse::salaryPerDay)
+            .reversed().thenComparingDouble(JobResponse::distanceKm).thenComparing(JobResponse::id));
+        return results.toList();
     }
     @Transactional(readOnly = true)
     public List<JobResponse> byContractor(Long id) {

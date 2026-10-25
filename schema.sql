@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS job_applications (
   job_id BIGINT NOT NULL REFERENCES jobs(id) ON DELETE CASCADE,
   worker_id BIGINT NOT NULL REFERENCES users(id),
   status VARCHAR(30) NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING','ACCEPTED','REJECTED')),
+  worker_rating INTEGER CONSTRAINT chk_worker_rating CHECK (worker_rating IS NULL OR (worker_rating BETWEEN 1 AND 5 AND status = 'ACCEPTED')),
   applied_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   UNIQUE (job_id, worker_id)
 );
