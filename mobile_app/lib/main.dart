@@ -4,6 +4,7 @@ import 'screens/login_screen.dart';
 import 'screens/worker_home_screen.dart';
 import 'screens/contractor_home_screen.dart';
 import 'services/api_service.dart';
+import 'theme/app_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,16 +20,7 @@ class ThoXayApp extends StatelessWidget {
   Widget build(BuildContext context) => MaterialApp(
     title: 'Thợ Xây',
     debugShowCheckedModeBanner: false,
-    theme: ThemeData(
-      colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xff176b52)),
-      scaffoldBackgroundColor: const Color(0xfff5f7f6),
-      inputDecorationTheme: const InputDecorationTheme(
-        border: OutlineInputBorder(),
-        filled: true,
-        fillColor: Colors.white,
-      ),
-      useMaterial3: true,
-    ),
+    theme: AppTheme.light,
     home: ListenableBuilder(
       listenable: api,
       builder: (context, _) {

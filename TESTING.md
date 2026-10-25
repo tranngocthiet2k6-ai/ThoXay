@@ -6,7 +6,7 @@
 .\mvnw.cmd -B verify
 ```
 
-30 kiểm thử JUnit/Spring Boot dùng H2 mặc định, chạy với Spring Security và JWT
+31 kiểm thử JUnit/Spring Boot dùng H2 mặc định, chạy với Spring Security và JWT
 thật: đăng ký/đăng nhập, BCrypt, chống đăng ký ADMIN, token giả/thiếu, tài khoản
 bị khóa, phân quyền, Haversine, dữ liệu sai, ứng tuyển trùng, lịch sử, duyệt,
 hai giao dịch duyệt đồng thời cho một vị trí, render Thymeleaf, CSRF, xác thực
@@ -44,7 +44,7 @@ flutter test
 flutter build web --release
 ```
 
-26 kiểm thử Dart/widget: lưu/khôi phục phiên, đính JWT, xóa phiên khi 401,
+30 kiểm thử Dart/widget: lưu/khôi phục phiên, đính JWT, xóa phiên khi 401,
 validation đăng nhập/đăng ký, tìm việc theo vị trí được cấp cho test, ứng tuyển
 và lịch sử, duyệt thợ, validation form đăng công trình. Widget test dùng API
 và vị trí giả lập, không truy cập GPS thật hay gửi yêu cầu ra mạng.
@@ -82,6 +82,23 @@ Nghiệm thu: dùng hai tài khoản Thầu–Thợ, đăng việc → ứng tuy
 gửi thêm tin từ thiết bị kia, bật lại mạng và kiểm tra tin được tải bù đúng thứ
 tự. Khóa một tài khoản trong Admin và kiểm tra socket bị đóng, không gửi được
 tin mới. Đóng/mở lại Chat để xác nhận lịch sử đã được lưu.
+
+## Giao diện và khả năng truy cập
+
+Checkpoint UI: `mvnw verify` đạt 31 test; Flutter analyzer không lỗi, 30 test
+đạt và Web release build thành công. Admin test kiểm tra số tài khoản/công trình,
+tỷ lệ KYC 0% → 33% sau duyệt và trường hợp không có tài khoản. Widget test kiểm
+tra skeleton → kết quả trống, phân biệt lỗi kết nối với danh sách trống, tắt
+animation khi giảm chuyển động/route ẩn, card/minh họa ở chiều rộng 320px với
+chữ phóng 1.8 lần. Test bản đồ giải mã ảnh in-memory trước khi đợi shimmer kết
+thúc và tiếp tục kiểm tra chọn ghim/tọa độ; không tải tile mạng trong test.
+
+Đã xem trên Chrome: Admin desktop hiển thị bốn thẻ và tỷ lệ KYC 33% từ dữ liệu
+local thực tế, bảng/icon/badge và popup CCCD mở được, nút duyệt vẫn bị khóa
+khi thiếu hai ảnh. Flutter ở viewport 390 × 844 hiển thị card, bộ lọc, shimmer
+khi tải lại và minh họa/nút khôi phục khi lọc Phụ hồ không có kết quả. Viewport
+kiểm tra đã được trả về mặc định. Không thay đổi tài khoản hoặc công trình
+trong quá trình xem trước giao diện.
 
 ## Modal Admin
 

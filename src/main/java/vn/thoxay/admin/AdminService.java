@@ -25,7 +25,10 @@ public class AdminService {
         boolean verified, boolean active, double rating, String cccdFrontImage, String cccdBackImage,
         boolean cccdComplete) { }
     public record Dashboard(List<AdminUser> users, List<JobResponse> jobs, long pendingVerification,
-        long activeUsers, long openJobs) { }
+        long activeUsers, long openJobs) {
+        public long verifiedUsers() { return users.stream().filter(AdminUser::verified).count(); }
+        public long verificationRate() { return users.isEmpty() ? 0 : Math.round(verifiedUsers() * 100.0 / users.size()); }
+    }
 
     @Transactional(readOnly = true)
     public Dashboard dashboard() {

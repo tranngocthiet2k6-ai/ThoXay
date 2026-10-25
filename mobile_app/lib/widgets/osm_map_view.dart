@@ -4,6 +4,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../services/location_service.dart';
+import 'loading_jobs.dart';
 
 class OsmMapView extends StatefulWidget {
   const OsmMapView({
@@ -135,6 +136,21 @@ class _OsmMapViewState extends State<OsmMapView> {
               maxNativeZoom: 19,
               panBuffer: 0,
               keepBuffer: 1,
+              tileBuilder: (context, image, tile) =>
+                  tile.loadStarted != null &&
+                      tile.loadFinishedAt == null &&
+                      !tile.loadError &&
+                      !tile.cancelLoading.isCompleted
+                  ? Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        const ShimmerSurface(
+                          child: ColoredBox(color: Color(0xffe3ebe6)),
+                        ),
+                        image,
+                      ],
+                    )
+                  : image,
               errorTileCallback: (_, error, stackTrace) => _onTileError(),
             ),
             MarkerLayer(markers: widget.markers),

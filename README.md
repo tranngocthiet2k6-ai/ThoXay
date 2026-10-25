@@ -336,6 +336,21 @@ bằng form và kiểm tra tài khoản còn hoạt động mỗi request. Form 
 Tài khoản bị khóa không đăng nhập được; JWT đã phát cũng bị chặn ở request kế tiếp.
 Response không trả hash mật khẩu hoặc liên kết CCCD cho API tìm việc/ứng tuyển.
 
+## Giao diện trình bày đồ án
+
+Flutter dùng theme xanh ngọc thống nhất cho form, nút, điều hướng và chat.
+Card công trình phân biệt Thợ chính/Phụ hồ bằng icon, nhãn và màu, nhấn rõ mức
+lương, khoảng cách và trạng thái. Danh sách và tile bản đồ có shimmer trong
+lúc tải; animation dừng khi route không hoạt động hoặc bật giảm chuyển động.
+Kết quả trống có minh họa vector được vẽ tại ứng dụng và nút đổi vị trí/khám phá
+việc/đăng công trình. Lỗi kết nối được hiển thị riêng để không nhầm với hết việc.
+
+Admin có thanh điều hướng, bảng cuộn ngang khi màn hình hẹp, avatar, icon SVG
+local và badge xanh/đỏ/vàng kèm chữ. Bốn thẻ thống kê lấy dữ liệu thật: tổng tài
+khoản, công trình OPEN, tỷ lệ KYC và hồ sơ đủ ảnh chờ duyệt. Tỷ lệ KYC bằng số
+tài khoản đã xác thực chia tổng tài khoản (kể cả admin), làm tròn phần trăm;
+không có tài khoản thì hiển thị 0%. Không dùng font/icon/ảnh CDN cho trang trí.
+
 ## Cấu trúc và kiểm chứng
 
 - `src/main/java/vn/thoxay/`: entity, repository, DTO, security, service, controller, admin.

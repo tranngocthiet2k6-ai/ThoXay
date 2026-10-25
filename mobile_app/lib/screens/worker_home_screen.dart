@@ -9,6 +9,9 @@ import '../widgets/call_button.dart';
 import '../widgets/chat_button.dart';
 import 'profile_screen.dart';
 import '../widgets/jobs_map.dart';
+import '../widgets/loading_jobs.dart';
+import '../widgets/empty_state.dart';
+import '../widgets/feature_banner.dart';
 
 class WorkerHomeScreen extends StatefulWidget {
   const WorkerHomeScreen({super.key, required this.api, this.location});
@@ -143,23 +146,26 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
     ),
     body: Column(
       children: [
-        if (_loading) const LinearProgressIndicator(),
         Expanded(
           child: RefreshIndicator(
             onRefresh: _refresh,
             child: ListView(
               physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(20),
+              padding: EdgeInsets.symmetric(
+                vertical: 20,
+                horizontal: MediaQuery.sizeOf(context).width > 920
+                    ? (MediaQuery.sizeOf(context).width - 880) / 2
+                    : 20,
+              ),
               children: [
-                Text(
-                  'Chào ${widget.api.session?.fullName ?? 'bạn'},',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  _tab == 0 ? 'Tìm công trình gần bạn' : 'Việc đã ứng tuyển',
-                  style: Theme.of(context).textTheme.headlineSmall
-                      ?.copyWith(fontWeight: FontWeight.bold),
+                FeatureBanner(
+                  greeting: 'Chào ${widget.api.session?.fullName ?? 'bạn'},',
+                  title: _tab == 0
+                      ? 'Tìm công trình gần bạn'
+                      : 'Việc đã ứng tuyển',
+                  subtitle: _tab == 0
+                      ? 'Việc gần nhà. Thợ đúng nghề.'
+                      : 'Theo dõi đơn và kết nối với chủ thầu của bạn.',
                 ),
                 const SizedBox(height: 20),
                 if (_tab == 0) ...[
@@ -291,15 +297,20 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                       child: Text(_error!),
                     ),
                   ),
-                if (_tab == 0) ...[
-                  if (!_loading && _jobs.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 40),
-                      child: Text(
-                        'Chưa có công trình phù hợp. Thử tăng bán kính hoặc đổi vị trí.',
-                        textAlign: TextAlign.center,
+                if (_loading)
+                  LoadingJobs(mapMode: _tab == 0 && _showMap)
+                else if (_tab == 0) ...[
+                  if (_jobs.isEmpty && _error == null)
+                    EmptyState(
+                      title: 'Không tìm thấy công trình quanh đây',
+                      message: 'Thử tăng bán kính, đổi loại việc hoặc chọn một vị trí khác. Cơ hội phù hợp có thể ở gần bạn hơn đấy!',
+                      action: OutlinedButton.icon(
+                        onPressed: _selectPosition,
+                        icon: const Icon(Icons.edit_location_alt_outlined),
+                        label: const Text('Đổi vị trí tìm kiếm'),
                       ),
                     ),
+                  if (_jobs.isEmpty) const SizedBox(height: 16),
                   if (_showMap && _position != null) ...[
                     SizedBox(
                       height: 360,
@@ -342,12 +353,13 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                         ),
                       ),
                 ] else ...[
-                  if (!_loading && _applications.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 40),
-                      child: Text(
-                        'Bạn chưa ứng tuyển công trình nào.',
-                        textAlign: TextAlign.center,
+                  if (_applications.isEmpty && _error == null)
+                    EmptyState(
+                      title: 'Hành trình mới bắt đầu',
+                      message: 'Bạn chưa ứng tuyển công trình nào. Khám phá công việc gần bạn và gửi đơn đầu tiên nhé!',
+                      action: FilledButton(
+                        onPressed: () => setState(() => _tab = 0),
+                        child: const Text('Khám phá công trình'),
                       ),
                     ),
                   for (final application in _applications)

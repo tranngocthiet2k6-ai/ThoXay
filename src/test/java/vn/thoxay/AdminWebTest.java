@@ -45,6 +45,9 @@ class AdminWebTest {
         job.setSalaryPerDay(300000); job.setAddress("TP.HCM"); job.setRequiredWorkers(1); jobs.saveAndFlush(job);
         JobApplication application = new JobApplication(); application.setJob(job); application.setWorker(worker); applications.saveAndFlush(application);
         mvc.perform(get("/admin/dashboard")).andExpect(status().isOk()).andExpect(content().string(containsString("Công trình vi phạm")))
+            .andExpect(content().string(containsString("id=\"stat-total-users\">3</strong>")))
+            .andExpect(content().string(containsString("id=\"stat-open-jobs\">1</strong>")))
+            .andExpect(content().string(containsString("id=\"stat-kyc-rate\">0%</strong>")))
             .andExpect(content().string(not(containsString("/admin/users/" + admin.getId() + "/toggle-active"))))
             .andExpect(content().string(containsString("/admin/users/" + worker.getId() + "/toggle-active")))
             .andExpect(content().string(containsString("data-bs-target=\"#kyc-modal\"")))
@@ -57,6 +60,8 @@ class AdminWebTest {
             .param("cccdFrontImage", worker.getCccdFrontImage())
             .param("cccdBackImage", worker.getCccdBackImage())).andExpect(status().is3xxRedirection());
         assertThat(users.findById(worker.getId()).orElseThrow().isVerified()).isTrue();
+        mvc.perform(get("/admin/dashboard")).andExpect(status().isOk())
+            .andExpect(content().string(containsString("id=\"stat-kyc-rate\">33%</strong>")));
         mvc.perform(post("/admin/users/" + worker.getId() + "/toggle-active").with(csrf())).andExpect(status().is3xxRedirection());
         assertThat(users.findById(worker.getId()).orElseThrow().isActive()).isFalse();
         mvc.perform(post("/admin/users/" + worker.getId() + "/toggle-active").with(csrf())).andExpect(status().is3xxRedirection());
@@ -65,6 +70,11 @@ class AdminWebTest {
             .andExpect(flash().attributeExists("error"));
         mvc.perform(post("/admin/jobs/" + job.getId() + "/delete").with(csrf())).andExpect(status().is3xxRedirection());
         assertThat(jobs.existsById(job.getId())).isFalse(); assertThat(applications.existsById(application.getId())).isFalse();
+    }
+    @Test void emptyDashboardHasZeroVerificationRate() {
+        var dashboard = new vn.thoxay.admin.AdminService.Dashboard(java.util.List.of(), java.util.List.of(), 0, 0, 0);
+        assertThat(dashboard.verificationRate()).isZero();
+        assertThat(dashboard.verifiedUsers()).isZero();
     }
     private User user(String phone, Role role) {
         User u = new User(); u.setPhoneNumber(phone); u.setPassword("hash"); u.setFullName("Tài khoản quản trị thử");

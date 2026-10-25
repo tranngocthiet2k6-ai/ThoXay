@@ -10,6 +10,9 @@ import '../widgets/chat_button.dart';
 import '../widgets/job_completion_dialog.dart';
 import 'profile_screen.dart';
 import 'location_picker_screen.dart';
+import '../widgets/loading_jobs.dart';
+import '../widgets/empty_state.dart';
+import '../widgets/feature_banner.dart';
 
 class ContractorHomeScreen extends StatefulWidget {
   const ContractorHomeScreen({super.key, required this.api});
@@ -109,27 +112,30 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
     ),
     body: Column(
       children: [
-        if (_loading) const LinearProgressIndicator(),
         Expanded(
           child: RefreshIndicator(
             onRefresh: _refresh,
             child: ListView(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
+              padding: EdgeInsets.fromLTRB(
+                MediaQuery.sizeOf(context).width > 920
+                    ? (MediaQuery.sizeOf(context).width - 880) / 2
+                    : 20,
+                20,
+                MediaQuery.sizeOf(context).width > 920
+                    ? (MediaQuery.sizeOf(context).width - 880) / 2
+                    : 20,
+                100,
+              ),
               physics: const AlwaysScrollableScrollPhysics(),
               children: [
-                Text(
-                  'Chào ${widget.api.session?.fullName ?? 'chủ thầu'},',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Tìm thợ cho công trình',
-                  style: Theme.of(context).textTheme.headlineSmall
-                      ?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '${_jobs.length} công trình · ${_jobs.where((j) => j.status == 'OPEN').length} đang tuyển',
+                FeatureBanner(
+                  greeting:
+                      'Chào ${widget.api.session?.fullName ?? 'chủ thầu'},',
+                  title: 'Tìm thợ cho công trình',
+                  icon: Icons.apartment_outlined,
+                  subtitle: _loading
+                      ? 'Đang cập nhật công trình của bạn…'
+                      : '${_jobs.length} công trình · ${_jobs.where((j) => j.status == 'OPEN').length} đang tuyển',
                 ),
                 const SizedBox(height: 24),
                 if (_error != null)
@@ -140,40 +146,38 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
                       child: Text(_error!),
                     ),
                   ),
-                if (!_loading && _jobs.isEmpty)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 60),
-                    child: Column(
-                      children: [
-                        Icon(Icons.apartment_outlined, size: 64),
-                        SizedBox(height: 16),
-                        Text(
-                          'Đăng công trình đầu tiên để kết nối với người thợ quanh bạn.',
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
+                if (_loading) const LoadingJobs(),
+                if (!_loading && _jobs.isEmpty && _error == null)
+                  EmptyState(
+                    title: 'Công trình mới, cơ hội mới',
+                    message: 'Đăng công trình đầu tiên để kết nối với người thợ quanh bạn.',
+                    action: FilledButton.icon(
+                      onPressed: _create,
+                      icon: const Icon(Icons.add),
+                      label: const Text('Tạo công trình đầu tiên'),
                     ),
                   ),
-                for (final job in _jobs)
-                  JobCard(
-                    job: job,
-                    action: Wrap(
-                      spacing: 12,
-                      runSpacing: 8,
-                      children: [
-                        FilledButton.tonal(
-                          onPressed: () => _applicants(job),
-                          child: const Text('Xem & duyệt thợ'),
-                        ),
-                        if (job.status == 'IN_PROGRESS')
-                          OutlinedButton.icon(
-                            onPressed: () => _complete(job),
-                            icon: const Icon(Icons.task_alt),
-                            label: const Text('Hoàn thành công trình'),
+                if (!_loading)
+                  for (final job in _jobs)
+                    JobCard(
+                      job: job,
+                      action: Wrap(
+                        spacing: 12,
+                        runSpacing: 8,
+                        children: [
+                          FilledButton.tonal(
+                            onPressed: () => _applicants(job),
+                            child: const Text('Xem & duyệt thợ'),
                           ),
-                      ],
+                          if (job.status == 'IN_PROGRESS')
+                            OutlinedButton.icon(
+                              onPressed: () => _complete(job),
+                              icon: const Icon(Icons.task_alt),
+                              label: const Text('Hoàn thành công trình'),
+                            ),
+                        ],
+                      ),
                     ),
-                  ),
               ],
             ),
           ),

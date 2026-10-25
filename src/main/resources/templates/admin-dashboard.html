@@ -7,65 +7,86 @@
   <link th:href="@{/css/admin.css}" rel="stylesheet">
 </head>
 <body>
-<header class="navbar bg-white border-bottom px-3 px-lg-5 py-3">
-  <a class="navbar-brand fw-bold d-flex align-items-center gap-3" th:href="@{/admin/dashboard}"><span class="brand-mark">TX</span>Thợ Xây <span class="badge text-bg-light fw-normal">Quản trị</span></a>
-  <form th:action="@{/admin/logout}" method="post"><button class="btn btn-outline-secondary btn-sm">Đăng xuất</button></form>
+<svg xmlns="http://www.w3.org/2000/svg" class="icon-definitions" aria-hidden="true"><defs>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 5a3 3 0 0 1 0 6M21 21v-3a6 6 0 0 0-4-5"/></symbol>
+  <symbol id="i-building" viewBox="0 0 24 24"><path d="M3 21h18M5 21V5l7-2v18M12 8h7v13M8 8v1m0 3v1m0 3v1m7-5h1m-1 4h1"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6zM8 12l3 3 5-6"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-location" viewBox="0 0 24 24"><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 0 1 14 0Z"/><circle cx="12" cy="10" r="2"/></symbol>
+  <symbol id="i-exit" viewBox="0 0 24 24"><path d="M9 4H4v16h5M13 7l5 5-5 5M8 12h13"/></symbol>
+</defs></svg>
+<aside class="admin-sidebar" aria-label="Điều hướng quản trị">
+  <a class="sidebar-brand" th:href="@{/admin/dashboard}"><span class="brand-mark">TX</span><span>Thợ Xây<small>KẾT NỐI &amp; KIẾN TẠO</small></span></a>
+  <p class="sidebar-label">KHÔNG GIAN LÀM VIỆC</p>
+  <nav class="sidebar-nav">
+    <a class="active" href="#overview" aria-current="page"><svg class="ui-icon" aria-hidden="true"><use href="#i-grid"/></svg>Tổng quan</a>
+    <a href="#users-heading"><svg class="ui-icon" aria-hidden="true"><use href="#i-users"/></svg>Tài khoản &amp; KYC</a>
+    <a href="#jobs-heading"><svg class="ui-icon" aria-hidden="true"><use href="#i-building"/></svg>Công trình</a>
+  </nav>
+  <div class="sidebar-note"><svg class="ui-icon" aria-hidden="true"><use href="#i-shield"/></svg><strong>Kết nối từ niềm tin</strong><p>Kiểm tra danh tính để xây dựng cộng đồng lao động an toàn.</p></div>
+</aside>
+<header class="admin-topbar">
+  <a class="mobile-brand" th:href="@{/admin/dashboard}"><span class="brand-mark">TX</span>Thợ Xây</a>
+  <span class="topbar-label">Hệ thống quản trị <span>/ Tổng quan</span></span>
+  <div class="d-flex align-items-center gap-3"><span class="admin-identity"><span class="admin-avatar">QT</span>Quản trị viên</span>
+    <form th:action="@{/admin/logout}" method="post"><button class="btn btn-outline-secondary btn-sm"><svg class="ui-icon" aria-hidden="true"><use href="#i-exit"/></svg>Đăng xuất</button></form>
+  </div>
 </header>
-<main class="container-fluid px-3 px-lg-5 py-4">
-  <p class="eyebrow mt-2">QUẢN LÝ HỆ THỐNG</p>
-  <h1 class="h2 fw-bold">Tổng quan hoạt động</h1>
-  <p class="text-secondary mb-4">Kiểm tra danh tính, quản lý tài khoản và kiểm duyệt công trình.</p>
+<main class="admin-main" id="overview">
+  <div class="page-heading"><div><p class="eyebrow">THỢ XÂY · KHÔNG GIAN QUẢN TRỊ</p><h1>Tổng quan hoạt động</h1><p class="text-secondary mb-0">Mỗi kết nối tốt đẹp bắt đầu từ một cộng đồng đáng tin cậy.</p></div>
+    <span class="workspace-chip"><svg class="ui-icon" aria-hidden="true"><use href="#i-shield"/></svg>Quản lý cộng đồng</span>
+  </div>
   <div th:if="${success}" class="alert alert-success" role="status" th:text="${success}"></div>
   <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
-  <div class="row g-3 mb-4">
-    <div class="col-6 col-xl-3"><div class="stat-card"><span>Tổng tài khoản</span><strong th:text="${dashboard.users.size()}"></strong></div></div>
-    <div class="col-6 col-xl-3"><div class="stat-card"><span>Đang hoạt động</span><strong th:text="${dashboard.activeUsers}"></strong></div></div>
-    <div class="col-6 col-xl-3"><div class="stat-card"><span>Chờ xác thực CCCD</span><strong class="text-warning-emphasis" th:text="${dashboard.pendingVerification}"></strong></div></div>
-    <div class="col-6 col-xl-3"><div class="stat-card"><span>Công trình đang tuyển</span><strong class="text-success" th:text="${dashboard.openJobs}"></strong></div></div>
+  <div class="row g-3 mb-4" aria-label="Thống kê hệ thống">
+    <div class="col-12 col-sm-6 col-xl-3"><article class="stat-card"><div class="stat-top"><span>Tổng số tài khoản</span><span class="stat-icon blue"><svg class="ui-icon" aria-hidden="true"><use href="#i-users"/></svg></span></div><strong id="stat-total-users" th:text="${dashboard.users.size()}"></strong><p><span class="status-dot"></span><span th:text="${dashboard.activeUsers}"></span> đang hoạt động</p></article></div>
+    <div class="col-12 col-sm-6 col-xl-3"><article class="stat-card"><div class="stat-top"><span>Công trình đang tuyển</span><span class="stat-icon green"><svg class="ui-icon" aria-hidden="true"><use href="#i-building"/></svg></span></div><strong id="stat-open-jobs" th:text="${dashboard.openJobs}"></strong><p>Trong <span th:text="${dashboard.jobs.size()}"></span> công trình toàn hệ thống</p></article></div>
+    <div class="col-12 col-sm-6 col-xl-3"><article class="stat-card"><div class="stat-top"><span>Tỷ lệ xác thực KYC</span><span class="stat-icon violet"><svg class="ui-icon" aria-hidden="true"><use href="#i-shield"/></svg></span></div><strong id="stat-kyc-rate" th:text="${dashboard.verificationRate() + '%'}"></strong><div class="kyc-progress" role="progressbar" aria-label="Tỷ lệ tài khoản đã xác thực" aria-valuemin="0" aria-valuemax="100" th:attr="aria-valuenow=${dashboard.verificationRate()}"><span th:style="'width: ' + ${dashboard.verificationRate()} + '%'"></span></div><p><span th:text="${dashboard.verifiedUsers()}"></span>/<span th:text="${dashboard.users.size()}"></span> tài khoản đã xác thực</p></article></div>
+    <div class="col-12 col-sm-6 col-xl-3"><article class="stat-card"><div class="stat-top"><span>Hồ sơ chờ duyệt</span><span class="stat-icon amber"><svg class="ui-icon" aria-hidden="true"><use href="#i-clock"/></svg></span></div><strong th:text="${dashboard.pendingVerification}"></strong><p>Đã có đủ ảnh CCCD hai mặt</p></article></div>
   </div>
-  <section class="card border-0 shadow-sm mb-4" aria-labelledby="users-heading">
-    <div class="card-body p-4 border-bottom"><h2 id="users-heading" class="h5 fw-bold mb-1">Tài khoản &amp; xác thực danh tính</h2><p class="text-secondary small mb-0">Kiểm tra đủ ảnh mặt trước và mặt sau CCCD trước khi xác thực.</p></div>
-    <div class="table-responsive"><table class="table align-middle mb-0">
-      <thead><tr><th>Họ tên / Điện thoại</th><th>Vai trò</th><th>CCCD</th><th>Trạng thái</th><th class="text-end">Thao tác</th></tr></thead>
+  <section class="card admin-panel mb-4" aria-labelledby="users-heading">
+    <div class="panel-heading"><div><h2 id="users-heading"><svg class="ui-icon" aria-hidden="true"><use href="#i-users"/></svg>Tài khoản &amp; xác thực danh tính</h2><p>Kiểm tra đủ hai mặt CCCD trước khi xác thực danh tính.</p></div><span class="count-chip" th:text="${dashboard.users.size() + ' tài khoản'}"></span></div>
+    <div class="table-responsive" role="region" aria-label="Bảng tài khoản" tabindex="0"><table class="table align-middle mb-0">
+      <thead><tr><th scope="col">Họ tên / Điện thoại</th><th scope="col">Vai trò</th><th scope="col">CCCD</th><th scope="col">Trạng thái</th><th scope="col" class="text-end">Thao tác</th></tr></thead>
       <tbody>
         <tr th:if="${dashboard.users.isEmpty()}"><td colspan="5" class="text-center py-5 text-secondary">Chưa có tài khoản.</td></tr>
         <tr th:each="user : ${dashboard.users}">
-          <td><strong th:text="${user.fullName}"></strong><div class="small text-secondary" th:text="${user.phoneNumber}"></div></td>
-          <td th:text="${user.role == 'ROLE_ADMIN' ? 'Quản trị' : (user.role == 'ROLE_CONTRACTOR' ? 'Chủ thầu' : 'Thợ')}"></td>
+          <td><div class="identity-cell"><span class="person-avatar" aria-hidden="true" th:text="${#strings.isEmpty(user.fullName) ? '?' : #strings.substring(user.fullName,0,1)}"></span><div><strong th:text="${user.fullName}"></strong><div class="small text-secondary" th:text="${user.phoneNumber}"></div></div></div></td>
+          <td><span class="badge role-badge" th:classappend="${user.role == 'ROLE_ADMIN' ? 'badge-violet' : (user.role == 'ROLE_CONTRACTOR' ? 'badge-blue' : 'badge-neutral')}" th:text="${user.role == 'ROLE_ADMIN' ? 'Quản trị' : (user.role == 'ROLE_CONTRACTOR' ? 'Chủ thầu' : 'Thợ')}"></span></td>
           <td>
-            <span th:if="${user.verified}" class="badge text-bg-success">Đã xác thực</span>
-            <span th:unless="${user.verified}" class="badge text-bg-light">Chưa xác thực</span>
+            <span th:if="${user.verified}" class="badge badge-green"><svg class="ui-icon" aria-hidden="true"><use href="#i-shield"/></svg>Đã xác thực</span>
+            <span th:unless="${user.verified}" class="badge badge-amber"><svg class="ui-icon" aria-hidden="true"><use href="#i-clock"/></svg>Chưa xác thực</span>
             <div th:unless="${user.cccdComplete}" class="small text-secondary mt-1">Chưa đủ ảnh hai mặt</div>
-            <button type="button" class="btn btn-sm btn-outline-primary mt-2 d-block"
-              data-bs-toggle="modal" data-bs-target="#kyc-modal"
-              th:attr="data-user-name=${user.fullName},data-front-image=${user.cccdFrontImage},data-back-image=${user.cccdBackImage},data-verified=${user.verified},data-verify-url=@{/admin/users/{id}/verify(id=${user.id})}">Xem CCCD</button>
+            <button type="button" class="btn btn-sm btn-outline-primary mt-2 d-block" data-bs-toggle="modal" data-bs-target="#kyc-modal"
+              th:attr="data-user-name=${user.fullName},data-front-image=${user.cccdFrontImage},data-back-image=${user.cccdBackImage},data-verified=${user.verified},data-verify-url=@{/admin/users/{id}/verify(id=${user.id})}"><svg class="ui-icon" aria-hidden="true"><use href="#i-eye"/></svg>Xem CCCD</button>
           </td>
-          <td><span th:class="${user.active ? 'badge text-bg-success' : 'badge text-bg-danger'}" th:text="${user.active ? 'Hoạt động' : 'Đã khóa'}"></span></td>
-          <td class="text-end"><div class="d-flex gap-2 justify-content-end flex-wrap">
-            <form th:if="${user.role != 'ROLE_ADMIN'}" th:action="@{/admin/users/{id}/toggle-active(id=${user.id})}" method="post"><button class="btn btn-sm btn-outline-secondary" th:text="${user.active ? 'Khóa' : 'Mở khóa'}"></button></form>
-          </div></td>
+          <td><span class="badge" th:classappend="${user.active ? 'badge-green' : 'badge-red'}"><span class="status-dot" aria-hidden="true"></span><span th:text="${user.active ? 'Hoạt động' : 'Đã khóa'}"></span></span></td>
+          <td class="text-end"><div class="d-flex gap-2 justify-content-end flex-wrap"><form th:if="${user.role != 'ROLE_ADMIN'}" th:action="@{/admin/users/{id}/toggle-active(id=${user.id})}" method="post"><button class="btn btn-sm btn-outline-secondary" th:text="${user.active ? 'Khóa' : 'Mở khóa'}"></button></form></div></td>
         </tr>
       </tbody>
     </table></div>
   </section>
-  <section class="card border-0 shadow-sm" aria-labelledby="jobs-heading">
-    <div class="card-body p-4 border-bottom"><h2 id="jobs-heading" class="h5 fw-bold mb-1">Kiểm duyệt công trình</h2><p class="text-secondary small mb-0">Xóa bài vi phạm sẽ xóa các đơn ứng tuyển liên quan.</p></div>
-    <div class="table-responsive"><table class="table align-middle mb-0">
-      <thead><tr><th>Công trình</th><th>Chủ thầu</th><th>Lương / ngày</th><th>Trạng thái</th><th class="text-end">Thao tác</th></tr></thead>
+  <section class="card admin-panel" aria-labelledby="jobs-heading">
+    <div class="panel-heading"><div><h2 id="jobs-heading"><svg class="ui-icon" aria-hidden="true"><use href="#i-building"/></svg>Kiểm duyệt công trình</h2><p>Xóa bài vi phạm sẽ xóa cả đơn ứng tuyển và tin nhắn liên quan.</p></div><span class="count-chip" th:text="${dashboard.jobs.size() + ' công trình'}"></span></div>
+    <div class="table-responsive" role="region" aria-label="Bảng công trình" tabindex="0"><table class="table align-middle mb-0">
+      <thead><tr><th scope="col">Công trình</th><th scope="col">Chủ thầu</th><th scope="col">Lương / ngày</th><th scope="col">Trạng thái</th><th scope="col" class="text-end">Thao tác</th></tr></thead>
       <tbody>
         <tr th:if="${dashboard.jobs.isEmpty()}"><td colspan="5" class="text-center py-5 text-secondary">Chưa có công trình.</td></tr>
         <tr th:each="job : ${dashboard.jobs}">
-          <td><strong th:text="${job.title}"></strong><div class="small text-secondary" th:text="${job.address}"></div></td>
+          <td><div class="identity-cell"><span class="job-avatar"><svg class="ui-icon" aria-hidden="true"><use href="#i-building"/></svg></span><div><strong th:text="${job.title}"></strong><div class="small text-secondary address-cell"><svg class="ui-icon" aria-hidden="true"><use href="#i-location"/></svg><span th:text="${job.address}"></span></div></div></div></td>
           <td><span th:text="${job.contractorName}"></span><div class="small text-secondary" th:text="${job.contractorPhone}"></div></td>
-          <td><span th:text="${#numbers.formatDecimal(job.salaryPerDay, 0, 'COMMA', 0, 'POINT')}"></span> đ</td>
-          <td><span class="badge text-bg-light" th:text="${job.status == 'OPEN' ? 'Đang tuyển' : (job.status == 'IN_PROGRESS' ? 'Đang thi công' : (job.status == 'COMPLETED' ? 'Hoàn thành' : 'Đã hủy'))}"></span></td>
-          <td class="text-end"><form th:action="@{/admin/jobs/{id}/delete(id=${job.id})}" method="post" onsubmit="return confirm('Xóa công trình này và toàn bộ đơn ứng tuyển?')"><button class="btn btn-sm btn-outline-danger">Xóa bài</button></form></td>
+          <td class="salary-cell"><span th:text="${#numbers.formatDecimal(job.salaryPerDay, 0, 'POINT', 0, 'COMMA')}"></span> đ<div class="small text-secondary fw-normal">mỗi ngày</div></td>
+          <td><span class="badge" th:classappend="${job.status == 'OPEN' ? 'badge-green' : (job.status == 'IN_PROGRESS' ? 'badge-blue' : (job.status == 'COMPLETED' ? 'badge-violet' : 'badge-red'))}"><span class="status-dot" aria-hidden="true"></span><span th:text="${job.status == 'OPEN' ? 'Đang tuyển' : (job.status == 'IN_PROGRESS' ? 'Đang thi công' : (job.status == 'COMPLETED' ? 'Hoàn thành' : 'Đã hủy'))}"></span></span></td>
+          <td class="text-end"><form th:action="@{/admin/jobs/{id}/delete(id=${job.id})}" method="post" onsubmit="return confirm('Xóa công trình này cùng toàn bộ đơn ứng tuyển và tin nhắn?')"><button class="btn btn-sm btn-outline-danger">Xóa bài</button></form></td>
         </tr>
       </tbody>
     </table></div>
   </section>
   <footer class="text-secondary small py-4">Thợ Xây · Kết nối lao động phổ thông &amp; chủ thầu</footer>
 </main>
+
 <div class="modal fade" id="kyc-modal" tabindex="-1" aria-labelledby="kyc-modal-title" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content">

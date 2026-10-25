@@ -29,3 +29,11 @@ tin hai chiều, thời gian, trạng thái kết nối, tải tin cũ và giữ
 Kết nối WebSocket tự nối lại và tải bù tin bỏ lỡ; gửi lại dùng cùng mã tin để tránh
 trùng. Đóng màn hình hoặc đăng xuất sẽ dọn kết nối. Backend cần migration
 `004_messages.sql`; REST và WebSocket dùng cùng địa chỉ máy chủ từ `API_BASE_URL`.
+
+## Giao diện
+
+Theme dùng chung nằm ở `lib/theme/app_theme.dart`. `JobCard` có nhãn loại việc,
+lương, khoảng cách, trạng thái và thao tác rõ ràng. `LoadingJobs`/`ShimmerSurface`
+hiển thị skeleton trong lúc tải; hỗ trợ giảm chuyển động và tự dừng ở route ẩn.
+`EmptyState` dùng minh họa vector vẽ local, không phụ thuộc ảnh mạng. Thử lọc
+một loại việc không có kết quả để xem trạng thái trống và nút đổi vị trí.

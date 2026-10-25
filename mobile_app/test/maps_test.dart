@@ -5,11 +5,38 @@ import 'package:tho_xay_mobile/models/models.dart';
 import 'package:tho_xay_mobile/screens/location_picker_screen.dart';
 import 'package:tho_xay_mobile/services/location_service.dart';
 import 'package:tho_xay_mobile/widgets/jobs_map.dart';
+import 'package:tho_xay_mobile/widgets/loading_jobs.dart';
 
 class MemoryTiles extends TileProvider {
   @override
   ImageProvider getImage(TileCoordinates coordinates, TileLayer options) =>
       MemoryImage(TileProvider.transparentImage);
+}
+
+// Decode the in-memory image on the real event loop before waiting for loading
+// animations. A continuous shimmer is expected while the codec is still pending.
+Future<void> settleMap(WidgetTester tester) async {
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 400));
+  if (find.byType(FlutterMap).evaluate().isNotEmpty) {
+    await tester.runAsync(
+      () => precacheImage(
+        MemoryImage(TileProvider.transparentImage),
+        tester.element(find.byType(FlutterMap).first),
+      ),
+    );
+  }
+  for (
+    var frame = 0;
+    frame < 50 && find.byType(ShimmerSurface).evaluate().isNotEmpty;
+    frame++
+  ) {
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 20)),
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+  }
+  await tester.pumpAndSettle();
 }
 
 Job job(int id, double lat, double lng) => Job(
@@ -53,7 +80,7 @@ void main() {
       ),
     );
     await tester.tap(find.text('Mở bản đồ'));
-    await tester.pumpAndSettle();
+    await settleMap(tester);
     expect(
       tester
           .widget<FilledButton>(
@@ -66,10 +93,10 @@ void main() {
       tester.getCenter(find.byType(FlutterMap)) + const Offset(30, 30),
     );
     await tester.pump(const Duration(milliseconds: 350));
-    await tester.pumpAndSettle();
+    await settleMap(tester);
     expect(find.text('Chưa chọn vị trí'), findsNothing);
     await tester.tap(find.text('Dùng vị trí đã chọn'));
-    await tester.pumpAndSettle();
+    await settleMap(tester);
     expect(selected, isNotNull);
     expect(selected!.latitude, inInclusiveRange(-85, 85));
     expect(selected!.longitude, inInclusiveRange(-180, 180));
@@ -91,12 +118,12 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await settleMap(tester);
     expect(find.byKey(const ValueKey('job-marker-1')), findsOneWidget);
     expect(find.byKey(const ValueKey('job-marker-2')), findsOneWidget);
     expect(find.text('OpenStreetMap contributors'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('job-marker-2')));
-    await tester.pumpAndSettle();
+    await settleMap(tester);
     expect(chosen?.id, 2);
   });
   testWidgets('changing filtered results recenters to the new pins', (
@@ -118,11 +145,11 @@ void main() {
     await tester.pumpWidget(
       view(const GeoPoint(10.7769, 106.7009), [job(1, 10.778, 106.702)]),
     );
-    await tester.pumpAndSettle();
+    await settleMap(tester);
     await tester.pumpWidget(
       view(const GeoPoint(21.0285, 105.8542), [job(2, 21.03, 105.855)]),
     );
-    await tester.pumpAndSettle();
+    await settleMap(tester);
     expect(find.byKey(const ValueKey('job-marker-1')), findsNothing);
     expect(find.byKey(const ValueKey('job-marker-2')), findsOneWidget);
   });

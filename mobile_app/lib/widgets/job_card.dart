@@ -14,50 +14,105 @@ class JobCard extends StatelessWidget {
   final Widget action;
   final bool canContactContractor;
   @override
-  Widget build(BuildContext context) => Card(
-    margin: const EdgeInsets.only(bottom: 14),
+  Widget build(BuildContext context) => Container(
+    margin: const EdgeInsets.only(bottom: 18),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(22),
+      border: Border.all(color: const Color(0xffe3eae6)),
+      boxShadow: [
+        BoxShadow(
+          color: const Color(0xff1b4637).withValues(alpha: .045),
+          blurRadius: 22,
+          offset: const Offset(0, 7),
+        ),
+      ],
+    ),
     child: Padding(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
             children: [
-              Chip(
-                label: Text(job.jobType),
-                visualDensity: VisualDensity.compact,
+              _JobBadge(
+                label: job.jobType,
+                icon: job.jobType == 'Thợ chính'
+                    ? Icons.engineering_outlined
+                    : Icons.handyman_outlined,
+                color: job.jobType == 'Thợ chính'
+                    ? const Color(0xff176b52)
+                    : const Color(0xff95510a),
+                background: job.jobType == 'Thợ chính'
+                    ? const Color(0xffe8f3ed)
+                    : const Color(0xfffff2df),
               ),
-              const Spacer(),
               if (job.distanceKm != null)
-                Text(
-                  '${job.distanceKm!.toStringAsFixed(1)} km',
-                  style: const TextStyle(color: Colors.black54),
+                _JobBadge(
+                  label: '${job.distanceKm!.toStringAsFixed(1)} km',
+                  icon: Icons.near_me_outlined,
+                  color: const Color(0xff416a92),
+                  background: const Color(0xffeef4fb),
                 ),
+              _JobBadge(
+                label: statusLabel(job.status),
+                icon: job.status == 'COMPLETED'
+                    ? Icons.task_alt
+                    : Icons.circle_outlined,
+                color: job.status == 'CANCELLED'
+                    ? const Color(0xffae3d40)
+                    : const Color(0xff51685e),
+                background: job.status == 'CANCELLED'
+                    ? const Color(0xffffeeee)
+                    : const Color(0xfff0f4f2),
+              ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
           Text(
             job.title,
             style: Theme.of(context).textTheme.titleLarge
                 ?.copyWith(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 8),
-          Text(
-            '${money(job.salaryPerDay)} / ngày',
-            style: TextStyle(
-              fontSize: 19,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.primary,
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: const Color(0xfff0f7f3),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                const Icon(
+                  Icons.payments_outlined,
+                  color: Color(0xff176b52),
+                  size: 22,
+                ),
+                Text(
+                  '${money(job.salaryPerDay)} / ngày',
+                  style: const TextStyle(
+                    fontSize: 21,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xff176b52),
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 12),
-          Text(job.address),
-          const SizedBox(height: 6),
-          Text(
-            'Cần ${job.requiredWorkers} thợ · ${statusLabel(job.status)}',
-            style: const TextStyle(color: Colors.black54),
+          const SizedBox(height: 16),
+          _JobInfo(icon: Icons.location_on_outlined, label: job.address),
+          const SizedBox(height: 8),
+          _JobInfo(
+            icon: Icons.groups_outlined,
+            label: 'Cần ${job.requiredWorkers} thợ · ${job.contractorName}',
           ),
-          const SizedBox(height: 12),
+          const Divider(height: 30),
           Wrap(
             spacing: 12,
             runSpacing: 8,
@@ -77,6 +132,63 @@ class JobCard extends StatelessWidget {
         ],
       ),
     ),
+  );
+}
+
+class _JobBadge extends StatelessWidget {
+  const _JobBadge({
+    required this.label,
+    required this.icon,
+    required this.color,
+    required this.background,
+  });
+  final String label;
+  final IconData icon;
+  final Color color, background;
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+    decoration: BoxDecoration(
+      color: background,
+      borderRadius: BorderRadius.circular(9),
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14, color: color),
+        const SizedBox(width: 5),
+        Flexible(
+          child: Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.w700,
+              fontSize: 12,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class _JobInfo extends StatelessWidget {
+  const _JobInfo({required this.icon, required this.label});
+  final IconData icon;
+  final String label;
+  @override
+  Widget build(BuildContext context) => Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Icon(icon, size: 18, color: const Color(0xff6b8075)),
+      const SizedBox(width: 8),
+      Expanded(
+        child: Text(
+          label,
+          style: const TextStyle(color: Color(0xff61756b), height: 1.4),
+        ),
+      ),
+    ],
   );
 }
 
