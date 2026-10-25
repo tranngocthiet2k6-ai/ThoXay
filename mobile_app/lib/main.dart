@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'screens/login_screen.dart';
 import 'screens/worker_home_screen.dart';
+import 'screens/contractor_home_screen.dart';
 import 'services/api_service.dart';
 
 Future<void> main() async {
@@ -33,6 +34,9 @@ class ThoXayApp extends StatelessWidget {
               final session = api.session!;
               if (session.role == 'ROLE_WORKER') {
                 return WorkerHomeScreen(api: api);
+              }
+              if (session.role == 'ROLE_CONTRACTOR') {
+                return ContractorHomeScreen(api: api);
               }
               return Scaffold(
                 appBar: AppBar(title: const Text('Tài khoản Thợ Xây')),
