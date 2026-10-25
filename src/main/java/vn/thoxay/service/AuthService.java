@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import vn.thoxay.dto.*;
 import vn.thoxay.entity.*;
 import vn.thoxay.exception.ApiException;
+import vn.thoxay.exception.AccountLockedException;
 import vn.thoxay.repository.UserRepository;
 import vn.thoxay.security.JwtUtil;
 import java.nio.charset.StandardCharsets;
@@ -33,8 +34,17 @@ public class AuthService {
         return response(user);
     }
     public AuthResponse login(LoginRequest request) {
-        manager.authenticate(new UsernamePasswordAuthenticationToken(request.phoneNumber(), request.password()));
-        return response(users.findByPhoneNumber(request.phoneNumber()).orElseThrow());
+        users.findByPhoneNumber(request.phoneNumber()).ifPresent(user -> {
+            if (!user.isActive()) throw new AccountLockedException();
+        });
+        try {
+            manager.authenticate(new UsernamePasswordAuthenticationToken(request.phoneNumber(), request.password()));
+        } catch (DisabledException e) {
+            throw new AccountLockedException();
+        }
+        User user = users.findByPhoneNumber(request.phoneNumber()).orElseThrow();
+        if (!user.isActive()) throw new AccountLockedException();
+        return response(user);
     }
     private AuthResponse response(User user) {
         return AuthResponse.of(jwt.generateToken(user.getPhoneNumber()), jwt.expiresInSeconds(), user);

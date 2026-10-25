@@ -11,6 +11,7 @@ import vn.thoxay.entity.*;
 import vn.thoxay.repository.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -42,7 +43,9 @@ class AdminWebTest {
         Job job = new Job(); job.setContractor(owner); job.setTitle("Công trình vi phạm"); job.setJobType("Phụ hồ");
         job.setSalaryPerDay(300000); job.setAddress("TP.HCM"); job.setRequiredWorkers(1); jobs.saveAndFlush(job);
         JobApplication application = new JobApplication(); application.setJob(job); application.setWorker(worker); applications.saveAndFlush(application);
-        mvc.perform(get("/admin/dashboard")).andExpect(status().isOk()).andExpect(content().string(containsString("Công trình vi phạm")));
+        mvc.perform(get("/admin/dashboard")).andExpect(status().isOk()).andExpect(content().string(containsString("Công trình vi phạm")))
+            .andExpect(content().string(not(containsString("/admin/users/" + admin.getId() + "/toggle-active"))))
+            .andExpect(content().string(containsString("/admin/users/" + worker.getId() + "/toggle-active")));
         mvc.perform(post("/admin/users/" + worker.getId() + "/verify")).andExpect(status().isForbidden());
         mvc.perform(post("/admin/users/" + worker.getId() + "/verify").with(csrf())).andExpect(status().is3xxRedirection());
         assertThat(users.findById(worker.getId()).orElseThrow().isVerified()).isTrue();

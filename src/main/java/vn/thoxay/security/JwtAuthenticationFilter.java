@@ -11,11 +11,15 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
+import java.util.Map;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import vn.thoxay.exception.AccountLockedException;
 
 @Component @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwt;
     private final CustomUserDetailsService users;
+    private final ObjectMapper json;
 
     @Override protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI().substring(request.getContextPath().length());
@@ -27,11 +31,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (header != null && header.startsWith("Bearer ")) {
             try {
                 var user = users.loadUserByUsername(jwt.extractPhone(header.substring(7)));
-                if (user.isEnabled()) {
-                    var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                if (!user.isEnabled()) {
+                    SecurityContextHolder.clearContext();
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    response.setContentType("application/json;charset=UTF-8");
+                    json.writeValue(response.getWriter(), Map.of("status", 403,
+                        "code", AccountLockedException.CODE, "message", AccountLockedException.MESSAGE));
+                    return;
                 }
+                var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (JwtException | IllegalArgumentException | UsernameNotFoundException e) {
                 SecurityContextHolder.clearContext();
             }

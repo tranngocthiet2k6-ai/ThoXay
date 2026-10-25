@@ -51,7 +51,9 @@ class JobApiTest {
             .andExpect(status().isBadRequest());
         String existingToken = token(worker); worker.setActive(false); users.saveAndFlush(worker);
         mvc.perform(get("/api/jobs/nearby?lat=10&lng=106").header("Authorization", existingToken))
-            .andExpect(status().isUnauthorized());
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("code").value("ACCOUNT_LOCKED"))
+            .andExpect(jsonPath("message").value(vn.thoxay.exception.AccountLockedException.MESSAGE));
     }
 
     private String token(User user) { return "Bearer " + jwt.generateToken(user.getPhoneNumber()); }

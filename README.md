@@ -191,7 +191,7 @@ Ví dụ body đăng công trình:
 
 AuthResponse gồm `token`, `tokenType`, `expiresIn` (giây), `userId`, `phoneNumber`,
 `fullName`, `role`. Lỗi API có `status`, `message`: 400 dữ liệu không hợp lệ,
-401 chưa đăng nhập/token hết hạn/tài khoản bị khóa, 403 sai quyền, 404 không
+401 chưa đăng nhập/token hết hạn, 403 sai quyền hoặc tài khoản bị khóa, 404 không
 tìm thấy, 409 trùng hoặc xung đột nghiệp vụ. Bán kính từ 0.1 đến 200 km.
 Mật khẩu từ 8 ký tự và tối đa 72 byte UTF-8.
 

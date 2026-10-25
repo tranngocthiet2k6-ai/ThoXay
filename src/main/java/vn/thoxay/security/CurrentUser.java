@@ -7,6 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import vn.thoxay.entity.*;
 import vn.thoxay.exception.ApiException;
+import vn.thoxay.exception.AccountLockedException;
 import vn.thoxay.repository.UserRepository;
 
 @Component @RequiredArgsConstructor
@@ -17,7 +18,7 @@ public class CurrentUser {
         if (auth == null) throw new ApiException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập");
         User user = users.findByPhoneNumber(auth.getName())
             .orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "Không tìm thấy tài khoản"));
-        if (!user.isActive()) throw new AccessDeniedException("Tài khoản đã bị khóa");
+        if (!user.isActive()) throw new AccountLockedException();
         return user;
     }
     public User require(Role role) {

@@ -15,6 +15,11 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice(basePackages = "vn.thoxay.controller")
 public class ApiExceptionHandler {
+    @ExceptionHandler(AccountLockedException.class)
+    ResponseEntity<?> locked(AccountLockedException e) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("status", 403,
+            "code", AccountLockedException.CODE, "message", e.getMessage()));
+    }
     @ExceptionHandler(ApiException.class)
     ResponseEntity<?> business(ApiException e) { return error(e.getStatus(), e.getMessage()); }
 
@@ -30,7 +35,7 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(AuthenticationException.class)
     ResponseEntity<?> authentication(AuthenticationException e) {
-        return error(HttpStatus.UNAUTHORIZED, "Sai số điện thoại, mật khẩu hoặc tài khoản đã bị khóa");
+        return error(HttpStatus.UNAUTHORIZED, "Sai số điện thoại hoặc mật khẩu");
     }
 
     @ExceptionHandler(AccessDeniedException.class)

@@ -39,7 +39,9 @@ class AuthApiTest {
         var user = users.findByPhoneNumber("0911111111").orElseThrow(); user.setActive(false); users.saveAndFlush(user);
         mvc.perform(post("/api/auth/login").contentType("application/json").content("""
           {"phoneNumber":"0911111111","password":"password123"}
-          """)).andExpect(status().isUnauthorized());
+          """)).andExpect(status().isForbidden())
+            .andExpect(jsonPath("code").value("ACCOUNT_LOCKED"))
+            .andExpect(jsonPath("message").value(vn.thoxay.exception.AccountLockedException.MESSAGE));
     }
 
     @Test void protectedEndpointsRejectMissingAndForgedJwt() throws Exception {
