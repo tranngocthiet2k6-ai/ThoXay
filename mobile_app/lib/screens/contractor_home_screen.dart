@@ -6,6 +6,7 @@ import '../services/location_service.dart';
 import '../widgets/coordinates_dialog.dart';
 import '../widgets/job_card.dart';
 import '../widgets/call_button.dart';
+import '../widgets/chat_button.dart';
 import '../widgets/job_completion_dialog.dart';
 import 'profile_screen.dart';
 import 'location_picker_screen.dart';
@@ -550,6 +551,14 @@ class _ApplicantsSheetState extends State<_ApplicantsSheet> {
                             CallButton(
                               phone: application.workerPhone!,
                               label: 'Gọi thợ',
+                            ),
+                          if (application.status == 'ACCEPTED' &&
+                              application.workerActive)
+                            ChatButton(
+                              api: widget.api,
+                              job: widget.job,
+                              peerId: application.workerId,
+                              peerName: application.workerName,
                             ),
                           const SizedBox(height: 8),
                           Text(

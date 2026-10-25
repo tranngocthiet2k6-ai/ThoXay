@@ -63,7 +63,7 @@ docker compose up -d db
 .\scripts\start-local.ps1
 ```
 
-Compose tạo database `tho_xay_db`, ba bảng và dữ liệu demo từ [schema.sql](schema.sql).
+Compose tạo database `tho_xay_db`, các bảng và dữ liệu demo từ [schema.sql](schema.sql).
 Chỉ nạp script tự động khi volume database được khởi tạo lần đầu. Với PostgreSQL
 cài riêng, tạo database rồi nạp:
 
@@ -215,6 +215,7 @@ Chạy migration giữ nguyên dữ liệu:
 ```powershell
 psql -U postgres -d tho_xay_db -v ON_ERROR_STOP=1 -f migrations/002_worker_ratings.sql
 psql -U postgres -d tho_xay_db -v ON_ERROR_STOP=1 -f migrations/003_cccd_front_back.sql
+psql -U postgres -d tho_xay_db -v ON_ERROR_STOP=1 -f migrations/004_messages.sql
 ```
 
 Script khởi động local tự áp dụng các migration này khi sử dụng PostgreSQL portable
@@ -275,6 +276,58 @@ Mật khẩu từ 8 ký tự và tối đa 72 byte UTF-8.
 `sort=DISTANCE|SALARY_DESC` (mặc định DISTANCE). Tài khoản bị khóa trả
 403 cùng `code=ACCOUNT_LOCKED`; Flutter xóa phiên khi gặp mã này.
 
+## Nhắn tin trực tiếp realtime
+
+Thợ vào **Lịch sử ứng tuyển → Nhắn tin** ở đơn `ACCEPTED`. Chủ thầu vào
+**Xem & duyệt thợ → Nhắn tin** ở dòng thợ đã nhận. Mỗi công việc và mỗi cặp
+Thầu–Thợ có lịch sử riêng; chỉ hai tài khoản đang hoạt động được đọc/gửi.
+Đơn chưa duyệt hoặc bị từ chối không mở được chat, kể cả gọi API trực tiếp.
+Các cuộc trò chuyện đã được duyệt vẫn dùng được khi công việc hoàn thành.
+
+Tin được lưu trong `messages` với `sender_id`, `recipient_id`, `job_id`,
+`content`, `created_at` (UTC) và `client_message_id` chống trùng khi gửi lại.
+Xóa công trình sẽ xóa tin nhắn của công trình đó. Database cũ cần chạy
+`migrations/004_messages.sql`; script local tự áp dụng khi dùng PostgreSQL portable.
+
+API dùng JWT Bearer:
+
+| Phương thức | Đường dẫn | Nội dung |
+| --- | --- | --- |
+| POST | `/api/jobs/{jobId}/messages` | Gửi tin tới `recipientId` |
+| GET | `/api/jobs/{jobId}/messages?peerId={userId}` | 50 tin gần nhất, thứ tự ID tăng dần |
+
+Ví dụ body gửi tin:
+
+```json
+{"recipientId":3,"content":"Ngày mai bắt đầu lúc 7 giờ nhé","clientMessageId":"unique-retry-id"}
+```
+
+Nội dung tối đa 2000 ký tự, không được trống. `clientMessageId` là chuỗi 1–64 ký
+tự chữ/số/`_`/`-`, duy nhất theo người gửi. Gửi lại cùng mã và nội dung trả lại
+tin đã lưu; dùng mã đó cho nội dung hoặc người nhận khác trả 409. Server lấy
+người gửi từ JWT. Lịch sử trả `{messages, hasMore}`, hỗ trợ `limit=1..100`,
+`beforeId` để tải tin cũ hoặc `afterId` để đồng bộ tin bỏ lỡ (không dùng cùng lúc).
+
+WebSocket ở `/ws/chat`, ví dụ `ws://192.168.1.16:8080/ws/chat`. Sau khi kết nối,
+gửi frame JSON đầu tiên:
+
+```json
+{"type":"subscribe","token":"JWT_TOKEN","jobId":1,"peerId":3}
+```
+
+Server kiểm tra JWT và đơn ACCEPTED trước khi trả `{"type":"ready"}`. Tin mới
+được đẩy dưới dạng `{"type":"message","message":{...}}` sau khi giao dịch lưu
+thành công. Token không nằm trong URL. Heartbeat kiểm tra lại tài khoản/quyền
+mỗi 10 giây; token hết hạn hoặc tài khoản bị khóa sẽ nhận frame `error` rồi
+đóng kết nối. WebSocket của trình duyệt dùng cùng danh sách origin cấu hình
+`CORS_ORIGINS` với REST; native mobile không cần header Origin.
+
+Flutter tự nối lại, đồng bộ lịch sử khi mạng trở lại hoặc ứng dụng được mở lại,
+khử trùng theo ID và giữ nội dung chưa được xác nhận để gửi lại. URL `ws/wss`
+được suy ra từ `API_BASE_URL`. Đóng màn hình hoặc đăng xuất sẽ đóng kết nối.
+Realtime hiện chạy trong một tiến trình Backend; triển khai nhiều instance cần
+thêm broker dùng chung để chuyển tiếp sự kiện giữa các instance.
+
 ## Bảo mật quản trị
 
 `/admin/**` không đòi JWT ở lớp HTTP như đặc tả. Các phương thức dashboard
@@ -288,6 +341,6 @@ Response không trả hash mật khẩu hoặc liên kết CCCD cho API tìm vi�
 - `src/main/java/vn/thoxay/`: entity, repository, DTO, security, service, controller, admin.
 - `src/main/resources/`: cấu hình, template quản trị, CSS.
 - `mobile_app/lib/`: models, services, screens và widgets.
-- `schema.sql`: ba bảng PostgreSQL, constraints, indexes và seed.
+- `schema.sql`: bốn bảng PostgreSQL, constraints, indexes và seed.
 - [AGENTS.md](AGENTS.md): kiến trúc và quy trình build → commit → push cho mỗi hạng mục.
 - [TESTING.md](TESTING.md): lệnh kiểm thử, phạm vi đã kiểm chứng và kịch bản nghiệm thu.

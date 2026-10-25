@@ -52,7 +52,7 @@ public class SecurityConfig {
     @Bean @Order(2)
     SecurityFilterChain web(HttpSecurity http, AuthenticationManager manager) throws Exception {
         return http.authenticationManager(manager)
-            .authorizeHttpRequests(a -> a.requestMatchers("/admin/**", "/", "/error", "/css/**", "/js/**", "/vendor/**").permitAll().anyRequest().denyAll())
+            .authorizeHttpRequests(a -> a.requestMatchers("/ws/chat", "/admin/**", "/", "/error", "/css/**", "/js/**", "/vendor/**").permitAll().anyRequest().denyAll())
             .formLogin(f -> f.loginPage("/admin/login").loginProcessingUrl("/admin/login")
                 .usernameParameter("phoneNumber").defaultSuccessUrl("/admin/dashboard", true).permitAll())
             .logout(l -> l.logoutUrl("/admin/logout").logoutSuccessUrl("/admin/login?logout"))

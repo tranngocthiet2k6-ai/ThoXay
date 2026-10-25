@@ -42,6 +42,18 @@ CREATE TABLE IF NOT EXISTS job_applications (
 CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status);
 CREATE INDEX IF NOT EXISTS idx_jobs_contractor ON jobs(contractor_id);
 CREATE INDEX IF NOT EXISTS idx_applications_worker ON job_applications(worker_id);
+CREATE TABLE IF NOT EXISTS messages (
+  id BIGSERIAL PRIMARY KEY,
+  sender_id BIGINT NOT NULL REFERENCES users(id),
+  recipient_id BIGINT NOT NULL REFERENCES users(id),
+  job_id BIGINT NOT NULL REFERENCES jobs(id) ON DELETE CASCADE,
+  content VARCHAR(2000) NOT NULL CHECK (length(trim(content)) > 0),
+  client_message_id VARCHAR(64) NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CHECK (sender_id <> recipient_id),
+  UNIQUE (sender_id, client_message_id)
+);
+CREATE INDEX IF NOT EXISTS idx_messages_conversation ON messages(job_id, sender_id, recipient_id, id);
 -- Demo-only password for all three accounts: password
 INSERT INTO users (phone_number,password,full_name,role,is_verified)
 VALUES

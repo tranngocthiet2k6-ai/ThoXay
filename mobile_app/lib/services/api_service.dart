@@ -4,8 +4,11 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../models/models.dart';
+import '../models/chat_message.dart';
+import 'chat_connection.dart';
 
 class ApiException implements Exception {
   const ApiException(this.message, [this.statusCode]);
@@ -115,6 +118,88 @@ class ApiService extends ChangeNotifier {
   Future<UserProfile> profile() async => UserProfile.fromJson(
     await _request('GET', '/api/users/me') as Map<String, dynamic>,
   );
+  Future<MessagePage> messageHistory(
+    int jobId,
+    int peerId, {
+    int? afterId,
+    int? beforeId,
+  }) async {
+    final query = Uri(
+      queryParameters: {
+        'peerId': '$peerId',
+        if (afterId != null) 'afterId': '$afterId',
+        if (beforeId != null) 'beforeId': '$beforeId',
+      },
+    ).query;
+    final data = await _request(
+      'GET',
+      '/api/jobs/$jobId/messages?$query',
+    ) as Map<String, dynamic>;
+    return MessagePage(
+      (data['messages'] as List)
+          .map((m) => ChatMessage.fromJson(m as Map<String, dynamic>))
+          .toList(),
+      data['hasMore'] as bool,
+    );
+  }
+
+  Future<ChatMessage> sendMessage(
+    int jobId,
+    int recipientId,
+    String content,
+    String clientMessageId,
+  ) async => ChatMessage.fromJson(
+    await _request(
+      'POST',
+      '/api/jobs/$jobId/messages',
+      body: {
+        'recipientId': recipientId,
+        'content': content,
+        'clientMessageId': clientMessageId,
+      },
+    ) as Map<String, dynamic>,
+  );
+
+  Future<ChatConnection> connectChat(int jobId, int peerId) async {
+    final auth = _requireSession();
+    if (!auth.expiresAt.isAfter(DateTime.now())) {
+      await logout();
+      throw const ApiException('Phiên đăng nhập đã hết hạn', 401);
+    }
+    final base = Uri.parse(baseUrl);
+    final socket = WebSocketChannel.connect(
+      base.replace(
+        scheme: base.scheme == 'https' ? 'wss' : 'ws',
+        path: '${base.path}/ws/chat',
+        query: null,
+        fragment: null,
+      ),
+    );
+    try {
+      await socket.ready.timeout(const Duration(seconds: 10));
+      // Send credentials as a frame, never in the URL or access logs. Works on Web and Android.
+      socket.sink.add(
+        jsonEncode({
+          'type': 'subscribe',
+          'token': auth.token,
+          'jobId': jobId,
+          'peerId': peerId,
+        }),
+      );
+      return ChatConnection(
+        events: socket.stream.map(
+          (value) => jsonDecode(value as String) as Map<String, dynamic>,
+        ),
+        close: () async {
+          await socket.sink.close();
+        },
+      );
+    } on Object {
+      unawaited(socket.sink.close().catchError((Object _) {}));
+      throw const ApiException('Không kết nối được máy chủ nhắn tin');
+    }
+  }
+
   Future<UserProfile> updateCccd(
     String frontImageUrl,
     String backImageUrl,

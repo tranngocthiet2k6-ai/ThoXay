@@ -10,6 +10,7 @@ import java.util.Optional;
 
 public interface JobApplicationRepository extends JpaRepository<JobApplication, Long> {
     boolean existsByJobIdAndWorkerId(Long jobId, Long workerId);
+    boolean existsByJobIdAndWorkerIdAndStatus(Long jobId, Long workerId, ApplicationStatus status);
     List<JobApplication> findByJobIdOrderByAppliedAtDesc(Long jobId);
     List<JobApplication> findByWorkerIdOrderByAppliedAtDesc(Long workerId);
     long countByJobIdAndStatus(Long jobId, ApplicationStatus status);

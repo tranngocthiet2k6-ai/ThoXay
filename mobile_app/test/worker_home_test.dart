@@ -86,6 +86,7 @@ void main() {
       await tester.tap(find.text('Đã ứng tuyển').last);
       await tester.pumpAndSettle();
       expect(find.text('Chờ duyệt'), findsOneWidget);
+      expect(find.text('Nhắn tin'), findsNothing);
       expect(find.byType(CallButton), findsNothing);
       api.dispose();
     },
@@ -127,6 +128,7 @@ void main() {
     await tester.tap(find.text('Đã ứng tuyển').last);
     await tester.pumpAndSettle();
     expect(find.text('Gọi chủ thầu: 0900000002'), findsOneWidget);
+    expect(find.text('Nhắn tin'), findsOneWidget);
     api.dispose();
   });
 }

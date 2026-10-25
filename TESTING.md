@@ -6,7 +6,7 @@
 .\mvnw.cmd -B verify
 ```
 
-23 kiểm thử JUnit/Spring Boot dùng H2 mặc định, chạy với Spring Security và JWT
+30 kiểm thử JUnit/Spring Boot dùng H2 mặc định, chạy với Spring Security và JWT
 thật: đăng ký/đăng nhập, BCrypt, chống đăng ký ADMIN, token giả/thiếu, tài khoản
 bị khóa, phân quyền, Haversine, dữ liệu sai, ứng tuyển trùng, lịch sử, duyệt,
 hai giao dịch duyệt đồng thời cho một vị trí, render Thymeleaf, CSRF, xác thực
@@ -44,7 +44,7 @@ flutter test
 flutter build web --release
 ```
 
-18 kiểm thử Dart/widget: lưu/khôi phục phiên, đính JWT, xóa phiên khi 401,
+26 kiểm thử Dart/widget: lưu/khôi phục phiên, đính JWT, xóa phiên khi 401,
 validation đăng nhập/đăng ký, tìm việc theo vị trí được cấp cho test, ứng tuyển
 và lịch sử, duyệt thợ, validation form đăng công trình. Widget test dùng API
 và vị trí giả lập, không truy cập GPS thật hay gửi yêu cầu ra mạng.
@@ -55,6 +55,33 @@ trả đúng tọa độ đã chọn, chọn đúng công trình qua ghim và c�
 khi kết quả tìm kiếm thay đổi. Không gọi tile OpenStreetMap trong test.
 KYC kiểm tra nhãn hai ô ảnh, bắt buộc mặt sau, giữ mặt trước đã có và gửi đúng
 hai khóa cccdFrontImage/cccdBackImage tới REST API.
+
+## Nhắn tin realtime
+
+`ChatApiTest` dùng cả MockMvc và WebSocket thật tới Tomcat cổng ngẫu nhiên:
+gửi hai chiều, giới hạn nội dung, gửi lại không trùng, phân trang/cursor, lịch sử
+riêng theo job và cặp người dùng, chặn pending/rejected/admin/người ngoài,
+phát tin tới đúng hai kết nối sau commit, chặn JWT sai, khóa tài khoản đang
+online, và cascade tin nhắn khi admin xóa job. Cùng bộ test chạy trên H2 và
+PostgreSQL bằng lệnh verify ở trên.
+
+Flutter kiểm tra wire format của API, nút chat chỉ hiện ở đơn ACCEPTED, tin
+realtime đến trong lúc tải lịch sử, khử trùng, tải bù nhiều trang sau ngắt mạng
+kể cả khi ID lớn đã đến trước, tải tin cũ, giữ bản nháp/gửi lại cùng mã khi mất
+phản hồi, lỗi quyền và dọn kết nối lúc đóng màn hình/đăng xuất.
+
+Checkpoint chat đã chạy `mvnw verify` thành công với 30 test trên H2 và
+PostgreSQL, analyzer không lỗi, 26 test Flutter và Web release build thành công.
+Đã kiểm tra thêm chính Flutter HTTP/WebSocket client với Backend JAR và
+PostgreSQL đang chạy: đăng ký hai tài khoản tạm, đăng việc/ứng tuyển/duyệt,
+gửi hai chiều realtime, gửi lại cùng mã và đọc lại đúng hai tin đã lưu. Migration
+004 chạy lại thành công; công trình, tin nhắn và hai tài khoản thử đã được dọn.
+
+Nghiệm thu: dùng hai tài khoản Thầu–Thợ, đăng việc → ứng tuyển → duyệt, mở Chat
+ở hai thiết bị và gửi tin qua lại không tải lại trang. Ngắt mạng một thiết bị,
+gửi thêm tin từ thiết bị kia, bật lại mạng và kiểm tra tin được tải bù đúng thứ
+tự. Khóa một tài khoản trong Admin và kiểm tra socket bị đóng, không gửi được
+tin mới. Đóng/mở lại Chat để xác nhận lịch sử đã được lưu.
 
 ## Modal Admin
 

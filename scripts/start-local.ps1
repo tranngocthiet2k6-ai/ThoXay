@@ -71,6 +71,8 @@ try {
         if ($LASTEXITCODE -ne 0) { throw 'Cannot apply the worker ratings migration.' }
         & (Join-Path $pgBin 'psql.exe') -h 127.0.0.1 -p 55432 -U postgres -d tho_xay_db -v ON_ERROR_STOP=1 -c 'SET client_min_messages=WARNING' -f (Join-Path $projectRoot 'migrations\003_cccd_front_back.sql')
         if ($LASTEXITCODE -ne 0) { throw 'Cannot apply the front/back CCCD migration.' }
+        & (Join-Path $pgBin 'psql.exe') -h 127.0.0.1 -p 55432 -U postgres -d tho_xay_db -v ON_ERROR_STOP=1 -c 'SET client_min_messages=WARNING' -f (Join-Path $projectRoot 'migrations\004_messages.sql')
+        if ($LASTEXITCODE -ne 0) { throw 'Cannot apply the messages migration.' }
     }
 
     if (-not (Test-Path -LiteralPath $localConfiguration)) {

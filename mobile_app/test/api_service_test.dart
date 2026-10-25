@@ -8,6 +8,76 @@ import 'package:tho_xay_mobile/services/api_service.dart';
 
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
+  test('chat HTTP sends authenticated recipient and retry ID and loads cursor history', () async {
+    var historyCalls = 0;
+    final payload = {
+      'id': 12,
+      'senderId': 3,
+      'recipientId': 2,
+      'jobId': 8,
+      'content': 'Chào chủ thầu',
+      'createdAt': '2026-10-26T08:00:00Z',
+      'clientMessageId': 'retry-id',
+    };
+    final api = ApiService(
+      baseUrl: 'https://api.example.com',
+      client: MockClient((request) async {
+        if (request.url.path == '/api/auth/login') {
+          return http.Response(
+            jsonEncode({
+              'token': 'jwt',
+              'userId': 3,
+              'fullName': 'Worker A',
+              'phoneNumber': '0900000003',
+              'role': 'ROLE_WORKER',
+              'expiresIn': 3600,
+            }),
+            200,
+          );
+        }
+        expect(request.headers['Authorization'], 'Bearer jwt');
+        expect(request.url.path, '/api/jobs/8/messages');
+        if (request.method == 'POST') {
+          expect(jsonDecode(request.body), {
+            'recipientId': 2,
+            'content': 'Chào chủ thầu',
+            'clientMessageId': 'retry-id',
+          });
+          return http.Response(
+            jsonEncode(payload),
+            201,
+            headers: {'content-type': 'application/json; charset=utf-8'},
+          );
+        }
+        historyCalls++;
+        expect(request.url.queryParameters['peerId'], '2');
+        expect(
+          request.url.queryParameters[historyCalls == 1
+              ? 'afterId'
+              : 'beforeId'],
+          historyCalls == 1 ? '10' : '12',
+        );
+        return http.Response(
+          jsonEncode({
+            'messages': [payload],
+            'hasMore': true,
+          }),
+          200,
+          headers: {'content-type': 'application/json; charset=utf-8'},
+        );
+      }),
+    );
+    await api.login('0900000003', 'password');
+    expect(
+      (await api.sendMessage(8, 2, 'Chào chủ thầu', 'retry-id')).content,
+      'Chào chủ thầu',
+    );
+    final newer = await api.messageHistory(8, 2, afterId: 10);
+    expect(newer.hasMore, isTrue);
+    expect(newer.messages.single.id, 12);
+    await api.messageHistory(8, 2, beforeId: 12);
+    api.dispose();
+  });
   test(
     'CCCD update sends both faces and decodes them from the profile',
     () async {

@@ -20,3 +20,12 @@ trong `mobile_app/` trên Ubuntu.
 Khi lần chạy thành công, mở phần **Artifacts**, tải `tho-xay-release-apk` và giải
 nén để lấy `app-release.apk`. Artifact được giữ 30 ngày. APK dùng cấu hình ký demo
 hiện tại và API mặc định `http://192.168.1.16:8080` được tích hợp từ mã nguồn.
+
+## Nhắn tin realtime
+
+Thợ chọn **Nhắn tin** trong lịch sử đơn đã được duyệt; chủ thầu mở danh sách
+thợ của công trình và chọn **Nhắn tin** ở dòng thợ `ACCEPTED`. Màn hình hiển thị
+tin hai chiều, thời gian, trạng thái kết nối, tải tin cũ và giữ bản nháp khi lỗi gửi.
+Kết nối WebSocket tự nối lại và tải bù tin bỏ lỡ; gửi lại dùng cùng mã tin để tránh
+trùng. Đóng màn hình hoặc đăng xuất sẽ dọn kết nối. Backend cần migration
+`004_messages.sql`; REST và WebSocket dùng cùng địa chỉ máy chủ từ `API_BASE_URL`.

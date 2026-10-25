@@ -6,6 +6,7 @@ import '../services/location_service.dart';
 import '../widgets/coordinates_dialog.dart';
 import '../widgets/job_card.dart';
 import '../widgets/call_button.dart';
+import '../widgets/chat_button.dart';
 import 'profile_screen.dart';
 import '../widgets/jobs_map.dart';
 
@@ -372,6 +373,13 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                           if (application.jobRating != null)
                             Text(
                               'Đánh giá công trình: ${application.jobRating}/5 ★',
+                            ),
+                          if (application.status == 'ACCEPTED')
+                            ChatButton(
+                              api: widget.api,
+                              job: application.job,
+                              peerId: application.job.contractorId,
+                              peerName: application.job.contractorName,
                             ),
                           if (application.status == 'ACCEPTED' &&
                               application.job.contractorPhone != null)
