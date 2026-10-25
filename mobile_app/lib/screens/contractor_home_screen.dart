@@ -8,6 +8,7 @@ import '../widgets/job_card.dart';
 import '../widgets/call_button.dart';
 import '../widgets/job_completion_dialog.dart';
 import 'profile_screen.dart';
+import 'location_picker_screen.dart';
 
 class ContractorHomeScreen extends StatefulWidget {
   const ContractorHomeScreen({super.key, required this.api});
@@ -236,6 +237,20 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
     }
   }
 
+  Future<void> _chooseOnMap() async {
+    final point = await Navigator.of(context).push<GeoPoint>(
+      MaterialPageRoute(
+        builder: (_) => LocationPickerScreen(initialPosition: _position),
+      ),
+    );
+    if (point != null && mounted) {
+      setState(() {
+        _position = point;
+        _error = null;
+      });
+    }
+  }
+
   Future<void> _submit() async {
     if (!_form.currentState!.validate()) return;
     if (_position == null) {
@@ -365,6 +380,11 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
                 Wrap(
                   spacing: 8,
                   children: [
+                    OutlinedButton.icon(
+                      onPressed: _busy || _gps ? null : _chooseOnMap,
+                      icon: const Icon(Icons.map_outlined),
+                      label: const Text('Chọn trên bản đồ'),
+                    ),
                     OutlinedButton.icon(
                       onPressed: _busy || _gps ? null : _locate,
                       icon: const Icon(Icons.my_location),

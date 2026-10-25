@@ -176,7 +176,29 @@ xử lý cuộc gọi; nếu không có, ứng dụng hiển thị số để li
 Màn hình thợ có bộ lọc **Thợ chính / Phụ hồ / Tất cả** và sắp xếp **Gần nhất /
 Lương cao nhất**, áp dụng cùng bán kính GPS.
 
-Database đã tồn tại cần chạy migration giữ nguyên dữ liệu:
+## Bản đồ OpenStreetMap
+
+Trong form đăng công trình, chọn **Chọn trên bản đồ**, chạm đúng vị trí rồi bấm
+**Dùng vị trí đã chọn**. Có thể lấy GPS hoặc nhập tọa độ như trước; địa chỉ mô
+tả và tọa độ được gửi chung khi đăng việc.
+
+Ở màn hình thợ, chuyển sang **Bản đồ** để xem các ghim công trình trong bán
+kính và bộ lọc hiện tại. Chạm ghim để xem công trình và Nhận việc. Nút phóng to,
+thu nhỏ và về vùng đang tìm hỗ trợ điều hướng. Ghim xanh dương là tâm tìm kiếm.
+
+Ứng dụng dùng [flutter_map](https://pub.dev/packages/flutter_map) với tile HTTPS
+OpenStreetMap, attribution luôn hiển thị và định danh ứng dụng riêng. Giữ cơ
+chế [cache mặc định của flutter_map](https://docs.fleaflet.dev/layers/tile-layer/caching)
+và trình duyệt; chỉ tải vùng đang xem, không có chức năng tải hàng loạt/offline,
+theo [chính sách tile OpenStreetMap](https://operations.osmfoundation.org/policies/tiles/).
+Nền bản đồ cần mạng; khi tải lỗi vẫn có ghim, lựa chọn tọa độ và danh sách.
+Có thể chuyển sang dịch vụ tile dựa trên OSM của bạn bằng build option
+`--dart-define=MAP_TILE_URL=https://your-host/{z}/{x}/{y}.png`; giữ attribution
+và bổ sung điều kiện/giấy phép của nhà cung cấp khi triển khai.
+
+## Nâng cấp database đã tồn tại
+
+Chạy migration giữ nguyên dữ liệu:
 
 ```powershell
 psql -U postgres -d tho_xay_db -v ON_ERROR_STOP=1 -f migrations/002_worker_ratings.sql

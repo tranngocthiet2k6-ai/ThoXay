@@ -50,6 +50,10 @@ các công trình COMPLETED. Xóa công trình có đánh giá phải tính lạ
 Thợ chưa có đánh giá giữ mặc định 5.0. Điện thoại liên lạc chỉ trả trong đơn
 ACCEPTED. Tìm gần hỗ trợ jobType và sort=DISTANCE|SALARY_DESC.
 Khi nâng cấp database hiện có, áp dụng `migrations/002_worker_ratings.sql`.
+Flutter dùng flutter_map/latlong2: chọn tọa độ công trình bằng chạm ghim,
+và hiển thị các kết quả tìm kiếm đã lọc trên bản đồ. Giữ attribution OSM luôn
+thấy được, userAgentPackageName riêng và cache mặc định; test bản đồ phải dùng
+TileProvider giả trong bộ nhớ thay vì tải tile mạng. Hướng dẫn ở README.
 
 ## Các tính năng phải hoàn thành theo thứ tự
 

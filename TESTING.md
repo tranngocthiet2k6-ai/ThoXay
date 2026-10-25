@@ -41,19 +41,26 @@ flutter test
 flutter build web --release
 ```
 
-13 kiểm thử Dart/widget: lưu/khôi phục phiên, đính JWT, xóa phiên khi 401,
+16 kiểm thử Dart/widget: lưu/khôi phục phiên, đính JWT, xóa phiên khi 401,
 validation đăng nhập/đăng ký, tìm việc theo vị trí được cấp cho test, ứng tuyển
 và lịch sử, duyệt thợ, validation form đăng công trình. Widget test dùng API
 và vị trí giả lập, không truy cập GPS thật hay gửi yêu cầu ra mạng.
 Nâng cấp kiểm tra thêm ACCOUNT_LOCKED 403, bộ lọc, liên hệ sau ACCEPTED,
 URI tel qua launcher giả, cập nhật CCCD và chọn điểm trước khi hoàn thành.
+Ba kiểm thử bản đồ dùng MemoryTiles: bắt buộc chọn vị trí trước khi xác nhận,
+trả đúng tọa độ đã chọn, chọn đúng công trình qua ghim và cập nhật camera/ghim
+khi kết quả tìm kiếm thay đổi. Không gọi tile OpenStreetMap trong test.
 
 Đã kiểm chứng trên Windows, Java 21, Flutter 3.47.8: Maven verify với cả 18 test
-trên H2 và PostgreSQL 17.11, Flutter analyzer, 13 test và Web release build.
+trên H2 và PostgreSQL 17.11, Flutter analyzer, 16 test và Web release build.
 Schema/seed và luồng HTTP đăng nhập →
 Haversine → đăng việc → ứng tuyển → nhận thợ → IN_PROGRESS đã chạy trên
 PostgreSQL 17.11 thật. Web Admin và Flutter đã được đăng nhập trên Chrome,
 kiểm tra dashboard quản trị và danh sách công trình/ứng viên của chủ thầu.
+Nâng cấp đã kiểm chứng nền OpenStreetMap tải trên Chrome, chạm đặt ghim và
+trả tọa độ về form đăng công trình. Luồng HTTP cập nhật CCCD → nhận thợ →
+hoàn thành → điểm trung bình đã chạy trên database local bằng tài khoản tạm,
+và dữ liệu kiểm thử đã được dọn sau khi xác nhận.
 APK chưa build vì máy kiểm chứng chưa có Android SDK; iOS chưa build vì cần macOS/Xcode.
 
 ## Nghiệm thu thủ công

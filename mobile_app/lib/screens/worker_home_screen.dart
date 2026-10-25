@@ -7,6 +7,7 @@ import '../widgets/coordinates_dialog.dart';
 import '../widgets/job_card.dart';
 import '../widgets/call_button.dart';
 import 'profile_screen.dart';
+import '../widgets/jobs_map.dart';
 
 class WorkerHomeScreen extends StatefulWidget {
   const WorkerHomeScreen({super.key, required this.api, this.location});
@@ -25,6 +26,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
   int _tab = 0;
   int? _applying;
   bool _loading = false;
+  bool _showMap = false;
   String? _error;
   @override
   void initState() {
@@ -89,6 +91,29 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
     }
   }
 
+  Future<void> _showMapJob(Job job) async {
+    final alreadyApplied = _applications.any((a) => a.job.id == job.id);
+    final apply = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      showDragHandle: true,
+      builder: (context) => SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: JobCard(
+          job: job,
+          action: FilledButton(
+            onPressed: alreadyApplied || _applying != null
+                ? null
+                : () => Navigator.pop(context, true),
+            child: Text(alreadyApplied ? 'Đã ứng tuyển' : 'Nhận việc'),
+          ),
+        ),
+      ),
+    );
+    if (apply == true && mounted) await _apply(job);
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
@@ -137,6 +162,24 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                 ),
                 const SizedBox(height: 20),
                 if (_tab == 0) ...[
+                  SegmentedButton<bool>(
+                    segments: const [
+                      ButtonSegment(
+                        value: false,
+                        icon: Icon(Icons.view_list_outlined),
+                        label: Text('Danh sách'),
+                      ),
+                      ButtonSegment(
+                        value: true,
+                        icon: Icon(Icons.map_outlined),
+                        label: Text('Bản đồ'),
+                      ),
+                    ],
+                    selected: {_showMap},
+                    onSelectionChanged: (value) =>
+                        setState(() => _showMap = value.first),
+                  ),
+                  const SizedBox(height: 16),
                   Row(
                     children: [
                       Expanded(
@@ -256,25 +299,47 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                         textAlign: TextAlign.center,
                       ),
                     ),
-                  for (final job in _jobs)
-                    JobCard(
-                      job: job,
-                      action: FilledButton(
-                        onPressed:
-                            _applying != null ||
-                                _loading ||
-                                _applications.any((a) => a.job.id == job.id)
-                            ? null
-                            : () => _apply(job),
-                        child: Text(
-                          _applying == job.id
-                              ? 'Đang gửi…'
-                              : _applications.any((a) => a.job.id == job.id)
-                              ? 'Đã ứng tuyển'
-                              : 'Nhận việc',
-                        ),
+                  if (_showMap && _position != null) ...[
+                    SizedBox(
+                      height: 360,
+                      child: JobsMap(
+                        center: _position!,
+                        jobs: _jobs,
+                        onJobTap: _showMapJob,
                       ),
                     ),
+                    const SizedBox(height: 10),
+                    Text(
+                      '${_jobs.length} công trình · Chạm ghim để xem và nhận việc',
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                  if (_showMap && _position == null && !_loading)
+                    TextButton.icon(
+                      onPressed: _selectPosition,
+                      icon: const Icon(Icons.edit_location_alt_outlined),
+                      label: const Text('Chọn vị trí tìm kiếm để xem bản đồ'),
+                    ),
+                  if (!_showMap)
+                    for (final job in _jobs)
+                      JobCard(
+                        job: job,
+                        action: FilledButton(
+                          onPressed:
+                              _applying != null ||
+                                  _loading ||
+                                  _applications.any((a) => a.job.id == job.id)
+                              ? null
+                              : () => _apply(job),
+                          child: Text(
+                            _applying == job.id
+                                ? 'Đang gửi…'
+                                : _applications.any((a) => a.job.id == job.id)
+                                ? 'Đã ứng tuyển'
+                                : 'Nhận việc',
+                          ),
+                        ),
+                      ),
                 ] else ...[
                   if (!_loading && _applications.isEmpty)
                     const Padding(
