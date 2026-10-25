@@ -156,10 +156,21 @@ công trình mẫu để kiểm tra trên máy tính.
   tài khoản hoặc xóa bài vi phạm. Xóa công trình xóa đơn ứng tuyển liên quan.
   Admin không thể tự khóa tài khoản đang dùng.
 
-Trường `cccdImage` là liên kết ảnh HTTPS, đúng kiểu VARCHAR trong đặc tả.
-Có thể bổ sung/thay ảnh trong mục **Hồ sơ & CCCD** ở thanh trên của Flutter.
-Mỗi lần cập nhật đều cần Admin xem ảnh và xác thực lại. Dashboard gửi kèm URL
-ảnh đã xem; nếu ảnh vừa bị thay đổi, hệ thống yêu cầu Admin tải lại trước khi duyệt.
+CCCD dùng hai trường `cccdFrontImage` và `cccdBackImage`, tương ứng cột
+`cccd_front_image` / `cccd_back_image` (VARCHAR(500)). Trong **Hồ sơ & CCCD**,
+thợ và chủ thầu nhập hai liên kết HTTPS riêng cho mặt trước, mặt sau. Cập nhật
+hồ sơ yêu cầu đủ hai ảnh; mỗi lần cập nhật đều cần được xác thực lại.
+
+Admin bấm **Xem CCCD** để mở Bootstrap 5 Modal trong trang, xem hai ảnh lớn
+song song và bấm **Xác thực danh tính** ngay trong popup. Thiếu ảnh hoặc ảnh
+không tải được thì nút duyệt bị vô hiệu hóa. Form gửi kèm cả hai URL đã xem;
+nếu một mặt vừa bị đổi, hệ thống yêu cầu tải lại trước khi duyệt. Modal xóa
+URL ảnh khi đóng. Bootstrap CSS/JS được lưu cục bộ kèm giấy phép, không phụ
+thuộc CDN để mở popup; ảnh HTTPS vẫn cần truy cập được từ trình duyệt Admin.
+
+Tài khoản mới và seed đều chưa xác thực. Ràng buộc database và Entity không
+cho giữ `is_verified=true` khi thiếu mặt trước hoặc mặt sau, áp dụng mọi vai
+trò. `ROLE_ADMIN` vẫn đăng nhập quản trị bằng vai trò dù chưa xác thực CCCD.
 
 Chủ thầu bấm **Hoàn thành công trình** khi công trình đang thi công, chọn 1–5
 sao cho từng thợ đã được nhận, rồi xác nhận. Điểm được lưu tại
@@ -202,11 +213,16 @@ Chạy migration giữ nguyên dữ liệu:
 
 ```powershell
 psql -U postgres -d tho_xay_db -v ON_ERROR_STOP=1 -f migrations/002_worker_ratings.sql
+psql -U postgres -d tho_xay_db -v ON_ERROR_STOP=1 -f migrations/003_cccd_front_back.sql
 ```
 
-Script khởi động local tự áp dụng migration này khi sử dụng PostgreSQL portable
+Script khởi động local tự áp dụng các migration này khi sử dụng PostgreSQL portable
 của workspace ở cổng 55432. PostgreSQL/Docker riêng cần chạy lệnh trên với cấu
 hình kết nối của bạn. Database mới đã có cột và ràng buộc trong `schema.sql`.
+Migration 003 giữ cột `cccd_image` cũ và chuyển ảnh cũ sang mặt trước nếu trống;
+không coi một ảnh là đủ hai mặt. Tài khoản cũ thiếu ảnh được chuyển về chưa xác
+thực, cần bổ sung mặt sau rồi Admin duyệt lại. Chạy lại migration giữ nguyên
+trạng thái những hồ sơ đã được duyệt đủ hai ảnh.
 
 ## REST API
 
@@ -218,7 +234,7 @@ cho các API nghiệp vụ. ID người thực hiện được lấy từ tài k
 | POST | `/api/auth/register` | Công khai; tạo tài khoản và JWT, 201 |
 | POST | `/api/auth/login` | Công khai; JWT và thông tin tài khoản, 200 |
 | GET | `/api/users/me` | Hồ sơ, xác thực và đánh giá của chính người đăng nhập |
-| PUT | `/api/users/me/cccd` | Body `{"cccdImage":"https://..."}`; lưu ảnh, verified=false |
+| PUT | `/api/users/me/cccd` | Body gồm `cccdFrontImage` và `cccdBackImage` HTTPS; lưu cả hai, verified=false |
 | POST | `/api/jobs` | Chủ thầu; tạo công trình, 201 |
 | GET | `/api/jobs/nearby?lat=10.7769&lng=106.7009&radius=10` | Thợ; công trình gần nhất trước, kèm distanceKm |
 | GET | `/api/jobs/contractor/{contractorId}` | Chủ thầu xem công trình của mình |
@@ -231,8 +247,17 @@ cho các API nghiệp vụ. ID người thực hiện được lấy từ tài k
 Ví dụ body đăng ký:
 
 ```json
-{"phoneNumber":"0912345678","password":"password123","fullName":"Nguyễn Văn A","role":"ROLE_WORKER","cccdImage":null}
+{"phoneNumber":"0912345678","password":"password123","fullName":"Nguyễn Văn A","role":"ROLE_WORKER","cccdFrontImage":null,"cccdBackImage":null}
 ```
+
+Ví dụ body cập nhật CCCD:
+
+```json
+{"cccdFrontImage":"https://example.com/cccd-front.jpg","cccdBackImage":"https://example.com/cccd-back.jpg"}
+```
+
+Thay URL minh họa bằng ảnh của bạn. Đăng ký cho phép bổ sung ảnh sau, nhưng
+API cập nhật CCCD trong hồ sơ yêu cầu cả hai URL cùng lúc.
 
 Ví dụ body đăng công trình:
 

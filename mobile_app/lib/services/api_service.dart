@@ -62,14 +62,16 @@ class ApiService extends ChangeNotifier {
     required String phoneNumber,
     required String password,
     required String role,
-    String? cccdImage,
+    String? cccdFrontImage,
+    String? cccdBackImage,
   }) async {
     await _authenticate('/api/auth/register', {
       'fullName': fullName,
       'phoneNumber': phoneNumber,
       'password': password,
       'role': role,
-      'cccdImage': cccdImage,
+      'cccdFrontImage': cccdFrontImage,
+      'cccdBackImage': cccdBackImage,
     });
   }
 
@@ -115,9 +117,15 @@ class ApiService extends ChangeNotifier {
   Future<UserProfile> profile() async => UserProfile.fromJson(
     await _request('GET', '/api/users/me') as Map<String, dynamic>,
   );
-  Future<UserProfile> updateCccd(String imageUrl) async => UserProfile.fromJson(
-    await _request('PUT', '/api/users/me/cccd', body: {'cccdImage': imageUrl})
-        as Map<String, dynamic>,
+  Future<UserProfile> updateCccd(
+    String frontImageUrl,
+    String backImageUrl,
+  ) async => UserProfile.fromJson(
+    await _request(
+      'PUT',
+      '/api/users/me/cccd',
+      body: {'cccdFrontImage': frontImageUrl, 'cccdBackImage': backImageUrl},
+    ) as Map<String, dynamic>,
   );
   Future<Job> completeJob(int jobId, Map<int, int> ratings) async =>
       Job.fromJson(

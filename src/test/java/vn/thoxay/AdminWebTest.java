@@ -26,7 +26,8 @@ class AdminWebTest {
     @BeforeEach void setup() {
         admin = user("0944444441", Role.ROLE_ADMIN);
         worker = user("0944444442", Role.ROLE_WORKER);
-        worker.setCccdImage("https://example.com/identity.jpg"); users.saveAndFlush(worker);
+        worker.setCccdFrontImage("https://example.com/front.jpg");
+        worker.setCccdBackImage("https://example.com/back.jpg"); users.saveAndFlush(worker);
     }
     @Test void anonymousCanSeeLoginButCannotSeeDashboard() throws Exception {
         mvc.perform(get("/admin/login")).andExpect(status().isOk()).andExpect(content().string(containsString("Số điện thoại quản trị")));
@@ -45,10 +46,16 @@ class AdminWebTest {
         JobApplication application = new JobApplication(); application.setJob(job); application.setWorker(worker); applications.saveAndFlush(application);
         mvc.perform(get("/admin/dashboard")).andExpect(status().isOk()).andExpect(content().string(containsString("Công trình vi phạm")))
             .andExpect(content().string(not(containsString("/admin/users/" + admin.getId() + "/toggle-active"))))
-            .andExpect(content().string(containsString("/admin/users/" + worker.getId() + "/toggle-active")));
+            .andExpect(content().string(containsString("/admin/users/" + worker.getId() + "/toggle-active")))
+            .andExpect(content().string(containsString("data-bs-target=\"#kyc-modal\"")))
+            .andExpect(content().string(containsString("id=\"kyc-front-image\"")))
+            .andExpect(content().string(containsString("id=\"kyc-back-image\"")))
+            .andExpect(content().string(containsString("Xác thực danh tính")))
+            .andExpect(content().string(not(containsString("target=\"_blank\""))));
         mvc.perform(post("/admin/users/" + worker.getId() + "/verify")).andExpect(status().isForbidden());
         mvc.perform(post("/admin/users/" + worker.getId() + "/verify").with(csrf())
-            .param("cccdImage", worker.getCccdImage())).andExpect(status().is3xxRedirection());
+            .param("cccdFrontImage", worker.getCccdFrontImage())
+            .param("cccdBackImage", worker.getCccdBackImage())).andExpect(status().is3xxRedirection());
         assertThat(users.findById(worker.getId()).orElseThrow().isVerified()).isTrue();
         mvc.perform(post("/admin/users/" + worker.getId() + "/toggle-active").with(csrf())).andExpect(status().is3xxRedirection());
         assertThat(users.findById(worker.getId()).orElseThrow().isActive()).isFalse();

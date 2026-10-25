@@ -29,7 +29,9 @@ public class AuthService {
             throw new ApiException(HttpStatus.CONFLICT, "Số điện thoại đã được đăng ký");
         User user = new User(); user.setPhoneNumber(request.phoneNumber());
         user.setPassword(encoder.encode(request.password())); user.setFullName(request.fullName().trim());
-        user.setRole(Role.valueOf(request.role())); user.setCccdImage(request.cccdImage());
+        user.setRole(Role.valueOf(request.role()));
+        user.setCccdFrontImage(request.cccdFrontImage());
+        user.setCccdBackImage(request.cccdBackImage());
         users.saveAndFlush(user);
         return response(user);
     }

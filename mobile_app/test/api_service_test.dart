@@ -9,6 +9,56 @@ import 'package:tho_xay_mobile/services/api_service.dart';
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
   test(
+    'CCCD update sends both faces and decodes them from the profile',
+    () async {
+      final api = ApiService(
+        client: MockClient((request) async {
+          if (request.url.path == '/api/auth/login') {
+            return http.Response(
+              jsonEncode({
+                'token': 'jwt',
+                'userId': 3,
+                'fullName': 'A',
+                'phoneNumber': '0900000003',
+                'role': 'ROLE_WORKER',
+                'expiresIn': 3600,
+              }),
+              200,
+            );
+          }
+          expect(request.method, 'PUT');
+          expect(request.url.path, '/api/users/me/cccd');
+          expect(jsonDecode(request.body), {
+            'cccdFrontImage': 'https://example.com/front.jpg',
+            'cccdBackImage': 'https://example.com/back.jpg',
+          });
+          return http.Response(
+            jsonEncode({
+              'id': 3,
+              'fullName': 'A',
+              'phoneNumber': '0900000003',
+              'role': 'ROLE_WORKER',
+              'verified': false,
+              'rating': 5,
+              'cccdFrontImage': 'https://example.com/front.jpg',
+              'cccdBackImage': 'https://example.com/back.jpg',
+            }),
+            200,
+          );
+        }),
+      );
+      await api.login('0900000003', 'password');
+      final profile = await api.updateCccd(
+        'https://example.com/front.jpg',
+        'https://example.com/back.jpg',
+      );
+      expect(profile.cccdFrontImage, 'https://example.com/front.jpg');
+      expect(profile.cccdBackImage, 'https://example.com/back.jpg');
+      expect(profile.verified, isFalse);
+      api.dispose();
+    },
+  );
+  test(
     'locked 403 clears session while ordinary permission 403 keeps it',
     () async {
       var locked = false;

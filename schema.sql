@@ -8,9 +8,13 @@ CREATE TABLE IF NOT EXISTS users (
   role VARCHAR(30) NOT NULL CHECK (role IN ('ROLE_WORKER','ROLE_CONTRACTOR','ROLE_ADMIN')),
   is_verified BOOLEAN NOT NULL DEFAULT FALSE,
   cccd_image VARCHAR(500),
+  cccd_front_image VARCHAR(500),
+  cccd_back_image VARCHAR(500),
   rating DOUBLE PRECISION NOT NULL DEFAULT 5.0 CHECK (rating BETWEEN 0 AND 5),
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT chk_users_verified_cccd_faces CHECK (NOT is_verified OR
+    (COALESCE(cccd_front_image, '') LIKE 'https://_%' AND COALESCE(cccd_back_image, '') LIKE 'https://_%'))
 );
 CREATE TABLE IF NOT EXISTS jobs (
   id BIGSERIAL PRIMARY KEY,
@@ -41,8 +45,8 @@ CREATE INDEX IF NOT EXISTS idx_applications_worker ON job_applications(worker_id
 -- Demo-only password for all three accounts: password
 INSERT INTO users (phone_number,password,full_name,role,is_verified)
 VALUES
-('0900000001','$2a$10$ujHVMiRDJR3OBm5yXjsRS.XF8NDGIFPgFIdRQDpYcVr/MUAvSILda','Quản trị viên','ROLE_ADMIN',TRUE),
-('0900000002','$2a$10$ujHVMiRDJR3OBm5yXjsRS.XF8NDGIFPgFIdRQDpYcVr/MUAvSILda','Nguyễn Văn Thầu','ROLE_CONTRACTOR',TRUE),
+('0900000001','$2a$10$ujHVMiRDJR3OBm5yXjsRS.XF8NDGIFPgFIdRQDpYcVr/MUAvSILda','Quản trị viên','ROLE_ADMIN',FALSE),
+('0900000002','$2a$10$ujHVMiRDJR3OBm5yXjsRS.XF8NDGIFPgFIdRQDpYcVr/MUAvSILda','Nguyễn Văn Thầu','ROLE_CONTRACTOR',FALSE),
 ('0900000003','$2a$10$ujHVMiRDJR3OBm5yXjsRS.XF8NDGIFPgFIdRQDpYcVr/MUAvSILda','Trần Văn Thợ','ROLE_WORKER',FALSE)
 ON CONFLICT (phone_number) DO NOTHING;
 INSERT INTO jobs (contractor_id,title,description,job_type,salary_per_day,address,latitude,longitude,required_workers)

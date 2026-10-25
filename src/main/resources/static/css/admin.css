@@ -13,4 +13,6 @@ body { background: #f4f6f7; color: #182e2b; }
 .btn-outline-primary { --bs-btn-color: #176b52; --bs-btn-border-color: #176b52; --bs-btn-hover-bg: #176b52; --bs-btn-hover-border-color: #176b52; }
 .login-page { min-height: 100vh; display: grid; place-items: center; padding: 24px; background: radial-gradient(ellipse at top left, #dfede7, #f4f6f7 65%); }
 .login-card { width: 100%; max-width: 480px; }
+.kyc-image-frame { min-height: 260px; display: flex; align-items: center; justify-content: center; background: #f4f6f7; border: 1px solid #dce4df; border-radius: 12px; overflow: hidden; }
+.kyc-image { width: 100%; height: auto; max-height: 60vh; object-fit: contain; }
 @media (max-width: 575px) { .table > :not(caption) > * > * { padding: 12px; } .navbar-brand { font-size: 17px; } .stat-card { padding: 16px; } }

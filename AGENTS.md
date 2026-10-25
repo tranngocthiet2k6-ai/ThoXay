@@ -15,7 +15,8 @@ ROLE_ADMIN. Chỉ cho phép đăng ký công khai vai trò thợ hoặc chủ th
 - `users`: `id BIGSERIAL PRIMARY KEY`, `phone_number VARCHAR(15) UNIQUE NOT NULL`,
   `password VARCHAR(255) NOT NULL`, `full_name VARCHAR(100) NOT NULL`,
   `role VARCHAR(30)` (ROLE_WORKER, ROLE_CONTRACTOR, ROLE_ADMIN),
-  `is_verified BOOLEAN DEFAULT FALSE`, `cccd_image VARCHAR(500)`,
+  `is_verified BOOLEAN DEFAULT FALSE`, `cccd_front_image VARCHAR(500)`,
+  `cccd_back_image VARCHAR(500)`, `cccd_image VARCHAR(500)` (legacy),
   `rating DOUBLE PRECISION DEFAULT 5.0`, `is_active BOOLEAN DEFAULT TRUE`,
   `created_at TIMESTAMP`.
 - `jobs`: `id BIGSERIAL PRIMARY KEY`, `contractor_id BIGINT REFERENCES users(id)`,
@@ -40,8 +41,13 @@ khi đủ số ACCEPTED, chuyển công trình sang IN_PROGRESS.
 Tài khoản bị khóa trả 403 với code ACCOUNT_LOCKED cho đăng nhập và JWT cũ.
 Ẩn thao tác khóa mọi ROLE_ADMIN và chặn cùng thao tác ở service.
 `GET /api/users/me`, `PUT /api/users/me/cccd` chỉ xử lý hồ sơ đang đăng nhập.
-Đổi ảnh CCCD đưa verified về false. Admin xác nhận kèm URL ảnh đã xem để chặn
-xác thực nhầm ảnh bị thay đổi sau khi tải dashboard.
+CCCD dùng hai URL HTTPS cccdFrontImage/cccdBackImage. Cập nhật hồ sơ yêu cầu
+đủ hai ảnh và đưa verified về false; đăng ký được bổ sung sau và luôn chưa xác
+thực. Entity callback và CHECK database chặn verified=true khi thiếu mặt.
+Seed không có đủ ảnh phải verified=false, kể cả ROLE_ADMIN.
+Admin xem hai mặt trong Bootstrap modal, xác nhận kèm cả hai URL đã xem để
+chặn xác thực nhầm ảnh bị thay đổi sau khi tải dashboard. Chỉ tải ảnh khi mở
+modal; xóa src khi đóng. Chưa tải đủ hai ảnh thì nút xác thực bị vô hiệu hóa.
 `PUT /api/jobs/{id}/complete` nhận ratings gồm workerId/stars cho đúng toàn bộ
 thợ ACCEPTED, chỉ cho chủ công trình IN_PROGRESS; lưu điểm và COMPLETED cùng
 giao dịch. Gửi lại cùng đánh giá là idempotent; điểm đã chốt không sửa.
@@ -50,6 +56,9 @@ các công trình COMPLETED. Xóa công trình có đánh giá phải tính lạ
 Thợ chưa có đánh giá giữ mặc định 5.0. Điện thoại liên lạc chỉ trả trong đơn
 ACCEPTED. Tìm gần hỗ trợ jobType và sort=DISTANCE|SALARY_DESC.
 Khi nâng cấp database hiện có, áp dụng `migrations/002_worker_ratings.sql`.
+Sau đó áp dụng `migrations/003_cccd_front_back.sql`; ảnh legacy được giữ và
+chuyển sang mặt trước, tài khoản thiếu ảnh mặt sau phải được duyệt lại sau
+khi bổ sung. Các migration phải chạy lại an toàn.
 Flutter dùng flutter_map/latlong2: chọn tọa độ công trình bằng chạm ghim,
 và hiển thị các kết quả tìm kiếm đã lọc trên bản đồ. Giữ attribution OSM luôn
 thấy được, userAgentPackageName riêng và cache mặc định; test bản đồ phải dùng

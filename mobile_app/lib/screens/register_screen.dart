@@ -16,13 +16,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _name = TextEditingController(), _phone = TextEditingController();
   final _password = TextEditingController(),
       _confirmation = TextEditingController();
-  final _cccd = TextEditingController();
+  final _cccdFront = TextEditingController(),
+      _cccdBack = TextEditingController();
   String _role = 'ROLE_WORKER';
   String? _error;
   bool _busy = false;
   @override
   void dispose() {
-    for (final controller in [_name, _phone, _password, _confirmation, _cccd]) {
+    for (final controller in [
+      _name,
+      _phone,
+      _password,
+      _confirmation,
+      _cccdFront,
+      _cccdBack,
+    ]) {
       controller.dispose();
     }
     super.dispose();
@@ -41,7 +49,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
         phoneNumber: _phone.text.trim(),
         password: _password.text,
         role: _role,
-        cccdImage: _cccd.text.trim().isEmpty ? null : _cccd.text.trim(),
+        cccdFrontImage: _cccdFront.text.trim().isEmpty
+            ? null
+            : _cccdFront.text.trim(),
+        cccdBackImage: _cccdBack.text.trim().isEmpty
+            ? null
+            : _cccdBack.text.trim(),
       );
       if (mounted) Navigator.of(context).popUntil((route) => route.isFirst);
     } on ApiException catch (e) {
@@ -141,20 +154,36 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
-                  controller: _cccd,
+                  controller: _cccdFront,
                   enabled: !_busy,
                   maxLength: 500,
                   keyboardType: TextInputType.url,
                   decoration: const InputDecoration(
-                    labelText: 'Liên kết ảnh CCCD (không bắt buộc)',
-                    helperText:
-                        'Liên kết HTTPS để quản trị viên kiểm tra danh tính.',
+                    labelText: 'Liên kết ảnh mặt trước CCCD (HTTPS)',
+                    helperText: 'Không bắt buộc khi đăng ký; có thể bổ sung trong hồ sơ.',
                   ),
                   validator: (v) =>
                       (v?.trim().isEmpty ?? true) ||
                           RegExp(r'^https://[^\s]+$').hasMatch(v!.trim())
                       ? null
-                      : 'Ảnh CCCD phải là liên kết HTTPS',
+                      : 'Ảnh mặt trước CCCD phải là liên kết HTTPS',
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _cccdBack,
+                  enabled: !_busy,
+                  maxLength: 500,
+                  keyboardType: TextInputType.url,
+                  decoration: const InputDecoration(
+                    labelText: 'Liên kết ảnh mặt sau CCCD (HTTPS)',
+                    helperText:
+                        'Cần đủ hai mặt trước khi quản trị viên xác thực.',
+                  ),
+                  validator: (v) =>
+                      (v?.trim().isEmpty ?? true) ||
+                          RegExp(r'^https://[^\s]+$').hasMatch(v!.trim())
+                      ? null
+                      : 'Ảnh mặt sau CCCD phải là liên kết HTTPS',
                 ),
                 if (_error != null)
                   Padding(

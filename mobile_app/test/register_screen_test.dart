@@ -12,6 +12,7 @@ void main() {
       expect(find.text('Tôi là thợ'), findsOneWidget);
       expect(find.text('Tôi là chủ thầu'), findsOneWidget);
       await tester.ensureVisible(find.text('Tạo tài khoản'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Tạo tài khoản'));
       await tester.pump();
       expect(find.text('Nhập họ và tên'), findsOneWidget);

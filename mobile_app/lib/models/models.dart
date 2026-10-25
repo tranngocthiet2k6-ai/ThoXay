@@ -114,13 +114,14 @@ class UserProfile {
     required this.role,
     required this.verified,
     required this.rating,
-    this.cccdImage,
+    this.cccdFrontImage,
+    this.cccdBackImage,
   });
   final int id;
   final String fullName, phoneNumber, role;
   final bool verified;
   final double rating;
-  final String? cccdImage;
+  final String? cccdFrontImage, cccdBackImage;
   factory UserProfile.fromJson(Map<String, dynamic> json) => UserProfile(
     id: (json['id'] as num).toInt(),
     fullName: json['fullName'] as String,
@@ -128,7 +129,8 @@ class UserProfile {
     role: json['role'] as String,
     verified: json['verified'] as bool,
     rating: (json['rating'] as num).toDouble(),
-    cccdImage: json['cccdImage'] as String?,
+    cccdFrontImage: json['cccdFrontImage'] as String?,
+    cccdBackImage: json['cccdBackImage'] as String?,
   );
 }
 

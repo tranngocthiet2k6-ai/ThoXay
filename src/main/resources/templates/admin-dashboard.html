@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tổng quan quản trị · Thợ Xây</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link th:href="@{/vendor/bootstrap/bootstrap.min.css}" rel="stylesheet">
   <link th:href="@{/css/admin.css}" rel="stylesheet">
 </head>
 <body>
@@ -24,7 +24,7 @@
     <div class="col-6 col-xl-3"><div class="stat-card"><span>Công trình đang tuyển</span><strong class="text-success" th:text="${dashboard.openJobs}"></strong></div></div>
   </div>
   <section class="card border-0 shadow-sm mb-4" aria-labelledby="users-heading">
-    <div class="card-body p-4 border-bottom"><h2 id="users-heading" class="h5 fw-bold mb-1">Tài khoản &amp; xác thực danh tính</h2><p class="text-secondary small mb-0">Xem ảnh CCCD trước khi xác nhận danh tính.</p></div>
+    <div class="card-body p-4 border-bottom"><h2 id="users-heading" class="h5 fw-bold mb-1">Tài khoản &amp; xác thực danh tính</h2><p class="text-secondary small mb-0">Kiểm tra đủ ảnh mặt trước và mặt sau CCCD trước khi xác thực.</p></div>
     <div class="table-responsive"><table class="table align-middle mb-0">
       <thead><tr><th>Họ tên / Điện thoại</th><th>Vai trò</th><th>CCCD</th><th>Trạng thái</th><th class="text-end">Thao tác</th></tr></thead>
       <tbody>
@@ -32,11 +32,16 @@
         <tr th:each="user : ${dashboard.users}">
           <td><strong th:text="${user.fullName}"></strong><div class="small text-secondary" th:text="${user.phoneNumber}"></div></td>
           <td th:text="${user.role == 'ROLE_ADMIN' ? 'Quản trị' : (user.role == 'ROLE_CONTRACTOR' ? 'Chủ thầu' : 'Thợ')}"></td>
-          <td><span th:if="${user.verified}" class="badge text-bg-success">Đã xác thực</span><span th:unless="${user.verified}" class="badge text-bg-light">Chưa xác thực</span><div class="mt-2"><a th:if="${user.cccdImage != null}" th:href="${user.cccdImage}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-secondary">Xem CCCD ↗</a></div></td>
+          <td>
+            <span th:if="${user.verified}" class="badge text-bg-success">Đã xác thực</span>
+            <span th:unless="${user.verified}" class="badge text-bg-light">Chưa xác thực</span>
+            <div th:unless="${user.cccdComplete}" class="small text-secondary mt-1">Chưa đủ ảnh hai mặt</div>
+            <button type="button" class="btn btn-sm btn-outline-primary mt-2 d-block"
+              data-bs-toggle="modal" data-bs-target="#kyc-modal"
+              th:attr="data-user-name=${user.fullName},data-front-image=${user.cccdFrontImage},data-back-image=${user.cccdBackImage},data-verified=${user.verified},data-verify-url=@{/admin/users/{id}/verify(id=${user.id})}">Xem CCCD</button>
+          </td>
           <td><span th:class="${user.active ? 'badge text-bg-success' : 'badge text-bg-danger'}" th:text="${user.active ? 'Hoạt động' : 'Đã khóa'}"></span></td>
           <td class="text-end"><div class="d-flex gap-2 justify-content-end flex-wrap">
-            <form th:if="${!user.verified and user.cccdImage != null}" th:action="@{/admin/users/{id}/verify(id=${user.id})}" method="post"><input type="hidden" name="cccdImage" th:value="${user.cccdImage}"><button class="btn btn-sm btn-outline-primary">Xác thực</button></form>
-            <button th:if="${!user.verified and user.cccdImage == null}" class="btn btn-sm btn-outline-primary" disabled title="Tài khoản chưa cung cấp ảnh CCCD">Xác thực</button>
             <form th:if="${user.role != 'ROLE_ADMIN'}" th:action="@{/admin/users/{id}/toggle-active(id=${user.id})}" method="post"><button class="btn btn-sm btn-outline-secondary" th:text="${user.active ? 'Khóa' : 'Mở khóa'}"></button></form>
           </div></td>
         </tr>
@@ -61,5 +66,46 @@
   </section>
   <footer class="text-secondary small py-4">Thợ Xây · Kết nối lao động phổ thông &amp; chủ thầu</footer>
 </main>
+<div class="modal fade" id="kyc-modal" tabindex="-1" aria-labelledby="kyc-modal-title" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title fs-5" id="kyc-modal-title">Kiểm tra CCCD</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng xem CCCD"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-secondary">Đối chiếu rõ cả hai mặt trước khi xác thực danh tính.</p>
+        <div class="row g-4">
+          <div class="col-12 col-md-6"><figure class="mb-0">
+            <figcaption class="fw-semibold mb-2">Mặt trước CCCD</figcaption>
+            <div class="kyc-image-frame">
+              <img id="kyc-front-image" class="kyc-image" alt="Ảnh mặt trước CCCD" referrerpolicy="no-referrer" hidden>
+              <p id="kyc-front-status" class="text-secondary text-center p-3 mb-0" role="status">Chưa cập nhật ảnh mặt trước CCCD.</p>
+            </div>
+          </figure></div>
+          <div class="col-12 col-md-6"><figure class="mb-0">
+            <figcaption class="fw-semibold mb-2">Mặt sau CCCD</figcaption>
+            <div class="kyc-image-frame">
+              <img id="kyc-back-image" class="kyc-image" alt="Ảnh mặt sau CCCD" referrerpolicy="no-referrer" hidden>
+              <p id="kyc-back-status" class="text-secondary text-center p-3 mb-0" role="status">Chưa cập nhật ảnh mặt sau CCCD.</p>
+            </div>
+          </figure></div>
+        </div>
+        <p id="kyc-review-status" class="small text-secondary mt-3 mb-0" role="status" aria-live="polite">Cần đủ hai ảnh CCCD để xác thực.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>
+        <form id="kyc-verify-form" method="post">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+          <input type="hidden" name="cccdFrontImage" id="kyc-front-snapshot">
+          <input type="hidden" name="cccdBackImage" id="kyc-back-snapshot">
+          <button id="kyc-verify-button" type="submit" class="btn btn-primary" disabled>Xác thực danh tính</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<script defer th:src="@{/vendor/bootstrap/bootstrap.bundle.min.js}"></script>
+<script defer th:src="@{/js/admin-kyc.js}"></script>
 </body>
 </html>

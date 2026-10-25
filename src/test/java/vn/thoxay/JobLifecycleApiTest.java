@@ -34,20 +34,24 @@ class JobLifecycleApiTest {
     @AfterEach void clean() { applications.deleteAllInBatch(); jobs.deleteAllInBatch(); users.deleteAllInBatch(); }
 
     @Test void ownCccdUpdateRequiresHttpsAndInvalidatesVerification() throws Exception {
+        worker.setCccdFrontImage("https://example.com/old-front.jpg");
+        worker.setCccdBackImage("https://example.com/old-back.jpg");
         worker.setVerified(true); users.saveAndFlush(worker);
         mvc.perform(put("/api/users/me/cccd").header("Authorization", token(worker))
-            .contentType("application/json").content("{\"cccdImage\":\"https://example.com/new-id.jpg\"}"))
+            .contentType("application/json").content("{\"cccdFrontImage\":\"https://example.com/new-front.jpg\",\"cccdBackImage\":\"https://example.com/new-back.jpg\"}"))
             .andExpect(status().isOk()).andExpect(jsonPath("verified").value(false))
-            .andExpect(jsonPath("cccdImage").value("https://example.com/new-id.jpg"));
+            .andExpect(jsonPath("cccdFrontImage").value("https://example.com/new-front.jpg"))
+            .andExpect(jsonPath("cccdBackImage").value("https://example.com/new-back.jpg"));
         mvc.perform(get("/api/users/me").header("Authorization", token(worker)))
             .andExpect(status().isOk()).andExpect(jsonPath("password").doesNotExist());
-        assertThat(users.findById(owner.getId()).orElseThrow().getCccdImage()).isNull();
+        assertThat(users.findById(owner.getId()).orElseThrow().getCccdFrontImage()).isNull();
         mvc.perform(put("/api/users/me/cccd").header("Authorization", token(worker))
-            .contentType("application/json").content("{\"cccdImage\":\"http://example.com/id.jpg\"}"))
+            .contentType("application/json").content("{\"cccdFrontImage\":\"http://example.com/id.jpg\",\"cccdBackImage\":\"https://example.com/back.jpg\"}"))
             .andExpect(status().isBadRequest());
         mvc.perform(post("/admin/users/" + worker.getId() + "/verify").with(csrf())
             .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user(admin.getPhoneNumber()).roles("ADMIN"))
-            .param("cccdImage", "https://example.com/old-id.jpg"))
+            .param("cccdFrontImage", "https://example.com/old-front.jpg")
+            .param("cccdBackImage", "https://example.com/new-back.jpg"))
             .andExpect(flash().attributeExists("error"));
         assertThat(users.findById(worker.getId()).orElseThrow().isVerified()).isFalse();
     }

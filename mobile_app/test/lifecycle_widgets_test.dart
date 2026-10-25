@@ -16,6 +16,8 @@ class LifecycleApi extends ApiService {
     role: 'ROLE_WORKER',
     verified: true,
     rating: 4,
+    cccdFrontImage: 'https://example.com/old-front.jpg',
+    cccdBackImage: 'https://example.com/old-back.jpg',
   );
   final job = const Job(
     id: 1,
@@ -35,7 +37,10 @@ class LifecycleApi extends ApiService {
   @override
   Future<UserProfile> profile() async => person;
   @override
-  Future<UserProfile> updateCccd(String imageUrl) async {
+  Future<UserProfile> updateCccd(
+    String frontImageUrl,
+    String backImageUrl,
+  ) async {
     cccdUpdates++;
     return person = UserProfile(
       id: 3,
@@ -44,7 +49,8 @@ class LifecycleApi extends ApiService {
       role: 'ROLE_WORKER',
       verified: false,
       rating: 4,
-      cccdImage: imageUrl,
+      cccdFrontImage: frontImageUrl,
+      cccdBackImage: backImageUrl,
     );
   }
 
@@ -99,21 +105,66 @@ void main() {
       await tester.pumpWidget(MaterialApp(home: ProfileScreen(api: api)));
       await tester.pumpAndSettle();
       await tester.enterText(
-        find.byType(TextFormField),
+        find.byKey(const ValueKey('cccd-front-input')),
         'http://example.com/id.jpg',
       );
+      await tester.ensureVisible(find.text('Cập nhật CCCD'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Cập nhật CCCD'));
       await tester.pumpAndSettle();
       expect(api.cccdUpdates, 0);
-      expect(find.text('Nhập liên kết HTTPS hợp lệ'), findsOneWidget);
+      expect(
+        find.text('Nhập liên kết HTTPS hợp lệ cho mặt trước'),
+        findsOneWidget,
+      );
       await tester.enterText(
-        find.byType(TextFormField),
+        find.byKey(const ValueKey('cccd-front-input')),
         'https://example.com/id.jpg',
       );
       await tester.tap(find.text('Cập nhật CCCD'));
       await tester.pumpAndSettle();
       expect(api.cccdUpdates, 1);
+      expect(api.person.cccdFrontImage, 'https://example.com/id.jpg');
+      expect(api.person.cccdBackImage, 'https://example.com/old-back.jpg');
       expect(find.text('Chưa xác thực CCCD'), findsOneWidget);
+      api.dispose();
+    },
+  );
+  testWidgets(
+    'profile requires the back face and preserves a migrated front image',
+    (tester) async {
+      final api = LifecycleApi()
+        ..person = const UserProfile(
+          id: 3,
+          fullName: 'Thợ A',
+          phoneNumber: '0900000003',
+          role: 'ROLE_WORKER',
+          verified: false,
+          rating: 4,
+          cccdFrontImage: 'https://example.com/front.jpg',
+        );
+      await tester.pumpWidget(MaterialApp(home: ProfileScreen(api: api)));
+      await tester.pumpAndSettle();
+      expect(find.text('Liên kết ảnh mặt trước CCCD (HTTPS)'), findsOneWidget);
+      expect(find.text('Liên kết ảnh mặt sau CCCD (HTTPS)'), findsOneWidget);
+      await tester.ensureVisible(find.text('Cập nhật CCCD'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Cập nhật CCCD'));
+      await tester.pumpAndSettle();
+      expect(api.cccdUpdates, 0);
+      expect(
+        find.text('Nhập liên kết HTTPS hợp lệ cho mặt sau'),
+        findsOneWidget,
+      );
+      await tester.enterText(
+        find.byKey(const ValueKey('cccd-back-input')),
+        'https://example.com/back.jpg',
+      );
+      await tester.tap(find.text('Cập nhật CCCD'));
+      await tester.pumpAndSettle();
+      expect(api.cccdUpdates, 1);
+      expect(api.person.cccdFrontImage, 'https://example.com/front.jpg');
+      expect(api.person.cccdBackImage, 'https://example.com/back.jpg');
       api.dispose();
     },
   );

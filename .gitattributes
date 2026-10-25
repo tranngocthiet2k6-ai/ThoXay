@@ -2,3 +2,5 @@ mvnw text eol=lf
 *.sh text eol=lf
 *.cmd text eol=crlf
 *.ps1 text eol=crlf
+src/main/resources/static/vendor/bootstrap/*.min.css -text
+src/main/resources/static/vendor/bootstrap/*.min.js -text

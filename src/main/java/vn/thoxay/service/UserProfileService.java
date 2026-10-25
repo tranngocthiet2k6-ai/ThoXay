@@ -18,7 +18,8 @@ public class UserProfileService {
     public UserProfileResponse updateCccd(CccdRequest request) {
         var user = current.get();
         entityManager.refresh(user, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
-        user.setCccdImage(request.cccdImage());
+        user.setCccdFrontImage(request.cccdFrontImage());
+        user.setCccdBackImage(request.cccdBackImage());
         user.setVerified(false);
         return UserProfileResponse.of(user);
     }

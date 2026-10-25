@@ -12,7 +12,8 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final _form = GlobalKey<FormState>();
-  final _image = TextEditingController();
+  final _frontImage = TextEditingController();
+  final _backImage = TextEditingController();
   UserProfile? _profile;
   bool _loading = false;
   String? _error;
@@ -24,7 +25,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   void dispose() {
-    _image.dispose();
+    _frontImage.dispose();
+    _backImage.dispose();
     super.dispose();
   }
 
@@ -38,7 +40,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (mounted) {
         setState(() {
           _profile = profile;
-          _image.text = profile.cccdImage ?? '';
+          _frontImage.text = profile.cccdFrontImage ?? '';
+          _backImage.text = profile.cccdBackImage ?? '';
         });
       }
     } on ApiException catch (e) {
@@ -55,13 +58,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _error = null;
     });
     try {
-      final profile = await widget.api.updateCccd(_image.text.trim());
+      final profile = await widget.api.updateCccd(
+        _frontImage.text.trim(),
+        _backImage.text.trim(),
+      );
       if (!mounted) return;
       setState(() => _profile = profile);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Đã cập nhật ảnh CCCD. Vui lòng chờ quản trị viên xác thực.',
+            'Đã cập nhật đủ hai ảnh CCCD. Vui lòng chờ quản trị viên xác thực.',
           ),
         ),
       );
@@ -111,23 +117,43 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 24),
           const Text(
-            'Cập nhật liên kết ảnh CCCD HTTPS để quản trị viên kiểm tra. Mỗi lần cập nhật cần được xác thực lại.',
+            'Cung cấp đủ ảnh mặt trước và mặt sau CCCD bằng liên kết HTTPS. Mỗi lần cập nhật cần được quản trị viên xác thực lại.',
           ),
           const SizedBox(height: 16),
           Form(
             key: _form,
-            child: TextFormField(
-              controller: _image,
-              enabled: !_loading,
-              maxLength: 500,
-              keyboardType: TextInputType.url,
-              decoration: const InputDecoration(
-                labelText: 'Liên kết ảnh CCCD HTTPS',
-              ),
-              validator: (v) =>
-                  RegExp(r'^https://[^\s]+$').hasMatch(v?.trim() ?? '')
-                  ? null
-                  : 'Nhập liên kết HTTPS hợp lệ',
+            child: Column(
+              children: [
+                TextFormField(
+                  key: const ValueKey('cccd-front-input'),
+                  controller: _frontImage,
+                  enabled: !_loading,
+                  maxLength: 500,
+                  keyboardType: TextInputType.url,
+                  decoration: const InputDecoration(
+                    labelText: 'Liên kết ảnh mặt trước CCCD (HTTPS)',
+                  ),
+                  validator: (v) =>
+                      RegExp(r'^https://[^\s]+$').hasMatch(v?.trim() ?? '')
+                      ? null
+                      : 'Nhập liên kết HTTPS hợp lệ cho mặt trước',
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  key: const ValueKey('cccd-back-input'),
+                  controller: _backImage,
+                  enabled: !_loading,
+                  maxLength: 500,
+                  keyboardType: TextInputType.url,
+                  decoration: const InputDecoration(
+                    labelText: 'Liên kết ảnh mặt sau CCCD (HTTPS)',
+                  ),
+                  validator: (v) =>
+                      RegExp(r'^https://[^\s]+$').hasMatch(v?.trim() ?? '')
+                      ? null
+                      : 'Nhập liên kết HTTPS hợp lệ cho mặt sau',
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 16),

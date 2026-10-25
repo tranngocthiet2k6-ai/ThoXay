@@ -22,7 +22,8 @@ public class AdminService {
     private final jakarta.persistence.EntityManager entityManager;
 
     public record AdminUser(Long id, String fullName, String phoneNumber, String role,
-        boolean verified, boolean active, double rating, String cccdImage) { }
+        boolean verified, boolean active, double rating, String cccdFrontImage, String cccdBackImage,
+        boolean cccdComplete) { }
     public record Dashboard(List<AdminUser> users, List<JobResponse> jobs, long pendingVerification,
         long activeUsers, long openJobs) { }
 
@@ -31,20 +32,23 @@ public class AdminService {
         current.require(Role.ROLE_ADMIN);
         List<AdminUser> people = users.findAll().stream().map(u -> new AdminUser(u.getId(), u.getFullName(),
             u.getPhoneNumber(), u.getRole().name(), u.isVerified(), u.isActive(), u.getRating(),
-            validImage(u.getCccdImage()) ? u.getCccdImage() : null)).toList();
+            validImage(u.getCccdFrontImage()) ? u.getCccdFrontImage() : null,
+            validImage(u.getCccdBackImage()) ? u.getCccdBackImage() : null, u.hasCompleteCccd())).toList();
         List<JobResponse> listings = jobs.findAll().stream().map(j -> JobResponse.of(j, null)).toList();
-        return new Dashboard(people, listings, people.stream().filter(u -> !u.verified() && u.cccdImage() != null).count(),
+        return new Dashboard(people, listings, people.stream().filter(u -> !u.verified() && u.cccdComplete()).count(),
             people.stream().filter(AdminUser::active).count(), listings.stream().filter(j -> "OPEN".equals(j.status())).count());
     }
 
     @Transactional
-    public void verify(Long id, String expectedImage) {
+    public void verify(Long id, String expectedFrontImage, String expectedBackImage) {
         current.require(Role.ROLE_ADMIN);
         User user = user(id);
         entityManager.refresh(user, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
-        if (!validImage(user.getCccdImage())) throw new ApiException(HttpStatus.BAD_REQUEST, "Tài khoản chưa cung cấp ảnh CCCD HTTPS hợp lệ");
-        if (!java.util.Objects.equals(expectedImage, user.getCccdImage()))
-            throw new ApiException(HttpStatus.CONFLICT, "Ảnh CCCD đã thay đổi. Hãy tải lại và kiểm tra ảnh mới trước khi xác thực.");
+        if (!user.hasCompleteCccd())
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Tài khoản phải cung cấp đủ ảnh mặt trước và mặt sau CCCD HTTPS hợp lệ");
+        if (!java.util.Objects.equals(expectedFrontImage, user.getCccdFrontImage())
+            || !java.util.Objects.equals(expectedBackImage, user.getCccdBackImage()))
+            throw new ApiException(HttpStatus.CONFLICT, "Ảnh CCCD đã thay đổi. Hãy tải lại và kiểm tra cả hai ảnh mới trước khi xác thực.");
         user.setVerified(true);
     }
     @Transactional
