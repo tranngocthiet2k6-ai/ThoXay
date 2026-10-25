@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../models/models.dart';
 import '../services/api_service.dart';
 import '../services/location_service.dart';
@@ -40,90 +41,113 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
 
   Future<void> _create() async {
     final created = await showDialog<bool>(
-        context: context,
-        barrierDismissible: false,
-        builder: (_) => _CreateJobDialog(api: widget.api));
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => _CreateJobDialog(api: widget.api),
+    );
     if (created == true && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Đã đăng công trình mới.')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Đã đăng công trình mới.')));
       await _refresh();
     }
   }
 
   Future<void> _applicants(Job job) async {
     await showModalBottomSheet<void>(
-        context: context,
-        isScrollControlled: true,
-        useSafeArea: true,
-        showDragHandle: true,
-        builder: (_) => _ApplicantsSheet(api: widget.api, job: job));
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      showDragHandle: true,
+      builder: (_) => _ApplicantsSheet(api: widget.api, job: job),
+    );
     if (mounted) await _refresh();
   }
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('Công trình của tôi'), actions: [
-          IconButton(
-              tooltip: 'Làm mới',
-              onPressed: _loading ? null : _refresh,
-              icon: const Icon(Icons.refresh)),
-          IconButton(
-              tooltip: 'Đăng xuất',
-              onPressed: widget.api.logout,
-              icon: const Icon(Icons.logout)),
-        ]),
-        body: Column(children: [
-          if (_loading) const LinearProgressIndicator(),
-          Expanded(
-              child: RefreshIndicator(
-                  onRefresh: _refresh,
-                  child: ListView(
-                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    children: [
-                      Text(
-                          'Chào ${widget.api.session?.fullName ?? 'chủ thầu'},',
-                          style: Theme.of(context).textTheme.titleMedium),
-                      const SizedBox(height: 8),
-                      Text('Tìm thợ cho công trình',
-                          style: Theme.of(context)
-                              .textTheme
-                              .headlineSmall
-                              ?.copyWith(fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 8),
-                      Text(
-                          '${_jobs.length} công trình · ${_jobs.where((j) => j.status == 'OPEN').length} đang tuyển'),
-                      const SizedBox(height: 24),
-                      if (_error != null)
-                        Card(
-                            color: Theme.of(context).colorScheme.errorContainer,
-                            child: Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: Text(_error!))),
-                      if (!_loading && _jobs.isEmpty)
-                        const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 60),
-                            child: Column(children: [
-                              Icon(Icons.apartment_outlined, size: 64),
-                              SizedBox(height: 16),
-                              Text(
-                                  'Đăng công trình đầu tiên để kết nối với người thợ quanh bạn.',
-                                  textAlign: TextAlign.center)
-                            ])),
-                      for (final job in _jobs)
-                        JobCard(
-                            job: job,
-                            action: FilledButton.tonal(
-                                onPressed: () => _applicants(job),
-                                child: const Text('Xem & duyệt thợ'))),
-                    ],
-                  ))),
-        ]),
-        floatingActionButton: FloatingActionButton.extended(
-            onPressed: _create,
-            icon: const Icon(Icons.add),
-            label: const Text('Đăng công trình')),
-      );
+    appBar: AppBar(
+      title: const Text('Công trình của tôi'),
+      actions: [
+        IconButton(
+          tooltip: 'Làm mới',
+          onPressed: _loading ? null : _refresh,
+          icon: const Icon(Icons.refresh),
+        ),
+        IconButton(
+          tooltip: 'Đăng xuất',
+          onPressed: widget.api.logout,
+          icon: const Icon(Icons.logout),
+        ),
+      ],
+    ),
+    body: Column(
+      children: [
+        if (_loading) const LinearProgressIndicator(),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: _refresh,
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: [
+                Text(
+                  'Chào ${widget.api.session?.fullName ?? 'chủ thầu'},',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Tìm thợ cho công trình',
+                  style: Theme.of(context).textTheme.headlineSmall
+                      ?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '${_jobs.length} công trình · ${_jobs.where((j) => j.status == 'OPEN').length} đang tuyển',
+                ),
+                const SizedBox(height: 24),
+                if (_error != null)
+                  Card(
+                    color: Theme.of(context).colorScheme.errorContainer,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text(_error!),
+                    ),
+                  ),
+                if (!_loading && _jobs.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 60),
+                    child: Column(
+                      children: [
+                        Icon(Icons.apartment_outlined, size: 64),
+                        SizedBox(height: 16),
+                        Text(
+                          'Đăng công trình đầu tiên để kết nối với người thợ quanh bạn.',
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                for (final job in _jobs)
+                  JobCard(
+                    job: job,
+                    action: FilledButton.tonal(
+                      onPressed: () => _applicants(job),
+                      child: const Text('Xem & duyệt thợ'),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    ),
+    floatingActionButton: FloatingActionButton.extended(
+      onPressed: _create,
+      icon: const Icon(Icons.add),
+      label: const Text('Đăng công trình'),
+    ),
+  );
 }
 
 class _CreateJobDialog extends StatefulWidget {
@@ -180,7 +204,8 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
     if (!_form.currentState!.validate()) return;
     if (_position == null) {
       setState(
-          () => _error = 'Chọn vị trí công trình bằng GPS hoặc nhập tọa độ.');
+        () => _error = 'Chọn vị trí công trình bằng GPS hoặc nhập tọa độ.',
+      );
       return;
     }
     setState(() {
@@ -196,7 +221,7 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
         'address': _address.text.trim(),
         'latitude': _position!.latitude,
         'longitude': _position!.longitude,
-        'requiredWorkers': int.parse(_workers.text.trim())
+        'requiredWorkers': int.parse(_workers.text.trim()),
       });
       if (mounted) Navigator.pop(context, true);
     } on ApiException catch (e) {
@@ -208,118 +233,140 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
 
   @override
   Widget build(BuildContext context) => PopScope(
-      canPop: !_busy && !_gps,
-      child: AlertDialog(
-        title: const Text('Đăng công trình mới'),
-        content: SizedBox(
-            width: 480,
-            child: SingleChildScrollView(
-                child: Form(
-              key: _form,
-              child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+    canPop: !_busy && !_gps,
+    child: AlertDialog(
+      title: const Text('Đăng công trình mới'),
+      content: SizedBox(
+        width: 480,
+        child: SingleChildScrollView(
+          child: Form(
+            key: _form,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TextFormField(
+                  controller: _title,
+                  enabled: !_busy,
+                  maxLength: 200,
+                  decoration: const InputDecoration(
+                    labelText: 'Tên công trình',
+                  ),
+                  validator: (v) => (v?.trim().isEmpty ?? true)
+                      ? 'Nhập tên công trình'
+                      : null,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _description,
+                  enabled: !_busy,
+                  minLines: 2,
+                  maxLines: 5,
+                  maxLength: 20000,
+                  decoration: const InputDecoration(
+                    labelText: 'Mô tả công việc, giờ làm, đãi ngộ',
+                  ),
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String>(
+                  initialValue: _type,
+                  decoration: const InputDecoration(labelText: 'Loại thợ'),
+                  items: ['Thợ chính', 'Phụ hồ']
+                      .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                      .toList(),
+                  onChanged: _busy ? null : (t) => setState(() => _type = t!),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _salary,
+                  enabled: !_busy,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'Lương mỗi ngày (đồng)',
+                    hintText: '500000',
+                  ),
+                  validator: (v) {
+                    final n = double.tryParse(v?.trim() ?? '');
+                    return n == null || !n.isFinite || n < 1 || n > 1000000000
+                        ? 'Lương từ 1 đến 1.000.000.000 đồng'
+                        : null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _address,
+                  enabled: !_busy,
+                  maxLength: 255,
+                  decoration: const InputDecoration(
+                    labelText: 'Địa chỉ công trình',
+                  ),
+                  validator: (v) => (v?.trim().isEmpty ?? true)
+                      ? 'Nhập địa chỉ công trình'
+                      : null,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _workers,
+                  enabled: !_busy,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'Số lượng thợ cần tuyển',
+                  ),
+                  validator: (v) {
+                    final n = int.tryParse(v?.trim() ?? '');
+                    return n == null || n < 1 || n > 10000
+                        ? 'Số thợ từ 1 đến 10.000'
+                        : null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  _position == null
+                      ? 'Chưa chọn vị trí công trình'
+                      : 'Vị trí: ${_position!.latitude.toStringAsFixed(5)}, ${_position!.longitude.toStringAsFixed(5)}',
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
                   children: [
-                    TextFormField(
-                        controller: _title,
-                        enabled: !_busy,
-                        maxLength: 200,
-                        decoration:
-                            const InputDecoration(labelText: 'Tên công trình'),
-                        validator: (v) => (v?.trim().isEmpty ?? true)
-                            ? 'Nhập tên công trình'
-                            : null),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                        controller: _description,
-                        enabled: !_busy,
-                        minLines: 2,
-                        maxLines: 5,
-                        maxLength: 20000,
-                        decoration: const InputDecoration(
-                            labelText: 'Mô tả công việc, giờ làm, đãi ngộ')),
-                    const SizedBox(height: 12),
-                    DropdownButtonFormField<String>(
-                        initialValue: _type,
-                        decoration:
-                            const InputDecoration(labelText: 'Loại thợ'),
-                        items: ['Thợ chính', 'Phụ hồ']
-                            .map((t) =>
-                                DropdownMenuItem(value: t, child: Text(t)))
-                            .toList(),
-                        onChanged:
-                            _busy ? null : (t) => setState(() => _type = t!)),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                        controller: _salary,
-                        enabled: !_busy,
-                        keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                            labelText: 'Lương mỗi ngày (đồng)',
-                            hintText: '500000'),
-                        validator: (v) {
-                          final n = double.tryParse(v?.trim() ?? '');
-                          return n == null ||
-                                  !n.isFinite ||
-                                  n < 1 ||
-                                  n > 1000000000
-                              ? 'Lương từ 1 đến 1.000.000.000 đồng'
-                              : null;
-                        }),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                        controller: _address,
-                        enabled: !_busy,
-                        maxLength: 255,
-                        decoration: const InputDecoration(
-                            labelText: 'Địa chỉ công trình'),
-                        validator: (v) => (v?.trim().isEmpty ?? true)
-                            ? 'Nhập địa chỉ công trình'
-                            : null),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                        controller: _workers,
-                        enabled: !_busy,
-                        keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                            labelText: 'Số lượng thợ cần tuyển'),
-                        validator: (v) {
-                          final n = int.tryParse(v?.trim() ?? '');
-                          return n == null || n < 1 || n > 10000
-                              ? 'Số thợ từ 1 đến 10.000'
-                              : null;
-                        }),
-                    const SizedBox(height: 16),
-                    Text(_position == null
-                        ? 'Chưa chọn vị trí công trình'
-                        : 'Vị trí: ${_position!.latitude.toStringAsFixed(5)}, ${_position!.longitude.toStringAsFixed(5)}'),
-                    const SizedBox(height: 8),
-                    Wrap(spacing: 8, children: [
-                      OutlinedButton.icon(
-                          onPressed: _busy || _gps ? null : _locate,
-                          icon: const Icon(Icons.my_location),
-                          label: Text(_gps ? 'Đang lấy GPS…' : 'Lấy GPS')),
-                      TextButton(
-                          onPressed: _busy || _gps ? null : _choosePosition,
-                          child: const Text('Nhập vị trí')),
-                    ]),
-                    if (_error != null)
-                      Padding(
-                          padding: const EdgeInsets.only(top: 12),
-                          child: Text(_error!,
-                              style: TextStyle(
-                                  color: Theme.of(context).colorScheme.error))),
-                  ]),
-            ))),
-        actions: [
-          TextButton(
-              onPressed: _busy || _gps ? null : () => Navigator.pop(context),
-              child: const Text('Hủy')),
-          FilledButton(
-              onPressed: _busy || _gps ? null : _submit,
-              child: Text(_busy ? 'Đang đăng…' : 'Đăng việc'))
-        ],
-      ));
+                    OutlinedButton.icon(
+                      onPressed: _busy || _gps ? null : _locate,
+                      icon: const Icon(Icons.my_location),
+                      label: Text(_gps ? 'Đang lấy GPS…' : 'Lấy GPS'),
+                    ),
+                    TextButton(
+                      onPressed: _busy || _gps ? null : _choosePosition,
+                      child: const Text('Nhập vị trí'),
+                    ),
+                  ],
+                ),
+                if (_error != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: Text(
+                      _error!,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _busy || _gps ? null : () => Navigator.pop(context),
+          child: const Text('Hủy'),
+        ),
+        FilledButton(
+          onPressed: _busy || _gps ? null : _submit,
+          child: Text(_busy ? 'Đang đăng…' : 'Đăng việc'),
+        ),
+      ],
+    ),
+  );
 }
 
 class _ApplicantsSheet extends StatefulWidget {
@@ -375,84 +422,121 @@ class _ApplicantsSheetState extends State<_ApplicantsSheet> {
   Widget build(BuildContext context) {
     final accepted = _applications.where((a) => a.status == 'ACCEPTED').length;
     return SizedBox(
-        height: MediaQuery.sizeOf(context).height * .82,
-        child: Column(children: [
+      height: MediaQuery.sizeOf(context).height * .82,
+      child: Column(
+        children: [
           Padding(
-              padding: const EdgeInsets.fromLTRB(24, 0, 12, 12),
-              child: Row(children: [
+            padding: const EdgeInsets.fromLTRB(24, 0, 12, 12),
+            child: Row(
+              children: [
                 Expanded(
-                    child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                      Text(widget.job.title,
-                          style: Theme.of(context).textTheme.titleLarge),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Text(
-                          'Đã nhận $accepted / ${widget.job.requiredWorkers} thợ'),
-                    ])),
+                        widget.job.title,
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      Text(
+                        'Đã nhận $accepted / ${widget.job.requiredWorkers} thợ',
+                      ),
+                    ],
+                  ),
+                ),
                 IconButton(
-                    tooltip: 'Làm mới danh sách',
-                    onPressed: _loading || _updating != null ? null : _refresh,
-                    icon: const Icon(Icons.refresh)),
+                  tooltip: 'Làm mới danh sách',
+                  onPressed: _loading || _updating != null ? null : _refresh,
+                  icon: const Icon(Icons.refresh),
+                ),
                 IconButton(
-                    tooltip: 'Đóng',
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close)),
-              ])),
+                  tooltip: 'Đóng',
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close),
+                ),
+              ],
+            ),
+          ),
           if (_loading) const LinearProgressIndicator(),
           Expanded(
-              child: ListView(padding: const EdgeInsets.all(20), children: [
-            if (_error != null)
-              Card(
-                  color: Theme.of(context).colorScheme.errorContainer,
-                  child: Padding(
-                      padding: const EdgeInsets.all(16), child: Text(_error!))),
-            if (!_loading && _applications.isEmpty)
-              const Padding(
-                  padding: EdgeInsets.all(32),
-                  child: Text('Chưa có thợ ứng tuyển vào công trình này.',
-                      textAlign: TextAlign.center)),
-            for (final application in _applications)
-              Card(
-                  child: Padding(
+            child: ListView(
+              padding: const EdgeInsets.all(20),
+              children: [
+                if (_error != null)
+                  Card(
+                    color: Theme.of(context).colorScheme.errorContainer,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text(_error!),
+                    ),
+                  ),
+                if (!_loading && _applications.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.all(32),
+                    child: Text(
+                      'Chưa có thợ ứng tuyển vào công trình này.',
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                for (final application in _applications)
+                  Card(
+                    child: Padding(
                       padding: const EdgeInsets.all(18),
                       child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(application.workerName,
-                                style: Theme.of(context).textTheme.titleMedium),
-                            const SizedBox(height: 8),
-                            SelectableText(application.workerPhone),
-                            const SizedBox(height: 8),
-                            Text(
-                                'Đánh giá ${application.workerRating.toStringAsFixed(1)}/5 · ${application.workerVerified ? 'Đã xác thực CCCD' : 'Chưa xác thực CCCD'}'),
-                            if (!application.workerActive)
-                              const Text('Tài khoản đã bị khóa',
-                                  style: TextStyle(color: Colors.red)),
-                            const SizedBox(height: 8),
-                            Chip(label: Text(statusLabel(application.status))),
-                            if (application.status == 'PENDING')
-                              Wrap(spacing: 12, children: [
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            application.workerName,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: 8),
+                          SelectableText(application.workerPhone),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Đánh giá ${application.workerRating.toStringAsFixed(1)}/5 · ${application.workerVerified ? 'Đã xác thực CCCD' : 'Chưa xác thực CCCD'}',
+                          ),
+                          if (!application.workerActive)
+                            const Text(
+                              'Tài khoản đã bị khóa',
+                              style: TextStyle(color: Colors.red),
+                            ),
+                          const SizedBox(height: 8),
+                          Chip(label: Text(statusLabel(application.status))),
+                          if (application.status == 'PENDING')
+                            Wrap(
+                              spacing: 12,
+                              children: [
                                 FilledButton(
-                                    onPressed: _updating != null ||
-                                            _loading ||
-                                            accepted >=
-                                                widget.job.requiredWorkers ||
-                                            !application.workerActive
-                                        ? null
-                                        : () =>
-                                            _decide(application, 'ACCEPTED'),
-                                    child: Text(_updating == application.id
+                                  onPressed:
+                                      _updating != null ||
+                                          _loading ||
+                                          accepted >=
+                                              widget.job.requiredWorkers ||
+                                          !application.workerActive
+                                      ? null
+                                      : () => _decide(application, 'ACCEPTED'),
+                                  child: Text(
+                                    _updating == application.id
                                         ? 'Đang xử lý…'
-                                        : 'Nhận thợ')),
+                                        : 'Nhận thợ',
+                                  ),
+                                ),
                                 OutlinedButton(
-                                    onPressed: _updating != null || _loading
-                                        ? null
-                                        : () =>
-                                            _decide(application, 'REJECTED'),
-                                    child: const Text('Từ chối')),
-                              ]),
-                          ]))),
-          ])),
-        ]));
+                                  onPressed: _updating != null || _loading
+                                      ? null
+                                      : () => _decide(application, 'REJECTED'),
+                                  child: const Text('Từ chối'),
+                                ),
+                              ],
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

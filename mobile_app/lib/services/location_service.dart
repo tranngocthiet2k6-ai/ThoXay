@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -23,19 +24,22 @@ class LocationService {
     }
     if (permission == LocationPermission.denied ||
         permission == LocationPermission.deniedForever) {
-      throw LocationFailure(kIsWeb
-          ? 'Cho phép vị trí trong trình duyệt rồi thử lại.'
-          : 'Cho phép Thợ Xây truy cập vị trí trong cài đặt thiết bị rồi thử lại.');
+      throw LocationFailure(
+        kIsWeb ? 'Cho phép vị trí trong trình duyệt rồi thử lại.' : 'Cho phép Thợ Xây truy cập vị trí trong cài đặt thiết bị rồi thử lại.',
+      );
     }
     try {
       final position = await Geolocator.getCurrentPosition(
-          locationSettings: const LocationSettings(
-              accuracy: LocationAccuracy.high,
-              timeLimit: Duration(seconds: 20)));
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 20),
+        ),
+      );
       return GeoPoint(position.latitude, position.longitude);
     } on TimeoutException {
       throw const LocationFailure(
-          'Chưa lấy được GPS. Hãy thử lại hoặc chọn vị trí tìm việc.');
+        'Chưa lấy được GPS. Hãy thử lại hoặc chọn vị trí tìm việc.',
+      );
     } on LocationServiceDisabledException {
       throw const LocationFailure('Dịch vụ GPS đang tắt.');
     } on PermissionDeniedException {
