@@ -6,7 +6,54 @@ Backend Java 17+ / Spring Boot 3.5, PostgreSQL, JPA, Spring Security, JWT,
 BCrypt và Validation. Web quản trị dùng Thymeleaf / Bootstrap 5. Ứng dụng
 Flutter có giao diện tiếng Việt cho thợ và chủ thầu, chạy trên Android, iOS và Web.
 
-## Chạy backend và Web Admin
+## Khởi chạy nhanh trên PowerShell
+
+Từ thư mục gốc của dự án:
+
+```powershell
+.\scripts\start-local.ps1 -WithFrontend -OpenBrowser
+```
+
+Lệnh này build/test backend, build Flutter Web rồi chạy cả hai ở chế độ nền:
+
+- Web Admin: `http://localhost:8080/admin/login`.
+- Giao diện thợ/chủ thầu: `http://localhost:3000`.
+- Log khởi động: `.local/backend.log`, `.local/backend-error.log`, `.local/frontend-error.log`.
+
+Script dùng Flutter trong `.tools/flutter` nếu có, hoặc Flutter trong PATH;
+Node.js dùng để phục vụ bản Web đã build. Nếu PostgreSQL mặc định ở cổng 5432
+chưa chạy, script có thể bật bản portable đã được chuẩn bị trong workspace
+(`.tools/postgres`, `.tools/pgdata`) ở cổng **55432**, giữ nguyên dữ liệu hiện có.
+Fresh clone chưa có các công cụ này cần cài Flutter/Node và chuẩn bị PostgreSQL
+theo phần dưới. `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` vẫn được ưu tiên khi đặt.
+
+Lần đầu, script tạo `.local/application.properties` chứa địa chỉ database local
+và khóa JWT ngẫu nhiên. Spring Boot nạp tệp này khi chạy từ thư mục gốc; thư mục
+`.local/` bị loại khỏi Git. Khóa được giữ lại qua các lần khởi động.
+
+Sau khi đã build và chưa sửa mã nguồn, khởi động nhanh bằng:
+
+```powershell
+.\scripts\start-local.ps1 -WithFrontend -SkipBuild -OpenBrowser
+```
+
+Dừng backend và frontend do script quản lý:
+
+```powershell
+.\scripts\stop-local.ps1
+```
+
+PostgreSQL vẫn chạy để có thể chuyển sang lệnh Maven ở chế độ phát triển:
+
+```powershell
+.\mvnw.cmd spring-boot:run
+```
+
+Chạy lệnh Maven sau khi đã dừng backend đang chiếm cổng 8080. Cần gõ `mvnw.cmd`
+với tiền tố `.\` trên PowerShell. Sau khi khởi động lại Windows, chạy script
+khởi động trước để bật lại PostgreSQL portable.
+
+## Chuẩn bị PostgreSQL và chạy riêng backend
 
 Cần JDK 17 trở lên; Maven Wrapper đã có trong repository. Dùng PostgreSQL
 có sẵn hoặc Docker Desktop:
@@ -29,11 +76,10 @@ psql -U postgres -d tho_xay_db -v ON_ERROR_STOP=1 -f schema.sql
 API: `http://localhost:8080/api`. Web quản trị:
 `http://localhost:8080/admin/login`.
 
-Script khởi động chạy `mvnw verify` trước khi chạy JAR. Nếu chưa đặt `JWT_SECRET`,
-script tạo khóa ngẫu nhiên cho phiên chạy local; token cũ sẽ hết hiệu lực sau
-khi khởi động lại với khóa mới. Đặt khóa Base64 riêng (ít nhất 32 byte ngẫu nhiên)
-để giữ phiên qua các lần khởi động. [`.env.example`](.env.example) liệt kê các biến;
-Spring Boot đọc biến môi trường của tiến trình, không tự nạp tệp `.env`.
+Script khởi động chạy `mvnw verify` trước khi chạy JAR. Có thể đặt `JWT_SECRET`
+bằng khóa Base64 riêng (ít nhất 32 byte ngẫu nhiên) để thay khóa local.
+[`.env.example`](.env.example) liệt kê các biến; Spring Boot đọc biến môi trường
+của tiến trình và `.local/application.properties`, không tự nạp tệp `.env`.
 
 Chạy thủ công trên PowerShell:
 

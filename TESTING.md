@@ -65,6 +65,25 @@ APK chưa build vì máy kiểm chứng chưa có Android SDK; iOS chưa build v
 9. Đăng công trình thử khác, xóa bằng Admin; xác nhận công trình và đơn liên quan
    không còn trong danh sách sau khi làm mới.
 
+## Kiểm chứng lỗi khởi động PowerShell
+
+Lỗi `Process terminated with exit code: 1` đã được tái hiện bằng
+`.\mvnw.cmd spring-boot:run`: PostgreSQL mặc định `localhost:5432` từ chối kết nối.
+Sau khi kết nối đúng PostgreSQL local ở cổng 55432, lỗi tiếp theo là thiếu
+`JWT_SECRET`. Cổng 8080 trống tại thời điểm chẩn đoán.
+
+Script `scripts/start-local.ps1 -WithFrontend` chuẩn bị cấu hình riêng trong
+`.local/`, bật PostgreSQL portable nếu có, build/test và chờ cả backend cùng
+frontend trả HTTP 200. Biến môi trường vẫn có thể thay thế các giá trị local.
+`scripts/stop-local.ps1` kiểm tra đường dẫn command line trước khi dừng đúng
+tiến trình của workspace; giữ PostgreSQL chạy để sử dụng Maven trực tiếp.
+
+Sau sửa, chính lệnh `.\mvnw.cmd spring-boot:run` đã khởi động Tomcat cổng 8080
+và trả HTTP 200 tại `/admin/login`. Đã kiểm tra cả khởi động lại sau khi tắt
+PostgreSQL, nạp lại cấu hình/khóa JWT đã lưu, đăng nhập tài khoản demo và hai
+giao diện HTTP 200. Cơ chế chờ frontend dùng loopback IPv4 để tránh việc
+`localhost` trỏ IPv6 trong khi server Web chỉ lắng nghe IPv4.
+
 ## Checkpoint Git
 
 Mỗi bước và mỗi màn hình có commit riêng trên `main`, chỉ chuyển bước sau khi
