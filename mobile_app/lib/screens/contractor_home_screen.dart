@@ -13,6 +13,7 @@ import 'location_picker_screen.dart';
 import '../widgets/loading_jobs.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/feature_banner.dart';
+import '../widgets/notification_button.dart';
 
 class ContractorHomeScreen extends StatefulWidget {
   const ContractorHomeScreen({super.key, required this.api});
@@ -89,6 +90,7 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
     appBar: AppBar(
       title: const Text('Công trình của tôi'),
       actions: [
+        NotificationButton(api: widget.api),
         IconButton(
           tooltip: 'Hồ sơ & CCCD',
           icon: const Icon(Icons.person_outline),

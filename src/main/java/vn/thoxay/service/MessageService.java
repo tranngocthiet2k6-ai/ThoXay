@@ -21,6 +21,7 @@ public class MessageService {
     private final CurrentUser current;
     private final ChatAccessService access;
     private final ApplicationEventPublisher events;
+    private final NotificationService notifications;
 
     public record MessageSent(ChatAccessService.Conversation conversation, MessageResponse message) { }
     public record History(List<MessageResponse> messages, boolean hasMore) { }
@@ -44,6 +45,8 @@ public class MessageService {
         m.setRecipient(users.getReferenceById(request.recipientId())); m.setContent(content);
         m.setClientMessageId(request.clientMessageId());
         MessageResponse response = MessageResponse.of(messages.saveAndFlush(m));
+        notifications.create(m.getRecipient(), job, "message:" + m.getId(), "CHAT_MESSAGE", "Bạn có tin nhắn mới",
+            "Mở cuộc trò chuyện trong Thợ Xây để xem và trả lời. Nội dung tin nhắn được giữ riêng trong ứng dụng.");
         events.publishEvent(new MessageSent(conversation, response));
         return response;
     }

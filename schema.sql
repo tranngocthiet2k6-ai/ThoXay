@@ -54,6 +54,23 @@ CREATE TABLE IF NOT EXISTS messages (
   UNIQUE (sender_id, client_message_id)
 );
 CREATE INDEX IF NOT EXISTS idx_messages_conversation ON messages(job_id, sender_id, recipient_id, id);
+CREATE TABLE IF NOT EXISTS notifications (
+  id BIGSERIAL PRIMARY KEY,
+  recipient_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  job_id BIGINT REFERENCES jobs(id) ON DELETE SET NULL,
+  event_key VARCHAR(200) UNIQUE NOT NULL,
+  type VARCHAR(40) NOT NULL, title VARCHAR(120) NOT NULL, body VARCHAR(500) NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP, read_at TIMESTAMPTZ,
+  push_status VARCHAR(20) NOT NULL DEFAULT 'DISABLED', push_attempts INTEGER NOT NULL DEFAULT 0,
+  next_attempt_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_notifications_recipient ON notifications(recipient_id,id);
+CREATE INDEX IF NOT EXISTS idx_notifications_outbox ON notifications(push_status,next_attempt_at);
+CREATE TABLE IF NOT EXISTS device_tokens (
+  id BIGSERIAL PRIMARY KEY, user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  token_hash VARCHAR(64) UNIQUE NOT NULL, token VARCHAR(4096) NOT NULL,
+  last_seen_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
 -- Demo-only password for all three accounts: password
 INSERT INTO users (phone_number,password,full_name,role,is_verified)
 VALUES

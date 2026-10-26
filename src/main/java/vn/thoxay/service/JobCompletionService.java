@@ -18,6 +18,7 @@ public class JobCompletionService {
     private final JobApplicationRepository applications;
     private final CurrentUser current;
     private final WorkerRatingService ratings;
+    private final NotificationService notifications;
 
     @Transactional
     public JobResponse complete(Long id, CompleteJobRequest request) {
@@ -51,6 +52,8 @@ public class JobCompletionService {
             .forEach(a -> a.setStatus(ApplicationStatus.REJECTED));
         applications.flush();
         ratings.recompute(workers);
+        for (JobApplication a : accepted) notifications.create(a.getWorker(), job, "completed:" + a.getId(), "JOB_COMPLETED",
+            "Công trình đã hoàn thành", "Bạn được đánh giá " + a.getWorkerRating() + "/5 sao cho công trình: " + job.getTitle());
         return JobResponse.of(job, null);
     }
 }

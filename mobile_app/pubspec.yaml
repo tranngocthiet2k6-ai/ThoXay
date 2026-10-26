@@ -18,6 +18,8 @@ dependencies:
   flutter_map: ^8.3.2
   latlong2: ^0.9.1
   web_socket_channel: ^3.0.3
+  firebase_core: ^5.1.0
+  firebase_messaging: ^17.0.1
 
 dev_dependencies:
   flutter_test:

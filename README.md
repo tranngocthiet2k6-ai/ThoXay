@@ -216,6 +216,7 @@ Chạy migration giữ nguyên dữ liệu:
 psql -U postgres -d tho_xay_db -v ON_ERROR_STOP=1 -f migrations/002_worker_ratings.sql
 psql -U postgres -d tho_xay_db -v ON_ERROR_STOP=1 -f migrations/003_cccd_front_back.sql
 psql -U postgres -d tho_xay_db -v ON_ERROR_STOP=1 -f migrations/004_messages.sql
+psql -U postgres -d tho_xay_db -v ON_ERROR_STOP=1 -f migrations/005_notifications.sql
 ```
 
 Script khởi động local tự áp dụng các migration này khi sử dụng PostgreSQL portable
@@ -336,6 +337,14 @@ bằng form và kiểm tra tài khoản còn hoạt động mỗi request. Form 
 Tài khoản bị khóa không đăng nhập được; JWT đã phát cũng bị chặn ở request kế tiếp.
 Response không trả hash mật khẩu hoặc liên kết CCCD cho API tìm việc/ứng tuyển.
 
+## Thông báo
+
+Thợ và chủ thầu mở biểu tượng chuông để xem lịch sử, phân trang, đánh dấu đã đọc
+hoặc đọc tất cả. Sự kiện ứng tuyển, duyệt/từ chối, hoàn thành, KYC và chat tạo
+thông báo trong cùng transaction. Backend có outbox FCM gửi lại có giới hạn;
+không có Firebase vẫn lưu/xem lịch sử bình thường. Hướng dẫn cấu hình Firebase
+cho Backend và APK, CI secret, quyền thiết bị: [docs/FIREBASE.md](docs/FIREBASE.md).
+
 ## Giao diện trình bày đồ án
 
 Flutter dùng theme xanh ngọc thống nhất cho form, nút, điều hướng và chat.
@@ -356,6 +365,6 @@ không có tài khoản thì hiển thị 0%. Không dùng font/icon/ảnh CDN c
 - `src/main/java/vn/thoxay/`: entity, repository, DTO, security, service, controller, admin.
 - `src/main/resources/`: cấu hình, template quản trị, CSS.
 - `mobile_app/lib/`: models, services, screens và widgets.
-- `schema.sql`: bốn bảng PostgreSQL, constraints, indexes và seed.
+- `schema.sql`: các bảng PostgreSQL, constraints, indexes và seed.
 - [AGENTS.md](AGENTS.md): kiến trúc và quy trình build → commit → push cho mỗi hạng mục.
 - [TESTING.md](TESTING.md): lệnh kiểm thử, phạm vi đã kiểm chứng và kịch bản nghiệm thu.

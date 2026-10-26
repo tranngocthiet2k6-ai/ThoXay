@@ -16,6 +16,7 @@ public class ApplicationService {
     private final JobApplicationRepository applications;
     private final JobRepository jobs;
     private final CurrentUser current;
+    private final NotificationService notifications;
 
     @Transactional
     public ApplicationResponse apply(ApplicationRequest request) {
@@ -26,7 +27,10 @@ public class ApplicationService {
         if (job.getStatus() != JobStatus.OPEN || !job.getContractor().isActive())
             throw new ApiException(HttpStatus.CONFLICT, "Công trình đã ngừng tuyển thợ");
         JobApplication application = new JobApplication(); application.setJob(job); application.setWorker(worker);
-        return ApplicationResponse.of(applications.saveAndFlush(application));
+        applications.saveAndFlush(application);
+        notifications.create(job.getContractor(), job, "application:" + application.getId(), "APPLICATION_RECEIVED",
+            "Có đơn ứng tuyển mới", "Một người thợ vừa ứng tuyển công trình: " + job.getTitle());
+        return ApplicationResponse.of(application);
     }
 
     @Transactional(readOnly = true)
@@ -64,6 +68,10 @@ public class ApplicationService {
         }
         application.setStatus(status);
         applications.saveAndFlush(application);
+        notifications.create(application.getWorker(), job, "decision:" + id + ":" + status, "APPLICATION_" + status,
+            status == ApplicationStatus.ACCEPTED ? "Đơn ứng tuyển đã được duyệt" : "Kết quả ứng tuyển",
+            status == ApplicationStatus.ACCEPTED ? "Chủ thầu đã nhận bạn. Mở ứng dụng để liên hệ và trao đổi công việc."
+                : "Đơn ứng tuyển chưa được nhận. Bạn có thể tìm thêm công trình phù hợp.");
         return ApplicationResponse.of(application);
     }
 

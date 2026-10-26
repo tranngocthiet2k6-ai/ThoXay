@@ -8,6 +8,41 @@ import 'package:tho_xay_mobile/services/api_service.dart';
 
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
+  test(
+    'logout clears session even when unregistering the push device returns 401',
+    () async {
+      var cleanup = 0;
+      final api = ApiService(
+        client: MockClient((request) async {
+          if (request.url.path == '/api/auth/login') {
+            return http.Response(
+              jsonEncode({
+                'token': 'jwt',
+                'userId': 3,
+                'fullName': 'Worker',
+                'phoneNumber': '0900000003',
+                'role': 'ROLE_WORKER',
+                'expiresIn': 3600,
+              }),
+              200,
+            );
+          }
+          return http.Response('{"message":"Expired"}', 401);
+        }),
+      );
+      await api.login('0900000003', 'password');
+      api.beforeLogout = () async {
+        cleanup++;
+        await api.unregisterDevice('fake-fid');
+      };
+      await api.logout();
+      expect(api.session, isNull);
+      expect(cleanup, 1);
+      await api.login('0900000003', 'password');
+      expect(api.session, isNotNull);
+      api.dispose();
+    },
+  );
   test('chat HTTP sends authenticated recipient and retry ID and loads cursor history', () async {
     var historyCalls = 0;
     final payload = {

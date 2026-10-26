@@ -5,12 +5,35 @@ import 'screens/worker_home_screen.dart';
 import 'screens/contractor_home_screen.dart';
 import 'services/api_service.dart';
 import 'theme/app_theme.dart';
+import 'services/push_notifications.dart';
+import 'screens/notifications_screen.dart';
+
+final _navigator = GlobalKey<NavigatorState>();
+final _messenger = GlobalKey<ScaffoldMessengerState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final api = ApiService();
   await api.restoreSession();
+  final push = PushNotifications.instance;
+  await push.initialize();
+  push.attach(api);
+  push.onOpen = () {
+    if (api.session != null) {
+      _navigator.currentState?.push(
+        MaterialPageRoute<void>(builder: (_) => NotificationsScreen(api: api)),
+      );
+    }
+  };
+  push.onForeground = (title) {
+    if (api.session != null) {
+      _messenger.currentState?.showSnackBar(SnackBar(content: Text(title)));
+    }
+  };
   runApp(ThoXayApp(api: api));
+  WidgetsBinding.instance.addPostFrameCallback(
+    (_) => push.openInitialIfNeeded(),
+  );
 }
 
 class ThoXayApp extends StatelessWidget {
@@ -19,6 +42,8 @@ class ThoXayApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) => MaterialApp(
     title: 'Thợ Xây',
+    navigatorKey: _navigator,
+    scaffoldMessengerKey: _messenger,
     debugShowCheckedModeBanner: false,
     theme: AppTheme.light,
     home: ListenableBuilder(

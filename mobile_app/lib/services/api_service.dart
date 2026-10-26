@@ -8,6 +8,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../models/models.dart';
 import '../models/chat_message.dart';
+import '../models/app_notification.dart';
 import 'chat_connection.dart';
 
 class ApiException implements Exception {
@@ -29,6 +30,8 @@ class ApiService extends ChangeNotifier {
   static const _storageKey = 'thoxay.session';
   final http.Client _client;
   final String baseUrl;
+  Future<void> Function()? beforeLogout;
+  bool _loggingOut = false;
   AuthSession? _session;
   AuthSession? get session => _session;
 
@@ -91,10 +94,55 @@ class ApiService extends ChangeNotifier {
   }
 
   Future<void> logout() async {
-    _session = null;
-    notifyListeners();
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_storageKey);
+    if (_loggingOut) return;
+    _loggingOut = true;
+    try {
+      await beforeLogout?.call().timeout(const Duration(seconds: 6));
+    } on Object {
+      /* Logout must remain available offline. */
+    }
+    try {
+      _session = null;
+      notifyListeners();
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_storageKey);
+    } finally {
+      _loggingOut = false;
+    }
+  }
+
+  Future<NotificationPage> notifications({int? beforeId}) async {
+    final data = await _request(
+      'GET',
+      '/api/notifications${beforeId == null ? '' : '?beforeId=$beforeId'}',
+    ) as Map<String, dynamic>;
+    return NotificationPage(
+      (data['items'] as List)
+          .map((n) => AppNotification.fromJson(n as Map<String, dynamic>))
+          .toList(),
+      data['hasMore'] as bool,
+      (data['unreadCount'] as num).toInt(),
+    );
+  }
+
+  Future<void> readNotification(int id) async {
+    await _request('PUT', '/api/notifications/$id/read');
+  }
+
+  Future<void> readAllNotifications() async {
+    await _request('PUT', '/api/notifications/read-all');
+  }
+
+  Future<void> registerDevice(String token) async {
+    await _request('PUT', '/api/notifications/devices', body: {'token': token});
+  }
+
+  Future<void> unregisterDevice(String token) async {
+    await _request(
+      'POST',
+      '/api/notifications/devices/unregister',
+      body: {'token': token},
+    );
   }
 
   Future<List<Job>> nearby(

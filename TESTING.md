@@ -6,7 +6,7 @@
 .\mvnw.cmd -B verify
 ```
 
-31 kiểm thử JUnit/Spring Boot dùng H2 mặc định, chạy với Spring Security và JWT
+35 kiểm thử JUnit/Spring Boot dùng H2 mặc định, chạy với Spring Security và JWT
 thật: đăng ký/đăng nhập, BCrypt, chống đăng ký ADMIN, token giả/thiếu, tài khoản
 bị khóa, phân quyền, Haversine, dữ liệu sai, ứng tuyển trùng, lịch sử, duyệt,
 hai giao dịch duyệt đồng thời cho một vị trí, render Thymeleaf, CSRF, xác thực
@@ -44,7 +44,7 @@ flutter test
 flutter build web --release
 ```
 
-30 kiểm thử Dart/widget: lưu/khôi phục phiên, đính JWT, xóa phiên khi 401,
+33 kiểm thử Dart/widget: lưu/khôi phục phiên, đính JWT, xóa phiên khi 401,
 validation đăng nhập/đăng ký, tìm việc theo vị trí được cấp cho test, ứng tuyển
 và lịch sử, duyệt thợ, validation form đăng công trình. Widget test dùng API
 và vị trí giả lập, không truy cập GPS thật hay gửi yêu cầu ra mạng.
@@ -82,6 +82,18 @@ Nghiệm thu: dùng hai tài khoản Thầu–Thợ, đăng việc → ứng tuy
 gửi thêm tin từ thiết bị kia, bật lại mạng và kiểm tra tin được tải bù đúng thứ
 tự. Khóa một tài khoản trong Admin và kiểm tra socket bị đóng, không gửi được
 tin mới. Đóng/mở lại Chat để xác nhận lịch sử đã được lưu.
+
+## Thông báo và FCM
+
+NotificationApiTest kiểm tra lịch sử riêng/phân trang/đã đọc, không trùng sự
+kiện khi duyệt lại, không đưa nội dung chat lên push, rebind thiết bị sau đổi
+tài khoản, không thu hồi thiết bị của người khác, rollback không gửi, retry
+tối đa ba lần, xóa đăng ký hỏng và ngừng push cho tài khoản bị khóa. Gateway
+Firebase được giả lập để test không gửi tới thiết bị thật/không cần khóa cloud.
+Flutter kiểm tra inbox/phân trang/đọc tất cả, foreground cập nhật, dọn listener,
+thiếu cấu hình được giải thích và đăng xuất không lặp khi unregister trả 401.
+Push tới điện thoại thật cần cấu hình và kiểm tra theo `docs/FIREBASE.md`;
+chưa thể nghiệm thu gửi thật khi chưa có dự án/credential/thiết bị Firebase.
 
 ## Giao diện và khả năng truy cập
 

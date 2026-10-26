@@ -19,6 +19,7 @@ public class AdminService {
     private final JobApplicationRepository applications;
     private final CurrentUser current;
     private final WorkerRatingService ratings;
+    private final vn.thoxay.service.NotificationService notifications;
     private final jakarta.persistence.EntityManager entityManager;
 
     public record AdminUser(Long id, String fullName, String phoneNumber, String role,
@@ -52,7 +53,11 @@ public class AdminService {
         if (!java.util.Objects.equals(expectedFrontImage, user.getCccdFrontImage())
             || !java.util.Objects.equals(expectedBackImage, user.getCccdBackImage()))
             throw new ApiException(HttpStatus.CONFLICT, "Ảnh CCCD đã thay đổi. Hãy tải lại và kiểm tra cả hai ảnh mới trước khi xác thực.");
-        user.setVerified(true);
+        if (!user.isVerified()) {
+            user.setVerified(true);
+            notifications.create(user, null, "kyc:" + id + ":" + vn.thoxay.service.NotificationService.hash(expectedFrontImage + "\n" + expectedBackImage),
+                "KYC_VERIFIED", "Danh tính đã được xác thực", "Hồ sơ CCCD hai mặt của bạn đã được quản trị viên xác thực thành công.");
+        }
     }
     @Transactional
     public void toggleActive(Long id) {
