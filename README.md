@@ -420,6 +420,14 @@ GPS; Offline không tìm việc quanh đây và Backend chặn ứng tuyển/duy
 việc, không tự nhận đơn hoặc theo dõi vị trí nền. Các thao tác duyệt/ứng tuyển
 và đổi trạng thái được khóa để tránh dùng dữ liệu trạng thái cũ.
 
+## Thu nhập, Ví và Ký quỹ
+
+Menu ví trên Flutter mở Thu nhập theo Ngày/Tuần/Tháng hoặc Ví điện tử.
+Chủ thầu thanh toán tiền công, tip và thưởng sau khi hoàn thành công trình;
+Admin đối soát nạp/rút tại `/admin/wallet`. Chi tiết quy tắc, API, hạn mức và
+migration 010 trong [docs/WALLET.md](docs/WALLET.md). Chưa có cổng thanh toán
+ngân hàng tự động; nạp/rút là yêu cầu chờ đối soát thực tế.
+
 ## Giao diện trình bày đồ án
 
 Flutter dùng theme xanh ngọc thống nhất cho form, nút, điều hướng và chat.

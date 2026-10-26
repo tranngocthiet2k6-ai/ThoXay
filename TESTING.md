@@ -6,7 +6,7 @@
 .\mvnw.cmd -B verify
 ```
 
-48 kiểm thử JUnit/Spring Boot dùng H2 mặc định, chạy với Spring Security và JWT
+58 kiểm thử JUnit/Spring Boot dùng H2 mặc định, chạy với Spring Security và JWT
 thật: đăng ký/đăng nhập, BCrypt, chống đăng ký ADMIN, token giả/thiếu, tài khoản
 bị khóa, phân quyền, Haversine, dữ liệu sai, ứng tuyển trùng, lịch sử, duyệt,
 hai giao dịch duyệt đồng thời cho một vị trí, render Thymeleaf, CSRF, xác thực
@@ -41,6 +41,20 @@ createdb -U postgres tho_xay_test
 
 ## Flutter
 
+Module ví bổ sung 10 kiểm thử Backend: nạp chờ đối soát, duyệt đồng thời một
+lần, mã ngân hàng không dùng lại, rút cạnh tranh không âm tiền, giữ chỗ và hoàn
+giữ chỗ, ký quỹ idempotent, thanh toán đúng nguồn tiền và chỉ công trình hợp
+lệ, ranh giới thời gian Việt Nam, riêng tư/hạn mức/số nguyên, bảo toàn sổ tiền
+khi xóa bài, render và POST form Admin có CSRF. Bốn kiểm thử Flutter kiểm tra
+cảnh báo ký quỹ, phân trang, thử lại cùng mã yêu cầu, đổi kỳ thu nhập và xác
+nhận ngày công/tip/thưởng trước thanh toán.
+
+Nghiệm thu HTTP local dùng ba tài khoản tạm gồm Admin thử: Online/Offline,
+nạp chờ duyệt và duyệt lại, hoàn thành rồi trả tiền công/tip/thưởng, chuyển
+ký quỹ, rút giữ chỗ, từ chối hoàn tiền và đối soát khoản rút, thống kê và sổ
+giao dịch đều đạt. Chỉ dùng khoản tiền kiểm thử tổng hợp; không chuyển ngân
+hàng thật. Các tài khoản và giao dịch thử được xóa theo đúng ID sau kiểm tra.
+
 Hủy việc bao phủ lý do sai, sai vai trò/chủ đơn/trạng thái, hai yêu cầu hủy
 đồng thời, hủy đua với hoàn thành, giảm bậc, điểm sàn 0, thu hồi liên lạc/chat,
 tuyển người thay thế và hoàn thành không chấm thợ đã hủy, giữ điểm phạt sau
@@ -65,7 +79,7 @@ flutter test
 flutter build web --release
 ```
 
-39 kiểm thử Dart/widget: lưu/khôi phục phiên, đính JWT, xóa phiên khi 401,
+43 kiểm thử Dart/widget: lưu/khôi phục phiên, đính JWT, xóa phiên khi 401,
 validation đăng nhập/đăng ký, tìm việc theo vị trí được cấp cho test, ứng tuyển
 và lịch sử, duyệt thợ, validation form đăng công trình. Widget test dùng API
 và vị trí giả lập, không truy cập GPS thật hay gửi yêu cầu ra mạng.

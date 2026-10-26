@@ -83,6 +83,8 @@ try {
         if ($LASTEXITCODE -ne 0) { throw 'Cannot apply the application cancellation migration.' }
         & (Join-Path $pgBin 'psql.exe') -h 127.0.0.1 -p 55432 -U postgres -d tho_xay_db -v ON_ERROR_STOP=1 -c 'SET client_min_messages=WARNING' -f (Join-Path $projectRoot 'migrations\009_worker_availability.sql')
         if ($LASTEXITCODE -ne 0) { throw 'Cannot apply the availability migration.' }
+        & (Join-Path $pgBin 'psql.exe') -h 127.0.0.1 -p 55432 -U postgres -d tho_xay_db -v ON_ERROR_STOP=1 -c 'SET client_min_messages=WARNING' -f (Join-Path $projectRoot 'migrations\010_wallet_earnings.sql')
+        if ($LASTEXITCODE -ne 0) { throw 'Cannot apply the wallet migration.' }
     }
 
     if (-not (Test-Path -LiteralPath $localConfiguration)) {

@@ -15,6 +15,8 @@ import '../widgets/empty_state.dart';
 import '../widgets/feature_banner.dart';
 import '../widgets/notification_button.dart';
 import 'worker_profile_screen.dart';
+import '../widgets/finance_menu.dart';
+import 'job_payments_screen.dart';
 
 class ContractorHomeScreen extends StatefulWidget {
   const ContractorHomeScreen({super.key, required this.api});
@@ -91,6 +93,7 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
     appBar: AppBar(
       title: const Text('Công trình của tôi'),
       actions: [
+        FinanceMenu(api: widget.api),
         NotificationButton(api: widget.api),
         IconButton(
           tooltip: 'Hồ sơ & CCCD',
@@ -168,6 +171,19 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
                         spacing: 12,
                         runSpacing: 8,
                         children: [
+                          if (job.status == 'COMPLETED')
+                            OutlinedButton.icon(
+                              onPressed: () => Navigator.of(context).push(
+                                MaterialPageRoute<void>(
+                                  builder: (_) => JobPaymentsScreen(
+                                    api: widget.api,
+                                    job: job,
+                                  ),
+                                ),
+                              ),
+                              icon: const Icon(Icons.payments_outlined),
+                              label: const Text('Thanh toán thu nhập'),
+                            ),
                           FilledButton.tonal(
                             onPressed: () => _applicants(job),
                             child: const Text('Xem & duyệt thợ'),

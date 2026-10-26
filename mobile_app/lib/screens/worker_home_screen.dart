@@ -14,6 +14,7 @@ import '../widgets/empty_state.dart';
 import '../widgets/feature_banner.dart';
 import '../widgets/notification_button.dart';
 import '../widgets/cancel_work_dialog.dart';
+import '../widgets/finance_menu.dart';
 
 class WorkerHomeScreen extends StatefulWidget {
   const WorkerHomeScreen({super.key, required this.api, this.location});
@@ -180,6 +181,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
     appBar: AppBar(
       title: const Text('Thợ Xây'),
       actions: [
+        FinanceMenu(api: widget.api, worker: true),
         NotificationButton(api: widget.api),
         IconButton(
           tooltip: 'Hồ sơ & CCCD',

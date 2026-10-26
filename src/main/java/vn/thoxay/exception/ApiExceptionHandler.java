@@ -13,7 +13,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@RestControllerAdvice(basePackages = "vn.thoxay.controller")
+@RestControllerAdvice(annotations = RestController.class)
 public class ApiExceptionHandler {
     @ExceptionHandler(AccountLockedException.class)
     ResponseEntity<?> locked(AccountLockedException e) {

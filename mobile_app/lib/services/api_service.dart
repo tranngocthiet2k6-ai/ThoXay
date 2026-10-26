@@ -11,6 +11,7 @@ import '../models/chat_message.dart';
 import '../models/app_notification.dart';
 import '../models/worker_profile.dart';
 import '../models/reputation.dart';
+import '../models/wallet.dart';
 import 'chat_connection.dart';
 
 class ApiException implements Exception {
@@ -22,6 +23,61 @@ class ApiException implements Exception {
 }
 
 class ApiService extends ChangeNotifier {
+  Future<WalletBalance> wallet() async => WalletBalance.fromJson(
+    await _request('GET', '/api/wallet') as Map<String, dynamic>,
+  );
+  Future<WalletPage<WalletEntry>> walletEntries({int? beforeId}) async {
+    final j = await _request(
+      'GET',
+      '/api/wallet/transactions${beforeId == null ? '' : '?beforeId=$beforeId'}',
+    ) as Map<String, dynamic>;
+    return WalletPage(
+      (j['items'] as List)
+          .map((e) => WalletEntry.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      j['hasMore'] as bool,
+    );
+  }
+
+  Future<WalletPage<WalletRequest>> walletRequests({int? beforeId}) async {
+    final j = await _request(
+      'GET',
+      '/api/wallet/requests${beforeId == null ? '' : '?beforeId=$beforeId'}',
+    ) as Map<String, dynamic>;
+    return WalletPage(
+      (j['items'] as List)
+          .map((e) => WalletRequest.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      j['hasMore'] as bool,
+    );
+  }
+
+  Future<void> createWalletRequest(Map<String, dynamic> input) async {
+    await _request('POST', '/api/wallet/requests', body: input);
+  }
+
+  Future<void> transferEscrow(Map<String, dynamic> input) async {
+    await _request('POST', '/api/wallet/escrow', body: input);
+  }
+
+  Future<Earnings> earnings(
+    String period,
+    DateTime date,
+  ) async => Earnings.fromJson(
+    await _request(
+      'GET',
+      '/api/wallet/earnings?period=$period&date=${date.toIso8601String().split('T').first}',
+    ) as Map<String, dynamic>,
+  );
+  Future<List<JobPayment>> jobPayments(int id) async =>
+      (await _request('GET', '/api/wallet/jobs/$id/payments') as List)
+          .map((e) => JobPayment.fromJson(e as Map<String, dynamic>))
+          .toList();
+  Future<JobPayment> payWorker(Map<String, dynamic> input) async =>
+      JobPayment.fromJson(
+        await _request('POST', '/api/wallet/job-payments', body: input)
+            as Map<String, dynamic>,
+      );
   Future<bool> availability() async =>
       (await _request('GET', '/api/users/me/availability')
               as Map<String, dynamic>)['available']
