@@ -362,6 +362,27 @@ hoặc null), `experienceYears`, `experienceSummary`, `skills`, `projectImages`.
 thợ đang hoạt động; không trả ngày sinh, điện thoại hoặc ảnh CCCD. Chủ thầu mở
 **Xem hồ sơ thợ** trong danh sách ứng viên. Migration: `006_extended_profiles.sql`.
 
+## Uy tín và xếp hạng
+
+Áp dụng `migrations/007_reputation.sql` sau migration 006 (script local tự chạy).
+Thợ khởi đầu 100 điểm; hoàn thành công trình cộng 2, tối đa 100. Điểm sao 1–5
+do chủ công trình chốt khi hoàn thành, lấy trung bình từ các đánh giá thực tế.
+Gửi lại cùng đánh giá không cộng điểm lần nữa. Dữ liệu cũ được tính lại số
+công trình và sao; không cộng thưởng ngược cho công trình đã hoàn thành.
+
+| Bậc | Điều kiện |
+| --- | --- |
+| Bạc | Bậc khởi đầu hoặc chưa đủ điều kiện bậc cao hơn |
+| Vàng | Uy tín ≥80, sao ≥4.0, ít nhất 5 công trình đã được đánh giá |
+| Kim Cương | Uy tín ≥95, sao ≥4.7, ít nhất 20 công trình và CCCD đã xác thực |
+
+`GET /api/workers/leaderboard?limit=20` xếp thợ đang hoạt động, đã có đánh giá,
+theo bậc, uy tín, sao, số công trình và ID. `GET /api/workers/{id}/reviews`
+có phân trang `beforeId/limit`; `GET /api/users/me/reputation` là lịch sử
+điểm của chính tài khoản. Flutter mở các mục này từ Hồ sơ. Thay đổi danh tính
+làm mất KYC và tính lại bậc; xóa công trình tính lại số công trình/sao/bậc,
+nhưng nhật ký điểm đã ghi vẫn được giữ với tên công trình tại thời điểm phát sinh.
+
 ## Giao diện trình bày đồ án
 
 Flutter dùng theme xanh ngọc thống nhất cho form, nút, điều hướng và chat.

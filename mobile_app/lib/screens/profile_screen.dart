@@ -4,6 +4,9 @@ import '../models/models.dart';
 import '../services/api_service.dart';
 import '../widgets/profile_editor.dart';
 import '../widgets/portfolio_gallery.dart';
+import '../widgets/tier_badge.dart';
+import 'leaderboard_screen.dart';
+import 'reputation_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key, required this.api});
@@ -92,112 +95,143 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ],
     ),
-    body: ListView(
+    body: SingleChildScrollView(
       padding: const EdgeInsets.all(24),
-      children: [
-        if (_loading) const LinearProgressIndicator(),
-        if (_profile != null) ...[
-          Text(
-            _profile!.fullName,
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 8),
-          Text(_profile!.phoneNumber),
-          const SizedBox(height: 8),
-          Text('Đánh giá trung bình: ${_profile!.rating.toStringAsFixed(1)}/5'),
-          const SizedBox(height: 12),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Chip(
-              avatar: Icon(
-                _profile!.verified ? Icons.verified : Icons.hourglass_empty,
-              ),
-              label: Text(
-                _profile!.verified ? 'Đã xác thực CCCD' : 'Chưa xác thực CCCD',
-              ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (_loading) const LinearProgressIndicator(),
+          if (_profile != null) ...[
+            Text(
+              _profile!.fullName,
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
-          ),
-          const SizedBox(height: 24),
-          Card(
-            child: ExpansionTile(
-              maintainState: true,
-              enabled: !_loading,
-              title: const Text('Thông tin cá nhân & kinh nghiệm'),
-              leading: const Icon(Icons.edit_outlined),
-              childrenPadding: const EdgeInsets.all(16),
-              children: [
-                ProfileEditor(
-                  api: widget.api,
-                  profile: _profile!,
-                  onBusy: (busy) {
-                    if (mounted) setState(() => _loading = busy);
-                  },
-                  onSaved: (person) => setState(() => _profile = person),
+            const SizedBox(height: 8),
+            Text(_profile!.phoneNumber),
+            if (_profile!.role == 'ROLE_WORKER') ...[
+              TierBadge(tier: _profile!.workerTier ?? 'SILVER'),
+              Text(
+                '${_profile!.reputationScore}/100 điểm uy tín · ${_profile!.completedJobs} công trình hoàn thành',
+              ),
+              TextButton.icon(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => ReputationScreen(api: widget.api),
+                  ),
                 ),
-              ],
+                icon: const Icon(Icons.history),
+                label: const Text('Lịch sử uy tín'),
+              ),
+            ],
+            TextButton.icon(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => LeaderboardScreen(api: widget.api),
+                ),
+              ),
+              icon: const Icon(Icons.leaderboard_outlined),
+              label: const Text('Bảng xếp hạng thợ'),
             ),
-          ),
-          if (_profile!.projectImages.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              'Đánh giá trung bình: ${_profile!.rating.toStringAsFixed(1)}/5',
+            ),
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Chip(
+                avatar: Icon(
+                  _profile!.verified ? Icons.verified : Icons.hourglass_empty,
+                ),
+                label: Text(
+                  _profile!.verified
+                      ? 'Đã xác thực CCCD'
+                      : 'Chưa xác thực CCCD',
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Card(
+              child: ExpansionTile(
+                maintainState: true,
+                enabled: !_loading,
+                title: const Text('Thông tin cá nhân & kinh nghiệm'),
+                leading: const Icon(Icons.edit_outlined),
+                childrenPadding: const EdgeInsets.all(16),
+                children: [
+                  ProfileEditor(
+                    api: widget.api,
+                    profile: _profile!,
+                    onBusy: (busy) {
+                      if (mounted) setState(() => _loading = busy);
+                    },
+                    onSaved: (person) => setState(() => _profile = person),
+                  ),
+                ],
+              ),
+            ),
+            if (_profile!.projectImages.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              PortfolioGallery(images: _profile!.projectImages),
+            ],
+            const SizedBox(height: 24),
+            const Text(
+              'Cung cấp đủ ảnh mặt trước và mặt sau CCCD bằng liên kết HTTPS. Mỗi lần cập nhật cần được quản trị viên xác thực lại.',
+            ),
             const SizedBox(height: 16),
-            PortfolioGallery(images: _profile!.projectImages),
+            Form(
+              key: _form,
+              child: Column(
+                children: [
+                  TextFormField(
+                    key: const ValueKey('cccd-front-input'),
+                    controller: _frontImage,
+                    enabled: !_loading,
+                    maxLength: 500,
+                    keyboardType: TextInputType.url,
+                    decoration: const InputDecoration(
+                      labelText: 'Liên kết ảnh mặt trước CCCD (HTTPS)',
+                    ),
+                    validator: (v) =>
+                        RegExp(r'^https://[^\s]+$').hasMatch(v?.trim() ?? '')
+                        ? null
+                        : 'Nhập liên kết HTTPS hợp lệ cho mặt trước',
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    key: const ValueKey('cccd-back-input'),
+                    controller: _backImage,
+                    enabled: !_loading,
+                    maxLength: 500,
+                    keyboardType: TextInputType.url,
+                    decoration: const InputDecoration(
+                      labelText: 'Liên kết ảnh mặt sau CCCD (HTTPS)',
+                    ),
+                    validator: (v) =>
+                        RegExp(r'^https://[^\s]+$').hasMatch(v?.trim() ?? '')
+                        ? null
+                        : 'Nhập liên kết HTTPS hợp lệ cho mặt sau',
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            FilledButton.icon(
+              onPressed: _loading ? null : _save,
+              icon: const Icon(Icons.badge_outlined),
+              label: const Text('Cập nhật CCCD'),
+            ),
           ],
-          const SizedBox(height: 24),
-          const Text(
-            'Cung cấp đủ ảnh mặt trước và mặt sau CCCD bằng liên kết HTTPS. Mỗi lần cập nhật cần được quản trị viên xác thực lại.',
-          ),
-          const SizedBox(height: 16),
-          Form(
-            key: _form,
-            child: Column(
-              children: [
-                TextFormField(
-                  key: const ValueKey('cccd-front-input'),
-                  controller: _frontImage,
-                  enabled: !_loading,
-                  maxLength: 500,
-                  keyboardType: TextInputType.url,
-                  decoration: const InputDecoration(
-                    labelText: 'Liên kết ảnh mặt trước CCCD (HTTPS)',
-                  ),
-                  validator: (v) =>
-                      RegExp(r'^https://[^\s]+$').hasMatch(v?.trim() ?? '')
-                      ? null
-                      : 'Nhập liên kết HTTPS hợp lệ cho mặt trước',
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  key: const ValueKey('cccd-back-input'),
-                  controller: _backImage,
-                  enabled: !_loading,
-                  maxLength: 500,
-                  keyboardType: TextInputType.url,
-                  decoration: const InputDecoration(
-                    labelText: 'Liên kết ảnh mặt sau CCCD (HTTPS)',
-                  ),
-                  validator: (v) =>
-                      RegExp(r'^https://[^\s]+$').hasMatch(v?.trim() ?? '')
-                      ? null
-                      : 'Nhập liên kết HTTPS hợp lệ cho mặt sau',
-                ),
-              ],
+          if (_error != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 16),
+              child: Text(
+                _error!,
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-          FilledButton.icon(
-            onPressed: _loading ? null : _save,
-            icon: const Icon(Icons.badge_outlined),
-            label: const Text('Cập nhật CCCD'),
-          ),
         ],
-        if (_error != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 16),
-            child: Text(
-              _error!,
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
-            ),
-          ),
-      ],
+      ),
     ),
   );
 }

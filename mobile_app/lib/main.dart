@@ -16,6 +16,15 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final api = ApiService();
   await api.restoreSession();
+  api.addListener(() {
+    if (api.session == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (api.session == null) {
+          _navigator.currentState?.popUntil((route) => route.isFirst);
+        }
+      });
+    }
+  });
   final push = PushNotifications.instance;
   await push.initialize();
   push.attach(api);

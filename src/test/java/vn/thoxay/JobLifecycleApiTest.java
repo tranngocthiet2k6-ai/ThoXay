@@ -92,6 +92,7 @@ class JobLifecycleApiTest {
     }
 
     @Test void concurrentDifferentJobsForSameWorkerKeepCorrectAverage() throws Exception {
+        worker.setReputationScore(80); users.saveAndFlush(worker);
         Job first = acceptedJob(owner, "Đồng thời A"), second = acceptedJob(outsider, "Đồng thời B");
         ExecutorService pool = Executors.newFixedThreadPool(2);
         CountDownLatch start = new CountDownLatch(1);
@@ -101,6 +102,7 @@ class JobLifecycleApiTest {
             start.countDown();
             assertThat(List.of(a.get(15, TimeUnit.SECONDS), b.get(15, TimeUnit.SECONDS))).containsOnly(200);
             assertThat(users.findById(worker.getId()).orElseThrow().getRating()).isEqualTo(3.0);
+            assertThat(users.findById(worker.getId()).orElseThrow().getReputationScore()).isEqualTo(84);
         } finally { pool.shutdownNow(); }
     }
 

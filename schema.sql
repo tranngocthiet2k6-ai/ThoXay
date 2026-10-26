@@ -14,6 +14,10 @@ CREATE TABLE IF NOT EXISTS users (
   cccd_front_image VARCHAR(500),
   cccd_back_image VARCHAR(500),
   rating DOUBLE PRECISION NOT NULL DEFAULT 5.0 CHECK (rating BETWEEN 0 AND 5),
+  reputation_score INTEGER NOT NULL DEFAULT 100 CHECK (reputation_score BETWEEN 0 AND 100),
+  completed_jobs INTEGER NOT NULL DEFAULT 0,
+  cancelled_jobs INTEGER NOT NULL DEFAULT 0,
+  worker_tier VARCHAR(12) NOT NULL DEFAULT 'SILVER',
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT chk_users_verified_cccd_faces CHECK (NOT is_verified OR
@@ -39,6 +43,7 @@ CREATE TABLE IF NOT EXISTS job_applications (
   worker_id BIGINT NOT NULL REFERENCES users(id),
   status VARCHAR(30) NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING','ACCEPTED','REJECTED')),
   worker_rating INTEGER CONSTRAINT chk_worker_rating CHECK (worker_rating IS NULL OR (worker_rating BETWEEN 1 AND 5 AND status = 'ACCEPTED')),
+  reviewed_at TIMESTAMPTZ,
   applied_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   UNIQUE (job_id, worker_id)
 );
@@ -84,6 +89,15 @@ CREATE TABLE IF NOT EXISTS user_project_images (
   sort_order INTEGER NOT NULL, image_url VARCHAR(500) NOT NULL,
   PRIMARY KEY(user_id,sort_order)
 );
+CREATE TABLE IF NOT EXISTS reputation_events (
+  id BIGSERIAL PRIMARY KEY, user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  job_id BIGINT REFERENCES jobs(id) ON DELETE SET NULL,
+  application_id BIGINT REFERENCES job_applications(id) ON DELETE SET NULL,
+  job_title VARCHAR(200) NOT NULL, type VARCHAR(30) NOT NULL, delta INTEGER NOT NULL,
+  score_after INTEGER NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(application_id,type)
+);
+CREATE INDEX IF NOT EXISTS idx_reputation_user ON reputation_events(user_id,id);
 -- Demo-only password for all three accounts: password
 INSERT INTO users (phone_number,password,full_name,role,is_verified)
 VALUES

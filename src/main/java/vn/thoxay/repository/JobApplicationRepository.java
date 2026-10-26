@@ -21,4 +21,11 @@ public interface JobApplicationRepository extends JpaRepository<JobApplication, 
         + "and a.status = vn.thoxay.entity.ApplicationStatus.ACCEPTED "
         + "and a.job.status = vn.thoxay.entity.JobStatus.COMPLETED")
     Double averageRatingByWorkerId(@Param("id") Long id);
+    @Query("select count(a) from JobApplication a where a.worker.id = :id and a.workerRating is not null "
+        + "and a.status = vn.thoxay.entity.ApplicationStatus.ACCEPTED and a.job.status = vn.thoxay.entity.JobStatus.COMPLETED")
+    long completedRatings(@Param("id") Long id);
+    @Query("select a from JobApplication a where a.worker.id = :id and a.workerRating is not null "
+        + "and a.status = vn.thoxay.entity.ApplicationStatus.ACCEPTED and a.job.status = vn.thoxay.entity.JobStatus.COMPLETED "
+        + "and a.id < :before order by a.id desc")
+    List<JobApplication> reviews(@Param("id") Long id, @Param("before") long before, org.springframework.data.domain.Pageable page);
 }

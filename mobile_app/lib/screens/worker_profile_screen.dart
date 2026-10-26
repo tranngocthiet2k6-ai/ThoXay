@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../models/worker_profile.dart';
 import '../services/api_service.dart';
 import '../widgets/portfolio_gallery.dart';
+import '../widgets/tier_badge.dart';
+import '../widgets/worker_reviews.dart';
 
 class WorkerProfileScreen extends StatefulWidget {
   const WorkerProfileScreen({
@@ -63,11 +65,17 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                   spacing: 8,
                   runSpacing: 8,
                   children: [
+                    TierBadge(tier: person.workerTier),
+                    Chip(label: Text('${person.reputationScore}/100 uy tín')),
                     Chip(
                       label: Text('${person.experienceYears} năm kinh nghiệm'),
                     ),
                     Chip(
-                      label: Text('${person.rating.toStringAsFixed(1)}/5 sao'),
+                      label: Text(
+                        person.completedJobs == 0
+                            ? 'Chưa có đánh giá'
+                            : '${person.rating.toStringAsFixed(1)}/5 sao · ${person.completedJobs} công trình',
+                      ),
                     ),
                     if (person.verified)
                       const Chip(
@@ -95,6 +103,8 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                 ),
                 const SizedBox(height: 24),
                 PortfolioGallery(images: person.projectImages),
+                const SizedBox(height: 24),
+                WorkerReviews(api: widget.api, workerId: person.id),
               ],
             ],
           ),

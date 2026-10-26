@@ -10,6 +10,7 @@ import '../models/models.dart';
 import '../models/chat_message.dart';
 import '../models/app_notification.dart';
 import '../models/worker_profile.dart';
+import '../models/reputation.dart';
 import 'chat_connection.dart';
 
 class ApiException implements Exception {
@@ -214,6 +215,36 @@ class ApiService extends ChangeNotifier {
         await _request('GET', '/api/workers/$workerId/profile')
             as Map<String, dynamic>,
       );
+  Future<List<WorkerRank>> leaderboard() async =>
+      (await _request('GET', '/api/workers/leaderboard') as List)
+          .map((j) => WorkerRank.fromJson(j as Map<String, dynamic>))
+          .toList();
+  Future<ReviewPage> workerReviews(int id, {int? beforeId}) async {
+    final j = await _request(
+      'GET',
+      '/api/workers/$id/reviews${beforeId == null ? '' : '?beforeId=$beforeId'}',
+    ) as Map<String, dynamic>;
+    return ReviewPage(
+      (j['items'] as List)
+          .map((r) => WorkerReview.fromJson(r as Map<String, dynamic>))
+          .toList(),
+      j['hasMore'] as bool,
+    );
+  }
+
+  Future<ReputationPage> reputationHistory({int? beforeId}) async {
+    final j = await _request(
+      'GET',
+      '/api/users/me/reputation${beforeId == null ? '' : '?beforeId=$beforeId'}',
+    ) as Map<String, dynamic>;
+    return ReputationPage(
+      (j['items'] as List)
+          .map((r) => ReputationEntry.fromJson(r as Map<String, dynamic>))
+          .toList(),
+      j['hasMore'] as bool,
+    );
+  }
+
   Future<MessagePage> messageHistory(
     int jobId,
     int peerId, {

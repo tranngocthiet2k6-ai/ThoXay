@@ -22,6 +22,7 @@ public class JobApplication {
     private ApplicationStatus status = ApplicationStatus.PENDING;
     @Column(name = "worker_rating")
     private Integer workerRating;
+    @Column(name = "reviewed_at") private java.time.Instant reviewedAt;
     @Column(name = "applied_at", nullable = false, updatable = false)
     private LocalDateTime appliedAt = LocalDateTime.now();
 }

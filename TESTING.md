@@ -6,7 +6,7 @@
 .\mvnw.cmd -B verify
 ```
 
-38 kiểm thử JUnit/Spring Boot dùng H2 mặc định, chạy với Spring Security và JWT
+41 kiểm thử JUnit/Spring Boot dùng H2 mặc định, chạy với Spring Security và JWT
 thật: đăng ký/đăng nhập, BCrypt, chống đăng ký ADMIN, token giả/thiếu, tài khoản
 bị khóa, phân quyền, Haversine, dữ liệu sai, ứng tuyển trùng, lịch sử, duyệt,
 hai giao dịch duyệt đồng thời cho một vị trí, render Thymeleaf, CSRF, xác thực
@@ -19,6 +19,12 @@ cho cùng thợ, tính lại điểm khi xóa và bộ lọc loại việc/lươ
 KYC hai mặt kiểm tra các vai trò kể cả Admin, mặc định chưa xác thực khi insert
 SQL, CHECK chống verified=true với ảnh thiếu, cập nhật thiếu/HTTP bị từ chối
 nguyên tử, ảnh đổi làm mất xác thực và chống duyệt snapshot cũ của từng mặt.
+
+Uy tín kiểm tra các ngưỡng bậc, KYC của Kim Cương, giới hạn 100 điểm,
+cộng thưởng đúng một lần, hai công trình cùng hoàn thành không mất lượt cộng,
+nhật ký điểm riêng tư, đánh giá thực tế và loại tài khoản khóa/chưa được đánh
+giá/chủ thầu khỏi bảng xếp hạng. Widget test kiểm tra dữ liệu bậc và phân trang
+lịch sử cộng/trừ điểm.
 
 Để chạy cùng bộ kiểm thử trên PostgreSQL, dùng **database kiểm thử riêng**.
 Hibernate `create-drop` và các thao tác dọn dữ liệu trong test sẽ xóa dữ liệu
@@ -44,7 +50,7 @@ flutter test
 flutter build web --release
 ```
 
-35 kiểm thử Dart/widget: lưu/khôi phục phiên, đính JWT, xóa phiên khi 401,
+37 kiểm thử Dart/widget: lưu/khôi phục phiên, đính JWT, xóa phiên khi 401,
 validation đăng nhập/đăng ký, tìm việc theo vị trí được cấp cho test, ứng tuyển
 và lịch sử, duyệt thợ, validation form đăng công trình. Widget test dùng API
 và vị trí giả lập, không truy cập GPS thật hay gửi yêu cầu ra mạng.

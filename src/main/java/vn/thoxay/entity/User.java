@@ -47,6 +47,14 @@ public class User {
     private String cccdBackImage;
     @Column(nullable = false)
     private double rating = 5.0;
+    @Column(name = "reputation_score", nullable = false) @org.hibernate.annotations.ColumnDefault("100")
+    private int reputationScore = 100;
+    @Column(name = "completed_jobs", nullable = false) @org.hibernate.annotations.ColumnDefault("0")
+    private int completedJobs;
+    @Column(name = "cancelled_jobs", nullable = false) @org.hibernate.annotations.ColumnDefault("0")
+    private int cancelledJobs;
+    @Enumerated(EnumType.STRING) @Column(name = "worker_tier", nullable = false, length = 12) @org.hibernate.annotations.ColumnDefault("'SILVER'")
+    private WorkerTier workerTier = WorkerTier.SILVER;
     @Column(name = "is_active", nullable = false)
     private boolean active = true;
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -59,7 +67,9 @@ public class User {
     @PrePersist @PreUpdate
     private void enforceCccdVerification() {
         if (!hasCompleteCccd()) verified = false;
+        recalculateTier();
     }
+    public void recalculateTier() { workerTier = WorkerTier.of(this); }
 
     private boolean validCccdImage(String image) {
         return image != null && image.matches("https://[^\\s]+");

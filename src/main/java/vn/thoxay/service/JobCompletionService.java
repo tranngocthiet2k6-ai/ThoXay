@@ -19,6 +19,7 @@ public class JobCompletionService {
     private final CurrentUser current;
     private final WorkerRatingService ratings;
     private final NotificationService notifications;
+    private final ReputationService reputation;
 
     @Transactional
     public JobResponse complete(Long id, CompleteJobRequest request) {
@@ -46,12 +47,14 @@ public class JobCompletionService {
         List<User> workers = ratings.lockWorkers(workerIds);
         for (JobApplication application : accepted) {
             application.setWorkerRating(scores.get(application.getWorker().getId()));
+            application.setReviewedAt(java.time.Instant.now());
         }
         job.setStatus(JobStatus.COMPLETED);
         allApplications.stream().filter(a -> a.getStatus() == ApplicationStatus.PENDING)
             .forEach(a -> a.setStatus(ApplicationStatus.REJECTED));
         applications.flush();
         ratings.recompute(workers);
+        for (JobApplication a : accepted) reputation.apply(a.getWorker(), a, "COMPLETED", ReputationService.COMPLETION_BONUS);
         for (JobApplication a : accepted) notifications.create(a.getWorker(), job, "completed:" + a.getId(), "JOB_COMPLETED",
             "Công trình đã hoàn thành", "Bạn được đánh giá " + a.getWorkerRating() + "/5 sao cho công trình: " + job.getTitle());
         return JobResponse.of(job, null);
