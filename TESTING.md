@@ -6,7 +6,7 @@
 .\mvnw.cmd -B verify
 ```
 
-46 kiểm thử JUnit/Spring Boot dùng H2 mặc định, chạy với Spring Security và JWT
+48 kiểm thử JUnit/Spring Boot dùng H2 mặc định, chạy với Spring Security và JWT
 thật: đăng ký/đăng nhập, BCrypt, chống đăng ký ADMIN, token giả/thiếu, tài khoản
 bị khóa, phân quyền, Haversine, dữ liệu sai, ứng tuyển trùng, lịch sử, duyệt,
 hai giao dịch duyệt đồng thời cho một vị trí, render Thymeleaf, CSRF, xác thực
@@ -65,7 +65,7 @@ flutter test
 flutter build web --release
 ```
 
-38 kiểm thử Dart/widget: lưu/khôi phục phiên, đính JWT, xóa phiên khi 401,
+39 kiểm thử Dart/widget: lưu/khôi phục phiên, đính JWT, xóa phiên khi 401,
 validation đăng nhập/đăng ký, tìm việc theo vị trí được cấp cho test, ứng tuyển
 và lịch sử, duyệt thợ, validation form đăng công trình. Widget test dùng API
 và vị trí giả lập, không truy cập GPS thật hay gửi yêu cầu ra mạng.

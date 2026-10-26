@@ -9,6 +9,10 @@ import vn.thoxay.service.UserProfileService;
 @RestController @RequestMapping("/api/users/me") @RequiredArgsConstructor
 public class UserProfileController {
     private final UserProfileService profiles;
+    private final vn.thoxay.service.WorkerAvailabilityService availability;
+    public record AvailabilityRequest(@jakarta.validation.constraints.NotNull Boolean available) { }
+    @GetMapping("/availability") public vn.thoxay.service.WorkerAvailabilityService.State availability() { return availability.get(); }
+    @PutMapping("/availability") public vn.thoxay.service.WorkerAvailabilityService.State availability(@Valid @RequestBody AvailabilityRequest request) { return availability.update(request.available()); }
     private final vn.thoxay.service.ReputationService reputation;
     @GetMapping("/reputation") public vn.thoxay.service.ReputationService.History reputation(
         @RequestParam(required = false) @jakarta.validation.constraints.Positive Long beforeId,

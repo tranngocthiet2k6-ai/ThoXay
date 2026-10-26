@@ -17,11 +17,14 @@ public class ApplicationService {
     private final JobRepository jobs;
     private final CurrentUser current;
     private final NotificationService notifications;
+    private final WorkerRatingService workerLocks;
 
     @Transactional
     public ApplicationResponse apply(ApplicationRequest request) {
         User worker = current.require(Role.ROLE_WORKER);
         Job job = lockedJob(request.jobId());
+        worker = workerLocks.lockWorkers(List.of(worker.getId())).get(0);
+        if (!worker.isAvailable()) throw new ApiException(HttpStatus.CONFLICT, "Bạn đang Offline. Bật trạng thái nhận việc để ứng tuyển.");
         if (applications.existsByJobIdAndWorkerId(job.getId(), worker.getId()))
             throw new ApiException(HttpStatus.CONFLICT, "Bạn đã ứng tuyển công trình này");
         if ((job.getStatus() != JobStatus.OPEN && job.getStatus() != JobStatus.IN_PROGRESS) || !job.getContractor().isActive()
@@ -60,6 +63,8 @@ public class ApplicationService {
         if (job.getStatus() == JobStatus.COMPLETED || job.getStatus() == JobStatus.CANCELLED)
             throw new ApiException(HttpStatus.CONFLICT, "Công trình đã kết thúc");
         if (status == ApplicationStatus.ACCEPTED) {
+            User worker = workerLocks.lockWorkers(List.of(application.getWorker().getId())).get(0);
+            if (!worker.isAvailable()) throw new ApiException(HttpStatus.CONFLICT, "Thợ đã tạm ngưng nhận việc mới");
             if (!application.getWorker().isActive())
                 throw new ApiException(HttpStatus.CONFLICT, "Tài khoản thợ đã bị khóa");
             long accepted = applications.countByJobIdAndStatus(jobId, ApplicationStatus.ACCEPTED);

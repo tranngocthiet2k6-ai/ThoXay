@@ -30,6 +30,7 @@ public class AuthService {
         User user = new User(); user.setPhoneNumber(request.phoneNumber());
         user.setPassword(encoder.encode(request.password())); user.setFullName(request.fullName().trim());
         user.setRole(Role.valueOf(request.role()));
+        user.setAvailable(false);
         user.setCccdFrontImage(request.cccdFrontImage());
         user.setCccdBackImage(request.cccdBackImage());
         users.saveAndFlush(user);

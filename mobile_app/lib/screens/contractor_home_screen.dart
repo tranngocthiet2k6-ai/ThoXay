@@ -591,6 +591,9 @@ class _ApplicantsSheetState extends State<_ApplicantsSheet> {
                             ),
                           const SizedBox(height: 8),
                           Chip(label: Text(statusLabel(application.status))),
+                          if (!application.workerAvailable &&
+                              application.status == 'PENDING')
+                            const Text('Thợ đang tạm ngưng nhận việc'),
                           if (application.status == 'CANCELLED')
                             Text(
                               'Lý do hủy: ${application.cancellationReason ?? "Không có"}',
@@ -612,7 +615,8 @@ class _ApplicantsSheetState extends State<_ApplicantsSheet> {
                                           _loading ||
                                           accepted >=
                                               widget.job.requiredWorkers ||
-                                          !application.workerActive
+                                          !application.workerActive ||
+                                          !application.workerAvailable
                                       ? null
                                       : () => _decide(application, 'ACCEPTED'),
                                   child: Text(

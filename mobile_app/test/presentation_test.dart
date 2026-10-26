@@ -13,6 +13,8 @@ import 'package:tho_xay_mobile/widgets/loading_jobs.dart';
 import 'worker_home_test.dart' show FixedLocation;
 
 class DelayedJobsApi extends ApiService {
+  @override
+  Future<bool> availability() async => true;
   final result = Completer<List<Job>>();
   @override
   Future<List<JobApplication>> workerApplications() async => [];
@@ -38,6 +40,7 @@ void main() {
         ),
       );
       await tester.pump(const Duration(milliseconds: 200));
+      await tester.scrollUntilVisible(find.byType(LoadingJobs), 180);
       expect(find.byType(LoadingJobs), findsOneWidget);
       expect(find.byType(EmptyState), findsNothing);
       api.result.complete([]);
@@ -66,6 +69,10 @@ void main() {
         const ApiException('Không kết nối được máy chủ'),
       );
       await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text('Không kết nối được máy chủ'),
+        180,
+      );
       expect(find.text('Không kết nối được máy chủ'), findsOneWidget);
       expect(find.byType(EmptyState), findsNothing);
       expect(find.byType(LoadingJobs), findsNothing);

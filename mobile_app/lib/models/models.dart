@@ -87,6 +87,7 @@ class JobApplication {
     this.cancellationReason,
     this.cancelledAt,
     this.cancellationPenalty = 0,
+    this.workerAvailable = true,
   });
   final int id, workerId;
   final Job job;
@@ -96,6 +97,7 @@ class JobApplication {
   final String? cancellationReason;
   final DateTime? cancelledAt;
   final int cancellationPenalty;
+  final bool workerAvailable;
   final double workerRating;
   final bool workerVerified, workerActive;
   factory JobApplication.fromJson(Map<String, dynamic> json) => JobApplication(
@@ -114,6 +116,7 @@ class JobApplication {
         ? null
         : DateTime.parse(json['cancelledAt'] as String),
     cancellationPenalty: (json['cancellationPenalty'] as num?)?.toInt() ?? 0,
+    workerAvailable: json['workerAvailable'] as bool? ?? true,
   );
 }
 

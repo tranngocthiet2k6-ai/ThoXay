@@ -409,6 +409,17 @@ vào chính công trình đã hủy.
 Các mức điểm/ngưỡng là quy tắc mặc định của phiên bản đồ án, định nghĩa tại
 `ReputationService` và `WorkerTier`, hiển thị trong ứng dụng để người dùng biết.
 
+## Trạng thái nhận việc
+
+Migration `009_worker_availability.sql` lưu `users.is_available`. Tài khoản cũ
+giữ Online để không gián đoạn; đăng ký mới bắt đầu Offline. Thợ bật/tắt bằng
+`GET/PUT /api/users/me/availability` (body `{"available":true}`), chỉ thay đổi
+chính tài khoản thợ đang đăng nhập. Flutter đồng bộ trạng thái trước khi tìm
+GPS; Offline không tìm việc quanh đây và Backend chặn ứng tuyển/duyệt mới.
+Đơn đã nhận, nhắn tin và lịch sử được giữ. Bật Online thể hiện sẵn sàng nhận
+việc, không tự nhận đơn hoặc theo dõi vị trí nền. Các thao tác duyệt/ứng tuyển
+và đổi trạng thái được khóa để tránh dùng dữ liệu trạng thái cũ.
+
 ## Giao diện trình bày đồ án
 
 Flutter dùng theme xanh ngọc thống nhất cho form, nút, điều hướng và chat.

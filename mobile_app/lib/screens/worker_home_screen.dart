@@ -32,6 +32,8 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
   int _tab = 0;
   int? _applying;
   bool _cancelling = false;
+  bool? _available;
+  bool _availabilityBusy = false;
   bool _loading = false;
   bool _showMap = false;
   String? _error;
@@ -48,9 +50,16 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
       _error = null;
     });
     try {
+      final available = await widget.api.availability();
+      if (!mounted) return;
+      setState(() {
+        _available = available;
+        if (!available) _jobs = [];
+      });
       final history = await widget.api.workerApplications();
       if (!mounted) return;
       setState(() => _applications = history);
+      if (!available) return;
       if (_position == null || gps) {
         _position = await (widget.location ?? LocationService())
             .currentPosition();
@@ -77,6 +86,24 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
     if (point == null || !mounted) return;
     setState(() => _position = point);
     await _refresh();
+  }
+
+  Future<void> _setAvailable(bool value) async {
+    if (_availabilityBusy || _loading || _cancelling) return;
+    setState(() => _availabilityBusy = true);
+    try {
+      final saved = await widget.api.setAvailability(value);
+      if (!mounted) return;
+      setState(() {
+        _available = saved;
+        if (!saved) _jobs = [];
+      });
+      await _refresh();
+    } on ApiException catch (e) {
+      if (mounted) setState(() => _error = e.message);
+    } finally {
+      if (mounted) setState(() => _availabilityBusy = false);
+    }
   }
 
   Future<void> _apply(Job job) async {
@@ -191,6 +218,43 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                     : 20,
               ),
               children: [
+                Card(
+                  child: SwitchListTile(
+                    key: const ValueKey('availability-switch'),
+                    secondary: Icon(
+                      _available == true
+                          ? Icons.wifi_rounded
+                          : Icons.pause_circle_outline,
+                      color: _available == true
+                          ? const Color(0xff176b52)
+                          : Colors.blueGrey,
+                    ),
+                    title: Text(
+                      _available == null
+                          ? 'Trạng thái nhận việc'
+                          : _available!
+                          ? 'Đang nhận việc'
+                          : 'Tạm ngưng nhận việc',
+                    ),
+                    subtitle: Text(
+                      _available == null
+                          ? 'Làm mới để đồng bộ trạng thái tài khoản.'
+                          : _available!
+                          ? 'Sẵn sàng ứng tuyển công trình quanh bạn.'
+                          : 'Các công trình đã nhận vẫn được giữ.',
+                    ),
+                    value: _available == true,
+                    onChanged:
+                        _loading ||
+                            _cancelling ||
+                            _availabilityBusy ||
+                            _available == null
+                        ? null
+                        : _setAvailable,
+                  ),
+                ),
+                if (_availabilityBusy) const LinearProgressIndicator(),
+                const SizedBox(height: 16),
                 FeatureBanner(
                   greeting: 'Chào ${widget.api.session?.fullName ?? 'bạn'},',
                   title: _tab == 0
@@ -201,7 +265,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                       : 'Theo dõi đơn và kết nối với chủ thầu của bạn.',
                 ),
                 const SizedBox(height: 20),
-                if (_tab == 0) ...[
+                if (_tab == 0 && _available == true) ...[
                   SegmentedButton<bool>(
                     segments: const [
                       ButtonSegment(
@@ -333,7 +397,12 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                 if (_loading)
                   LoadingJobs(mapMode: _tab == 0 && _showMap)
                 else if (_tab == 0) ...[
-                  if (_jobs.isEmpty && _error == null)
+                  if (_available == false)
+                    const EmptyState(
+                      title: 'Bạn đang tạm ngưng nhận việc',
+                      message: 'Bật trạng thái nhận việc khi sẵn sàng. Bạn vẫn xem được lịch sử và trao đổi trong công trình đã nhận.',
+                    ),
+                  if (_available == true && _jobs.isEmpty && _error == null)
                     EmptyState(
                       title: 'Không tìm thấy công trình quanh đây',
                       message: 'Thử tăng bán kính, đổi loại việc hoặc chọn một vị trí khác. Cơ hội phù hợp có thể ở gần bạn hơn đấy!',
@@ -344,7 +413,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                       ),
                     ),
                   if (_jobs.isEmpty) const SizedBox(height: 16),
-                  if (_showMap && _position != null) ...[
+                  if (_showMap && _position != null && _available == true) ...[
                     SizedBox(
                       height: 360,
                       child: JobsMap(
@@ -359,7 +428,10 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                     ),
                     const SizedBox(height: 16),
                   ],
-                  if (_showMap && _position == null && !_loading)
+                  if (_showMap &&
+                      _position == null &&
+                      !_loading &&
+                      _available == true)
                     TextButton.icon(
                       onPressed: _selectPosition,
                       icon: const Icon(Icons.edit_location_alt_outlined),

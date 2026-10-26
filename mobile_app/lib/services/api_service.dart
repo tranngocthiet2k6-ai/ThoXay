@@ -22,6 +22,17 @@ class ApiException implements Exception {
 }
 
 class ApiService extends ChangeNotifier {
+  Future<bool> availability() async =>
+      (await _request('GET', '/api/users/me/availability')
+              as Map<String, dynamic>)['available']
+          as bool;
+  Future<bool> setAvailability(bool available) async =>
+      (await _request(
+            'PUT',
+            '/api/users/me/availability',
+            body: {'available': available},
+          ) as Map<String, dynamic>)['available']
+          as bool;
   Future<JobApplication> cancelApplication(int id, String reason) async =>
       JobApplication.fromJson(
         await _request(

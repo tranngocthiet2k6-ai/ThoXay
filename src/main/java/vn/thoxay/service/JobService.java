@@ -27,7 +27,7 @@ public class JobService {
     }
     @Transactional(readOnly = true)
     public List<JobResponse> nearby(double lat, double lng, double radius, String jobType, String sort) {
-        current.require(Role.ROLE_WORKER);
+        if (!current.require(Role.ROLE_WORKER).isAvailable()) return List.of();
         var results = jobs.findNearby(lat, lng, radius).stream()
             .filter(j -> jobType == null || jobType.equals(j.getJobType()))
             .map(j -> JobResponse.of(j, distance(lat, lng, j.getLatitude(), j.getLongitude()), false));

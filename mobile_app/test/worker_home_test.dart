@@ -12,6 +12,11 @@ class FixedLocation extends LocationService {
 }
 
 class WorkerApi extends ApiService {
+  bool online = true;
+  @override
+  Future<bool> availability() async => online;
+  @override
+  Future<bool> setAvailability(bool value) async => online = value;
   bool applied = false;
   String applicationStatus = 'PENDING';
   String jobStatus = 'OPEN';
@@ -81,6 +86,27 @@ class WorkerApi extends ApiService {
 
 void main() {
   testWidgets(
+    'offline skips GPS and job discovery until the server confirms online',
+    (tester) async {
+      final api = WorkerApi()..online = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: WorkerHomeScreen(api: api, location: FixedLocation()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Bạn đang tạm ngưng nhận việc'), findsOneWidget);
+      expect(find.text('Xây nhà phố'), findsNothing);
+      expect(api.lastJobType, isNull);
+      await tester.tap(find.byKey(const ValueKey('availability-switch')));
+      await tester.pumpAndSettle();
+      expect(api.online, isTrue);
+      await tester.scrollUntilVisible(find.text('Xây nhà phố'), 180);
+      expect(find.text('Xây nhà phố'), findsOneWidget);
+      api.dispose();
+    },
+  );
+  testWidgets(
     'cancelling work requires explicit reason and confirmation then removes contact actions',
     (tester) async {
       final api = WorkerApi()
@@ -134,6 +160,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(find.text('Xây nhà phố'), 180);
       expect(find.text('Xây nhà phố'), findsOneWidget);
       await tester.ensureVisible(find.text('Nhận việc'));
       await tester.pumpAndSettle();
