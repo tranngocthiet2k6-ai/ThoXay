@@ -1,0 +1,15 @@
+BEGIN;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS date_of_birth DATE;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS experience_years INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS experience_summary VARCHAR(2000);
+CREATE TABLE IF NOT EXISTS user_skills (
+  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  sort_order INTEGER NOT NULL, skill VARCHAR(50) NOT NULL,
+  PRIMARY KEY(user_id,sort_order)
+);
+CREATE TABLE IF NOT EXISTS user_project_images (
+  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  sort_order INTEGER NOT NULL, image_url VARCHAR(500) NOT NULL,
+  PRIMARY KEY(user_id,sort_order)
+);
+COMMIT;

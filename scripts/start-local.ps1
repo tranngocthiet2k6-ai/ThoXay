@@ -75,6 +75,8 @@ try {
         if ($LASTEXITCODE -ne 0) { throw 'Cannot apply the messages migration.' }
         & (Join-Path $pgBin 'psql.exe') -h 127.0.0.1 -p 55432 -U postgres -d tho_xay_db -v ON_ERROR_STOP=1 -c 'SET client_min_messages=WARNING' -f (Join-Path $projectRoot 'migrations\005_notifications.sql')
         if ($LASTEXITCODE -ne 0) { throw 'Cannot apply the notifications migration.' }
+        & (Join-Path $pgBin 'psql.exe') -h 127.0.0.1 -p 55432 -U postgres -d tho_xay_db -v ON_ERROR_STOP=1 -c 'SET client_min_messages=WARNING' -f (Join-Path $projectRoot 'migrations\006_extended_profiles.sql')
+        if ($LASTEXITCODE -ne 0) { throw 'Cannot apply the extended profiles migration.' }
     }
 
     if (-not (Test-Path -LiteralPath $localConfiguration)) {

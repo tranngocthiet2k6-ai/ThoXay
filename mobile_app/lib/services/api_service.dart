@@ -9,6 +9,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import '../models/models.dart';
 import '../models/chat_message.dart';
 import '../models/app_notification.dart';
+import '../models/worker_profile.dart';
 import 'chat_connection.dart';
 
 class ApiException implements Exception {
@@ -166,6 +167,53 @@ class ApiService extends ChangeNotifier {
   Future<UserProfile> profile() async => UserProfile.fromJson(
     await _request('GET', '/api/users/me') as Map<String, dynamic>,
   );
+  Future<UserProfile> updateProfile({
+    required String fullName,
+    String? dateOfBirth,
+    required int experienceYears,
+    required String experienceSummary,
+    required List<String> skills,
+    required List<String> projectImages,
+  }) async {
+    final person = UserProfile.fromJson(
+      await _request(
+        'PUT',
+        '/api/users/me',
+        body: {
+          'fullName': fullName,
+          'dateOfBirth': dateOfBirth,
+          'experienceYears': experienceYears,
+          'experienceSummary': experienceSummary,
+          'skills': skills,
+          'projectImages': projectImages,
+        },
+      ) as Map<String, dynamic>,
+    );
+    final old = _session;
+    if (old != null && old.userId == person.id) {
+      final updated = AuthSession(
+        token: old.token,
+        userId: old.userId,
+        fullName: person.fullName,
+        phoneNumber: old.phoneNumber,
+        role: old.role,
+        expiresAt: old.expiresAt,
+      );
+      _session = updated;
+      final prefs = await SharedPreferences.getInstance();
+      if (identical(_session, updated)) {
+        await prefs.setString(_storageKey, jsonEncode(updated.toJson()));
+        notifyListeners();
+      }
+    }
+    return person;
+  }
+
+  Future<WorkerProfile> workerProfile(int workerId) async =>
+      WorkerProfile.fromJson(
+        await _request('GET', '/api/workers/$workerId/profile')
+            as Map<String, dynamic>,
+      );
   Future<MessagePage> messageHistory(
     int jobId,
     int peerId, {

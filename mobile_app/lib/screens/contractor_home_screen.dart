@@ -14,6 +14,7 @@ import '../widgets/loading_jobs.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/feature_banner.dart';
 import '../widgets/notification_button.dart';
+import 'worker_profile_screen.dart';
 
 class ContractorHomeScreen extends StatefulWidget {
   const ContractorHomeScreen({super.key, required this.api});
@@ -557,6 +558,19 @@ class _ApplicantsSheetState extends State<_ApplicantsSheet> {
                             CallButton(
                               phone: application.workerPhone!,
                               label: 'Gọi thợ',
+                            ),
+                          if (application.workerActive)
+                            TextButton.icon(
+                              onPressed: () => Navigator.of(context).push(
+                                MaterialPageRoute<void>(
+                                  builder: (_) => WorkerProfileScreen(
+                                    api: widget.api,
+                                    workerId: application.workerId,
+                                  ),
+                                ),
+                              ),
+                              icon: const Icon(Icons.badge_outlined),
+                              label: const Text('Xem hồ sơ thợ'),
                             ),
                           if (application.status == 'ACCEPTED' &&
                               application.workerActive)

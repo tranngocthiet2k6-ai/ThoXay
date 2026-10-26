@@ -217,6 +217,7 @@ psql -U postgres -d tho_xay_db -v ON_ERROR_STOP=1 -f migrations/002_worker_ratin
 psql -U postgres -d tho_xay_db -v ON_ERROR_STOP=1 -f migrations/003_cccd_front_back.sql
 psql -U postgres -d tho_xay_db -v ON_ERROR_STOP=1 -f migrations/004_messages.sql
 psql -U postgres -d tho_xay_db -v ON_ERROR_STOP=1 -f migrations/005_notifications.sql
+psql -U postgres -d tho_xay_db -v ON_ERROR_STOP=1 -f migrations/006_extended_profiles.sql
 ```
 
 Script khởi động local tự áp dụng các migration này khi sử dụng PostgreSQL portable
@@ -344,6 +345,22 @@ hoặc đọc tất cả. Sự kiện ứng tuyển, duyệt/từ chối, hoàn 
 thông báo trong cùng transaction. Backend có outbox FCM gửi lại có giới hạn;
 không có Firebase vẫn lưu/xem lịch sử bình thường. Hướng dẫn cấu hình Firebase
 cho Backend và APK, CI secret, quyền thiết bị: [docs/FIREBASE.md](docs/FIREBASE.md).
+
+## Hồ sơ mở rộng
+
+Trong **Hồ sơ & CCCD**, mở **Thông tin cá nhân & kinh nghiệm** để cập nhật họ tên,
+ngày sinh không bắt buộc, số năm kinh nghiệm (0–60), mô tả kinh nghiệm, tối đa
+20 kỹ năng và 10 liên kết ảnh dự án HTTPS. Album hỗ trợ xem ảnh lớn/phóng to và
+hiển thị trạng thái tải/lỗi. Ảnh dự án dùng URL HTTPS, không tải file lên server.
+Đổi họ tên/ngày sinh đưa CCCD về chưa xác thực; chỉ sửa kinh nghiệm/kỹ năng/album
+giữ nguyên xác thực. Không dùng ảnh CCCD trong album công khai.
+
+`PUT /api/users/me` chỉ cập nhật hồ sơ của JWT hiện tại, không cho sửa vai trò,
+sao hay trạng thái xác thực. Body gồm `fullName`, `dateOfBirth` (`yyyy-MM-dd`
+hoặc null), `experienceYears`, `experienceSummary`, `skills`, `projectImages`.
+`GET /api/workers/{id}/profile` cho người đã đăng nhập xem hồ sơ nghề nghiệp của
+thợ đang hoạt động; không trả ngày sinh, điện thoại hoặc ảnh CCCD. Chủ thầu mở
+**Xem hồ sơ thợ** trong danh sách ứng viên. Migration: `006_extended_profiles.sql`.
 
 ## Giao diện trình bày đồ án
 

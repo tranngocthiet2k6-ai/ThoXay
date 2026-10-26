@@ -116,12 +116,21 @@ class UserProfile {
     required this.rating,
     this.cccdFrontImage,
     this.cccdBackImage,
+    this.dateOfBirth,
+    this.experienceYears = 0,
+    this.experienceSummary = '',
+    this.skills = const [],
+    this.projectImages = const [],
   });
   final int id;
   final String fullName, phoneNumber, role;
   final bool verified;
   final double rating;
   final String? cccdFrontImage, cccdBackImage;
+  final String? dateOfBirth;
+  final int experienceYears;
+  final String experienceSummary;
+  final List<String> skills, projectImages;
   factory UserProfile.fromJson(Map<String, dynamic> json) => UserProfile(
     id: (json['id'] as num).toInt(),
     fullName: json['fullName'] as String,
@@ -131,6 +140,11 @@ class UserProfile {
     rating: (json['rating'] as num).toDouble(),
     cccdFrontImage: json['cccdFrontImage'] as String?,
     cccdBackImage: json['cccdBackImage'] as String?,
+    dateOfBirth: json['dateOfBirth'] as String?,
+    experienceYears: (json['experienceYears'] as num?)?.toInt() ?? 0,
+    experienceSummary: json['experienceSummary'] as String? ?? '',
+    skills: (json['skills'] as List? ?? []).cast<String>(),
+    projectImages: (json['projectImages'] as List? ?? []).cast<String>(),
   );
 }
 

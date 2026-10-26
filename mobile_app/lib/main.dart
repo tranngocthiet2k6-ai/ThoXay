@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'screens/login_screen.dart';
 import 'screens/worker_home_screen.dart';
@@ -46,6 +47,13 @@ class ThoXayApp extends StatelessWidget {
     scaffoldMessengerKey: _messenger,
     debugShowCheckedModeBanner: false,
     theme: AppTheme.light,
+    locale: const Locale('vi', 'VN'),
+    supportedLocales: const [Locale('vi', 'VN'), Locale('en', 'US')],
+    localizationsDelegates: const [
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
     home: ListenableBuilder(
       listenable: api,
       builder: (context, _) {

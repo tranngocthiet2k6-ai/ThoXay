@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../models/models.dart';
 import '../services/api_service.dart';
+import '../widgets/profile_editor.dart';
+import '../widgets/portfolio_gallery.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key, required this.api});
@@ -115,6 +117,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
           ),
+          const SizedBox(height: 24),
+          Card(
+            child: ExpansionTile(
+              maintainState: true,
+              enabled: !_loading,
+              title: const Text('Thông tin cá nhân & kinh nghiệm'),
+              leading: const Icon(Icons.edit_outlined),
+              childrenPadding: const EdgeInsets.all(16),
+              children: [
+                ProfileEditor(
+                  api: widget.api,
+                  profile: _profile!,
+                  onBusy: (busy) {
+                    if (mounted) setState(() => _loading = busy);
+                  },
+                  onSaved: (person) => setState(() => _profile = person),
+                ),
+              ],
+            ),
+          ),
+          if (_profile!.projectImages.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            PortfolioGallery(images: _profile!.projectImages),
+          ],
           const SizedBox(height: 24),
           const Text(
             'Cung cấp đủ ảnh mặt trước và mặt sau CCCD bằng liên kết HTTPS. Mỗi lần cập nhật cần được quản trị viên xác thực lại.',

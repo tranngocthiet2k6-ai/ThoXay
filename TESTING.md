@@ -6,7 +6,7 @@
 .\mvnw.cmd -B verify
 ```
 
-35 kiểm thử JUnit/Spring Boot dùng H2 mặc định, chạy với Spring Security và JWT
+38 kiểm thử JUnit/Spring Boot dùng H2 mặc định, chạy với Spring Security và JWT
 thật: đăng ký/đăng nhập, BCrypt, chống đăng ký ADMIN, token giả/thiếu, tài khoản
 bị khóa, phân quyền, Haversine, dữ liệu sai, ứng tuyển trùng, lịch sử, duyệt,
 hai giao dịch duyệt đồng thời cho một vị trí, render Thymeleaf, CSRF, xác thực
@@ -44,7 +44,7 @@ flutter test
 flutter build web --release
 ```
 
-33 kiểm thử Dart/widget: lưu/khôi phục phiên, đính JWT, xóa phiên khi 401,
+35 kiểm thử Dart/widget: lưu/khôi phục phiên, đính JWT, xóa phiên khi 401,
 validation đăng nhập/đăng ký, tìm việc theo vị trí được cấp cho test, ứng tuyển
 và lịch sử, duyệt thợ, validation form đăng công trình. Widget test dùng API
 và vị trí giả lập, không truy cập GPS thật hay gửi yêu cầu ra mạng.
@@ -82,6 +82,16 @@ Nghiệm thu: dùng hai tài khoản Thầu–Thợ, đăng việc → ứng tuy
 gửi thêm tin từ thiết bị kia, bật lại mạng và kiểm tra tin được tải bù đúng thứ
 tự. Khóa một tài khoản trong Admin và kiểm tra socket bị đóng, không gửi được
 tin mới. Đóng/mở lại Chat để xác nhận lịch sử đã được lưu.
+
+## Hồ sơ mở rộng
+
+ExtendedProfileApiTest xác nhận lưu/đọc kỹ năng và album, chuẩn hóa trùng kỹ
+năng, không tự sửa vai trò/rating/verified hoặc hồ sơ tài khoản khác, bảo vệ
+ngày sinh/điện thoại/CCCD ở API hồ sơ thợ, dữ liệu sai không lưu một phần và
+thay đổi danh tính làm mất KYC. Đã chạy cùng bộ kiểm thử trên PostgreSQL cho
+cả các collection có ON DELETE CASCADE. Flutter kiểm tra validation kinh nghiệm,
+HTTP ảnh bị từ chối, lưu album/kỹ năng, payload API và cập nhật họ tên cache;
+các test CCCD cũ vẫn chạy với hồ sơ có phần chỉnh sửa và danh sách cuộn dài.
 
 ## Thông báo và FCM
 

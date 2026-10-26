@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -19,6 +22,18 @@ public class User {
     private String password;
     @Column(name = "full_name", nullable = false, length = 100)
     private String fullName;
+    @Column(name = "date_of_birth") private LocalDate dateOfBirth;
+    @Column(name = "experience_years", nullable = false) @org.hibernate.annotations.ColumnDefault("0")
+    private int experienceYears;
+    @Column(name = "experience_summary", length = 2000) private String experienceSummary = "";
+    @ElementCollection @CollectionTable(name = "user_skills", joinColumns = @JoinColumn(name = "user_id", nullable = false))
+    @OrderColumn(name = "sort_order") @Column(name = "skill", nullable = false, length = 50)
+    @org.hibernate.annotations.OnDelete(action = org.hibernate.annotations.OnDeleteAction.CASCADE)
+    private List<String> skills = new ArrayList<>();
+    @ElementCollection @CollectionTable(name = "user_project_images", joinColumns = @JoinColumn(name = "user_id", nullable = false))
+    @OrderColumn(name = "sort_order") @Column(name = "image_url", nullable = false, length = 500)
+    @org.hibernate.annotations.OnDelete(action = org.hibernate.annotations.OnDeleteAction.CASCADE)
+    private List<String> projectImages = new ArrayList<>();
     @Enumerated(EnumType.STRING) @Column(nullable = false, length = 30)
     private Role role;
     @Column(name = "is_verified", nullable = false)

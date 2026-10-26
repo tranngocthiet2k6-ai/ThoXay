@@ -5,6 +5,9 @@ CREATE TABLE IF NOT EXISTS users (
   phone_number VARCHAR(15) UNIQUE NOT NULL,
   password VARCHAR(255) NOT NULL,
   full_name VARCHAR(100) NOT NULL,
+  date_of_birth DATE,
+  experience_years INTEGER NOT NULL DEFAULT 0,
+  experience_summary VARCHAR(2000),
   role VARCHAR(30) NOT NULL CHECK (role IN ('ROLE_WORKER','ROLE_CONTRACTOR','ROLE_ADMIN')),
   is_verified BOOLEAN NOT NULL DEFAULT FALSE,
   cccd_image VARCHAR(500),
@@ -70,6 +73,16 @@ CREATE TABLE IF NOT EXISTS device_tokens (
   id BIGSERIAL PRIMARY KEY, user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   token_hash VARCHAR(64) UNIQUE NOT NULL, token VARCHAR(4096) NOT NULL,
   last_seen_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS user_skills (
+  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  sort_order INTEGER NOT NULL, skill VARCHAR(50) NOT NULL,
+  PRIMARY KEY(user_id,sort_order)
+);
+CREATE TABLE IF NOT EXISTS user_project_images (
+  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  sort_order INTEGER NOT NULL, image_url VARCHAR(500) NOT NULL,
+  PRIMARY KEY(user_id,sort_order)
 );
 -- Demo-only password for all three accounts: password
 INSERT INTO users (phone_number,password,full_name,role,is_verified)

@@ -11,6 +11,8 @@ public class UserProfileController {
     private final UserProfileService profiles;
     @GetMapping
     public UserProfileResponse profile() { return profiles.profile(); }
+    @PutMapping
+    public UserProfileResponse update(@Valid @RequestBody ProfileRequest request) { return profiles.update(request); }
     @PutMapping("/cccd")
     public UserProfileResponse updateCccd(@Valid @RequestBody CccdRequest request) {
         return profiles.updateCccd(request);

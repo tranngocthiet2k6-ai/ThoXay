@@ -108,7 +108,11 @@ void main() {
         find.byKey(const ValueKey('cccd-front-input')),
         'http://example.com/id.jpg',
       );
-      await tester.ensureVisible(find.text('Cập nhật CCCD'));
+      await tester.scrollUntilVisible(
+        find.text('Cập nhật CCCD'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.pumpAndSettle();
       await tester.tap(find.text('Cập nhật CCCD'));
       await tester.pumpAndSettle();
@@ -147,7 +151,11 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Liên kết ảnh mặt trước CCCD (HTTPS)'), findsOneWidget);
       expect(find.text('Liên kết ảnh mặt sau CCCD (HTTPS)'), findsOneWidget);
-      await tester.ensureVisible(find.text('Cập nhật CCCD'));
+      await tester.scrollUntilVisible(
+        find.text('Cập nhật CCCD'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.pumpAndSettle();
       await tester.tap(find.text('Cập nhật CCCD'));
       await tester.pumpAndSettle();

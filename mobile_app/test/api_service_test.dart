@@ -8,6 +8,66 @@ import 'package:tho_xay_mobile/services/api_service.dart';
 
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
+  test('extended profile update uses current user endpoint and refreshes cached display name only', () async {
+    final api = ApiService(
+      client: MockClient((request) async {
+        if (request.url.path == '/api/auth/login') {
+          return http.Response(
+            jsonEncode({
+              'token': 'jwt',
+              'userId': 3,
+              'fullName': 'Worker',
+              'phoneNumber': '0900000003',
+              'role': 'ROLE_WORKER',
+              'expiresIn': 3600,
+            }),
+            200,
+          );
+        }
+        expect(request.method, 'PUT');
+        expect(request.url.path, '/api/users/me');
+        expect(request.headers['Authorization'], 'Bearer jwt');
+        final body = jsonDecode(request.body);
+        expect(body['dateOfBirth'], '1990-01-01');
+        expect(body['skills'], ['Xay']);
+        return http.Response(
+          jsonEncode({
+            'id': 3,
+            'fullName': 'New name',
+            'phoneNumber': '0900000003',
+            'role': 'ROLE_WORKER',
+            'verified': false,
+            'rating': 5,
+            'dateOfBirth': '1990-01-01',
+            'experienceYears': 5,
+            'experienceSummary': 'House building',
+            'skills': ['Xay'],
+            'projectImages': ['https://example.com/project.jpg'],
+          }),
+          200,
+        );
+      }),
+    );
+    await api.login('0900000003', 'password');
+    final person = await api.updateProfile(
+      fullName: 'New name',
+      dateOfBirth: '1990-01-01',
+      experienceYears: 5,
+      experienceSummary: 'House building',
+      skills: ['Xay'],
+      projectImages: ['https://example.com/project.jpg'],
+    );
+    expect(person.projectImages.length, 1);
+    expect(api.session!.fullName, 'New name');
+    expect(api.session!.token, 'jwt');
+    expect(
+      jsonDecode(
+        (await SharedPreferences.getInstance()).getString('thoxay.session')!,
+      )['fullName'],
+      'New name',
+    );
+    api.dispose();
+  });
   test(
     'logout clears session even when unregistering the push device returns 401',
     () async {
