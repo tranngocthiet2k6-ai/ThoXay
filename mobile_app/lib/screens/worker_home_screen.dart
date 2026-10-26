@@ -13,6 +13,7 @@ import '../widgets/loading_jobs.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/feature_banner.dart';
 import '../widgets/notification_button.dart';
+import '../widgets/cancel_work_dialog.dart';
 
 class WorkerHomeScreen extends StatefulWidget {
   const WorkerHomeScreen({super.key, required this.api, this.location});
@@ -30,6 +31,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
   String _jobType = '', _sort = 'DISTANCE';
   int _tab = 0;
   int? _applying;
+  bool _cancelling = false;
   bool _loading = false;
   bool _showMap = false;
   String? _error;
@@ -97,6 +99,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
   }
 
   Future<void> _showMapJob(Job job) async {
+    if (_cancelling) return;
     final alreadyApplied = _applications.any((a) => a.job.id == job.id);
     final apply = await showModalBottomSheet<bool>(
       context: context,
@@ -119,6 +122,32 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
     if (apply == true && mounted) await _apply(job);
   }
 
+  Future<void> _cancel(JobApplication application) async {
+    if (_cancelling || _loading) return;
+    setState(() => _cancelling = true);
+    try {
+      final reason = await showCancelWorkDialog(context);
+      if (reason == null || !mounted) return;
+      final result = await widget.api.cancelApplication(application.id, reason);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Đã hủy việc. Trừ ${result.cancellationPenalty} điểm uy tín.',
+          ),
+        ),
+      );
+      await _refresh();
+    } on ApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    } finally {
+      if (mounted) setState(() => _cancelling = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
@@ -136,7 +165,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
         ),
         IconButton(
           tooltip: 'Làm mới',
-          onPressed: _loading ? null : () => _refresh(),
+          onPressed: _loading || _cancelling ? null : () => _refresh(),
           icon: const Icon(Icons.refresh),
         ),
         IconButton(
@@ -150,7 +179,9 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
       children: [
         Expanded(
           child: RefreshIndicator(
-            onRefresh: _refresh,
+            onRefresh: () async {
+              if (!_cancelling) await _refresh();
+            },
             child: ListView(
               physics: const AlwaysScrollableScrollPhysics(),
               padding: EdgeInsets.symmetric(
@@ -341,6 +372,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                         action: FilledButton(
                           onPressed:
                               _applying != null ||
+                                  _cancelling ||
                                   _loading ||
                                   _applications.any((a) => a.job.id == job.id)
                               ? null
@@ -387,6 +419,26 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                           if (application.jobRating != null)
                             Text(
                               'Đánh giá công trình: ${application.jobRating}/5 ★',
+                            ),
+                          if (application.status == 'CANCELLED')
+                            Text(
+                              'Lý do: ${application.cancellationReason ?? "Đã hủy việc"}\nĐã trừ ${application.cancellationPenalty} điểm uy tín.',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                            ),
+                          if (application.status == 'ACCEPTED' &&
+                              application.job.status == 'IN_PROGRESS')
+                            OutlinedButton.icon(
+                              onPressed: _loading || _cancelling
+                                  ? null
+                                  : () => _cancel(application),
+                              icon: const Icon(Icons.work_off_outlined),
+                              label: Text(
+                                _cancelling
+                                    ? 'Đang xử lý…'
+                                    : 'Hủy việc đang làm',
+                              ),
                             ),
                           if (application.status == 'ACCEPTED')
                             ChatButton(

@@ -68,7 +68,8 @@ Thông báo tạo lúc FCM bị tắt không được phát lại hàng loạt k
 - `PUT /api/notifications/devices`, `POST /api/notifications/devices/unregister`:
   body `{"token":"FID từ SDK"}`, trả 204, yêu cầu JWT còn hoạt động.
 
-Sự kiện: đơn mới, duyệt/từ chối, hoàn thành/đánh giá, KYC được duyệt, tin chat mới.
+Sự kiện: đơn mới, duyệt/từ chối, hoàn thành/đánh giá, KYC được duyệt, tin chat mới,
+thợ hủy việc đang làm (thông báo cho thợ và chủ thầu).
 Migration: `migrations/005_notifications.sql`, chạy sau 004 và có thể chạy lại.
 
 Tham khảo chính thức: [Flutter nhận thông báo](https://firebase.google.com/docs/cloud-messaging/flutter/receive-messages),

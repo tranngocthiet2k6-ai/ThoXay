@@ -24,7 +24,8 @@ public class ApplicationService {
         Job job = lockedJob(request.jobId());
         if (applications.existsByJobIdAndWorkerId(job.getId(), worker.getId()))
             throw new ApiException(HttpStatus.CONFLICT, "Bạn đã ứng tuyển công trình này");
-        if (job.getStatus() != JobStatus.OPEN || !job.getContractor().isActive())
+        if ((job.getStatus() != JobStatus.OPEN && job.getStatus() != JobStatus.IN_PROGRESS) || !job.getContractor().isActive()
+            || applications.countByJobIdAndStatus(job.getId(), ApplicationStatus.ACCEPTED) >= job.getRequiredWorkers())
             throw new ApiException(HttpStatus.CONFLICT, "Công trình đã ngừng tuyển thợ");
         JobApplication application = new JobApplication(); application.setJob(job); application.setWorker(worker);
         applications.saveAndFlush(application);
@@ -62,7 +63,7 @@ public class ApplicationService {
             if (!application.getWorker().isActive())
                 throw new ApiException(HttpStatus.CONFLICT, "Tài khoản thợ đã bị khóa");
             long accepted = applications.countByJobIdAndStatus(jobId, ApplicationStatus.ACCEPTED);
-            if (job.getStatus() != JobStatus.OPEN || accepted >= job.getRequiredWorkers())
+            if (accepted >= job.getRequiredWorkers())
                 throw new ApiException(HttpStatus.CONFLICT, "Công trình đã đủ số lượng thợ");
             if (accepted + 1 >= job.getRequiredWorkers()) job.setStatus(JobStatus.IN_PROGRESS);
         }

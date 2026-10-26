@@ -12,6 +12,11 @@ import java.util.List;
 @RestController @RequestMapping("/api/applications") @RequiredArgsConstructor
 public class ApplicationController {
     private final ApplicationService applications;
+    private final vn.thoxay.service.ApplicationCancellationService cancellations;
+    @PutMapping("/{id}/cancel")
+    public ApplicationResponse cancel(@PathVariable @Positive Long id, @Valid @RequestBody CancelApplicationRequest request) {
+        return cancellations.cancel(id, request);
+    }
     @PostMapping("/apply") @ResponseStatus(HttpStatus.CREATED)
     public ApplicationResponse apply(@Valid @RequestBody ApplicationRequest request) { return applications.apply(request); }
     @GetMapping("/job/{jobId}")

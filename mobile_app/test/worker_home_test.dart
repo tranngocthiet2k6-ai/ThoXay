@@ -14,9 +14,12 @@ class FixedLocation extends LocationService {
 class WorkerApi extends ApiService {
   bool applied = false;
   String applicationStatus = 'PENDING';
+  String jobStatus = 'OPEN';
+  String? cancelReason;
+  int cancelCalls = 0;
   String? lastJobType;
   String lastSort = 'DISTANCE';
-  final job = const Job(
+  Job get job => Job(
     id: 1,
     contractorId: 2,
     contractorName: 'Chủ thầu',
@@ -29,7 +32,7 @@ class WorkerApi extends ApiService {
     latitude: 10.7769,
     longitude: 106.7009,
     requiredWorkers: 1,
-    status: 'OPEN',
+    status: jobStatus,
     distanceKm: 0,
   );
   JobApplication get application => JobApplication(
@@ -42,6 +45,8 @@ class WorkerApi extends ApiService {
     workerVerified: false,
     workerActive: true,
     status: applicationStatus,
+    cancellationReason: cancelReason,
+    cancellationPenalty: applicationStatus == 'CANCELLED' ? 15 : 0,
   );
   @override
   Future<List<Job>> nearby(
@@ -64,9 +69,61 @@ class WorkerApi extends ApiService {
     applied = true;
     return application;
   }
+
+  @override
+  Future<JobApplication> cancelApplication(int id, String reason) async {
+    cancelCalls++;
+    cancelReason = reason;
+    applicationStatus = 'CANCELLED';
+    return application;
+  }
 }
 
 void main() {
+  testWidgets(
+    'cancelling work requires explicit reason and confirmation then removes contact actions',
+    (tester) async {
+      final api = WorkerApi()
+        ..applied = true
+        ..applicationStatus = 'ACCEPTED'
+        ..jobStatus = 'IN_PROGRESS';
+      await tester.pumpWidget(
+        MaterialApp(
+          home: WorkerHomeScreen(api: api, location: FixedLocation()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Đã ứng tuyển').last);
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Hủy việc đang làm'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Hủy việc đang làm'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('trừ 15 điểm uy tín'), findsOneWidget);
+      await tester.tap(find.text('Xác nhận hủy việc'));
+      await tester.pumpAndSettle();
+      expect(api.cancelCalls, 0);
+      expect(find.text('Vui lòng nhập lý do hủy việc'), findsOneWidget);
+      await tester.tap(find.text('Tiếp tục làm việc'));
+      await tester.pumpAndSettle();
+      expect(api.cancelCalls, 0);
+      await tester.tap(find.text('Hủy việc đang làm'));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const ValueKey('cancellation-reason')),
+        'Gia đình có việc',
+      );
+      await tester.tap(find.text('Xác nhận hủy việc'));
+      await tester.pumpAndSettle();
+      expect(api.cancelCalls, 1);
+      expect(api.cancelReason, 'Gia đình có việc');
+      expect(find.text('Đã hủy'), findsOneWidget);
+      expect(find.text('Nhắn tin'), findsNothing);
+      expect(find.byType(CallButton), findsNothing);
+      expect(find.text('Hủy việc đang làm'), findsNothing);
+      api.dispose();
+    },
+  );
   testWidgets(
     'worker finds GPS jobs, applies once and sees application history',
     (tester) async {
@@ -129,6 +186,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Gọi chủ thầu: 0900000002'), findsOneWidget);
     expect(find.text('Nhắn tin'), findsOneWidget);
+    expect(find.text('Hủy việc đang làm'), findsNothing);
     api.dispose();
   });
 }

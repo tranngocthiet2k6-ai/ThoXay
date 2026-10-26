@@ -6,7 +6,7 @@
 .\mvnw.cmd -B verify
 ```
 
-41 kiểm thử JUnit/Spring Boot dùng H2 mặc định, chạy với Spring Security và JWT
+46 kiểm thử JUnit/Spring Boot dùng H2 mặc định, chạy với Spring Security và JWT
 thật: đăng ký/đăng nhập, BCrypt, chống đăng ký ADMIN, token giả/thiếu, tài khoản
 bị khóa, phân quyền, Haversine, dữ liệu sai, ứng tuyển trùng, lịch sử, duyệt,
 hai giao dịch duyệt đồng thời cho một vị trí, render Thymeleaf, CSRF, xác thực
@@ -41,6 +41,21 @@ createdb -U postgres tho_xay_test
 
 ## Flutter
 
+Hủy việc bao phủ lý do sai, sai vai trò/chủ đơn/trạng thái, hai yêu cầu hủy
+đồng thời, hủy đua với hoàn thành, giảm bậc, điểm sàn 0, thu hồi liên lạc/chat,
+tuyển người thay thế và hoàn thành không chấm thợ đã hủy, giữ điểm phạt sau
+khi Admin xóa công trình. Cùng bộ 46 test đạt trên H2 và PostgreSQL riêng.
+Schema mới và migration 002–008 được chạy hai lần trên database thử nghiệm;
+chạy lại 007 không xóa điểm phạt hay số lần hủy đã lưu.
+
+Nghiệm thu HTTP trên Backend local/PostgreSQL: tạo ba tài khoản tạm, cập nhật
+hồ sơ và kiểm tra dữ liệu công khai; ứng tuyển/duyệt/chat; hủy và gửi lại;
+kiểm tra mất quyền liên lạc, vị trí trống trên tìm gần; nhận người thay thế,
+hoàn thành/chấm sao, bảng xếp hạng và lịch sử uy tín; đọc tất cả thông báo.
+Các bước đạt và dữ liệu thử được dọn theo đúng ID sau nghiệm thu.
+FCM cloud/thiết bị thật chưa thử vì chưa có dự án Firebase; cấu hình theo
+`docs/FIREBASE.md` trước khi kiểm thử foreground/background/terminated trên máy.
+
 ```powershell
 cd mobile_app
 flutter pub get
@@ -50,7 +65,7 @@ flutter test
 flutter build web --release
 ```
 
-37 kiểm thử Dart/widget: lưu/khôi phục phiên, đính JWT, xóa phiên khi 401,
+38 kiểm thử Dart/widget: lưu/khôi phục phiên, đính JWT, xóa phiên khi 401,
 validation đăng nhập/đăng ký, tìm việc theo vị trí được cấp cho test, ứng tuyển
 và lịch sử, duyệt thợ, validation form đăng công trình. Widget test dùng API
 và vị trí giả lập, không truy cập GPS thật hay gửi yêu cầu ra mạng.

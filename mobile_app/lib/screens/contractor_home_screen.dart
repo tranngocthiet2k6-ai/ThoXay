@@ -591,6 +591,13 @@ class _ApplicantsSheetState extends State<_ApplicantsSheet> {
                             ),
                           const SizedBox(height: 8),
                           Chip(label: Text(statusLabel(application.status))),
+                          if (application.status == 'CANCELLED')
+                            Text(
+                              'Lý do hủy: ${application.cancellationReason ?? "Không có"}',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                            ),
                           if (application.jobRating != null)
                             Text(
                               'Điểm công trình: ${application.jobRating}/5 ★',

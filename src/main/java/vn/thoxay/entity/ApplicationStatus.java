@@ -1,3 +1,3 @@
 package vn.thoxay.entity;
 
-public enum ApplicationStatus { PENDING, ACCEPTED, REJECTED }
+public enum ApplicationStatus { PENDING, ACCEPTED, REJECTED, CANCELLED }

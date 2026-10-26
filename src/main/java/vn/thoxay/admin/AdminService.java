@@ -64,6 +64,7 @@ public class AdminService {
         User admin = current.require(Role.ROLE_ADMIN);
         if (admin.getId().equals(id)) throw new ApiException(HttpStatus.CONFLICT, "Bạn không thể tự khóa tài khoản đang sử dụng");
         User user = user(id);
+        entityManager.refresh(user, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
         if (user.getRole() == Role.ROLE_ADMIN)
             throw new ApiException(HttpStatus.CONFLICT, "Không thể khóa tài khoản quản trị viên");
         user.setActive(!user.isActive());

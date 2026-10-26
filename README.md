@@ -383,6 +383,32 @@ có phân trang `beforeId/limit`; `GET /api/users/me/reputation` là lịch sử
 làm mất KYC và tính lại bậc; xóa công trình tính lại số công trình/sao/bậc,
 nhưng nhật ký điểm đã ghi vẫn được giữ với tên công trình tại thời điểm phát sinh.
 
+## Hủy việc đang làm
+
+Áp dụng `migrations/008_application_cancellation.sql` sau migration 007;
+`scripts/start-local.ps1` áp dụng các migration theo thứ tự và có thể chạy lại.
+Thợ dùng `PUT /api/applications/{id}/cancel` với `{"reason":"Lý do hủy"}`
+(1–500 ký tự) cho đơn ACCEPTED của chính mình thuộc công trình IN_PROGRESS.
+Không cho hủy đơn chờ, bị từ chối hoặc công trình đã hoàn thành.
+
+Flutter: **Đã ứng tuyển → Hủy việc đang làm → nhập lý do → Xác nhận hủy việc**.
+Hộp thoại nêu rõ trừ 15 điểm (tối thiểu 0), tính lại bậc và không thể khôi phục
+đơn. Lý do, thời điểm và điểm thực trừ được lưu; gửi lại không bị phạt thêm.
+Thợ và chủ thầu nhận thông báo trong lịch sử (push khi Firebase đã cấu hình).
+Sau hủy, đơn không còn hiển thị số liên lạc và không còn quyền chat, kể cả
+JWT/đường dẫn cũ; kết nối realtime kiểm tra lại quyền tại heartbeat tiếp theo.
+
+Công trình giữ IN_PROGRESS. Khi thiếu người, kết quả tìm việc gần hiển thị
+công trình để thợ khác ứng tuyển, chủ thầu có thể nhận người thay thế. Hoàn
+thành chỉ chấm điểm những thợ ACCEPTED còn lại; thợ đã hủy không được thưởng
+hay nhận sao công trình. Khóa công trình rồi khóa thợ bảo đảm hủy, duyệt và
+hoàn thành đồng thời không vượt số người, trừ/cộng điểm hai lần hoặc chốt cả
+hai kết quả trái ngược. Hủy đơn giữ bản ghi nên cùng thợ không ứng tuyển lại
+vào chính công trình đã hủy.
+
+Các mức điểm/ngưỡng là quy tắc mặc định của phiên bản đồ án, định nghĩa tại
+`ReputationService` và `WorkerTier`, hiển thị trong ứng dụng để người dùng biết.
+
 ## Giao diện trình bày đồ án
 
 Flutter dùng theme xanh ngọc thống nhất cho form, nút, điều hướng và chat.

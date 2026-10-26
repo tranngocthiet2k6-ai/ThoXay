@@ -22,6 +22,14 @@ class ApiException implements Exception {
 }
 
 class ApiService extends ChangeNotifier {
+  Future<JobApplication> cancelApplication(int id, String reason) async =>
+      JobApplication.fromJson(
+        await _request(
+          'PUT',
+          '/api/applications/$id/cancel',
+          body: {'reason': reason},
+        ) as Map<String, dynamic>,
+      );
   ApiService({http.Client? client, String? baseUrl})
     : _client = client ?? http.Client(),
       baseUrl = (baseUrl ?? _defaultBaseUrl).replaceFirst(RegExp(r'/+$'), '');
