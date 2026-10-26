@@ -104,6 +104,8 @@ void main() {
       final api = LifecycleApi();
       await tester.pumpWidget(MaterialApp(home: ProfileScreen(api: api)));
       await tester.pumpAndSettle();
+      expect(find.text('Chưa có đánh giá công trình'), findsOneWidget);
+      expect(find.text('Đánh giá trung bình: 4.0/5'), findsNothing);
       await tester.enterText(
         find.byKey(const ValueKey('cccd-front-input')),
         'http://example.com/id.jpg',

@@ -133,9 +133,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
               label: const Text('Bảng xếp hạng thợ'),
             ),
             const SizedBox(height: 8),
-            Text(
-              'Đánh giá trung bình: ${_profile!.rating.toStringAsFixed(1)}/5',
-            ),
+            if (_profile!.role == 'ROLE_WORKER')
+              Text(
+                _profile!.completedJobs == 0
+                    ? 'Chưa có đánh giá công trình'
+                    : 'Đánh giá trung bình: ${_profile!.rating.toStringAsFixed(1)}/5',
+              ),
             const SizedBox(height: 12),
             Align(
               alignment: Alignment.centerLeft,
