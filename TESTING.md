@@ -79,7 +79,7 @@ flutter test
 flutter build web --release
 ```
 
-45 kiểm thử Dart/widget: lưu/khôi phục phiên, đính JWT, xóa phiên khi 401,
+47 kiểm thử Dart/widget: lưu/khôi phục phiên, đính JWT, xóa phiên khi 401,
 validation đăng nhập/đăng ký, tìm việc theo vị trí được cấp cho test, ứng tuyển
 và lịch sử, duyệt thợ, validation form đăng công trình. Widget test dùng API
 và vị trí giả lập, không truy cập GPS thật hay gửi yêu cầu ra mạng.
@@ -238,3 +238,11 @@ Kiểm thử multipart hai mặt, kiểm tra nội dung ảnh thực, ảnh thi�
 Flutter kiểm tra gửi binary có JWT, xóa phiên bị khóa, chụp đủ hai mặt, hủy
 và từ chối quyền camera. Các kiểm thử camera dùng đối tượng giả; chưa thay thế
 việc kiểm chứng quyền và chụp thực tế trên Android/iOS.
+
+Theme theo vai trò được kiểm thử trên ứng dụng gốc: đăng nhập thợ → mở màn
+hình con → đổi phiên chủ thầu → đăng xuất; cả màn hình đang mở đổi màu đúng.
+Màu chữ trên nút nhấn chính đạt tỷ lệ tương phản tối thiểu 4.5:1 cho từng vai trò.
+
+Kiểm chứng HTTP local với PostgreSQL: hai ảnh tổng hợp (không dùng CCCD thật)
+được gửi bằng multipart, đọc lại JPEG riêng tư có `no-store`; tệp vượt 5 MB trả
+413 từ servlet. Tài khoản thử được xóa và ảnh xóa theo cascade sau kiểm tra.

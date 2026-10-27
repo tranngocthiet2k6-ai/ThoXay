@@ -1,3 +1,5 @@
+import '../theme/app_theme.dart';
+
 import 'package:flutter/material.dart';
 
 class FeatureBanner extends StatelessWidget {
@@ -15,14 +17,14 @@ class FeatureBanner extends StatelessWidget {
     padding: const EdgeInsets.all(24),
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(24),
-      gradient: const LinearGradient(
-        colors: [Color(0xff103f34), Color(0xff218365)],
+      gradient: LinearGradient(
+        colors: AppTheme.brandGradient(context),
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
       ),
       boxShadow: [
         BoxShadow(
-          color: const Color(0xff176b52).withValues(alpha: .13),
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: .13),
           blurRadius: 24,
           offset: const Offset(0, 8),
         ),
@@ -36,7 +38,7 @@ class FeatureBanner extends StatelessWidget {
             children: [
               Text(
                 greeting,
-                style: const TextStyle(color: Color(0xffc6e6d9), fontSize: 13),
+                style: const TextStyle(color: Colors.white70, fontSize: 13),
               ),
               const SizedBox(height: 10),
               Text(
@@ -52,7 +54,7 @@ class FeatureBanner extends StatelessWidget {
               Text(
                 subtitle,
                 style: const TextStyle(
-                  color: Color(0xffd7ede4),
+                  color: Colors.white70,
                   fontSize: 13,
                   height: 1.5,
                 ),
@@ -68,7 +70,7 @@ class FeatureBanner extends StatelessWidget {
               color: Colors.white.withValues(alpha: .1),
               borderRadius: BorderRadius.circular(22),
             ),
-            child: Icon(icon, color: const Color(0xffe0efe5), size: 42),
+            child: Icon(icon, color: Colors.white, size: 42),
           ),
         ],
       ],

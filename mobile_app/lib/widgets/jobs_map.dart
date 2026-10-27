@@ -53,9 +53,9 @@ class JobsMap extends StatelessWidget {
               child: GestureDetector(
                 key: ValueKey('job-marker-${job.id}'),
                 onTap: () => onJobTap(job),
-                child: const Icon(
+                child: Icon(
                   Icons.location_on,
-                  color: Color(0xff176b52),
+                  color: Theme.of(context).colorScheme.primary,
                   size: 44,
                 ),
               ),

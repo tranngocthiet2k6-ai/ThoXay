@@ -1,3 +1,5 @@
+import '../theme/app_theme.dart';
+
 import 'package:flutter/material.dart';
 
 /// A shared, keyboard-safe entry point for both account flows.
@@ -14,10 +16,10 @@ class AuthShell extends StatelessWidget {
   final bool canGoBack;
   @override
   Widget build(BuildContext context) => Scaffold(
-    backgroundColor: const Color(0xffedf4f1),
+    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
     appBar: canGoBack
         ? AppBar(
-            backgroundColor: const Color(0xffedf4f1),
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             title: const Text('Đăng ký'),
           )
         : null,
@@ -29,10 +31,10 @@ class AuthShell extends StatelessWidget {
             padding: EdgeInsets.all(wide ? 36 : 24),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(28),
-              gradient: const LinearGradient(
+              gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [Color(0xff123e36), Color(0xff21846b)],
+                colors: AppTheme.brandGradient(context),
               ),
             ),
             child: Column(
@@ -96,10 +98,11 @@ class AuthShell extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(28),
-              border: Border.all(color: const Color(0xffe1ece6)),
+              border: Border.all(color: const Color(0xffe2e8f0)),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xff123e36).withValues(alpha: .07),
+                  color: Theme.of(context).colorScheme.primary
+                      .withValues(alpha: .07),
                   blurRadius: 40,
                   offset: const Offset(0, 16),
                 ),
@@ -112,13 +115,13 @@ class AuthShell extends StatelessWidget {
                   title,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.w800,
-                    color: const Color(0xff183e34),
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 10),
                 Text(
                   subtitle,
-                  style: const TextStyle(color: Color(0xff667b72), height: 1.5),
+                  style: const TextStyle(color: Color(0xff64748b), height: 1.5),
                 ),
                 const SizedBox(height: 28),
                 child,

@@ -33,7 +33,7 @@ class PortfolioGallery extends StatelessWidget {
                   width: (constraints.maxWidth - 20) / 3,
                   height: 105,
                   child: Material(
-                    color: const Color(0xffeaf2ed),
+                    color: Theme.of(context).colorScheme.primaryContainer,
                     borderRadius: BorderRadius.circular(12),
                     clipBehavior: Clip.antiAlias,
                     child: InkWell(

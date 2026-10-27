@@ -1,3 +1,5 @@
+import '../theme/app_theme.dart';
+
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -51,123 +53,132 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => AuthShell(
-    title: 'Bắt đầu kết nối',
-    subtitle: 'Bạn muốn tìm việc hay tìm người thợ phù hợp?',
-    canGoBack: true,
-    child: Form(
-      key: _form,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SegmentedButton<String>(
-            segments: const [
-              ButtonSegment(
-                value: 'ROLE_WORKER',
-                label: Text('Tôi là thợ'),
-                icon: Icon(Icons.construction),
+  Widget build(BuildContext context) => Theme(
+    data: AppTheme.forRole(_role),
+    child: Builder(
+      builder: (context) => AuthShell(
+        title: 'Bắt đầu kết nối',
+        subtitle: 'Bạn muốn tìm việc hay tìm người thợ phù hợp?',
+        canGoBack: true,
+        child: Form(
+          key: _form,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SegmentedButton<String>(
+                segments: const [
+                  ButtonSegment(
+                    value: 'ROLE_WORKER',
+                    label: Text('Tôi là thợ'),
+                    icon: Icon(Icons.construction),
+                  ),
+                  ButtonSegment(
+                    value: 'ROLE_CONTRACTOR',
+                    label: Text('Tôi là chủ thầu'),
+                    icon: Icon(Icons.apartment),
+                  ),
+                ],
+                selected: {_role},
+                onSelectionChanged: _busy
+                    ? null
+                    : (value) => setState(() => _role = value.first),
               ),
-              ButtonSegment(
-                value: 'ROLE_CONTRACTOR',
-                label: Text('Tôi là chủ thầu'),
-                icon: Icon(Icons.apartment),
+              const SizedBox(height: 24),
+              TextFormField(
+                controller: _name,
+                enabled: !_busy,
+                textCapitalization: TextCapitalization.words,
+                maxLength: 100,
+                autofillHints: const [AutofillHints.name],
+                decoration: const InputDecoration(
+                  labelText: 'Họ và tên',
+                  prefixIcon: Icon(Icons.person_outline),
+                ),
+                validator: (v) =>
+                    (v?.trim().isEmpty ?? true) ? 'Nhập họ và tên' : null,
               ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _phone,
+                enabled: !_busy,
+                maxLength: 15,
+                keyboardType: TextInputType.phone,
+                autofillHints: const [AutofillHints.telephoneNumber],
+                decoration: const InputDecoration(
+                  labelText: 'Số điện thoại',
+                  prefixIcon: Icon(Icons.phone_outlined),
+                ),
+                validator: (v) =>
+                    RegExp(r'^0[0-9]{9,14}$').hasMatch(v?.trim() ?? '')
+                    ? null
+                    : 'Nhập số điện thoại hợp lệ',
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _password,
+                enabled: !_busy,
+                obscureText: true,
+                autofillHints: const [AutofillHints.newPassword],
+                decoration: const InputDecoration(
+                  labelText: 'Mật khẩu',
+                  prefixIcon: Icon(Icons.lock_outline),
+                ),
+                validator: (v) => (v?.length ?? 0) < 8
+                    ? 'Mật khẩu ít nhất 8 ký tự'
+                    : utf8.encode(v!).length > 72
+                    ? 'Mật khẩu tối đa 72 byte UTF-8'
+                    : null,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _confirmation,
+                enabled: !_busy,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  labelText: 'Nhập lại mật khẩu',
+                  prefixIcon: Icon(Icons.lock_reset_outlined),
+                ),
+                validator: (v) => v != _password.text || (v?.isEmpty ?? true)
+                    ? 'Mật khẩu nhập lại chưa khớp'
+                    : null,
+              ),
+              const SizedBox(height: 16),
+              const ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(Icons.camera_alt_outlined),
+                title: Text('Xác thực CCCD bằng camera'),
+                subtitle: Text(
+                  'Sau khi đăng ký, mở Hồ sơ & CCCD để chụp đủ hai mặt và gửi xác thực.',
+                ),
+              ),
+              if (_error != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: Text(
+                    _error!,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                ),
+              const SizedBox(height: 24),
+              FilledButton(
+                onPressed: _busy ? null : _submit,
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.all(18),
+                ),
+                child: _busy
+                    ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Tạo tài khoản'),
+              ),
+              const SizedBox(height: 16),
             ],
-            selected: {_role},
-            onSelectionChanged: _busy
-                ? null
-                : (value) => setState(() => _role = value.first),
           ),
-          const SizedBox(height: 24),
-          TextFormField(
-            controller: _name,
-            enabled: !_busy,
-            textCapitalization: TextCapitalization.words,
-            maxLength: 100,
-            autofillHints: const [AutofillHints.name],
-            decoration: const InputDecoration(
-              labelText: 'Họ và tên',
-              prefixIcon: Icon(Icons.person_outline),
-            ),
-            validator: (v) =>
-                (v?.trim().isEmpty ?? true) ? 'Nhập họ và tên' : null,
-          ),
-          const SizedBox(height: 12),
-          TextFormField(
-            controller: _phone,
-            enabled: !_busy,
-            maxLength: 15,
-            keyboardType: TextInputType.phone,
-            autofillHints: const [AutofillHints.telephoneNumber],
-            decoration: const InputDecoration(
-              labelText: 'Số điện thoại',
-              prefixIcon: Icon(Icons.phone_outlined),
-            ),
-            validator: (v) =>
-                RegExp(r'^0[0-9]{9,14}$').hasMatch(v?.trim() ?? '')
-                ? null
-                : 'Nhập số điện thoại hợp lệ',
-          ),
-          const SizedBox(height: 12),
-          TextFormField(
-            controller: _password,
-            enabled: !_busy,
-            obscureText: true,
-            autofillHints: const [AutofillHints.newPassword],
-            decoration: const InputDecoration(
-              labelText: 'Mật khẩu',
-              prefixIcon: Icon(Icons.lock_outline),
-            ),
-            validator: (v) => (v?.length ?? 0) < 8
-                ? 'Mật khẩu ít nhất 8 ký tự'
-                : utf8.encode(v!).length > 72
-                ? 'Mật khẩu tối đa 72 byte UTF-8'
-                : null,
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            controller: _confirmation,
-            enabled: !_busy,
-            obscureText: true,
-            decoration: const InputDecoration(
-              labelText: 'Nhập lại mật khẩu',
-              prefixIcon: Icon(Icons.lock_reset_outlined),
-            ),
-            validator: (v) => v != _password.text || (v?.isEmpty ?? true)
-                ? 'Mật khẩu nhập lại chưa khớp'
-                : null,
-          ),
-          const SizedBox(height: 16),
-          const ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: Icon(Icons.camera_alt_outlined),
-            title: Text('Xác thực CCCD bằng camera'),
-            subtitle: Text(
-              'Sau khi đăng ký, mở Hồ sơ & CCCD để chụp đủ hai mặt và gửi xác thực.',
-            ),
-          ),
-          if (_error != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 16),
-              child: Text(
-                _error!,
-                style: TextStyle(color: Theme.of(context).colorScheme.error),
-              ),
-            ),
-          const SizedBox(height: 24),
-          FilledButton(
-            onPressed: _busy ? null : _submit,
-            style: FilledButton.styleFrom(padding: const EdgeInsets.all(18)),
-            child: _busy
-                ? const SizedBox(
-                    width: 22,
-                    height: 22,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Text('Tạo tài khoản'),
-          ),
-          const SizedBox(height: 16),
-        ],
+        ),
       ),
     ),
   );

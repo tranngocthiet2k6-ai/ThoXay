@@ -55,7 +55,7 @@ class _EarningsScreenState extends State<EarningsScreen> {
 
   Widget _part(String title, int value, IconData icon) => Card(
     child: ListTile(
-      leading: Icon(icon, color: const Color(0xff176b52)),
+      leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
       title: Text(title),
       trailing: Text(
         money(value.toDouble()),
@@ -120,7 +120,7 @@ class _EarningsScreenState extends State<EarningsScreen> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: const Color(0xff176b52),
+                color: Theme.of(context).colorScheme.primary,
                 borderRadius: BorderRadius.circular(26),
               ),
               child: Column(

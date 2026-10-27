@@ -228,7 +228,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                           ? Icons.wifi_rounded
                           : Icons.pause_circle_outline,
                       color: _available == true
-                          ? const Color(0xff176b52)
+                          ? Theme.of(context).colorScheme.primary
                           : Colors.blueGrey,
                     ),
                     title: Text(

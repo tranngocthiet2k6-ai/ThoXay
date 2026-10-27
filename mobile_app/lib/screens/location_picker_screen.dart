@@ -45,9 +45,9 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                       width: 44,
                       height: 44,
                       alignment: Alignment.topCenter,
-                      child: const Icon(
+                      child: Icon(
                         Icons.location_on,
-                        color: Color(0xff176b52),
+                        color: Theme.of(context).colorScheme.primary,
                         size: 44,
                       ),
                     ),

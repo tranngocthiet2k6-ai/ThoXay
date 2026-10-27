@@ -1,3 +1,5 @@
+import '../theme/app_theme.dart';
+
 import 'package:flutter/material.dart';
 
 import '../models/wallet.dart';
@@ -98,7 +100,7 @@ class _WalletScreenState extends State<WalletScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, color: const Color(0xff176b52)),
+            Icon(icon, color: Theme.of(context).colorScheme.primary),
             const SizedBox(height: 8),
             Text(title),
             const SizedBox(height: 8),
@@ -151,8 +153,8 @@ class _WalletScreenState extends State<WalletScreen> {
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(26),
-                gradient: const LinearGradient(
-                  colors: [Color(0xff143e35), Color(0xff238267)],
+                gradient: LinearGradient(
+                  colors: AppTheme.brandGradient(context),
                 ),
               ),
               child: Column(
@@ -279,7 +281,7 @@ class _WalletScreenState extends State<WalletScreen> {
                           fontWeight: FontWeight.w700,
                           color: walletEntrySign(e.kind) == '− '
                               ? Colors.red.shade700
-                              : const Color(0xff176b52),
+                              : Theme.of(context).colorScheme.primary,
                         ),
                       ),
                     ),

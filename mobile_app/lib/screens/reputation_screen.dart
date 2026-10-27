@@ -89,7 +89,7 @@ class _ReputationScreenState extends State<ReputationScreen> {
                       style: TextStyle(
                         color: entry.delta < 0
                             ? Colors.red.shade700
-                            : const Color(0xff176b52),
+                            : Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.w700,
                       ),
                     ),

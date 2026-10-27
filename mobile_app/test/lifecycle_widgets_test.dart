@@ -43,7 +43,7 @@ class LifecycleApi extends ApiService {
   @override
   Future<UserProfile> uploadCccd(KycPhoto front, KycPhoto back) async {
     cccdUpdates++;
-    return person = UserProfile(
+    return person = const UserProfile(
       id: 3,
       fullName: 'Thợ A',
       phoneNumber: '0900000003',

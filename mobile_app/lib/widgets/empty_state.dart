@@ -20,10 +20,12 @@ class EmptyState extends StatelessWidget {
     ),
     child: Column(
       children: [
-        const ExcludeSemantics(
+        ExcludeSemantics(
           child: CustomPaint(
-            size: Size(180, 130),
-            painter: _WorksiteIllustration(),
+            size: const Size(180, 130),
+            painter: _WorksiteIllustration(
+              Theme.of(context).colorScheme.primary,
+            ),
           ),
         ),
         const SizedBox(height: 20),
@@ -32,7 +34,7 @@ class EmptyState extends StatelessWidget {
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w800,
-            color: const Color(0xff173f34),
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 10),
@@ -41,7 +43,10 @@ class EmptyState extends StatelessWidget {
           child: Text(
             message,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: Color(0xff637a70), height: 1.6),
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              height: 1.6,
+            ),
           ),
         ),
         if (action != null) ...[const SizedBox(height: 20), action!],
@@ -51,12 +56,13 @@ class EmptyState extends StatelessWidget {
 }
 
 class _WorksiteIllustration extends CustomPainter {
-  const _WorksiteIllustration();
+  const _WorksiteIllustration(this.accent);
+  final Color accent;
   @override
   void paint(Canvas canvas, Size size) {
     canvas.save();
     canvas.scale(size.width / 180, size.height / 130);
-    final fill = Paint()..color = const Color(0xffeaf4ee);
+    final fill = Paint()..color = accent.withValues(alpha: .09);
     canvas.drawCircle(const Offset(88, 67), 59, fill);
     canvas.drawCircle(
       const Offset(151, 24),
@@ -64,7 +70,7 @@ class _WorksiteIllustration extends CustomPainter {
       fill..color = const Color(0xffffdf9e),
     );
     final line = Paint()
-      ..color = const Color(0xff438970)
+      ..color = accent.withValues(alpha: .8)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2
       ..strokeCap = StrokeCap.round;
@@ -88,7 +94,7 @@ class _WorksiteIllustration extends CustomPainter {
             Rect.fromLTWH(x, y, 12, 12),
             const Radius.circular(3),
           ),
-          fill..color = const Color(0xffc8e3d5),
+          fill..color = accent.withValues(alpha: .2),
         );
       }
     }
@@ -97,7 +103,7 @@ class _WorksiteIllustration extends CustomPainter {
         const Rect.fromLTWH(72, 96, 14, 18),
         const Radius.circular(3),
       ),
-      fill..color = const Color(0xffa8cdbc),
+      fill..color = accent.withValues(alpha: .35),
     );
     final pin = Path()
       ..moveTo(138, 110)
@@ -105,11 +111,12 @@ class _WorksiteIllustration extends CustomPainter {
       ..cubicTo(118, 51, 158, 51, 158, 77)
       ..cubicTo(158, 86, 147, 99, 138, 110)
       ..close();
-    canvas.drawPath(pin, fill..color = const Color(0xff176b52));
+    canvas.drawPath(pin, fill..color = accent);
     canvas.drawCircle(const Offset(138, 77), 7, fill..color = Colors.white);
     canvas.restore();
   }
 
   @override
-  bool shouldRepaint(covariant _WorksiteIllustration oldDelegate) => false;
+  bool shouldRepaint(covariant _WorksiteIllustration oldDelegate) =>
+      oldDelegate.accent != accent;
 }

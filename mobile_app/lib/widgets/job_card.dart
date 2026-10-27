@@ -43,10 +43,10 @@ class JobCard extends StatelessWidget {
                     ? Icons.engineering_outlined
                     : Icons.handyman_outlined,
                 color: job.jobType == 'Thợ chính'
-                    ? const Color(0xff176b52)
+                    ? Theme.of(context).colorScheme.primary
                     : const Color(0xff95510a),
                 background: job.jobType == 'Thợ chính'
-                    ? const Color(0xffe8f3ed)
+                    ? Theme.of(context).colorScheme.primaryContainer
                     : const Color(0xfffff2df),
               ),
               if (job.distanceKm != null)
@@ -81,7 +81,7 @@ class JobCard extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: const Color(0xfff0f7f3),
+              color: Theme.of(context).colorScheme.primaryContainer,
               borderRadius: BorderRadius.circular(14),
             ),
             child: Wrap(
@@ -89,17 +89,17 @@ class JobCard extends StatelessWidget {
               runSpacing: 4,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                const Icon(
+                Icon(
                   Icons.payments_outlined,
-                  color: Color(0xff176b52),
+                  color: Theme.of(context).colorScheme.primary,
                   size: 22,
                 ),
                 Text(
                   '${money(job.salaryPerDay)} / ngày',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 21,
                     fontWeight: FontWeight.w800,
-                    color: Color(0xff176b52),
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
               ],

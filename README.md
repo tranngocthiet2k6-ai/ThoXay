@@ -457,3 +457,13 @@ không có tài khoản thì hiển thị 0%. Không dùng font/icon/ảnh CDN c
 Flutter chụp hai mặt bằng camera, gửi multipart có JWT và lưu ảnh riêng tư trong
 PostgreSQL. Kiểm tra ảnh tự động, Admin duyệt danh tính trong modal.
 Xem [cấu hình, API và giới hạn](docs/KYC_CAMERA.md).
+
+## Bộ màu theo vai trò
+
+- Admin: nền Navy `#0F172A`, sidebar/card `#1E293B`, điểm nhấn `#3B82F6`.
+- Thợ: cam xây dựng `#EA580C`, nền kem nhạt, banner cam đậm.
+- Chủ thầu: xanh lục bảo `#059669`, nền xanh rất nhạt, banner xanh đậm.
+
+Flutter chọn theme theo phiên đăng nhập, áp dụng cả màn hình con, Ví và Chat.
+Đăng ký xem trước màu khi đổi vai trò; màn hình đăng nhập dùng màu trung tính.
+Trạng thái thành công/cảnh báo/lỗi vẫn có màu ngữ nghĩa riêng.

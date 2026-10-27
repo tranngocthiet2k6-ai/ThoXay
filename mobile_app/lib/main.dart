@@ -52,63 +52,66 @@ class ThoXayApp extends StatelessWidget {
   const ThoXayApp({super.key, required this.api});
   final ApiService api;
   @override
-  Widget build(BuildContext context) => MaterialApp(
-    title: 'Thợ Xây',
-    navigatorKey: _navigator,
-    scaffoldMessengerKey: _messenger,
-    debugShowCheckedModeBanner: false,
-    theme: AppTheme.light,
-    locale: const Locale('vi', 'VN'),
-    supportedLocales: const [Locale('vi', 'VN'), Locale('en', 'US')],
-    localizationsDelegates: const [
-      GlobalMaterialLocalizations.delegate,
-      GlobalWidgetsLocalizations.delegate,
-      GlobalCupertinoLocalizations.delegate,
-    ],
-    home: ListenableBuilder(
-      listenable: api,
-      builder: (context, _) {
-        if (api.session == null) return LoginScreen(api: api);
-        final session = api.session!;
-        if (session.role == 'ROLE_WORKER') {
-          return WorkerHomeScreen(api: api);
-        }
-        if (session.role == 'ROLE_CONTRACTOR') {
-          return ContractorHomeScreen(api: api);
-        }
-        return Scaffold(
-          appBar: AppBar(title: const Text('Tài khoản Thợ Xây')),
-          body: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.verified_user_outlined, size: 64),
-                  const SizedBox(height: 16),
-                  Text(
-                    session.fullName,
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  Text(session.phoneNumber),
-                  Text(
-                    session.role == 'ROLE_ADMIN'
-                        ? 'Quản trị hệ thống · /admin/dashboard'
-                        : session.role == 'ROLE_WORKER'
-                        ? 'Thợ'
-                        : 'Chủ thầu',
-                  ),
-                  const SizedBox(height: 24),
-                  OutlinedButton(
-                    onPressed: api.logout,
-                    child: const Text('Đăng xuất'),
-                  ),
-                ],
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: api,
+    builder: (context, _) => MaterialApp(
+      title: 'Thợ Xây',
+      navigatorKey: _navigator,
+      scaffoldMessengerKey: _messenger,
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.forRole(api.session?.role),
+      locale: const Locale('vi', 'VN'),
+      supportedLocales: const [Locale('vi', 'VN'), Locale('en', 'US')],
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      home: ListenableBuilder(
+        listenable: api,
+        builder: (context, _) {
+          if (api.session == null) return LoginScreen(api: api);
+          final session = api.session!;
+          if (session.role == 'ROLE_WORKER') {
+            return WorkerHomeScreen(api: api);
+          }
+          if (session.role == 'ROLE_CONTRACTOR') {
+            return ContractorHomeScreen(api: api);
+          }
+          return Scaffold(
+            appBar: AppBar(title: const Text('Tài khoản Thợ Xây')),
+            body: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.verified_user_outlined, size: 64),
+                    const SizedBox(height: 16),
+                    Text(
+                      session.fullName,
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    Text(session.phoneNumber),
+                    Text(
+                      session.role == 'ROLE_ADMIN'
+                          ? 'Quản trị hệ thống · /admin/dashboard'
+                          : session.role == 'ROLE_WORKER'
+                          ? 'Thợ'
+                          : 'Chủ thầu',
+                    ),
+                    const SizedBox(height: 24),
+                    OutlinedButton(
+                      onPressed: api.logout,
+                      child: const Text('Đăng xuất'),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     ),
   );
 }

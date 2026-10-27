@@ -1,28 +1,67 @@
 import 'package:flutter/material.dart';
 
 abstract final class AppTheme {
-  static const green = Color(0xff176b52);
-  static ThemeData get light {
-    final colors = ColorScheme.fromSeed(
-      seedColor: green,
-      surface: Colors.white,
-    );
+  static List<Color> brandGradient(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    if (primary == workerOrange) {
+      return const [Color(0xff7c2d12), Color(0xffc2410c)];
+    }
+    if (primary == contractorEmerald) {
+      return const [Color(0xff064e3b), Color(0xff047857)];
+    }
+    return const [Color(0xff0f172a), Color(0xff1d4ed8)];
+  }
+
+  static const workerOrange = Color(0xffea580c);
+  static const contractorEmerald = Color(0xff059669);
+  static ThemeData get light => forRole(null);
+  static ThemeData forRole(String? role) {
+    final worker = role == 'ROLE_WORKER';
+    final contractor = role == 'ROLE_CONTRACTOR';
+    final accent = worker
+        ? workerOrange
+        : contractor
+        ? contractorEmerald
+        : const Color(0xff1d4ed8);
+    final background = worker
+        ? const Color(0xfffff7ed)
+        : contractor
+        ? const Color(0xfff0fdf4)
+        : const Color(0xfff1f5f9);
+    final container = worker
+        ? const Color(0xffffedd5)
+        : contractor
+        ? const Color(0xffd1fae5)
+        : const Color(0xffdbeafe);
+    final colors =
+        ColorScheme.fromSeed(seedColor: accent, surface: Colors.white).copyWith(
+          primary: accent,
+          onPrimary: worker
+              ? const Color(0xff1c0a00)
+              : contractor
+              ? const Color(0xff011b12)
+              : Colors.white,
+          primaryContainer: container,
+          onPrimaryContainer: const Color(0xff0f172a),
+          onSurface: const Color(0xff0f172a),
+          onSurfaceVariant: const Color(0xff475569),
+        );
     final rounded = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(16),
     );
     return ThemeData(
       useMaterial3: true,
       colorScheme: colors,
-      scaffoldBackgroundColor: const Color(0xfff3f6f5),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: Color(0xfff3f6f5),
-        foregroundColor: Color(0xff173b32),
+      scaffoldBackgroundColor: background,
+      appBarTheme: AppBarTheme(
+        backgroundColor: background,
+        foregroundColor: const Color(0xff0f172a),
         elevation: 0,
         scrolledUnderElevation: 0,
-        titleTextStyle: TextStyle(
+        titleTextStyle: const TextStyle(
           fontSize: 21,
           fontWeight: FontWeight.w800,
-          color: Color(0xff173b32),
+          color: Color(0xff0f172a),
         ),
       ),
       cardTheme: CardThemeData(
@@ -63,9 +102,9 @@ abstract final class AppTheme {
           ),
         ),
       ),
-      navigationBarTheme: const NavigationBarThemeData(
+      navigationBarTheme: NavigationBarThemeData(
         backgroundColor: Colors.white,
-        indicatorColor: Color(0xffdceee6),
+        indicatorColor: container,
         elevation: 0,
       ),
       snackBarTheme: SnackBarThemeData(
