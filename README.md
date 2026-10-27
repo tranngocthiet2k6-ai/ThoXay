@@ -451,3 +451,9 @@ không có tài khoản thì hiển thị 0%. Không dùng font/icon/ảnh CDN c
 - `schema.sql`: các bảng PostgreSQL, constraints, indexes và seed.
 - [AGENTS.md](AGENTS.md): kiến trúc và quy trình build → commit → push cho mỗi hạng mục.
 - [TESTING.md](TESTING.md): lệnh kiểm thử, phạm vi đã kiểm chứng và kịch bản nghiệm thu.
+
+## Chụp CCCD trực tiếp
+
+Flutter chụp hai mặt bằng camera, gửi multipart có JWT và lưu ảnh riêng tư trong
+PostgreSQL. Kiểm tra ảnh tự động, Admin duyệt danh tính trong modal.
+Xem [cấu hình, API và giới hạn](docs/KYC_CAMERA.md).

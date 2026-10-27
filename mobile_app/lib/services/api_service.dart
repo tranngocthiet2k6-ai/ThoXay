@@ -13,6 +13,7 @@ import '../models/worker_profile.dart';
 import '../models/reputation.dart';
 import '../models/wallet.dart';
 import 'chat_connection.dart';
+import 'kyc_camera.dart';
 
 class ApiException implements Exception {
   const ApiException(this.message, [this.statusCode]);
@@ -399,6 +400,71 @@ class ApiService extends ChangeNotifier {
     } on Object {
       unawaited(socket.sink.close().catchError((Object _) {}));
       throw const ApiException('Không kết nối được máy chủ nhắn tin');
+    }
+  }
+
+  Future<UserProfile> uploadCccd(KycPhoto front, KycPhoto back) async {
+    final session = _requireSession();
+    if (!session.expiresAt.isAfter(DateTime.now())) {
+      await logout();
+      throw const ApiException('Phiên đăng nhập đã hết hạn', 401);
+    }
+    if ([
+      front,
+      back,
+    ].any((p) => p.bytes.isEmpty || p.bytes.length > 5 * 1024 * 1024)) {
+      throw const ApiException('Cần hai ảnh hợp lệ, mỗi ảnh tối đa 5 MB');
+    }
+    final request =
+        http.MultipartRequest(
+            'POST',
+            Uri.parse('$baseUrl/api/users/me/cccd/photos'),
+          )
+          ..headers['Authorization'] = 'Bearer ${session.token}'
+          ..files.addAll([
+            http.MultipartFile.fromBytes(
+              'front',
+              front.bytes,
+              filename: 'front.jpg',
+            ),
+            http.MultipartFile.fromBytes(
+              'back',
+              back.bytes,
+              filename: 'back.jpg',
+            ),
+          ]);
+    try {
+      final response = await _client
+          .send(request)
+          .then(http.Response.fromStream)
+          .timeout(const Duration(seconds: 60));
+      final data = jsonDecode(utf8.decode(response.bodyBytes));
+      if (response.statusCode == 401 ||
+          (response.statusCode == 403 &&
+              data is Map &&
+              data['code'] == 'ACCOUNT_LOCKED')) {
+        await logout();
+      }
+      if (response.statusCode != 200) {
+        throw ApiException(
+          data is Map && data['message'] is String
+              ? data['message'] as String
+              : 'Không tải được ảnh CCCD',
+          response.statusCode,
+        );
+      }
+      if (data is! Map<String, dynamic>) throw const FormatException();
+      return UserProfile.fromJson(data);
+    } on FormatException {
+      throw const ApiException('Máy chủ trả về dữ liệu không hợp lệ');
+    } on TimeoutException {
+      throw const ApiException(
+        'Tải ảnh quá thời gian. Hai ảnh vẫn được giữ để gửi lại.',
+      );
+    } on http.ClientException {
+      throw const ApiException(
+        'Không kết nối được máy chủ. Hai ảnh vẫn được giữ để gửi lại.',
+      );
     }
   }
 

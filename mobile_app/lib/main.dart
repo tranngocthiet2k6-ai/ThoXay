@@ -5,6 +5,7 @@ import 'screens/login_screen.dart';
 import 'screens/worker_home_screen.dart';
 import 'screens/contractor_home_screen.dart';
 import 'services/api_service.dart';
+import 'services/kyc_camera.dart';
 import 'theme/app_theme.dart';
 import 'services/push_notifications.dart';
 import 'screens/notifications_screen.dart';
@@ -16,6 +17,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final api = ApiService();
   await api.restoreSession();
+  await KycCamera.instance.restoreLostPhoto();
   api.addListener(() {
     if (api.session == null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {

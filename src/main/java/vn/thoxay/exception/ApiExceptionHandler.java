@@ -15,6 +15,10 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice(annotations = RestController.class)
 public class ApiExceptionHandler {
+    @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
+    ResponseEntity<?> tooLarge(Exception e) { return error(HttpStatus.PAYLOAD_TOO_LARGE, "Mỗi ảnh tối đa 5 MB, tổng yêu cầu tối đa 11 MB"); }
+    @ExceptionHandler(org.springframework.web.multipart.support.MissingServletRequestPartException.class)
+    ResponseEntity<?> missingPhoto(Exception e) { return error(HttpStatus.BAD_REQUEST, "Cần đủ ảnh mặt trước và mặt sau CCCD"); }
     @ExceptionHandler(AccountLockedException.class)
     ResponseEntity<?> locked(AccountLockedException e) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("status", 403,

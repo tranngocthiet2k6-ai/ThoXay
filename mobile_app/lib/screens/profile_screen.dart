@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import '../services/kyc_camera.dart';
 
 import '../models/models.dart';
 import '../services/api_service.dart';
@@ -9,16 +12,16 @@ import 'leaderboard_screen.dart';
 import 'reputation_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key, required this.api});
+  const ProfileScreen({super.key, required this.api, this.camera});
   final ApiService api;
+  final KycCamera? camera;
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final _form = GlobalKey<FormState>();
-  final _frontImage = TextEditingController();
-  final _backImage = TextEditingController();
+  KycPhoto? _frontImage, _backImage;
+  KycCamera get _camera => widget.camera ?? KycCamera.instance;
   UserProfile? _profile;
   bool _loading = false;
   String? _error;
@@ -28,13 +31,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _load();
   }
 
-  @override
-  void dispose() {
-    _frontImage.dispose();
-    _backImage.dispose();
-    super.dispose();
-  }
-
   Future<void> _load() async {
     setState(() {
       _loading = true;
@@ -42,11 +38,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
     try {
       final profile = await widget.api.profile();
+      final recovered = await _camera.recover(profile.id);
       if (mounted) {
         setState(() {
           _profile = profile;
-          _frontImage.text = profile.cccdFrontImage ?? '';
-          _backImage.text = profile.cccdBackImage ?? '';
+          if (recovered != null) {
+            if (recovered.face == 'front') {
+              _frontImage = recovered.photo;
+            } else {
+              _backImage = recovered.photo;
+            }
+          }
         });
       }
     } on ApiException catch (e) {
@@ -57,18 +59,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _save() async {
-    if (!_form.currentState!.validate()) return;
+    if (_frontImage == null || _backImage == null) {
+      setState(
+        () => _error = 'Hãy chụp đủ mặt trước và mặt sau CCCD trước khi gửi.',
+      );
+      return;
+    }
     setState(() {
       _loading = true;
       _error = null;
     });
     try {
-      final profile = await widget.api.updateCccd(
-        _frontImage.text.trim(),
-        _backImage.text.trim(),
-      );
+      final profile = await widget.api.uploadCccd(_frontImage!, _backImage!);
       if (!mounted) return;
-      setState(() => _profile = profile);
+      setState(() {
+        _profile = profile;
+        _frontImage = null;
+        _backImage = null;
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
@@ -82,6 +90,93 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (mounted) setState(() => _loading = false);
     }
   }
+
+  Future<void> _capture(String face) async {
+    if (_profile == null || _loading) return;
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final photo = await _camera.capture(_profile!.id, face);
+      if (mounted && photo != null) {
+        setState(() {
+          if (face == 'front') {
+            _frontImage = photo;
+          } else {
+            _backImage = photo;
+          }
+        });
+      }
+    } on PlatformException {
+      if (mounted) {
+        setState(
+          () => _error = 'Không mở được camera. Hãy cho phép truy cập camera trong Cài đặt rồi thử lại.',
+        );
+      }
+    } on ApiException catch (e) {
+      if (mounted) setState(() => _error = e.message);
+    } on Object {
+      if (mounted) {
+        setState(() => _error = 'Không đọc được ảnh. Vui lòng chụp lại.');
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Widget _photoCard(String face, String label, KycPhoto? photo) => Card(
+    child: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(label, style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 12),
+          if (photo != null)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.memory(
+                photo.bytes,
+                height: 180,
+                fit: BoxFit.contain,
+                errorBuilder: (_, _, _) => const SizedBox(
+                  height: 80,
+                  child: Center(
+                    child: Text('Không xem được ảnh, hãy chụp lại.'),
+                  ),
+                ),
+              ),
+            )
+          else
+            Icon(
+              Icons.badge_outlined,
+              size: 60,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          const SizedBox(height: 12),
+          if (photo == null &&
+              (face == 'front'
+                      ? _profile?.cccdFrontImage
+                      : _profile?.cccdBackImage) !=
+                  null)
+            const Text('Đã có ảnh trong hồ sơ. Chụp ảnh mới để thay thế.'),
+          OutlinedButton.icon(
+            key: ValueKey('capture-$face'),
+            onPressed: _loading ? null : () => _capture(face),
+            icon: Icon(
+              _camera.usesFileSelection
+                  ? Icons.upload_file
+                  : Icons.camera_alt_outlined,
+            ),
+            label: Text(
+              '${_camera.usesFileSelection ? 'Chọn ảnh' : 'Chụp'} ${face == 'front' ? 'mặt trước' : 'mặt sau'}',
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -179,45 +274,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ],
             const SizedBox(height: 24),
             const Text(
-              'Cung cấp đủ ảnh mặt trước và mặt sau CCCD bằng liên kết HTTPS. Mỗi lần cập nhật cần được quản trị viên xác thực lại.',
+              'Chụp rõ toàn bộ CCCD, đủ sáng, tránh lóa và không che thông tin. Hệ thống kiểm tra tệp ảnh tự động; quản trị viên đối chiếu danh tính trước khi xác thực. Mỗi lần gửi cần đủ hai ảnh mới.',
             ),
             const SizedBox(height: 16),
-            Form(
-              key: _form,
-              child: Column(
-                children: [
-                  TextFormField(
-                    key: const ValueKey('cccd-front-input'),
-                    controller: _frontImage,
-                    enabled: !_loading,
-                    maxLength: 500,
-                    keyboardType: TextInputType.url,
-                    decoration: const InputDecoration(
-                      labelText: 'Liên kết ảnh mặt trước CCCD (HTTPS)',
-                    ),
-                    validator: (v) =>
-                        RegExp(r'^https://[^\s]+$').hasMatch(v?.trim() ?? '')
-                        ? null
-                        : 'Nhập liên kết HTTPS hợp lệ cho mặt trước',
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    key: const ValueKey('cccd-back-input'),
-                    controller: _backImage,
-                    enabled: !_loading,
-                    maxLength: 500,
-                    keyboardType: TextInputType.url,
-                    decoration: const InputDecoration(
-                      labelText: 'Liên kết ảnh mặt sau CCCD (HTTPS)',
-                    ),
-                    validator: (v) =>
-                        RegExp(r'^https://[^\s]+$').hasMatch(v?.trim() ?? '')
-                        ? null
-                        : 'Nhập liên kết HTTPS hợp lệ cho mặt sau',
-                  ),
-                ],
-              ),
-            ),
+            _photoCard('front', 'Mặt trước CCCD', _frontImage),
+            const SizedBox(height: 16),
+            _photoCard('back', 'Mặt sau CCCD', _backImage),
             const SizedBox(height: 16),
             FilledButton.icon(
               onPressed: _loading ? null : _save,

@@ -6,7 +6,7 @@
 .\mvnw.cmd -B verify
 ```
 
-58 kiểm thử JUnit/Spring Boot dùng H2 mặc định, chạy với Spring Security và JWT
+61 kiểm thử JUnit/Spring Boot dùng H2 mặc định, chạy với Spring Security và JWT
 thật: đăng ký/đăng nhập, BCrypt, chống đăng ký ADMIN, token giả/thiếu, tài khoản
 bị khóa, phân quyền, Haversine, dữ liệu sai, ứng tuyển trùng, lịch sử, duyệt,
 hai giao dịch duyệt đồng thời cho một vị trí, render Thymeleaf, CSRF, xác thực
@@ -79,7 +79,7 @@ flutter test
 flutter build web --release
 ```
 
-43 kiểm thử Dart/widget: lưu/khôi phục phiên, đính JWT, xóa phiên khi 401,
+45 kiểm thử Dart/widget: lưu/khôi phục phiên, đính JWT, xóa phiên khi 401,
 validation đăng nhập/đăng ký, tìm việc theo vị trí được cấp cho test, ứng tuyển
 và lịch sử, duyệt thợ, validation form đăng công trình. Widget test dùng API
 và vị trí giả lập, không truy cập GPS thật hay gửi yêu cầu ra mạng.
@@ -230,3 +230,11 @@ Mỗi bước và mỗi màn hình có commit riêng trên `main`, chỉ chuyể
 build và push thành công. Xem `git log --oneline` để chọn điểm khôi phục. Dùng
 `git revert <commit>` khi cần đảo một thay đổi đã chia sẻ, rồi build và push
 checkpoint mới theo AGENTS.md.
+
+### Camera CCCD
+
+Kiểm thử multipart hai mặt, kiểm tra nội dung ảnh thực, ảnh thiếu/giả/quá lớn,
+ảnh trùng, truy cập riêng tư, tài khoản khóa, thay ảnh và chống duyệt snapshot cũ.
+Flutter kiểm tra gửi binary có JWT, xóa phiên bị khóa, chụp đủ hai mặt, hủy
+và từ chối quyền camera. Các kiểm thử camera dùng đối tượng giả; chưa thay thế
+việc kiểm chứng quyền và chụp thực tế trên Android/iOS.

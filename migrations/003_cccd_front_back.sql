@@ -8,8 +8,8 @@ UPDATE users SET cccd_front_image = cccd_image
   WHERE NULLIF(BTRIM(cccd_front_image), '') IS NULL AND NULLIF(BTRIM(cccd_image), '') IS NOT NULL;
 UPDATE users SET is_verified = FALSE
   WHERE is_verified AND NOT (
-    COALESCE(cccd_front_image, '') ~ '^https://[^[:space:]]+$'
-    AND COALESCE(cccd_back_image, '') ~ '^https://[^[:space:]]+$');
+    COALESCE(cccd_front_image, '') ~ '^(https://[^[:space:]]+|/admin/kyc/images/[0-9a-f-]{36})$'
+    AND COALESCE(cccd_back_image, '') ~ '^(https://[^[:space:]]+|/admin/kyc/images/[0-9a-f-]{36})$');
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_users_verified_cccd_faces'

@@ -49,7 +49,7 @@ public class AdminService {
         User user = user(id);
         entityManager.refresh(user, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
         if (!user.hasCompleteCccd())
-            throw new ApiException(HttpStatus.BAD_REQUEST, "Tài khoản phải cung cấp đủ ảnh mặt trước và mặt sau CCCD HTTPS hợp lệ");
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Tài khoản phải cung cấp đủ ảnh mặt trước và mặt sau CCCD hợp lệ");
         if (!java.util.Objects.equals(expectedFrontImage, user.getCccdFrontImage())
             || !java.util.Objects.equals(expectedBackImage, user.getCccdBackImage()))
             throw new ApiException(HttpStatus.CONFLICT, "Ảnh CCCD đã thay đổi. Hãy tải lại và kiểm tra cả hai ảnh mới trước khi xác thực.");
@@ -81,5 +81,5 @@ public class AdminService {
     private User user(Long id) {
         return users.findById(id).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Tài khoản không tồn tại"));
     }
-    private boolean validImage(String url) { return url != null && url.matches("https://[^\\s]+"); }
+    private boolean validImage(String url) { return User.validCccdImage(url); }
 }

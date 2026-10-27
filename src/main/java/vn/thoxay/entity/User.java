@@ -12,7 +12,7 @@ import java.util.List;
 @Table(name = "users")
 @Getter @Setter
 @org.hibernate.annotations.DynamicUpdate
-@org.hibernate.annotations.Check(constraints = "NOT is_verified OR (COALESCE(cccd_front_image, '') LIKE 'https://_%' AND COALESCE(cccd_back_image, '') LIKE 'https://_%')")
+@org.hibernate.annotations.Check(constraints = "NOT is_verified OR ((COALESCE(cccd_front_image, '') LIKE 'https://_%' OR COALESCE(cccd_front_image, '') LIKE '/admin/kyc/images/%') AND (COALESCE(cccd_back_image, '') LIKE 'https://_%' OR COALESCE(cccd_back_image, '') LIKE '/admin/kyc/images/%'))")
 public class User {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -73,7 +73,8 @@ public class User {
     }
     public void recalculateTier() { workerTier = WorkerTier.of(this); }
 
-    private boolean validCccdImage(String image) {
-        return image != null && image.matches("https://[^\\s]+");
+    public static boolean validCccdImage(String image) {
+        return image != null && (image.matches("https://[^\\s]+")
+            || image.matches("/admin/kyc/images/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"));
     }
 }

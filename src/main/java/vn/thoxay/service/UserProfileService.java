@@ -17,6 +17,7 @@ public class UserProfileService {
     private final CurrentUser current;
     private final jakarta.persistence.EntityManager entityManager;
     private final UserRepository users;
+    private final vn.thoxay.kyc.KycImageRepository images;
 
     @Transactional(readOnly = true)
     public UserProfileResponse profile() { return UserProfileResponse.of(current.get()); }
@@ -47,6 +48,7 @@ public class UserProfileService {
     public UserProfileResponse updateCccd(CccdRequest request) {
         var user = current.get();
         entityManager.refresh(user, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+        images.deleteForUser(user.getId());
         user.setCccdFrontImage(request.cccdFrontImage());
         user.setCccdBackImage(request.cccdBackImage());
         user.setVerified(false);

@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+    <key>NSCameraUsageDescription</key>
+    <string>Thợ Xây cần camera để chụp hai mặt CCCD khi bạn gửi hồ sơ xác thực.</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Thợ Xây cho phép chọn ảnh CCCD khi thiết bị không hỗ trợ chụp trực tiếp.</string>
     <key>LSApplicationQueriesSchemes</key>
     <array><string>tel</string></array>
     <key>NSLocationWhenInUseUsageDescription</key>

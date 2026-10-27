@@ -50,7 +50,7 @@
       const status = document.getElementById(`kyc-${face}-status`);
       const url = trigger.dataset[`${face}Image`] || '';
       const label = face === 'front' ? 'mặt trước' : 'mặt sau';
-      present[face] = /^https:\/\/[^\s]+$/.test(url);
+      present[face] = /^https:\/\/[^\s]+$/.test(url) || /^\/admin\/kyc\/images\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(url);
       loaded[face] = false;
       document.getElementById(`kyc-${face}-snapshot`).value = url;
       status.hidden = false;
@@ -68,7 +68,7 @@
         loaded[face] = false;
         image.hidden = true;
         status.hidden = false;
-        status.textContent = `Không tải được ảnh ${label}. Vui lòng kiểm tra liên kết HTTPS.`;
+        status.textContent = `Không tải được ảnh ${label}. Hãy tải lại hồ sơ và kiểm tra quyền truy cập.`;
         updateReview();
       };
       image.src = url;

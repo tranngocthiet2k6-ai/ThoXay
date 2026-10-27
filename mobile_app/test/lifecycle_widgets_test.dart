@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:flutter/services.dart';
+import 'package:tho_xay_mobile/services/kyc_camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tho_xay_mobile/models/models.dart';
@@ -37,10 +41,7 @@ class LifecycleApi extends ApiService {
   @override
   Future<UserProfile> profile() async => person;
   @override
-  Future<UserProfile> updateCccd(
-    String frontImageUrl,
-    String backImageUrl,
-  ) async {
+  Future<UserProfile> uploadCccd(KycPhoto front, KycPhoto back) async {
     cccdUpdates++;
     return person = UserProfile(
       id: 3,
@@ -49,8 +50,8 @@ class LifecycleApi extends ApiService {
       role: 'ROLE_WORKER',
       verified: false,
       rating: 4,
-      cccdFrontImage: frontImageUrl,
-      cccdBackImage: backImageUrl,
+      cccdFrontImage: '/admin/kyc/images/front',
+      cccdBackImage: '/admin/kyc/images/back',
     );
   }
 
@@ -72,6 +73,26 @@ class LifecycleApi extends ApiService {
   Future<Job> completeJob(int id, Map<int, int> ratings) async {
     submitted = Map.of(ratings);
     return job;
+  }
+}
+
+class FakeCamera extends KycCamera {
+  final faces = <String>[];
+  bool cancel = false, denied = false;
+  @override
+  bool get usesFileSelection => false;
+  @override
+  Future<({String face, KycPhoto photo})?> recover(int userId) async => null;
+  @override
+  Future<KycPhoto?> capture(int userId, String face) async {
+    faces.add(face);
+    if (denied) throw PlatformException(code: 'camera_access_denied');
+    if (cancel) return null;
+    return KycPhoto(
+      base64Decode(
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLbtAAAAABJRU5ErkJggg==',
+      ),
+    );
   }
 }
 
@@ -99,82 +120,75 @@ void main() {
     expect(received.toString(), 'tel:0900000003');
   });
   testWidgets(
-    'profile rejects insecure CCCD and shows pending verification after update',
+    'camera requires both faces then uploads and resets verification',
     (tester) async {
       final api = LifecycleApi();
-      await tester.pumpWidget(MaterialApp(home: ProfileScreen(api: api)));
+      final camera = FakeCamera();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ProfileScreen(api: api, camera: camera),
+        ),
+      );
       await tester.pumpAndSettle();
       expect(find.text('Chưa có đánh giá công trình'), findsOneWidget);
-      expect(find.text('Đánh giá trung bình: 4.0/5'), findsNothing);
-      await tester.enterText(
-        find.byKey(const ValueKey('cccd-front-input')),
-        'http://example.com/id.jpg',
-      );
       await tester.scrollUntilVisible(
         find.text('Cập nhật CCCD'),
         200,
         scrollable: find.byType(Scrollable).first,
       );
-      await tester.pumpAndSettle();
       await tester.tap(find.text('Cập nhật CCCD'));
       await tester.pumpAndSettle();
       expect(api.cccdUpdates, 0);
       expect(
-        find.text('Nhập liên kết HTTPS hợp lệ cho mặt trước'),
+        find.text('Hãy chụp đủ mặt trước và mặt sau CCCD trước khi gửi.'),
         findsOneWidget,
       );
-      await tester.enterText(
-        find.byKey(const ValueKey('cccd-front-input')),
-        'https://example.com/id.jpg',
-      );
+      await tester.ensureVisible(find.byKey(const ValueKey('capture-front')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('capture-front')));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.byKey(const ValueKey('capture-back')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('capture-back')));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Cập nhật CCCD'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Cập nhật CCCD'));
       await tester.pumpAndSettle();
       expect(api.cccdUpdates, 1);
-      expect(api.person.cccdFrontImage, 'https://example.com/id.jpg');
-      expect(api.person.cccdBackImage, 'https://example.com/old-back.jpg');
-      expect(find.text('Chưa xác thực CCCD'), findsOneWidget);
+      expect(api.person.verified, false);
+      expect(camera.faces, ['front', 'back']);
+      expect(find.byType(Image), findsNothing);
       api.dispose();
     },
   );
   testWidgets(
-    'profile requires the back face and preserves a migrated front image',
+    'camera cancellation and permission denial keep existing verified profile',
     (tester) async {
-      final api = LifecycleApi()
-        ..person = const UserProfile(
-          id: 3,
-          fullName: 'Thợ A',
-          phoneNumber: '0900000003',
-          role: 'ROLE_WORKER',
-          verified: false,
-          rating: 4,
-          cccdFrontImage: 'https://example.com/front.jpg',
-        );
-      await tester.pumpWidget(MaterialApp(home: ProfileScreen(api: api)));
+      final api = LifecycleApi();
+      final camera = FakeCamera()..cancel = true;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ProfileScreen(api: api, camera: camera),
+        ),
+      );
       await tester.pumpAndSettle();
-      expect(find.text('Liên kết ảnh mặt trước CCCD (HTTPS)'), findsOneWidget);
-      expect(find.text('Liên kết ảnh mặt sau CCCD (HTTPS)'), findsOneWidget);
       await tester.scrollUntilVisible(
-        find.text('Cập nhật CCCD'),
+        find.byKey(const ValueKey('capture-front')),
         200,
         scrollable: find.byType(Scrollable).first,
       );
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Cập nhật CCCD'));
+      await tester.tap(find.byKey(const ValueKey('capture-front')));
       await tester.pumpAndSettle();
       expect(api.cccdUpdates, 0);
-      expect(
-        find.text('Nhập liên kết HTTPS hợp lệ cho mặt sau'),
-        findsOneWidget,
-      );
-      await tester.enterText(
-        find.byKey(const ValueKey('cccd-back-input')),
-        'https://example.com/back.jpg',
-      );
-      await tester.tap(find.text('Cập nhật CCCD'));
+      expect(api.person.verified, true);
+      camera.cancel = false;
+      camera.denied = true;
+      await tester.tap(find.byKey(const ValueKey('capture-front')));
       await tester.pumpAndSettle();
-      expect(api.cccdUpdates, 1);
-      expect(api.person.cccdFrontImage, 'https://example.com/front.jpg');
-      expect(api.person.cccdBackImage, 'https://example.com/back.jpg');
+      expect(find.textContaining('Không mở được camera.'), findsOneWidget);
+      expect(api.cccdUpdates, 0);
+      expect(api.person.verified, true);
       api.dispose();
     },
   );

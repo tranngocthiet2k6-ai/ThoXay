@@ -22,8 +22,15 @@ CREATE TABLE IF NOT EXISTS users (
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT chk_users_verified_cccd_faces CHECK (NOT is_verified OR
-    (COALESCE(cccd_front_image, '') LIKE 'https://_%' AND COALESCE(cccd_back_image, '') LIKE 'https://_%'))
+    ((COALESCE(cccd_front_image, '') LIKE 'https://_%' OR COALESCE(cccd_front_image, '') LIKE '/admin/kyc/images/%')
+     AND (COALESCE(cccd_back_image, '') LIKE 'https://_%' OR COALESCE(cccd_back_image, '') LIKE '/admin/kyc/images/%')))
 );
+CREATE TABLE IF NOT EXISTS kyc_images (
+  id UUID PRIMARY KEY,
+  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  content BYTEA NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_kyc_images_user ON kyc_images(user_id);
 CREATE TABLE IF NOT EXISTS jobs (
   id BIGSERIAL PRIMARY KEY,
   contractor_id BIGINT NOT NULL REFERENCES users(id),

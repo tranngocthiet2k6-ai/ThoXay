@@ -85,6 +85,8 @@ try {
         if ($LASTEXITCODE -ne 0) { throw 'Cannot apply the availability migration.' }
         & (Join-Path $pgBin 'psql.exe') -h 127.0.0.1 -p 55432 -U postgres -d tho_xay_db -v ON_ERROR_STOP=1 -c 'SET client_min_messages=WARNING' -f (Join-Path $projectRoot 'migrations\010_wallet_earnings.sql')
         if ($LASTEXITCODE -ne 0) { throw 'Cannot apply the wallet migration.' }
+        & (Join-Path $pgBin 'psql.exe') -h 127.0.0.1 -p 55432 -U postgres -d tho_xay_db -v ON_ERROR_STOP=1 -c 'SET client_min_messages=WARNING' -f (Join-Path $projectRoot 'migrations\011_kyc_photos.sql')
+        if ($LASTEXITCODE -ne 0) { throw 'Cannot apply the private CCCD photos migration.' }
     }
 
     if (-not (Test-Path -LiteralPath $localConfiguration)) {
