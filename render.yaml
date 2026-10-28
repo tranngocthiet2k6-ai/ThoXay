@@ -1,0 +1,50 @@
+# Render source of truth. Adopts the existing empty tho-xay-db in the confirmed ThoXay workspace.
+services:
+  - type: web
+    name: thoxay-api
+    runtime: docker
+    plan: free
+    region: singapore
+    repo: https://github.com/tranngocthiet2k6-ai/ThoXay
+    branch: main
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    autoDeployTrigger: commit
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: DB_HOST
+        fromDatabase:
+          name: tho-xay-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: tho-xay-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: tho-xay-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: tho-xay-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: tho-xay-db
+          property: password
+      - key: DB_INIT_MODE
+        value: always
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: https://deployment-pending.invalid
+      - key: APP_FCM_ENABLED
+        value: 'false'
+databases:
+  - name: tho-xay-db
+    plan: free
+    region: singapore
+    postgresMajorVersion: '17'
+    ipAllowList: []

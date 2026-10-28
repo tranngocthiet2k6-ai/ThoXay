@@ -267,3 +267,10 @@ proxy và CORS đúng origin Vercel. Database ứng dụng hiện có không b�
 Workflow `deployment-checks.yml` kiểm chứng Docker build và tải SDK Linux/build
 Web bằng chính script dùng trên Vercel. Hướng dẫn cloud ở
 [DEPLOY_VERCEL.md](docs/DEPLOY_VERCEL.md).
+
+Render Blueprint: `render.yaml` đã được kiểm tra với JSON Schema chính thức
+hiện hành. Chạy production với `DB_HOST`/`DB_PORT`/`DB_NAME` (không cần DB_URL),
+`DB_INIT_MODE=always` trên database test trống: tự tạo bảng thành công, không seed
+tài khoản. Khởi động lần hai giữ nguyên bản ghi tổng hợp đã tạo để kiểm chứng.
+Kiểm thử Node so sánh byte nội dung DDL bootstrap với bản xuất không seed từ
+`schema.sql` để phát hiện sai lệch. Luồng DB_URL thủ công vẫn được hỗ trợ.

@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { apiOrigin } from './build-vercel.mjs';
 
@@ -20,4 +21,6 @@ test('cloud schema contains constraints and private KYC but no sample accounts',
   assert.match(result.stdout, /CREATE TABLE IF NOT EXISTS wallet_entries/);
   assert.doesNotMatch(result.stdout, /INSERT INTO|0900000001|Demo-only password/);
   assert.match(result.stdout, /COMMIT;\s*$/);
+  assert.equal(readFileSync('src/main/resources/db/cloud-schema.sql', 'utf8').replace(/\r\n/g, '\n'), result.stdout.replace(/\r\n/g, '\n'),
+    'Regenerate the bootstrap resource when schema.sql changes; never add demo data.');
 });

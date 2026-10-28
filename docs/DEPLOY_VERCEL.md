@@ -4,6 +4,34 @@ Bạn đã kết nối GitHub với Vercel. Repository đã được chuẩn b�
 trực tiếp, nhưng cần tạo Backend/database online trước. Hiện chưa có URL online
 hay tài nguyên trả phí nào được tạo tự động.
 
+## Cách tự động bằng Blueprint (ưu tiên khi triển khai qua plugin)
+
+`render.yaml` ghép Backend Docker với database `tho-xay-db`, cùng vùng Singapore,
+gói Free. Nếu database này đã được tạo trong workspace ThoXay, Blueprint dùng
+lại nó theo tên, không tạo một bản khác. Không sửa các thuộc tính bất biến của
+database đang có và không chạy Blueprint này ở workspace khác.
+
+1. Mở [Apply Blueprint cho ThoXay](https://dashboard.render.com/blueprint/new?repo=https://github.com/tranngocthiet2k6-ai/ThoXay),
+   chọn workspace ThoXay. Kết nối GitHub nếu Render yêu cầu.
+2. Xem danh sách tài nguyên: `thoxay-api` và `tho-xay-db`, cả hai **Free**;
+   xác nhận sử dụng database hiện có. Chọn Apply/Deploy.
+3. Render tự truyền host/port/database/user/password cho Backend bằng `fromDatabase`,
+   tự tạo `JWT_SECRET`. Bạn không phải dán những giá trị này vào chat hay source.
+4. Backend nhận `DB_INIT_MODE=always`: khởi tạo DDL `CREATE ... IF NOT EXISTS`
+   từ `src/main/resources/db/cloud-schema.sql` trước khi Hibernate kiểm tra schema.
+   Không thêm tài khoản/công trình demo, không xóa hay sửa dữ liệu hiện có.
+5. Sau khi Backend live, plugin sẽ dùng URL HTTPS thật của nó để nối Vercel.
+   Cập nhật `CORS_ORIGINS` trong `render.yaml` bằng URL Production Vercel thật
+   rồi push/sync để cấu hình vẫn đồng nhất qua các lần cập nhật Blueprint.
+
+File DDL bootstrap được xuất từ `schema.sql` bằng `scripts/export-cloud-schema.mjs`;
+kiểm thử phát hiện nếu file này lệch nguồn hoặc lẫn dữ liệu mẫu. Khi thay đổi
+schema trên database đã có bảng, vẫn cần migration tương ứng: bootstrap chỉ tạo
+bảng/index chưa có, không thay thế quy trình nâng cấp dữ liệu.
+
+Nếu dùng Blueprint, bỏ qua bước tạo database và nhập các secret thủ công bên dưới.
+Phần tiếp theo là phương án cấu hình thủ công khi không dùng Blueprint.
+
 | Thành phần | Nơi chạy | Ví dụ URL, cần thay bằng URL thật của bạn |
 | --- | --- | --- |
 | Flutter Web cho Thợ/Chủ thầu | Vercel | `https://ten-du-an.vercel.app` |
