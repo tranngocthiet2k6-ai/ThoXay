@@ -73,7 +73,8 @@ async function flutterSdk() {
     throw new Error('Flutter archive SHA-256 mismatch. Build stopped.');
   }
   renameSync(temporary, archive);
-  run('tar', ['-xJf', archive, '-C', cache]);
+  // Keep SDK files owned by the build user, including on root-based build images.
+  run('tar', ['--no-same-owner', '-xJf', archive, '-C', cache]);
   unlinkSync(archive);
   return executable;
 }
