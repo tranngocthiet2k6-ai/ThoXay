@@ -103,7 +103,7 @@ class ApiService extends ChangeNotifier {
       baseUrl = (baseUrl ?? _defaultBaseUrl).replaceFirst(RegExp(r'/+$'), '');
   static const _defaultBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://192.168.1.16:8080',
+    defaultValue: 'https://thoxay-api.onrender.com',
   );
   static const _storageKey = 'thoxay.session';
   final http.Client _client;

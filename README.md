@@ -138,17 +138,19 @@ flutter pub get
 flutter run -d chrome --web-port=3000
 ```
 
-API mặc định của Flutter và APK từ GitHub Actions là `http://192.168.1.16:8080`.
+API mặc định của Flutter và APK từ GitHub Actions là `https://thoxay-api.onrender.com`.
 Các endpoint đã có tiền tố `/api`, nên không thêm `/api` vào Base URL.
-Điện thoại cần cùng mạng LAN với máy backend và truy cập được cổng 8080.
+Điện thoại chỉ cần có Internet để gọi Backend online.
 Có thể thay địa chỉ lúc chạy hoặc build:
 
 ```powershell
 flutter run --dart-define=API_BASE_URL=https://api.example.com
 ```
 
-Thay URL minh họa bằng API đang chạy của bạn. Android cho phép HTTP tới riêng
-`192.168.1.16` trong `network_security_config.xml`. Android cần Android SDK và thiết bị/emulator.
+Thay URL minh họa bằng API đang chạy của bạn. Nếu dùng Backend LAN, truyền
+`--dart-define=API_BASE_URL=http://192.168.1.16:8080` và kết nối điện thoại cùng mạng.
+Android cho phép HTTP tới riêng IP này trong `network_security_config.xml`.
+Android cần Android SDK và thiết bị/emulator.
 iOS cần macOS, Xcode và cấu hình ký ứng dụng. Android release trong repo dùng
 debug key để demo; cấu hình upload key riêng khi phát hành Play Store.
 
@@ -325,7 +327,7 @@ tin đã lưu; dùng mã đó cho nội dung hoặc người nhận khác trả 
 người gửi từ JWT. Lịch sử trả `{messages, hasMore}`, hỗ trợ `limit=1..100`,
 `beforeId` để tải tin cũ hoặc `afterId` để đồng bộ tin bỏ lỡ (không dùng cùng lúc).
 
-WebSocket ở `/ws/chat`, ví dụ `ws://192.168.1.16:8080/ws/chat`. Sau khi kết nối,
+WebSocket ở `/ws/chat`, ví dụ `wss://thoxay-api.onrender.com/ws/chat`. Sau khi kết nối,
 gửi frame JSON đầu tiên:
 
 ```json

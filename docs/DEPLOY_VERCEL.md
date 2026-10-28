@@ -246,8 +246,10 @@ Không mở CORS cho toàn bộ `*.vercel.app`.
 Mỗi push `main` sau khi đã liên kết repo sẽ kích hoạt build Web; Backend áp dụng
 bộ lọc đường dẫn đã ghi ở đầu tài liệu.
 Workflow `deployment-checks.yml` kiểm tra container và lệnh build Vercel;
-workflow APK hiện có vẫn hoạt động. APK hiện vẫn dùng cấu hình LAN riêng:
-muốn APK gọi Backend online cần build lại APK với `--dart-define=API_BASE_URL=https://BACKEND_THAT`.
+workflow APK build release với
+`--dart-define=API_BASE_URL=https://thoxay-api.onrender.com`.
+URL này cũng là mặc định trong Flutter khi không truyền `API_BASE_URL`;
+APK mới gọi Backend online qua Internet.
 
 ## Khi cần hỗ trợ tiếp
 
