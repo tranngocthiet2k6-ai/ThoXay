@@ -26,8 +26,9 @@ Backend đã khởi tạo/validate schema, `/health` trả `UP`, preflight từ 
 origin khác bị từ chối, API không có JWT trả 401 và trang Admin có form CSRF.
 Chưa đăng nhập bằng tài khoản thật để nghiệm thu các luồng nghiệp vụ online.
 
-Cloud dùng database mới, không nhập dữ liệu local hoặc tài khoản demo. **Chưa có
-tài khoản Admin**; làm theo mục 5 để nâng quyền tài khoản Chủ thầu của chính bạn.
+Cloud dùng database mới, không nhập dữ liệu local hoặc tài khoản demo. Admin đầu tiên
+đã được cấp từ tài khoản Chủ thầu do chủ dự án tự đăng ký; thông tin đăng nhập không
+lưu trong repository. Mục 5 hướng dẫn cấp quyền cho tài khoản Chủ thầu của chính bạn.
 FCM vẫn tắt cho đến khi có cấu hình Firebase; lịch sử thông báo vẫn dùng được.
 
 **Database miễn phí này hết hạn ngày 27/11/2026**. Xuất dữ liệu và chuyển/nâng cấp
