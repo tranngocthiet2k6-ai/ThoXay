@@ -8,8 +8,16 @@ Flutter có giao diện tiếng Việt cho thợ và chủ thầu, chạy trên 
 
 ## Triển khai online
 
-Đã có cấu hình **Flutter Web → Vercel**, **Backend/Admin → Render Docker**,
-PostgreSQL online, build script ghim Flutter và profile `prod`.
+Đã triển khai ngày **28/10/2026**: **Flutter Web → Vercel**,
+**Backend/Admin → Render Docker**, PostgreSQL online và profile `prod`.
+
+- Ứng dụng Thợ/Chủ thầu: https://thoxay.vercel.app.
+- Trang đăng nhập Admin: https://thoxay-api.onrender.com/admin/login.
+- Kiểm tra Backend/database: https://thoxay-api.onrender.com/health.
+
+Database cloud mới không có tài khoản mẫu; cần tạo tài khoản riêng trước khi dùng.
+Database Render Free hiện hết hạn **27/11/2026**: cần xuất dữ liệu và chọn phương án
+duy trì trước ngày này. Backend Free có thể khởi động chậm sau thời gian không sử dụng.
 Xem [hướng dẫn Import Project, database và biến môi trường](docs/DEPLOY_VERCEL.md).
 Vercel cần `API_BASE_URL` là origin HTTPS của Backend, không có `/api` ở cuối.
 

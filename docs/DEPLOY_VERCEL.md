@@ -1,10 +1,43 @@
 # Đưa Thợ Xây lên Internet: Vercel + Render + PostgreSQL
 
-Bạn đã kết nối GitHub với Vercel. Repository đã được chuẩn bị để Import Project
-trực tiếp, nhưng cần tạo Backend/database online trước. Hiện chưa có URL online
-hay tài nguyên trả phí nào được tạo tự động.
+## Bản triển khai hiện tại — 28/10/2026
 
-## Cách tự động bằng Blueprint (ưu tiên khi triển khai qua plugin)
+Đã triển khai bằng CLI đã đăng nhập, trong workspace Render **ThoXay** và team
+Vercel **tranngocthiet2k6-ai's projects**. Các tài nguyên đều dùng gói miễn phí.
+
+| Thành phần | Địa chỉ / cấu hình đang chạy |
+| --- | --- |
+| Flutter Web | https://thoxay.vercel.app |
+| Spring Boot API | https://thoxay-api.onrender.com |
+| Web Admin | https://thoxay-api.onrender.com/admin/login |
+| Readiness có kiểm tra PostgreSQL | https://thoxay-api.onrender.com/health |
+| Render Web Service | `thoxay-api`, Singapore, một instance |
+| Render Postgres | `tho-xay-db`, PostgreSQL 17, Singapore, chỉ kết nối nội bộ |
+| Vercel API_BASE_URL (Production/Preview) | `https://thoxay-api.onrender.com` |
+| Backend CORS_ORIGINS | `https://thoxay.vercel.app` |
+
+Vercel đã kết nối GitHub, Production Branch là `main`. Render cũng theo dõi `main`,
+chỉ build khi `src/**`, `Dockerfile`, `.dockerignore`, `pom.xml`, `mvnw`, `.mvn/**`
+thay đổi; cập nhật tài liệu hoặc Flutter không khởi động lại Backend.
+
+Đã kiểm tra bản Web công khai trả HTTP 200 cho HTML, bootstrap, manifest và JavaScript;
+JavaScript nhúng đúng API HTTPS và trùng bản production staging đã kiểm tra.
+Backend đã khởi tạo/validate schema, `/health` trả `UP`, preflight từ Web được phép,
+origin khác bị từ chối, API không có JWT trả 401 và trang Admin có form CSRF.
+Chưa đăng nhập bằng tài khoản thật để nghiệm thu các luồng nghiệp vụ online.
+
+Cloud dùng database mới, không nhập dữ liệu local hoặc tài khoản demo. **Chưa có
+tài khoản Admin**; làm theo mục 5 để nâng quyền tài khoản Chủ thầu của chính bạn.
+FCM vẫn tắt cho đến khi có cấu hình Firebase; lịch sử thông báo vẫn dùng được.
+
+**Database miễn phí này hết hạn ngày 27/11/2026**. Xuất dữ liệu và chuyển/nâng cấp
+trước ngày đó; không dùng mốc này làm lịch lưu trữ dài hạn. Render Free Web Service
+ngủ sau 15 phút không có truy cập; lần mở tiếp theo có thể phải chờ khởi động.
+
+Các phần dưới là hướng dẫn tái tạo và quản lý triển khai, không cần tạo lại tài nguyên
+đã có. Không Apply Blueprint tham khảo lên dịch vụ hiện tại khi chưa đối chiếu cấu hình.
+
+## Blueprint tham khảo cho lần triển khai mới
 
 Nếu phiên triển khai đã dùng Render CLI để tạo dịch vụ trực tiếp, cấu hình đang
 chạy được quản lý trong Render (Environment/Secret Files), không phải Blueprint.
@@ -62,6 +95,12 @@ không phải một thư mục HTML độc lập để upload lên Vercel.
 4. Sau khi Available, ghi nhận **Database**, **Username**, **Password**,
    **Internal Hostname** và thông tin kết nối external. Giữ mật khẩu trong
    dashboard của bạn, không đưa vào Git hay gửi qua chat.
+
+Database hiện tại chặn toàn bộ kết nối external. Khi cần dùng `psql` từ máy của bạn
+để xuất dữ liệu hoặc cấp quyền Admin, vào Render → database → Networking và chỉ
+thêm IP public hiện tại của máy bạn với `/32`. Dùng thông tin external trong Dashboard;
+xóa mục IP tạm sau khi hoàn tất. Không mở `0.0.0.0/0`. Việc này không cần thiết cho
+Backend vì dịch vụ đang kết nối qua mạng nội bộ Render.
 
 Khởi tạo **database mới trống** bằng PowerShell tại thư mục gốc repo:
 
@@ -203,17 +242,17 @@ Không mở CORS cho toàn bộ `*.vercel.app`.
 - Giữ Backend một instance khi dùng bộ phát chat trong bộ nhớ hiện tại;
   nhiều instance cần bổ sung message broker trước khi mở rộng.
 
-Mỗi push `main` sau khi đã liên kết repo sẽ kích hoạt build mới trên các dịch vụ.
+Mỗi push `main` sau khi đã liên kết repo sẽ kích hoạt build Web; Backend áp dụng
+bộ lọc đường dẫn đã ghi ở đầu tài liệu.
 Workflow `deployment-checks.yml` kiểm tra container và lệnh build Vercel;
 workflow APK hiện có vẫn hoạt động. APK hiện vẫn dùng cấu hình LAN riêng:
 muốn APK gọi Backend online cần build lại APK với `--dart-define=API_BASE_URL=https://BACKEND_THAT`.
 
-## Bạn cần cung cấp cho tôi để kiểm tra tiếp
+## Khi cần hỗ trợ tiếp
 
-Chỉ gửi **URL HTTPS Backend**, **URL Production Vercel** và thông báo lỗi build
-nếu có (đã bỏ khóa/mật khẩu). Tôi có thể kiểm tra health, tài nguyên Web và
-CORS từ hai URL đó. Bạn tự nhập thông tin đăng nhập, database và khóa JWT
-trong dashboard; không cần gửi mật khẩu hay token Vercel/Render cho tôi.
+Gửi màn hình/thông báo lỗi đã bỏ thông tin nhạy cảm và thao tác gây lỗi.
+Hai URL triển khai đã được ghi ở đầu tài liệu; không cần gửi lại mật khẩu,
+khóa JWT, token Vercel/Render hoặc nội dung Secret Files.
 
 ## Tài liệu chính thức
 
