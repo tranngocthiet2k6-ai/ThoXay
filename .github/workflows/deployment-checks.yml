@@ -1,0 +1,41 @@
+name: Check cloud deployment
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backend-container:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build and test Java 17 production container
+        run: docker build --tag thoxay-deployment-check .
+
+  vercel-web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - name: Check deployment settings
+        run: node --test scripts/deployment.test.mjs
+      - name: Exercise the Vercel build command
+        env:
+          # Validation build only. Vercel uses its own real API_BASE_URL setting.
+          API_BASE_URL: https://thoxay-ci.example.com
+        run: node scripts/build-vercel.mjs
+      - name: Analyze and test Flutter with the downloaded SDK
+        working-directory: mobile_app
+        run: |
+          FLUTTER="$GITHUB_WORKSPACE/.vercel/cache/flutter-$(cat ../.flutter-version)/flutter/bin/flutter"
+          "$FLUTTER" analyze
+          "$FLUTTER" test

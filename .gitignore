@@ -16,6 +16,7 @@ mobile_app/ios/.symlinks/
 *.log
 .tools/
 .local/
+.vercel/
 mobile_app/android/app/google-services.json
 mobile_app/ios/Runner/GoogleService-Info.plist
 **/*service-account*.json

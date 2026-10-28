@@ -6,7 +6,7 @@
 .\mvnw.cmd -B verify
 ```
 
-61 kiểm thử JUnit/Spring Boot dùng H2 mặc định, chạy với Spring Security và JWT
+64 kiểm thử JUnit/Spring Boot dùng H2 mặc định, chạy với Spring Security và JWT
 thật: đăng ký/đăng nhập, BCrypt, chống đăng ký ADMIN, token giả/thiếu, tài khoản
 bị khóa, phân quyền, Haversine, dữ liệu sai, ứng tuyển trùng, lịch sử, duyệt,
 hai giao dịch duyệt đồng thời cho một vị trí, render Thymeleaf, CSRF, xác thực
@@ -246,3 +246,24 @@ Màu chữ trên nút nhấn chính đạt tỷ lệ tương phản tối thiể
 Kiểm chứng HTTP local với PostgreSQL: hai ảnh tổng hợp (không dùng CCCD thật)
 được gửi bằng multipart, đọc lại JPEG riêng tư có `no-store`; tệp vượt 5 MB trả
 413 từ servlet. Tài khoản thử được xóa và ảnh xóa theo cascade sau kiểm tra.
+
+## Chuẩn bị Vercel / cloud
+
+```powershell
+node --test scripts/deployment.test.mjs
+```
+
+Ba kiểm thử Node xác minh URL Backend HTTPS, từ chối LAN/localhost/credentials
+và export schema không có dữ liệu demo. Maven có thêm ba kiểm thử health công
+khai, preflight multipart từ đúng domain Vercel và từ chối domain Preview khác.
+Lệnh `node scripts/build-vercel.mjs` đã build Web release thành công với
+`FLUTTER_BIN` trỏ tới SDK local và API HTTPS giả lập chỉ dùng để kiểm chứng build.
+Sau đó Web local đã được build lại với cấu hình LAN ban đầu.
+
+Kiểm tra chạy thật profile `prod` trên database riêng `tho_xay_deploy_test`:
+schema được xuất từ DDL không seed, Hibernate `validate` khởi động thành công,
+users trống, `/health` UP, Admin cookie Secure/SameSite=Lax khi đứng sau HTTPS
+proxy và CORS đúng origin Vercel. Database ứng dụng hiện có không bị thay đổi.
+Workflow `deployment-checks.yml` kiểm chứng Docker build và tải SDK Linux/build
+Web bằng chính script dùng trên Vercel. Hướng dẫn cloud ở
+[DEPLOY_VERCEL.md](docs/DEPLOY_VERCEL.md).

@@ -6,6 +6,13 @@ Backend Java 17+ / Spring Boot 3.5, PostgreSQL, JPA, Spring Security, JWT,
 BCrypt và Validation. Web quản trị dùng Thymeleaf / Bootstrap 5. Ứng dụng
 Flutter có giao diện tiếng Việt cho thợ và chủ thầu, chạy trên Android, iOS và Web.
 
+## Triển khai online
+
+Đã có cấu hình **Flutter Web → Vercel**, **Backend/Admin → Render Docker**,
+PostgreSQL online, build script ghim Flutter và profile `prod`.
+Xem [hướng dẫn Import Project, database và biến môi trường](docs/DEPLOY_VERCEL.md).
+Vercel cần `API_BASE_URL` là origin HTTPS của Backend, không có `/api` ở cuối.
+
 ## Khởi chạy nhanh trên PowerShell
 
 Từ thư mục gốc của dự án:
