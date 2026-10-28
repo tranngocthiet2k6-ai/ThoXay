@@ -7,7 +7,9 @@ COPY src/ src/
 RUN ./mvnw -B -ntp verify
 
 FROM eclipse-temurin:17-jre-jammy
-RUN useradd --system --uid 10001 --create-home thoxay
+RUN useradd --system --uid 10001 --create-home thoxay \
+    && (getent group 1000 >/dev/null || groupadd --gid 1000 render-secrets) \
+    && usermod -a -G 1000 thoxay
 WORKDIR /app
 COPY --from=build /build/target/tho-xay-1.0.0.jar app.jar
 ENV SPRING_PROFILES_ACTIVE=prod

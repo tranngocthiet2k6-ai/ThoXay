@@ -1,4 +1,5 @@
-# Render source of truth. Adopts the existing empty tho-xay-db in the confirmed ThoXay workspace.
+# Alternative Dashboard Blueprint for the confirmed ThoXay workspace.
+# Direct CLI deployments use service settings/secret files in Render; review before adopting this Blueprint.
 services:
   - type: web
     name: thoxay-api
@@ -39,7 +40,7 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: CORS_ORIGINS
-        value: https://deployment-pending.invalid
+        value: https://thoxay.vercel.app
       - key: APP_FCM_ENABLED
         value: 'false'
 databases:

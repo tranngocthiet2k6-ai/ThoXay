@@ -6,6 +6,15 @@ hay tài nguyên trả phí nào được tạo tự động.
 
 ## Cách tự động bằng Blueprint (ưu tiên khi triển khai qua plugin)
 
+Nếu phiên triển khai đã dùng Render CLI để tạo dịch vụ trực tiếp, cấu hình đang
+chạy được quản lý trong Render (Environment/Secret Files), không phải Blueprint.
+CLI có thể chuyển các thông tin kết nối và JWT qua secret file `backend.properties`,
+được import bằng `SPRING_CONFIG_IMPORT=file:/etc/secrets/backend.properties`.
+File tạm local nằm trong `.local` bị Git bỏ qua và được xóa sau khi chuyển lên Render.
+Docker chạy user không phải root, thuộc group 1000 để đọc secret file theo hướng
+dẫn của Render. Không Apply Blueprint lên dịch vụ CLI đang chạy khi chưa đối chiếu
+các secret hiện có; `generateValue` khi thiếu biến có thể tạo một khóa JWT khác.
+
 `render.yaml` ghép Backend Docker với database `tho-xay-db`, cùng vùng Singapore,
 gói Free. Nếu database này đã được tạo trong workspace ThoXay, Blueprint dùng
 lại nó theo tên, không tạo một bản khác. Không sửa các thuộc tính bất biến của
