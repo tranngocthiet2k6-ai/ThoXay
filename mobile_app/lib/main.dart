@@ -21,7 +21,7 @@ final _messenger = GlobalKey<ScaffoldMessengerState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final api = ApiService();
+  final api = ApiService(warmUpServer: true);
   await api.restoreSession();
   await KycCamera.instance.restoreLostPhoto();
   api.addListener(() {

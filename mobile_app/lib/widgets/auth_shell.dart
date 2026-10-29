@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import 'design_motion.dart';
 import 'appearance_button.dart';
+import '../services/api_service.dart';
+import 'server_connection_notice.dart';
 
 class AuthShell extends StatelessWidget {
   const AuthShell({
@@ -11,10 +13,12 @@ class AuthShell extends StatelessWidget {
     required this.subtitle,
     required this.child,
     this.canGoBack = false,
+    this.api,
   });
   final String title, subtitle;
   final Widget child;
   final bool canGoBack;
+  final ApiService? api;
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -164,6 +168,7 @@ class AuthShell extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 32),
+                  if (api != null) ServerConnectionNotice(api: api!),
                   child,
                   const SizedBox(height: 24),
                   Row(

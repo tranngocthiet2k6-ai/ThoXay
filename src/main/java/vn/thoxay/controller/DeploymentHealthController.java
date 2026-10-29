@@ -11,7 +11,7 @@ import java.util.Map;
 @RestController @RequiredArgsConstructor
 public class DeploymentHealthController {
     private final JdbcTemplate jdbc;
-    @GetMapping("/health")
+    @GetMapping({"/health", "/api/auth/health"})
     public ResponseEntity<?> health() {
         try {
             jdbc.queryForObject("SELECT 1", Integer.class);

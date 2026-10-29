@@ -484,3 +484,14 @@ Xem [cấu hình, API và giới hạn](docs/KYC_CAMERA.md).
 Flutter chọn theme theo phiên đăng nhập, áp dụng cả màn hình con, Ví và Chat.
 Đăng ký xem trước màu khi đổi vai trò; màn hình đăng nhập dùng màu trung tính.
 Trạng thái thành công/cảnh báo/lỗi vẫn có màu ngữ nghĩa riêng.
+
+## Các nâng cấp nghiệp vụ và giao diện mới
+
+Xem [phạm vi, API và bằng chứng kiểm thử](docs/ADVANCED_UPGRADE.md),
+[migration an toàn](docs/DATABASE_MIGRATIONS.md) và
+[hệ thiết kế Sáng/Tối/Outdoor](docs/UI_UX_DESIGN_SYSTEM.md).
+
+Ứng dụng chờ health sẵn sàng khi Backend Render vừa ngủ, hiển thị tiến trình
+trước khi gửi yêu cầu nghiệp vụ. Chờ tối đa 4 phút; không tự gửi lại thao tác ghi.
+`GET /api/auth/health` hỗ trợ kiểm tra từ Web với CORS đã cấu hình, không cần JWT.
+VietQR chỉ bật sau khi Admin cấu hình/xác nhận tài khoản nhận tiền thật ở trang Ví.

@@ -363,3 +363,22 @@ Tham khảo thông số và mã WMO: [Open-Meteo Forecast API](https://open-mete
   PostgreSQL production-profile REST QA kiểm tra ngày và số tiền thật trong ledger
   fixture riêng, loại TOP_UP và dọn fixture sau kiểm tra. Chrome QA 390/1440px ở ba
   mode không có lỗi JS; đã xem ảnh biểu đồ điện thoại để kiểm tra cuộn và nhãn.
+
+## Checkpoint kết nối khi máy chủ ngủ
+
+- Thêm alias công khai `/api/auth/health` trả UP/DOWN như /health và áp dụng đúng
+  CORS của API. Không trả cấu hình/credential database.
+- App thật bật ServerWarmup cho HTTPS *.onrender.com: gộp một chu kỳ readiness
+  trước các request REST/ảnh/KYC/WebSocket sau khi chưa kết nối hoặc nghỉ lâu.
+  Chỉ GET health được thử lại, tối đa 4 phút; mỗi lượt tối đa 8 giây và có hủy
+  request khi timeout/dispose. Lỗi kết thúc có thông báo để người dùng chủ động thử lại.
+- Không tự retry POST/PUT/DELETE. Khi mất phản hồi nghiệp vụ, vẫn giữ cơ chế
+  idempotency và thao tác thử lại của tính năng tương ứng. Đổi/đăng xuất phiên
+  trong lúc chờ chặn gửi JWT cũ. Máy chủ cũ chưa có alias vẫn tương thích.
+- Trạng thái kết nối dùng notifier riêng với phiên đăng nhập, không làm mất màn
+  hình đăng ký. Auth/trang chủ có tiến trình và lời dẫn khi đang chờ; dữ liệu giữ
+  skeleton thay vì báo lỗi 20 giây ngay khi server chưa khởi động xong.
+- Kiểm chứng: 124 Backend/107 Flutter pass, analyze/JAR/Web release pass.
+  Production-profile QA xác nhận alias/CORS và Flyway đến V21. Chrome giữ health
+  ở trạng thái chờ: chỉ một GET health, không có request nghiệp vụ trước UP,
+  lời dẫn hiển thị và trang chủ hồi phục sau khi mở gate. Mọi fixture chỉ ở QA.

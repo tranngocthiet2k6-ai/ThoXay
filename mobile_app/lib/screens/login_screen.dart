@@ -41,6 +41,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) => AuthShell(
+    api: widget.api,
     title: 'Chào bạn trở lại',
     subtitle: 'Đăng nhập để tiếp tục hành trình công việc của bạn.',
     child: AutofillGroup(

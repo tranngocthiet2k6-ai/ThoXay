@@ -22,6 +22,7 @@ import '../models/deposit.dart';
 import '../models/incident.dart';
 import 'location_service.dart';
 import 'chat_connection.dart';
+import 'server_warmup.dart';
 import 'kyc_camera.dart';
 
 class ApiException implements Exception {
@@ -176,6 +177,7 @@ class ApiService extends ChangeNotifier {
     if (bytes.isEmpty || bytes.length > 5 * 1024 * 1024) {
       throw const ApiException('Mỗi ảnh tối đa 5 MB');
     }
+    await _ensureSessionServer(auth);
     final request = http.MultipartRequest('POST', Uri.parse('$baseUrl$path'))
       ..followRedirects = false
       ..headers['Authorization'] = 'Bearer ${auth.token}'
@@ -224,6 +226,7 @@ class ApiService extends ChangeNotifier {
       throw const ApiException('Phiên đăng nhập đã hết hạn', 401);
     }
     try {
+      await _ensureSessionServer(auth);
       final request = http.Request('GET', Uri.parse('$baseUrl$path'))
         ..followRedirects = false
         ..headers['Authorization'] = 'Bearer ${auth.token}';
@@ -488,7 +491,7 @@ class ApiService extends ChangeNotifier {
           body: {'reason': reason},
         ) as Map<String, dynamic>,
       );
-  ApiService({http.Client? client, String? baseUrl})
+  ApiService({http.Client? client, String? baseUrl, this.warmUpServer = false})
     : _client = client ?? http.Client(),
       baseUrl = (baseUrl ?? _defaultBaseUrl).replaceFirst(RegExp(r'/+$'), '');
   static const _defaultBaseUrl = String.fromEnvironment(
@@ -497,6 +500,43 @@ class ApiService extends ChangeNotifier {
   );
   static const _storageKey = 'thoxay.session';
   final http.Client _client;
+  final bool warmUpServer;
+  bool _disposed = false;
+  final connectionWaiting = ValueNotifier(false);
+  bool get warmingUp => connectionWaiting.value;
+  late final ServerWarmup _warmup = ServerWarmup(
+    _client,
+    Uri.parse(baseUrl),
+    enabled: warmUpServer,
+    onChanged: (value) {
+      // Requests may start from a screen's initState while the app is building.
+      scheduleMicrotask(() {
+        if (!_disposed) connectionWaiting.value = value;
+      });
+    },
+  );
+  Future<void> _ensureServer() async {
+    try {
+      await _warmup.ensureReady();
+    } on ServerWarmupFailure catch (e) {
+      throw ApiException(e.message, 503);
+    }
+  }
+
+  Future<void> _ensureSessionServer(AuthSession expected) async {
+    await _ensureServer();
+    if (_session?.token != expected.token) {
+      throw const ApiException(
+        'Phiên đăng nhập đã thay đổi. Vui lòng thử lại.',
+        401,
+      );
+    }
+    if (!expected.expiresAt.isAfter(DateTime.now())) {
+      await logout();
+      throw const ApiException('Phiên đăng nhập đã hết hạn', 401);
+    }
+  }
+
   final String baseUrl;
   Future<void> Function()? beforeLogout;
   bool _loggingOut = false;
@@ -825,6 +865,7 @@ class ApiService extends ChangeNotifier {
       await logout();
       throw const ApiException('Phiên đăng nhập đã hết hạn', 401);
     }
+    await _ensureSessionServer(auth);
     final base = Uri.parse(baseUrl);
     final socket = WebSocketChannel.connect(
       base.replace(
@@ -871,6 +912,7 @@ class ApiService extends ChangeNotifier {
     ].any((p) => p.bytes.isEmpty || p.bytes.length > 5 * 1024 * 1024)) {
       throw const ApiException('Cần hai ảnh hợp lệ, mỗi ảnh tối đa 5 MB');
     }
+    await _ensureSessionServer(session);
     final request =
         http.MultipartRequest(
             'POST',
@@ -996,6 +1038,14 @@ class ApiService extends ChangeNotifier {
       headers['Authorization'] = 'Bearer ${value.token}';
     }
     try {
+      await _ensureServer();
+      if (authenticated &&
+          headers['Authorization'] != 'Bearer ${_session?.token}') {
+        throw const ApiException(
+          'Phiên đăng nhập đã thay đổi. Vui lòng thử lại.',
+          401,
+        );
+      }
       final request = http.Request(method, Uri.parse('$baseUrl$path'))
         ..headers.addAll(headers);
       if (body != null) request.body = jsonEncode(body);
@@ -1003,6 +1053,7 @@ class ApiService extends ChangeNotifier {
           .send(request)
           .then(http.Response.fromStream)
           .timeout(const Duration(seconds: 20));
+      if (response.statusCode < 500) _warmup.reachable();
       Object? data;
       try {
         data = response.bodyBytes.isEmpty
@@ -1036,6 +1087,9 @@ class ApiService extends ChangeNotifier {
 
   @override
   void dispose() {
+    _disposed = true;
+    _warmup.dispose();
+    connectionWaiting.dispose();
     _client.close();
     super.dispose();
   }

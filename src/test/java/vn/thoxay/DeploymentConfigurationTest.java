@@ -14,6 +14,11 @@ class DeploymentConfigurationTest {
     @Test void healthIsPublicAndDoesNotDiscloseDatabaseCredentials() throws Exception {
         mvc.perform(get("/health")).andExpect(status().isOk()).andExpect(content().json("{\"status\":\"UP\"}"));
     }
+    @Test void readinessAliasIsPublicAndUsesTheConfiguredVercelCorsOrigin() throws Exception {
+        mvc.perform(get("/api/auth/health").header("Origin", "https://thoxay-demo.vercel.app"))
+            .andExpect(status().isOk()).andExpect(content().json("{\"status\":\"UP\"}"))
+            .andExpect(header().string("Access-Control-Allow-Origin", "https://thoxay-demo.vercel.app"));
+    }
     @Test void exactVercelOriginCanSendAuthenticatedMultipartRequests() throws Exception {
         mvc.perform(options("/api/users/me/cccd/photos").header("Origin", "https://thoxay-demo.vercel.app")
             .header("Access-Control-Request-Method", "POST").header("Access-Control-Request-Headers", "authorization,content-type"))

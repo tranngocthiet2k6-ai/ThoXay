@@ -57,6 +57,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     data: AppTheme.forRole(_role),
     child: Builder(
       builder: (context) => AuthShell(
+        api: widget.api,
         title: 'Bắt đầu kết nối',
         subtitle: 'Bạn muốn tìm việc hay tìm người thợ phù hợp?',
         canGoBack: true,

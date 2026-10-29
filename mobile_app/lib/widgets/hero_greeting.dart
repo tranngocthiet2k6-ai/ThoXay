@@ -5,6 +5,7 @@ import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import 'tier_badge.dart';
 import 'design_motion.dart';
+import 'server_connection_notice.dart';
 
 class HeroGreeting extends StatefulWidget {
   const HeroGreeting({
@@ -42,7 +43,15 @@ class _HeroGreetingState extends State<HeroGreeting> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      ServerConnectionNotice(api: widget.api),
+      _greeting(context),
+    ],
+  );
+
+  Widget _greeting(BuildContext context) {
     final name = _profile?.fullName ?? widget.api.session?.fullName ?? 'bạn';
     final worker =
         widget.api.session?.role == 'ROLE_WORKER' ||
