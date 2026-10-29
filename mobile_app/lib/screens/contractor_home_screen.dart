@@ -17,6 +17,7 @@ import '../widgets/notification_button.dart';
 import 'worker_profile_screen.dart';
 import '../widgets/finance_menu.dart';
 import 'job_payments_screen.dart';
+import '../widgets/home_navigation.dart';
 
 class ContractorHomeScreen extends StatefulWidget {
   const ContractorHomeScreen({super.key, required this.api});
@@ -208,6 +209,7 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
       icon: const Icon(Icons.add),
       label: const Text('Đăng công trình'),
     ),
+    bottomNavigationBar: HomeNavigation(api: widget.api, onCreate: _create),
   );
 }
 

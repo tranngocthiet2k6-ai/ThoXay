@@ -15,6 +15,7 @@ import '../widgets/feature_banner.dart';
 import '../widgets/notification_button.dart';
 import '../widgets/cancel_work_dialog.dart';
 import '../widgets/finance_menu.dart';
+import '../widgets/home_navigation.dart';
 
 class WorkerHomeScreen extends StatefulWidget {
   const WorkerHomeScreen({super.key, required this.api, this.location});
@@ -537,19 +538,11 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
         ),
       ],
     ),
-    bottomNavigationBar: NavigationBar(
+    bottomNavigationBar: HomeNavigation(
+      api: widget.api,
+      worker: true,
       selectedIndex: _tab,
-      onDestinationSelected: (index) => setState(() => _tab = index),
-      destinations: const [
-        NavigationDestination(
-          icon: Icon(Icons.near_me_outlined),
-          label: 'Gần bạn',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.work_history_outlined),
-          label: 'Đã ứng tuyển',
-        ),
-      ],
+      onSelected: (index) => setState(() => _tab = index),
     ),
   );
 }

@@ -9,6 +9,7 @@ import 'services/kyc_camera.dart';
 import 'theme/app_theme.dart';
 import 'services/push_notifications.dart';
 import 'screens/notifications_screen.dart';
+import 'widgets/adaptive_viewport.dart';
 
 final _navigator = GlobalKey<NavigatorState>();
 final _messenger = GlobalKey<ScaffoldMessengerState>();
@@ -59,6 +60,7 @@ class ThoXayApp extends StatelessWidget {
       navigatorKey: _navigator,
       scaffoldMessengerKey: _messenger,
       debugShowCheckedModeBanner: false,
+      builder: (context, child) => AdaptiveViewport(child: child!),
       theme: AppTheme.forRole(api.session?.role),
       locale: const Locale('vi', 'VN'),
       supportedLocales: const [Locale('vi', 'VN'), Locale('en', 'US')],

@@ -44,7 +44,7 @@ abstract final class AppTheme {
           primaryContainer: container,
           onPrimaryContainer: const Color(0xff0f172a),
           onSurface: const Color(0xff0f172a),
-          onSurfaceVariant: const Color(0xff475569),
+          onSurfaceVariant: const Color(0xff64748b),
         );
     final rounded = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(16),
@@ -53,6 +53,21 @@ abstract final class AppTheme {
       useMaterial3: true,
       colorScheme: colors,
       scaffoldBackgroundColor: background,
+      textTheme: const TextTheme(
+        headlineSmall: TextStyle(
+          fontSize: 28,
+          fontWeight: FontWeight.w800,
+          height: 1.2,
+        ),
+        titleLarge: TextStyle(
+          fontSize: 22,
+          fontWeight: FontWeight.w800,
+          height: 1.3,
+        ),
+        titleMedium: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+        bodyLarge: TextStyle(fontSize: 16, height: 1.5),
+        bodyMedium: TextStyle(fontSize: 14, height: 1.5),
+      ),
       appBarTheme: AppBarTheme(
         backgroundColor: background,
         foregroundColor: const Color(0xff0f172a),
@@ -66,7 +81,9 @@ abstract final class AppTheme {
       ),
       cardTheme: CardThemeData(
         color: Colors.white,
-        elevation: 0,
+        elevation: 1,
+        shadowColor: const Color(0x140f172a),
+        margin: const EdgeInsets.only(bottom: 16),
         shape: rounded,
       ),
       inputDecorationTheme: InputDecorationTheme(
@@ -106,6 +123,10 @@ abstract final class AppTheme {
         backgroundColor: Colors.white,
         indicatorColor: container,
         elevation: 0,
+        height: 72,
+        labelTextStyle: const WidgetStatePropertyAll(
+          TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+        ),
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
