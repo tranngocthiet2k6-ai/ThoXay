@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:tho_xay_mobile/services/kyc_camera.dart';
 import 'package:flutter/material.dart';
+import 'package:tho_xay_mobile/widgets/kyc_scanner_frame.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tho_xay_mobile/models/models.dart';
 import 'package:tho_xay_mobile/screens/profile_screen.dart';
@@ -146,6 +147,21 @@ void main() {
       await tester.ensureVisible(find.byKey(const ValueKey('capture-front')));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('capture-front')));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.byType(KycScannerFrame).first);
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find
+            .descendant(
+              of: find.byType(KycScannerFrame).first,
+              matching: find.byType(InkWell),
+            )
+            .first,
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(InteractiveViewer), findsOneWidget);
+      expect(api.cccdUpdates, 0);
+      await tester.tap(find.byTooltip('Đóng ảnh phóng to'));
       await tester.pumpAndSettle();
       await tester.ensureVisible(find.byKey(const ValueKey('capture-back')));
       await tester.pumpAndSettle();

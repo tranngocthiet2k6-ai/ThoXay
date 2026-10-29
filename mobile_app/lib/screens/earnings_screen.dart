@@ -4,6 +4,7 @@ import '../models/models.dart';
 import '../models/wallet.dart';
 import '../services/api_service.dart';
 import 'wallet_screen.dart';
+import '../widgets/earnings_chart.dart';
 
 class EarningsScreen extends StatefulWidget {
   const EarningsScreen({super.key, required this.api});
@@ -155,6 +156,7 @@ class _EarningsScreenState extends State<EarningsScreen> {
               '${MaterialLocalizations.of(context).formatShortDate(data.from)} – ${MaterialLocalizations.of(context).formatShortDate(data.to)} · Giờ Việt Nam',
             ),
             const SizedBox(height: 16),
+            EarningsChart(data: data),
             _part('Tiền công', data.base, Icons.construction_outlined),
             _part('Tiền tip', data.tip, Icons.volunteer_activism_outlined),
             _part('Tiền thưởng', data.bonus, Icons.stars_outlined),

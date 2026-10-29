@@ -20,6 +20,7 @@ class _WalletScreenState extends State<WalletScreen> {
   final _entries = <WalletEntry>[];
   final _requests = <WalletRequest>[];
   bool _busy = false, _entryMore = false, _requestMore = false;
+  bool _hideBalance = false;
   int _tab = 0;
   String? _error;
   @override
@@ -107,7 +108,7 @@ class _WalletScreenState extends State<WalletScreen> {
             FittedBox(
               fit: BoxFit.scaleDown,
               child: Text(
-                money(amount.toDouble()),
+                _hideBalance ? '••••••' : money(amount.toDouble()),
                 style: const TextStyle(
                   fontWeight: FontWeight.w800,
                   fontSize: 18,
@@ -152,7 +153,7 @@ class _WalletScreenState extends State<WalletScreen> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(26),
+                borderRadius: BorderRadius.circular(16),
                 gradient: LinearGradient(
                   colors: AppTheme.brandGradient(context),
                 ),
@@ -160,10 +161,30 @@ class _WalletScreenState extends State<WalletScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(
-                    Icons.account_balance_wallet_outlined,
-                    color: Color(0xffffd48b),
-                    size: 30,
+                  Row(
+                    children: [
+                      const Expanded(
+                        child: Text(
+                          'THOXAY · VÍ CỦA BẠN',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: _hideBalance ? 'Hiện số dư' : 'Ẩn số dư',
+                        onPressed: () =>
+                            setState(() => _hideBalance = !_hideBalance),
+                        icon: Icon(
+                          _hideBalance
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 14),
                   const Text(
@@ -174,7 +195,7 @@ class _WalletScreenState extends State<WalletScreen> {
                   FittedBox(
                     fit: BoxFit.scaleDown,
                     child: Text(
-                      money(balance.main.toDouble()),
+                      _hideBalance ? '••••••' : money(balance.main.toDouble()),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 34,
@@ -197,6 +218,22 @@ class _WalletScreenState extends State<WalletScreen> {
                 ),
               ],
             ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Semantics(
+                label: 'Mức ký quỹ so với ngưỡng cảnh báo',
+                child: LinearProgressIndicator(
+                  minHeight: 8,
+                  borderRadius: BorderRadius.circular(8),
+                  value: balance.minimum <= 0
+                      ? 1
+                      : (balance.escrow / balance.minimum).clamp(0.0, 1.0),
+                  color: balance.lowEscrow
+                      ? const Color(0xffb45309)
+                      : const Color(0xff047857),
+                ),
+              ),
+            ),
             if (balance.lowEscrow)
               Card(
                 color: const Color(0xfffff1d8),
@@ -208,22 +245,32 @@ class _WalletScreenState extends State<WalletScreen> {
                 ),
               ),
             const SizedBox(height: 12),
-            Wrap(
-              spacing: 10,
-              runSpacing: 10,
+            Row(
               children: [
-                FilledButton.icon(
-                  onPressed: _busy ? null : () => _operate('TOP_UP'),
-                  icon: const Icon(Icons.add),
-                  label: const Text('Nạp tiền'),
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: _busy ? null : () => _operate('TOP_UP'),
+                    icon: const Icon(Icons.add),
+                    label: const Text('Nạp tiền'),
+                  ),
                 ),
-                FilledButton.icon(
-                  onPressed: _busy || balance.main < 1000
-                      ? null
-                      : () => _operate('WITHDRAW'),
-                  icon: const Icon(Icons.north_east),
-                  label: const Text('Rút nhanh'),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: _busy || balance.main < 1000
+                        ? null
+                        : () => _operate('WITHDRAW'),
+                    icon: const Icon(Icons.north_east),
+                    label: const Text('Rút nhanh'),
+                  ),
                 ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: [
                 OutlinedButton.icon(
                   onPressed: _busy || balance.main < 1000
                       ? null
@@ -266,7 +313,25 @@ class _WalletScreenState extends State<WalletScreen> {
               Card(
                 child: ListTile(
                   isThreeLine: true,
-                  leading: const Icon(Icons.receipt_long_outlined),
+                  leading: CircleAvatar(
+                    backgroundColor: walletEntrySign(e.kind) == '− '
+                        ? const Color(0xfffef2f2)
+                        : walletEntrySign(e.kind) == '+ '
+                        ? const Color(0xffecfdf5)
+                        : const Color(0xfffffbeb),
+                    child: Icon(
+                      walletEntrySign(e.kind) == '− '
+                          ? Icons.north_east
+                          : walletEntrySign(e.kind) == '+ '
+                          ? Icons.south_west
+                          : Icons.swap_horiz,
+                      color: walletEntrySign(e.kind) == '− '
+                          ? const Color(0xffb91c1c)
+                          : walletEntrySign(e.kind) == '+ '
+                          ? const Color(0xff047857)
+                          : const Color(0xffb45309),
+                    ),
+                  ),
                   title: Text(walletKind(e.kind)),
                   subtitle: Text(
                     '${e.description}\n${MaterialLocalizations.of(context).formatShortDate(e.createdAt.toLocal())}',
@@ -281,7 +346,9 @@ class _WalletScreenState extends State<WalletScreen> {
                           fontWeight: FontWeight.w700,
                           color: walletEntrySign(e.kind) == '− '
                               ? Colors.red.shade700
-                              : Theme.of(context).colorScheme.primary,
+                              : walletEntrySign(e.kind) == '+ '
+                              ? const Color(0xff047857)
+                              : const Color(0xffb45309),
                         ),
                       ),
                     ),

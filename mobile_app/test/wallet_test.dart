@@ -95,6 +95,25 @@ class WalletApi extends ApiService {
 }
 
 void main() {
+  testWidgets(
+    'balance privacy hides all three balances and never changes wallet state',
+    (tester) async {
+      final api = WalletApi();
+      await tester.pumpWidget(MaterialApp(home: WalletScreen(api: api)));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Ẩn số dư'));
+      await tester.pumpAndSettle();
+      expect(find.text('500.000 đ'), findsNothing);
+      expect(find.text('••••••'), findsNWidgets(3));
+      expect(api.main, 500000);
+      await tester.tap(find.byTooltip('Hiện số dư'));
+      await tester.pumpAndSettle();
+      expect(find.text('500.000 đ'), findsOneWidget);
+      expect(api.submitted, isEmpty);
+      await tester.pumpWidget(const SizedBox());
+      api.dispose();
+    },
+  );
   testWidgets('wallet shows real balance, low escrow and paginated history', (
     tester,
   ) async {
@@ -155,7 +174,17 @@ void main() {
       await tester.pumpAndSettle();
       expect(api.period, 'MONTH');
       expect(find.text('350.000 đ'), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.text('20.000 đ'),
+        180,
+        scrollable: find.byType(Scrollable).first,
+      );
       expect(find.text('20.000 đ'), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.text('Tuần'),
+        -180,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.tap(find.text('Tuần'));
       await tester.pumpAndSettle();
       expect(api.period, 'WEEK');

@@ -8,6 +8,7 @@ import '../services/api_service.dart';
 import '../widgets/profile_editor.dart';
 import '../widgets/portfolio_gallery.dart';
 import '../widgets/profile_summary.dart';
+import '../widgets/kyc_scanner_frame.dart';
 import 'leaderboard_screen.dart';
 import 'reputation_screen.dart';
 
@@ -133,26 +134,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           Text(label, style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 12),
+          KycScannerFrame(label: label, photo: photo),
           if (photo != null)
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.memory(
-                photo.bytes,
-                height: 180,
-                fit: BoxFit.contain,
-                errorBuilder: (_, _, _) => const SizedBox(
-                  height: 80,
-                  child: Center(
-                    child: Text('Không xem được ảnh, hãy chụp lại.'),
-                  ),
-                ),
+            const Padding(
+              padding: EdgeInsets.only(top: 8),
+              child: Text(
+                'Bấm ảnh để phóng to kiểm tra trước khi gửi.',
+                style: TextStyle(color: Color(0xff64748b)),
               ),
-            )
-          else
-            Icon(
-              Icons.badge_outlined,
-              size: 60,
-              color: Theme.of(context).colorScheme.primary,
             ),
           const SizedBox(height: 12),
           if (photo == null &&
