@@ -1,3 +1,5 @@
+import '../theme/app_theme.dart';
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -90,43 +92,83 @@ class _HomeNavigationState extends State<HomeNavigation>
   }
 
   @override
-  Widget build(BuildContext context) => NavigationBar(
-    selectedIndex: widget.selectedIndex,
-    onDestinationSelected: _select,
-    labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-    destinations: [
-      NavigationDestination(
-        icon: Icon(
-          widget.worker ? Icons.near_me_outlined : Icons.apartment_outlined,
+  Widget build(BuildContext context) {
+    final bar = NavigationBar(
+      selectedIndex: widget.selectedIndex,
+      onDestinationSelected: _select,
+      labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+      destinations: [
+        NavigationDestination(
+          icon: Icon(
+            widget.worker ? Icons.near_me_outlined : Icons.apartment_outlined,
+          ),
+          selectedIcon: Icon(widget.worker ? Icons.near_me : Icons.apartment),
+          label: widget.worker ? 'Gần bạn' : 'Công trình',
         ),
-        selectedIcon: Icon(widget.worker ? Icons.near_me : Icons.apartment),
-        label: widget.worker ? 'Gần bạn' : 'Công trình',
-      ),
-      NavigationDestination(
-        icon: Icon(
-          widget.worker
-              ? Icons.work_history_outlined
-              : Icons.add_circle_outline,
+        NavigationDestination(
+          icon: Icon(
+            widget.worker
+                ? Icons.work_history_outlined
+                : Icons.add_circle_outline,
+          ),
+          selectedIcon: Icon(
+            widget.worker ? Icons.work_history : Icons.add_circle,
+          ),
+          label: widget.worker ? 'Đã ứng tuyển' : 'Tạo mới',
         ),
-        selectedIcon: const Icon(Icons.work_history),
-        label: widget.worker ? 'Đã ứng tuyển' : 'Tạo mới',
-      ),
-      const NavigationDestination(
-        icon: Icon(Icons.account_balance_wallet_outlined),
-        label: 'Ví',
-      ),
-      NavigationDestination(
-        icon: Badge(
-          isLabelVisible: _unread > 0,
-          label: Text(_unread > 99 ? '99+' : '$_unread'),
-          child: const Icon(Icons.notifications_none),
+        const NavigationDestination(
+          icon: Icon(Icons.account_balance_wallet_outlined),
+          label: 'Ví',
         ),
-        label: 'Thông báo',
+        NavigationDestination(
+          icon: Badge(
+            isLabelVisible: _unread > 0,
+            label: Text(_unread > 99 ? '99+' : '$_unread'),
+            child: const Icon(Icons.notifications_none),
+          ),
+          label: 'Thông báo',
+        ),
+        const NavigationDestination(
+          icon: Icon(Icons.person_outline),
+          label: 'Hồ sơ',
+        ),
+      ],
+    );
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        border: Border(top: BorderSide(color: AppColors.border)),
       ),
-      const NavigationDestination(
-        icon: Icon(Icons.person_outline),
-        label: 'Hồ sơ',
+      child: SafeArea(
+        top: false,
+        child: LayoutBuilder(
+          builder: (context, bounds) {
+            if (bounds.maxWidth < 840) return bar;
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.roofing_rounded,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(width: 10),
+                  const Text(
+                    'ThoXay',
+                    style: TextStyle(
+                      fontSize: 19,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -.7,
+                    ),
+                  ),
+                  const SizedBox(width: 32),
+                  Expanded(child: bar),
+                ],
+              ),
+            );
+          },
+        ),
       ),
-    ],
-  );
+    );
+  }
 }

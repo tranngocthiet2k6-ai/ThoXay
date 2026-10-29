@@ -1,3 +1,5 @@
+import '../theme/app_theme.dart';
+
 import 'package:flutter/material.dart';
 
 class JobSearchHeader extends SliverPersistentHeaderDelegate {
@@ -15,7 +17,12 @@ class JobSearchHeader extends SliverPersistentHeaderDelegate {
     bool overlapsContent,
   ) => Material(
     color: Theme.of(context).scaffoldBackgroundColor,
-    elevation: overlapsContent ? 2 : 0,
+    elevation: 0,
+    shape: Border(
+      bottom: BorderSide(
+        color: overlapsContent ? AppColors.border : Colors.transparent,
+      ),
+    ),
     child: child,
   );
   @override

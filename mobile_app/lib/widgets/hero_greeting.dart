@@ -4,6 +4,7 @@ import '../models/models.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import 'tier_badge.dart';
+import 'design_motion.dart';
 
 class HeroGreeting extends StatefulWidget {
   const HeroGreeting({
@@ -43,105 +44,144 @@ class _HeroGreetingState extends State<HeroGreeting> {
   @override
   Widget build(BuildContext context) {
     final name = _profile?.fullName ?? widget.api.session?.fullName ?? 'bạn';
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        gradient: LinearGradient(
-          colors: AppTheme.brandGradient(context),
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 24,
-                backgroundColor: Colors.white24,
-                child: Text(
-                  name.isEmpty ? 'TX' : name.characters.first.toUpperCase(),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+    final worker =
+        widget.api.session?.role == 'ROLE_WORKER' ||
+        widget.availability != null;
+    return DesignReveal(
+      child: DesignSurface(
+        dark: true,
+        child: LayoutBuilder(
+          builder: (context, bounds) {
+            final heading = Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    Text(
-                      'Chào $name,',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
+                    CircleAvatar(
+                      radius: 21,
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      child: Text(
+                        name.isEmpty
+                            ? 'TX'
+                            : name.characters.first.toUpperCase(),
+                        style: const TextStyle(
+                          color: AppColors.ink,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                     ),
-                    const Text(
-                      'Cùng xây những kết nối bền vững',
-                      style: TextStyle(color: Colors.white70),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Chào $name,',
+                            style: const TextStyle(
+                              color: AppColors.surface,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            worker
+                                ? 'KHÔNG GIAN NGƯỜI THỢ'
+                                : 'KHÔNG GIAN CHỦ THẦU',
+                            style: const TextStyle(
+                              color: Colors.white60,
+                              fontSize: 10,
+                              letterSpacing: 1.4,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
-              ),
-            ],
-          ),
-          if (_profile?.role == 'ROLE_WORKER') ...[
-            const SizedBox(height: 12),
-            TierBadge(tier: _profile!.workerTier ?? 'SILVER'),
-          ],
-          const SizedBox(height: 16),
-          Text(
-            widget.title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            widget.subtitle,
-            style: const TextStyle(color: Colors.white70, height: 1.5),
-          ),
-          if (widget.api.session?.role == 'ROLE_WORKER' ||
-              widget.availability != null) ...[
-            const SizedBox(height: 16),
-            Material(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(32),
-              child: SwitchListTile(
-                key: const ValueKey('availability-switch'),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(32),
+                const SizedBox(height: 24),
+                DesignReveal(
+                  child: Text(
+                    widget.title,
+                    style: const TextStyle(
+                      color: AppColors.surface,
+                      fontSize: 30,
+                      height: 1.2,
+                      letterSpacing: -.8,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                 ),
-                secondary: Icon(
-                  widget.availability == true
-                      ? Icons.wifi_rounded
-                      : Icons.pause_circle_outline,
-                  color: widget.availability == true
-                      ? const Color(0xff059669)
-                      : const Color(0xff64748b),
+                const SizedBox(height: 12),
+                DesignReveal(
+                  child: Text(
+                    widget.subtitle,
+                    style: const TextStyle(color: Colors.white70, height: 1.6),
+                  ),
                 ),
-                title: Text(
-                  widget.availability == true
-                      ? 'Đang nhận việc'
-                      : widget.availability == false
-                      ? 'Tạm ngưng nhận việc'
-                      : 'Đang đồng bộ trạng thái',
-                  style: const TextStyle(fontWeight: FontWeight.w700),
-                ),
-                value: widget.availability == true,
-                onChanged: widget.onAvailabilityChanged,
-              ),
-            ),
-          ],
-        ],
+                if (_profile?.role == 'ROLE_WORKER') ...[
+                  const SizedBox(height: 16),
+                  TierBadge(tier: _profile!.workerTier ?? 'SILVER'),
+                ],
+              ],
+            );
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (bounds.maxWidth >= 700)
+                  Row(
+                    children: [
+                      Expanded(child: heading),
+                      const SizedBox(width: 24),
+                      const SizedBox(
+                        width: 240,
+                        child: ConstructionArtwork(height: 180),
+                      ),
+                    ],
+                  )
+                else
+                  heading,
+                if (worker) ...[
+                  const SizedBox(height: 24),
+                  Material(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(16),
+                    child: SwitchListTile(
+                      key: const ValueKey('availability-switch'),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      secondary: Icon(
+                        widget.availability == true
+                            ? Icons.wifi_rounded
+                            : Icons.pause_circle_outline,
+                        color: widget.availability == true
+                            ? AppColors.success
+                            : AppColors.muted,
+                      ),
+                      title: AnimatedSwitcher(
+                        duration: MediaQuery.disableAnimationsOf(context)
+                            ? Duration.zero
+                            : const Duration(milliseconds: 180),
+                        child: Text(
+                          widget.availability == true
+                              ? 'Đang nhận việc'
+                              : widget.availability == false
+                              ? 'Tạm ngưng nhận việc'
+                              : 'Đang đồng bộ trạng thái',
+                          key: ValueKey(widget.availability),
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                      value: widget.availability == true,
+                      onChanged: widget.onAvailabilityChanged,
+                    ),
+                  ),
+                ],
+              ],
+            );
+          },
+        ),
       ),
     );
   }

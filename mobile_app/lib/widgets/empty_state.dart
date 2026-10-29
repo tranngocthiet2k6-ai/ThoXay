@@ -1,3 +1,6 @@
+import '../theme/app_theme.dart';
+import 'design_motion.dart';
+
 import 'package:flutter/material.dart';
 
 class EmptyState extends StatelessWidget {
@@ -12,59 +15,61 @@ class EmptyState extends StatelessWidget {
   final Widget? action;
   final IconData? icon;
   @override
-  Widget build(BuildContext context) => Container(
-    width: double.infinity,
-    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
-      border: Border.all(color: const Color(0xffe4ebe7)),
-    ),
-    child: Column(
-      children: [
-        ExcludeSemantics(
-          child: icon != null
-              ? CircleAvatar(
-                  radius: 48,
-                  backgroundColor: Theme.of(context)
-                      .colorScheme
-                      .primaryContainer,
-                  child: Icon(
-                    icon,
-                    size: 48,
-                    color: Theme.of(context).colorScheme.primary,
+  Widget build(BuildContext context) => DesignReveal(
+    child: Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        children: [
+          ExcludeSemantics(
+            child: icon != null
+                ? CircleAvatar(
+                    radius: 48,
+                    backgroundColor: Theme.of(context)
+                        .colorScheme
+                        .primaryContainer,
+                    child: Icon(
+                      icon,
+                      size: 48,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  )
+                : CustomPaint(
+                    size: const Size(180, 130),
+                    painter: _WorksiteIllustration(
+                      Theme.of(context).colorScheme.primary,
+                    ),
                   ),
-                )
-              : CustomPaint(
-                  size: const Size(180, 130),
-                  painter: _WorksiteIllustration(
-                    Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-        ),
-        const SizedBox(height: 20),
-        Text(
-          title,
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w800,
-            color: Theme.of(context).colorScheme.onSurface,
           ),
-        ),
-        const SizedBox(height: 10),
-        ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 340),
-          child: Text(
-            message,
+          const SizedBox(height: 20),
+          Text(
+            title,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              height: 1.6,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w800,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
-        ),
-        if (action != null) ...[const SizedBox(height: 20), action!],
-      ],
+          const SizedBox(height: 10),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 340),
+            child: Text(
+              message,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                height: 1.6,
+              ),
+            ),
+          ),
+          if (action != null) ...[const SizedBox(height: 20), action!],
+        ],
+      ),
     ),
   );
 }

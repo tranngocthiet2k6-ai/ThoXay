@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../models/models.dart';
+import '../theme/app_theme.dart';
+import 'design_motion.dart';
 import 'call_button.dart';
 
 class JobCard extends StatelessWidget {
@@ -16,105 +18,140 @@ class JobCard extends StatelessWidget {
   final bool canContactContractor;
   final WidgetBuilder? detailsActionBuilder;
   @override
-  Widget build(BuildContext context) => Card(
-    clipBehavior: Clip.antiAlias,
-    child: Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Text(
-                  job.title,
-                  style: Theme.of(context).textTheme.titleLarge,
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: 16),
+    child: DesignReveal(
+      child: DesignSurface(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    job.jobType == 'Thợ chính'
+                        ? Icons.engineering_outlined
+                        : Icons.handyman_outlined,
+                    color: Theme.of(context).colorScheme.primary,
+                    size: 24,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Flexible(child: JobStatusBadge(status: job.status)),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            '${money(job.salaryPerDay)} / ngày',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w800,
-              color: Theme.of(context).colorScheme.primary,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    job.title,
+                    style: Theme.of(context).textTheme.titleLarge
+                        ?.copyWith(fontSize: 18),
+                  ),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              Chip(
-                avatar: Icon(
-                  job.jobType == 'Thợ chính'
-                      ? Icons.engineering_outlined
-                      : Icons.handyman_outlined,
-                  size: 18,
-                ),
-                label: Text(job.jobType),
-                backgroundColor: job.jobType == 'Thợ chính'
-                    ? Theme.of(context).colorScheme.primaryContainer
-                    : const Color(0xffffedd5),
-                side: BorderSide.none,
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                JobStatusBadge(status: job.status),
+                Chip(label: Text(job.jobType), side: BorderSide.none),
+                if (job.distanceKm != null)
+                  Chip(
+                    avatar: const Icon(Icons.near_me_outlined, size: 15),
+                    label: Text('${job.distanceKm!.toStringAsFixed(1)} km'),
+                    side: BorderSide.none,
+                  ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'THU NHẬP NGÀY CÔNG',
+              style: TextStyle(
+                color: AppColors.muted,
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.2,
               ),
-              if (job.distanceKm != null)
-                Chip(
-                  avatar: const Icon(Icons.near_me_outlined, size: 18),
-                  label: Text('${job.distanceKm!.toStringAsFixed(1)} km'),
-                  side: BorderSide.none,
-                ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          _JobInfo(icon: Icons.location_on_outlined, label: job.address),
-          const SizedBox(height: 8),
-          _JobInfo(
-            icon: Icons.groups_outlined,
-            label: 'Cần ${job.requiredWorkers} thợ',
-          ),
-          const Divider(height: 32),
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 18,
-                backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                child: const Icon(Icons.apartment_outlined, size: 20),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              '${money(job.salaryPerDay)} / ngày',
+              style: const TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.w800,
+                color: AppColors.ink,
+                letterSpacing: -.8,
               ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  job.contractorName,
-                  style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 16),
+            _JobInfo(icon: Icons.location_on_outlined, label: job.address),
+            const SizedBox(height: 10),
+            _JobInfo(
+              icon: Icons.groups_outlined,
+              label: 'Cần ${job.requiredWorkers} thợ',
+            ),
+            const Divider(height: 32),
+            Row(
+              children: [
+                const CircleAvatar(
+                  radius: 18,
+                  backgroundColor: AppColors.soft,
+                  child: Icon(
+                    Icons.apartment_outlined,
+                    size: 19,
+                    color: AppColors.muted,
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 12,
-            runSpacing: 8,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              TextButton(
-                onPressed: () => showJobDetails<void>(
-                  context,
-                  job,
-                  canContactContractor: canContactContractor,
-                  action: action,
-                  actionBuilder: detailsActionBuilder,
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'CHỦ THẦU',
+                        style: TextStyle(
+                          fontSize: 9,
+                          letterSpacing: 1,
+                          color: AppColors.muted,
+                        ),
+                      ),
+                      Text(
+                        job.contractorName,
+                        style: const TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                    ],
+                  ),
                 ),
-                child: const Text('Xem chi tiết'),
-              ),
-              action,
-            ],
-          ),
-        ],
+              ],
+            ),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 12,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                TextButton.icon(
+                  onPressed: () => showJobDetails<void>(
+                    context,
+                    job,
+                    canContactContractor: canContactContractor,
+                    action: action,
+                    actionBuilder: detailsActionBuilder,
+                  ),
+                  icon: const Icon(Icons.arrow_outward_rounded, size: 16),
+                  label: const Text('Xem chi tiết'),
+                ),
+                action,
+              ],
+            ),
+          ],
+        ),
       ),
     ),
   );
@@ -211,9 +248,9 @@ Future<T?> showJobDetails<T>(
                 const SizedBox(height: 16),
                 _JobInfo(icon: Icons.location_on_outlined, label: job.address),
                 const SizedBox(height: 24),
-                const Text(
-                  'Thông tin công việc',
-                  style: TextStyle(fontWeight: FontWeight.w700),
+                const SectionIntro(
+                  title: 'Thông tin công việc',
+                  subtitle: 'Tìm hiểu yêu cầu trước khi nhận việc.',
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -241,7 +278,7 @@ Future<T?> showJobDetails<T>(
             padding: const EdgeInsets.all(16),
             decoration: const BoxDecoration(
               color: Colors.white,
-              border: Border(top: BorderSide(color: Color(0xffe2e8f0))),
+              border: Border(top: BorderSide(color: AppColors.border)),
             ),
             child: SafeArea(
               top: false,

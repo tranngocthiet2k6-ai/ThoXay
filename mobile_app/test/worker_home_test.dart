@@ -241,6 +241,8 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    await tester.ensureVisible(find.widgetWithText(ChoiceChip, 'Phụ hồ'));
+    await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(ChoiceChip, 'Phụ hồ'));
     await tester.pumpAndSettle();
     await tester.ensureVisible(

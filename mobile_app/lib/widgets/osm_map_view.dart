@@ -1,3 +1,5 @@
+import '../theme/app_theme.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -103,7 +105,7 @@ class _OsmMapViewState extends State<OsmMapView> {
 
   @override
   Widget build(BuildContext context) => ClipRRect(
-    borderRadius: BorderRadius.circular(16),
+    borderRadius: BorderRadius.circular(20),
     child: Stack(
       children: [
         FlutterMap(
@@ -113,7 +115,7 @@ class _OsmMapViewState extends State<OsmMapView> {
             initialZoom: 13,
             minZoom: 2,
             maxZoom: 19,
-            backgroundColor: const Color(0xffe8ede9),
+            backgroundColor: AppColors.soft,
             interactionOptions: const InteractionOptions(
               flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
             ),
@@ -145,7 +147,7 @@ class _OsmMapViewState extends State<OsmMapView> {
                       fit: StackFit.expand,
                       children: [
                         const ShimmerSurface(
-                          child: ColoredBox(color: Color(0xffe3ebe6)),
+                          child: ColoredBox(color: AppColors.soft),
                         ),
                         image,
                       ],
