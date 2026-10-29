@@ -739,6 +739,43 @@ class ApiService extends ChangeNotifier {
     ) as Map<String, dynamic>,
   );
 
+  Future<ChatMessage> sendChatPhoto(
+    int jobId,
+    int peerId,
+    Uint8List bytes,
+    String caption,
+    String clientId,
+  ) async => ChatMessage.fromJson(
+    await uploadPhoto(
+      '/api/jobs/$jobId/messages/photo',
+      bytes,
+      fields: {
+        'recipientId': '$peerId',
+        'caption': caption,
+        'clientMessageId': clientId,
+      },
+    ),
+  );
+
+  Future<ChatMessage> sendChatLocation(
+    int jobId,
+    int peerId,
+    double latitude,
+    double longitude,
+    String clientId,
+  ) async => ChatMessage.fromJson(
+    await _request(
+      'POST',
+      '/api/jobs/$jobId/messages/location',
+      body: {
+        'recipientId': peerId,
+        'latitude': latitude,
+        'longitude': longitude,
+        'clientMessageId': clientId,
+      },
+    ) as Map<String, dynamic>,
+  );
+
   Future<ChatConnection> connectChat(int jobId, int peerId) async {
     final auth = _requireSession();
     if (!auth.expiresAt.isAfter(DateTime.now())) {

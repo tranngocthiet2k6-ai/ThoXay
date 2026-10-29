@@ -235,20 +235,26 @@ class ChatController extends ChangeNotifier {
         List<int>.generate(18, (_) => random.nextInt(256)),
       );
     }
+    final sent = await sendMedia(
+      () => api.sendMessage(jobId, peerId, content, _pendingId!),
+    );
+    if (sent) {
+      _pendingId = null;
+      _pendingText = null;
+    }
+    return sent;
+  }
+
+  /// The composer owns the frozen media payload and idempotency key across retries.
+  Future<bool> sendMedia(Future<ChatMessage> Function() request) async {
+    if (!canSend) return false;
     sending = true;
     error = null;
     _notify();
     try {
-      final message = await api.sendMessage(
-        jobId,
-        peerId,
-        content,
-        _pendingId!,
-      );
+      final message = await request();
       if (_disposed) return false;
       _merge([message]);
-      _pendingId = null;
-      _pendingText = null;
       return true;
     } on ApiException catch (e) {
       if (!_disposed) {

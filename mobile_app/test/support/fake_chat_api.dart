@@ -29,6 +29,10 @@ Map<String, dynamic> messageEvent(ChatMessage m) => {
     'content': m.content,
     'createdAt': m.createdAt.toIso8601String(),
     'clientMessageId': m.clientMessageId,
+    'kind': m.kind,
+    'imagePath': m.imagePath,
+    'latitude': m.latitude,
+    'longitude': m.longitude,
   },
 };
 const chatJob = Job(

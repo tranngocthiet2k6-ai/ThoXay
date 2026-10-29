@@ -94,3 +94,11 @@ Thêm incidents/incident_audit, chỉ mục hàng đợi và người gửi, kh�
 reporter/clientRequestId. Gỡ công trình đặt FK về NULL, giữ snapshot và lịch sử.
 Không thay đổi trạng thái công trình hoặc ví khi xử lý báo cáo. SQL:
 `migrations/018_incidents_sos.sql`.
+
+### V19 — ảnh và GPS trong chat
+
+`V19__chat_media.sql` thêm kind mặc định TEXT, tọa độ nullable và hash ảnh nullable
+vào messages, cùng message_attachments (BYTEA tối đa 2 MB, FK CASCADE theo tin).
+CHECK phân biệt ba loại payload. Không sửa nội dung chat cũ. Migration thủ công
+`migrations/019_chat_media.sql` chạy lại an toàn; Flyway chạy một lần và validate
+checksum. Ảnh đọc bằng JWT theo đúng cặp chat đã ACCEPTED.

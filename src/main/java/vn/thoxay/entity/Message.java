@@ -23,6 +23,12 @@ public class Message {
     private Job job;
     @Column(nullable = false, length = 2000)
     private String content;
+    @Column(nullable = false, length = 16)
+    private String kind = "TEXT";
+    private Double latitude;
+    private Double longitude;
+    @Column(name = "image_hash", length = 64)
+    private String imageHash;
     @Column(name = "client_message_id", nullable = false, length = 64)
     private String clientMessageId;
     @Column(name = "created_at", nullable = false, updatable = false)

@@ -15,6 +15,8 @@ import java.net.URI;
 import java.net.http.*;
 import java.util.*;
 import java.util.concurrent.*;
+import org.springframework.mock.web.MockMultipartFile;
+import vn.thoxay.chat.MessageAttachmentRepository;
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -30,6 +32,7 @@ class ChatApiTest {
     @Autowired MessageRepository messages;
     @Autowired JwtUtil jwt;
     @Autowired ChatWebSocketHandler sockets;
+    @Autowired MessageAttachmentRepository attachments;
     @LocalServerPort int port;
     User owner, worker, otherWorker, stranger, admin;
     Job job;
@@ -62,6 +65,75 @@ class ChatApiTest {
         mvc.perform(post(path(job)).header("Authorization", token(worker)).contentType("application/json")
             .content(body(owner, "Nội dung khác", "once"))).andExpect(status().isConflict());
         assertThat(messages.count()).isEqualTo(2);
+    }
+
+    @Test void photoIsSanitizedPrivateIdempotentAndDeletedWithItsJob() throws Exception {
+        byte[] image = image(java.awt.Color.ORANGE);
+        JsonNode sent = upload(image, "photo-once", "Ảnh tiến độ");
+        String photo = sent.path("imagePath").asText();
+        assertThat(sent.path("kind").asText()).isEqualTo("IMAGE");
+        assertThat(upload(image, "photo-once", "Ảnh tiến độ").path("id")).isEqualTo(sent.path("id"));
+        assertThat(attachments.count()).isEqualTo(1);
+        for (User actor : List.of(worker, owner)) {
+            byte[] clean = mvc.perform(get(photo).header("Authorization", token(actor)))
+                .andExpect(status().isOk()).andExpect(header().string("Cache-Control", "no-store"))
+                .andExpect(content().contentType("image/jpeg")).andReturn().getResponse().getContentAsByteArray();
+            var decoded = javax.imageio.ImageIO.read(new java.io.ByteArrayInputStream(clean));
+            assertThat(decoded.getWidth()).isEqualTo(320);
+        }
+        for (User actor : List.of(otherWorker, stranger, admin))
+            mvc.perform(get(photo).header("Authorization", token(actor))).andExpect(status().isForbidden());
+        mvc.perform(get(photo)).andExpect(status().isUnauthorized());
+        mvc.perform(multipart(path(job) + "/photo").file(new MockMultipartFile("photo", "bad.jpg", "image/jpeg", new byte[]{1,2,3}))
+            .header("Authorization", token(worker)).param("recipientId", owner.getId().toString())
+            .param("clientMessageId", "bad")).andExpect(status().isBadRequest());
+        mvc.perform(multipart(path(job) + "/photo").file(new MockMultipartFile("photo", image(java.awt.Color.BLUE)))
+            .header("Authorization", token(worker)).param("recipientId", owner.getId().toString())
+            .param("clientMessageId", "photo-once").param("caption", "Ảnh tiến độ")).andExpect(status().isConflict());
+        // Same idempotency namespace spans text, images and GPS.
+        mvc.perform(post(path(job)).header("Authorization", token(worker)).contentType("application/json")
+            .content(body(owner, "Ảnh tiến độ", "photo-once"))).andExpect(status().isConflict());
+        mvc.perform(post("/admin/jobs/" + job.getId() + "/delete").with(csrf())
+            .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user(admin.getPhoneNumber()).roles("ADMIN"))).andExpect(status().is3xxRedirection());
+        assertThat(attachments.count()).isZero();
+    }
+
+    @Test void gpsSharesExactConfirmedCoordinatesOverRealtimeAndRejectsChangedRetry() throws Exception {
+        var listener = subscribe(owner, job, worker);
+        String location = json.writeValueAsString(Map.of("recipientId", owner.getId(), "clientMessageId", "gps-once",
+            "latitude", 10.762622, "longitude", 106.660172));
+        var first = mvc.perform(post(path(job) + "/location").header("Authorization", token(worker))
+            .contentType("application/json").content(location)).andExpect(status().isCreated())
+            .andExpect(jsonPath("$.kind").value("LOCATION")).andReturn();
+        var event = listener.await("message").path("message");
+        assertThat(event.path("latitude").asDouble()).isEqualTo(10.762622);
+        assertThat(event.path("longitude").asDouble()).isEqualTo(106.660172);
+        mvc.perform(post(path(job) + "/location").header("Authorization", token(worker)).contentType("application/json")
+            .content(location)).andExpect(status().isCreated())
+            .andExpect(jsonPath("$.id").value(json.readTree(first.getResponse().getContentAsString()).path("id").asLong()));
+        assertThat(messages.count()).isEqualTo(1);
+        assertThat(listener.events.poll(200, TimeUnit.MILLISECONDS)).isNull();
+        mvc.perform(post(path(job) + "/location").header("Authorization", token(worker)).contentType("application/json")
+            .content(location.replace("10.762622", "11.0"))).andExpect(status().isConflict());
+        for (String invalid : List.of(location.replace("10.762622", "91"), location.replace("106.660172", "181")))
+            mvc.perform(post(path(job) + "/location").header("Authorization", token(worker)).contentType("application/json")
+                .content(invalid)).andExpect(status().isBadRequest());
+        worker.setActive(false); users.saveAndFlush(worker);
+        mvc.perform(post(path(job) + "/location").header("Authorization", token(owner)).contentType("application/json")
+            .content(location.replace(owner.getId().toString(), worker.getId().toString()))).andExpect(status().isForbidden());
+    }
+
+    private JsonNode upload(byte[] bytes, String key, String caption) throws Exception {
+        return json.readTree(mvc.perform(multipart(path(job) + "/photo")
+            .file(new MockMultipartFile("photo", "photo.png", "image/png", bytes))
+            .header("Authorization", token(worker)).param("recipientId", owner.getId().toString())
+            .param("clientMessageId", key).param("caption", caption))
+            .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString());
+    }
+    private byte[] image(java.awt.Color color) throws Exception {
+        var image = new java.awt.image.BufferedImage(320, 240, java.awt.image.BufferedImage.TYPE_INT_RGB);
+        var g = image.createGraphics(); g.setColor(color); g.fillRect(0,0,320,240); g.dispose();
+        var bytes = new java.io.ByteArrayOutputStream(); javax.imageio.ImageIO.write(image, "png", bytes); return bytes.toByteArray();
     }
 
     @Test void onlyAcceptedPairCanReadOrSendAndCannotReadAnotherWorkersHistory() throws Exception {

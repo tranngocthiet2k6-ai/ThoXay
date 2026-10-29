@@ -258,3 +258,26 @@ trong payload chuyển khoản QRIBFTTA.
   JAR/Web release/analyze, Flyway V18/JPA validate/health UP trên QA. Chrome QA đã
   thực hiện đăng nhập Admin, xem SOS và cập nhật qua CSRF trên DB QA riêng, sau đó
   xóa đúng dữ liệu giả của lượt kiểm tra. Chưa phát thông báo tới tài khoản thật.
+
+## Checkpoint ảnh và GPS trong chat
+
+- Giữ endpoint chat text/clientMessageId cũ, thêm `POST /api/jobs/{id}/messages/photo`
+  (multipart photo/recipientId/caption/clientMessageId) và `/messages/location`
+  (recipientId/clientMessageId/latitude/longitude). Lịch sử/WebSocket thêm kind,
+  imagePath hoặc tọa độ; content vẫn có tóm tắt để tương thích client cũ.
+- Ảnh JPEG/PNG tối đa 5 MB đầu vào, kiểm tra điểm ảnh, đổi thành JPEG bỏ EXIF,
+  thu cạnh dài tối đa 1800px và lưu tối đa 2 MB trong PostgreSQL. Tệp gắn trực tiếp
+  với tin nhắn trong cùng giao dịch, xóa theo công trình/tin nhắn, không tạo tệp mồ côi.
+- `GET /api/jobs/{id}/messages/{messageId}/photo` dùng JWT/no-store. Chỉ cặp chat
+  đã được duyệt đọc được; Admin hoặc thợ khác cùng công trình không được đọc ảnh.
+  Khi khóa tài khoản/hủy tham gia, quyền chat/ảnh bị thu hồi như chat text.
+- Flutter chọn camera/thư viện hoặc GPS, xem trước rồi xác nhận. Không tự gửi khi
+  cấp quyền hoặc chọn ảnh; GPS bị từ chối không tạo tin. Chạm ảnh phóng to, chạm
+  vị trí mở chỉ đường. Khung chat desktop giới hạn 960px.
+- Gửi lại giữ nguyên mã, ảnh/tọa độ/chú thích; backend so sánh loại/nội dung/hash
+  ảnh đã xử lý, trả lại tin cũ khi trùng và 409 khi mã được dùng cho nội dung khác.
+- V19 thêm payload nullable cho messages và message_attachments. Chat cũ mặc định
+  TEXT, giữ nguyên nội dung và thời điểm; kiểm thử nâng cấp có tin nhắn legacy.
+- Kiểm chứng: 112 test Backend (gồm PostgreSQL migration), 85 test Flutter pass;
+  analyze không lỗi và JAR/Web release build thành công. Hộp thư/số chưa đọc là
+  checkpoint kế tiếp, chưa đánh dấu hoàn tất nhóm chat tổng thể.

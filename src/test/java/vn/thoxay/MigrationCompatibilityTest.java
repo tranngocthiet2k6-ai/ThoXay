@@ -71,6 +71,8 @@ class MigrationCompatibilityTest {
                 s.executeUpdate("INSERT INTO jobs(contractor_id,title,job_type,salary_per_day,address,latitude,longitude,required_workers) "
                     + "SELECT id,'Legacy paid rate','Thợ chính',450000.75,'QA',10,106,1 FROM users WHERE phone_number='0999999921'");
                 s.executeUpdate("INSERT INTO job_applications(job_id,worker_id,status) SELECT j.id,u.id,'ACCEPTED' FROM jobs j,users u WHERE u.phone_number='0999999922'");
+                s.executeUpdate("INSERT INTO messages(job_id,sender_id,recipient_id,content,client_message_id) "
+                    + "SELECT j.id,u.id,j.contractor_id,'Legacy text','legacy-chat' FROM jobs j,users u WHERE u.phone_number='0999999922'");
             }
         }
         migrations().migrate();
@@ -80,6 +82,10 @@ class MigrationCompatibilityTest {
         }
         try(var c=connect();var s=c.createStatement();var r=s.executeQuery("SELECT attendance_required FROM "+schema+".jobs")) {
             assertThat(r.next()).isTrue();assertThat(r.getBoolean(1)).isFalse();
+        }
+        try(var c=connect();var s=c.createStatement();var r=s.executeQuery("SELECT content,kind,latitude,longitude,image_hash FROM "+schema+".messages")) {
+            assertThat(r.next()).isTrue();assertThat(r.getString(1)).isEqualTo("Legacy text");assertThat(r.getString(2)).isEqualTo("TEXT");
+            assertThat(r.getObject(3)).isNull();assertThat(r.getObject(4)).isNull();assertThat(r.getObject(5)).isNull();
         }
         assertThat(migrations().migrate().migrationsExecuted).isZero();
     }
