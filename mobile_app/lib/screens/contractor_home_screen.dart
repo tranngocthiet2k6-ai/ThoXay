@@ -1,4 +1,5 @@
 import '../widgets/incident_actions.dart';
+import '../widgets/weather_card.dart';
 import 'attendance_screen.dart';
 import '../widgets/design_motion.dart';
 import '../widgets/work_commitment.dart';
@@ -37,6 +38,14 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
   List<Job> _jobs = [];
   final _search = TextEditingController();
   String _query = '', _status = '';
+  int? _weatherJobId;
+  Job? get _weatherJob => _jobs.isEmpty
+      ? null
+      : _jobs.where((j) => j.id == _weatherJobId).firstOrNull ??
+            _jobs
+                .where((j) => j.status == 'IN_PROGRESS' || j.status == 'OPEN')
+                .firstOrNull ??
+            _jobs.first;
   List<Job> get _visibleJobs => _jobs
       .where(
         (j) =>
@@ -160,6 +169,45 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
                     ),
                   ),
                 ),
+                if (_weatherJob != null)
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    sliver: SliverToBoxAdapter(
+                      child: Column(
+                        children: [
+                          if (_jobs.length > 1)
+                            DropdownButtonFormField<int>(
+                              initialValue: _weatherJob!.id,
+                              isExpanded: true,
+                              decoration: const InputDecoration(
+                                labelText: 'Thời tiết công trình',
+                              ),
+                              items: _jobs
+                                  .map(
+                                    (j) => DropdownMenuItem(
+                                      value: j.id,
+                                      child: Text(
+                                        j.title,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  )
+                                  .toList(),
+                              onChanged: (id) =>
+                                  setState(() => _weatherJobId = id),
+                            ),
+                          WeatherCard(
+                            api: widget.api,
+                            latitude: _weatherJob!.latitude,
+                            longitude: _weatherJob!.longitude,
+                            areaLabel: _weatherJob!.title,
+                            refreshToken: _jobs,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 SliverPersistentHeader(
                   pinned: true,
                   delegate: JobSearchHeader(

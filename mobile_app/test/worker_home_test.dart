@@ -95,6 +95,11 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.byType(TextField),
+        160,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.enterText(find.byType(TextField), 'không khớp');
       await tester.pumpAndSettle();
       expect(find.text('Xây nhà phố'), findsNothing);
@@ -241,7 +246,11 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.widgetWithText(ChoiceChip, 'Phụ hồ'));
+    await tester.scrollUntilVisible(
+      find.widgetWithText(ChoiceChip, 'Phụ hồ'),
+      160,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(ChoiceChip, 'Phụ hồ'));
     await tester.pumpAndSettle();

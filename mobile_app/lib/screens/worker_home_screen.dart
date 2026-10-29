@@ -1,4 +1,5 @@
 import '../widgets/incident_actions.dart';
+import '../widgets/weather_card.dart';
 import 'attendance_screen.dart';
 import '../widgets/design_motion.dart';
 import '../widgets/work_commitment.dart';
@@ -343,6 +344,16 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                               : 'Theo dõi đơn và kết nối với chủ thầu của bạn.',
                         ),
                         if (_availabilityBusy) const LinearProgressIndicator(),
+                        if (_tab == 0 && _position != null) ...[
+                          const SizedBox(height: 16),
+                          WeatherCard(
+                            api: widget.api,
+                            latitude: _position!.latitude,
+                            longitude: _position!.longitude,
+                            areaLabel: 'Khu vực đang tìm việc',
+                            refreshToken: _jobs,
+                          ),
+                        ],
                         if (_tab == 0 && _available == true) ...[
                           const SizedBox(height: 16),
                           Row(

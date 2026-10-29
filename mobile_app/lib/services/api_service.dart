@@ -9,6 +9,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import '../models/models.dart';
 import '../models/chat_message.dart';
 import '../models/chat_inbox.dart';
+import '../models/weather.dart';
 import '../models/app_notification.dart';
 import '../models/worker_profile.dart';
 import '../models/reputation.dart';
@@ -32,6 +33,18 @@ class ApiException implements Exception {
 }
 
 class ApiService extends ChangeNotifier {
+  Future<AreaWeather> weather(double latitude, double longitude) async {
+    final data = await _request(
+      'GET',
+      '/api/weather?latitude=$latitude&longitude=$longitude',
+    );
+    try {
+      return AreaWeather.fromJson(data as Map<String, dynamic>);
+    } on Object {
+      throw const ApiException('Chưa lấy được thời tiết khu vực');
+    }
+  }
+
   Future<IncidentDetail> reportIncident(
     int jobId,
     Map<String, dynamic> body,

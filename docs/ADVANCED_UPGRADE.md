@@ -22,7 +22,7 @@ lightbox/bộ lọc/KPI Admin. Các phần này được mở rộng, không t�
 - [x] SOS/sự cố/tranh chấp, cảnh báo Admin ưu tiên, lịch sử xử lý.
 - [x] Ảnh portfolio từ thiết bị, kiểm tra ảnh và lưu bền vững.
 - [x] Chat ảnh/GPS, hộp thư và số tin chưa đọc thật.
-- [ ] Thời tiết Open-Meteo, cache và trạng thái mất kết nối.
+- [x] Thời tiết Open-Meteo, cache và trạng thái mất kết nối.
 - [ ] Sáng/Tối/Outdoor, hoàn thiện các màn hình Flutter và công cụ Admin.
 - [ ] Toàn bộ test, build Web/APK, kiểm tra UI, migration lặp an toàn và push cuối.
 
@@ -303,3 +303,25 @@ trong payload chuyển khoản QRIBFTTA.
   PostgreSQL QA kiểm thử cả truy vấn SQL và REST production profile: V20 migrate,
   projection hộp thư, quyền metadata và con trỏ/số chưa đọc chính xác. Fixture tạm
   đã xóa, không tạo tài khoản/tin nhắn trên production.
+
+## Checkpoint thời tiết khu vực công trình
+
+- `GET /api/weather?latitude=&longitude=` yêu cầu JWT, kiểm tra tọa độ hữu hạn và
+  phạm vi. Backend làm tròn 2 chữ số thập phân trước khi gọi host HTTPS cố định
+  Open-Meteo, không gửi JWT hoặc GPS chính xác của người dùng tới provider.
+- Dữ liệu hiện tại gồm nhiệt độ/cảm giác, mã thời tiết, mưa, gió, ngày/đêm và thời
+  điểm. Flutter có nhãn/thông tin gợi ý theo điều kiện, kể cả mã dông 97; không
+  xem dữ liệu mô hình là kết luận an toàn thay thế quan sát công trường.
+- Cache LRU tối đa 128 khu vực/15 phút; gộp yêu cầu cùng khu vực, tối đa 8 lượt gọi
+  provider đồng thời. Kết nối 2 giây/request 3 giây; lỗi được cache 30 giây. Dữ liệu
+  trước đó còn dưới 3 giờ được đánh dấu stale, quá hạn trả unavailable/current=null.
+  Không mở giao dịch DB khi gọi dịch vụ thời tiết.
+- Thợ xem khu vực GPS/vị trí đang tìm việc; chủ thầu chọn công trình cần xem, mặc
+  định ưu tiên công trình đang tuyển/đang làm. API thời tiết độc lập nên không cản
+  tải công trình. Có skeleton, thử lại, ngày giờ dữ liệu, mở rộng chi tiết và link
+  attribution Open-Meteo/CC BY 4.0. Dùng dịch vụ miễn phí cho phạm vi đồ án phi thương mại.
+- Kiểm chứng: 122 test Backend, 92 test Flutter pass; analyze/JAR/Web release pass.
+  REST QA production profile đã nhận dữ liệu provider thật tại khu vực công khai,
+  đồng thời xác nhận các module chat/V20 vẫn hoạt động. Đã xóa fixture QA tạm.
+
+Tham khảo thông số và mã WMO: [Open-Meteo Forecast API](https://open-meteo.com/en/docs).
