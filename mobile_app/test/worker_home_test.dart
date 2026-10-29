@@ -120,6 +120,15 @@ void main() {
             .hitTestable(),
         findsOneWidget,
       );
+      await tester.tap(
+        find.descendant(
+          of: find.byKey(const ValueKey('job-detail-actions')),
+          matching: find.byType(FilledButton),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(api.applied, isTrue);
+      expect(find.byKey(const ValueKey('job-detail-actions')), findsNothing);
       await tester.pumpWidget(const SizedBox());
       api.dispose();
     },

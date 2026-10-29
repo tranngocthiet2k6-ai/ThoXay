@@ -165,6 +165,26 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
     if (apply == true && mounted) await _apply(job);
   }
 
+  Widget _applyButton(Job job, {BuildContext? sheetContext}) => FilledButton(
+    onPressed:
+        _applying != null ||
+            _cancelling ||
+            _loading ||
+            _applications.any((a) => a.job.id == job.id)
+        ? null
+        : () async {
+            if (sheetContext != null) Navigator.pop(sheetContext);
+            await _apply(job);
+          },
+    child: Text(
+      _applying == job.id
+          ? 'Đang gửi…'
+          : _applications.any((a) => a.job.id == job.id)
+          ? 'Đã ứng tuyển'
+          : 'Nhận việc',
+    ),
+  );
+
   Future<void> _cancel(JobApplication application) async {
     if (_cancelling || _loading) return;
     setState(() => _cancelling = true);
@@ -400,26 +420,9 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                           for (final job in _visibleJobs)
                             JobCard(
                               job: job,
-                              action: FilledButton(
-                                onPressed:
-                                    _applying != null ||
-                                        _cancelling ||
-                                        _loading ||
-                                        _applications.any(
-                                          (a) => a.job.id == job.id,
-                                        )
-                                    ? null
-                                    : () => _apply(job),
-                                child: Text(
-                                  _applying == job.id
-                                      ? 'Đang gửi…'
-                                      : _applications.any(
-                                          (a) => a.job.id == job.id,
-                                        )
-                                      ? 'Đã ứng tuyển'
-                                      : 'Nhận việc',
-                                ),
-                              ),
+                              action: _applyButton(job),
+                              detailsActionBuilder: (sheetContext) =>
+                                  _applyButton(job, sheetContext: sheetContext),
                             ),
                       ] else ...[
                         if (_applications.isEmpty && _error == null)

@@ -1,14 +1,21 @@
 <!doctype html>
 <html data-bs-theme="dark" lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Đối soát Ví · Thợ Xây</title><link th:href="@{/vendor/bootstrap/bootstrap.min.css}" rel="stylesheet"><link th:href="@{/css/admin.css}" rel="stylesheet"></head>
-<body class="bg-light"><main class="container py-4">
+<body><main class="container wallet-main py-4" data-filter-panel>
   <a class="btn btn-outline-secondary mb-4" th:href="@{/admin/dashboard}">← Tổng quan quản trị</a>
   <h1 class="h2">Đối soát nạp / rút tiền</h1>
   <p class="text-secondary">Kiểm tra tiền thực nhận hoặc tiền đã chuyển tới đúng tài khoản trước khi duyệt. Ứng dụng chưa tự động chuyển tiền ngân hàng.</p>
   <div th:if="${success}" class="alert alert-success" role="status" th:text="${success}"></div>
   <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
+<p class="small text-secondary">Bộ lọc áp dụng cho các yêu cầu chờ đối soát trên trang hiện tại; chọn “Yêu cầu cũ hơn” để xem trang kế tiếp.</p><div class="table-tools">
+  <div class="table-search"><label class="form-label" for="wallet-search">Tìm mã yêu cầu, họ tên hoặc nội dung giao dịch</label><input id="wallet-search" type="search" class="form-control" placeholder="Nhập từ khóa…" data-filter-search></div>
+  <div><label class="form-label" for="wallet-state">Trạng thái</label><select id="wallet-state" class="form-select" data-filter-select="filterState"><option value="">Tất cả trạng thái</option><option value="PENDING">Chờ đối soát</option></select></div>
+  <div><label class="form-label" for="wallet-kind">Loại giao dịch</label><select id="wallet-kind" class="form-select" data-filter-select="filterKind"><option value="">Nạp và rút</option><option value="TOP_UP">Nạp tiền</option><option value="WITHDRAW">Rút tiền</option></select></div><button type="button" class="btn btn-outline-secondary" data-filter-clear>Xóa bộ lọc</button>
+  <p class="filter-count small text-secondary mb-0" data-filter-count role="status" aria-live="polite"></p>
+  <p class="filter-empty mb-0" data-filter-empty hidden>Không có kết quả phù hợp. Hãy thử từ khóa hoặc trạng thái khác.</p>
+</div>
   <div th:if="${queue.items.isEmpty()}" class="card p-5 text-center">Không có yêu cầu chờ đối soát.</div>
-  <article class="card shadow-sm border-0 p-4 mb-4" th:each="r:${queue.items}">
+  <article class="card shadow-sm border-0 p-4 mb-4" th:each="r:${queue.items}" data-filter-row data-filter-state="PENDING" th:attr="data-filter-kind=${r.kind}">
     <div class="d-flex flex-wrap justify-content-between gap-2"><h2 class="h5"><span th:text="${r.kind == 'TOP_UP' ? 'Nạp tiền' : 'Rút tiền'}"></span> #<span th:text="${r.id}"></span></h2><strong class="text-success"><span th:text="${#numbers.formatInteger(r.amount,1,'POINT')}"></span> đ</strong></div>
     <p><strong th:text="${r.fullName}"></strong> · Tài khoản #<span th:text="${r.userId}"></span> · <span th:text="${r.createdAt}"></span></p>
     <p th:if="${r.kind == 'TOP_UP'}">Mã / nội dung do người nạp cung cấp: <strong th:text="${r.transferReference}"></strong></p>
@@ -31,4 +38,4 @@
     </div></div>
   </article>
   <a th:if="${queue.hasMore}" class="btn btn-outline-primary" th:href="@{/admin/wallet(beforeId=${queue.items[queue.items.size()-1].id})}">Yêu cầu cũ hơn</a>
-</main></body></html>
+</main><script defer th:src="@{/js/admin-ui.js}"></script></body></html>

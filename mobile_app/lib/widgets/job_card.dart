@@ -9,10 +9,12 @@ class JobCard extends StatelessWidget {
     required this.job,
     required this.action,
     this.canContactContractor = false,
+    this.detailsActionBuilder,
   });
   final Job job;
   final Widget action;
   final bool canContactContractor;
+  final WidgetBuilder? detailsActionBuilder;
   @override
   Widget build(BuildContext context) => Card(
     clipBehavior: Clip.antiAlias,
@@ -105,6 +107,7 @@ class JobCard extends StatelessWidget {
                   job,
                   canContactContractor: canContactContractor,
                   action: action,
+                  actionBuilder: detailsActionBuilder,
                 ),
                 child: const Text('Xem chi tiết'),
               ),
@@ -171,6 +174,7 @@ Future<T?> showJobDetails<T>(
   Job job, {
   bool canContactContractor = false,
   Widget? action,
+  WidgetBuilder? actionBuilder,
 }) => showModalBottomSheet<T>(
   context: context,
   isScrollControlled: true,
@@ -230,7 +234,7 @@ Future<T?> showJobDetails<T>(
             ),
           ),
         ),
-        if (action != null)
+        if (action != null || actionBuilder != null)
           Container(
             key: const ValueKey('job-detail-actions'),
             width: double.infinity,
@@ -239,7 +243,10 @@ Future<T?> showJobDetails<T>(
               color: Colors.white,
               border: Border(top: BorderSide(color: Color(0xffe2e8f0))),
             ),
-            child: SafeArea(top: false, child: action),
+            child: SafeArea(
+              top: false,
+              child: actionBuilder?.call(context) ?? action!,
+            ),
           ),
       ],
     ),

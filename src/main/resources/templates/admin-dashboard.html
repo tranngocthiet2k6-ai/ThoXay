@@ -42,18 +42,25 @@
   <div th:if="${success}" class="alert alert-success" role="status" th:text="${success}"></div>
   <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
   <div class="row g-3 mb-4" aria-label="Thống kê hệ thống">
-    <div class="col-12 col-sm-6 col-xl-3"><article class="stat-card"><div class="stat-top"><span>Tổng số tài khoản</span><span class="stat-icon blue"><svg class="ui-icon" aria-hidden="true"><use href="#i-users"/></svg></span></div><strong id="stat-total-users" th:text="${dashboard.users.size()}"></strong><p><span class="status-dot"></span><span th:text="${dashboard.activeUsers}"></span> đang hoạt động</p></article></div>
-    <div class="col-12 col-sm-6 col-xl-3"><article class="stat-card"><div class="stat-top"><span>Công trình đang tuyển</span><span class="stat-icon green"><svg class="ui-icon" aria-hidden="true"><use href="#i-building"/></svg></span></div><strong id="stat-open-jobs" th:text="${dashboard.openJobs}"></strong><p>Trong <span th:text="${dashboard.jobs.size()}"></span> công trình toàn hệ thống</p></article></div>
+    <div class="col-12 col-sm-6 col-xl-3"><article class="stat-card"><div class="stat-top"><span>Tổng số tài khoản</span><span class="stat-icon blue"><svg class="ui-icon" aria-hidden="true"><use href="#i-users"/></svg></span></div><strong id="stat-total-users" th:text="${dashboard.users.size()}"></strong><p><span class="status-dot"></span><span th:text="${dashboard.activeUsers}"></span> đang hoạt động</p><div class="kpi-meter"><span class="small text-secondary" th:text="${dashboard.users.isEmpty() ? 0 : (dashboard.activeUsers * 100 / dashboard.users.size())} + '% tài khoản hoạt động'"></span><div class="kyc-progress" role="progressbar" aria-label="tài khoản hoạt động" aria-valuemin="0" aria-valuemax="100" th:attr="aria-valuenow=${dashboard.users.isEmpty() ? 0 : (dashboard.activeUsers * 100 / dashboard.users.size())}"><span th:style="'width: ' + ${dashboard.users.isEmpty() ? 0 : (dashboard.activeUsers * 100 / dashboard.users.size())} + '%'"></span></div></div></article></div>
+    <div class="col-12 col-sm-6 col-xl-3"><article class="stat-card"><div class="stat-top"><span>Công trình đang tuyển</span><span class="stat-icon green"><svg class="ui-icon" aria-hidden="true"><use href="#i-building"/></svg></span></div><strong id="stat-open-jobs" th:text="${dashboard.openJobs}"></strong><p>Trong <span th:text="${dashboard.jobs.size()}"></span> công trình toàn hệ thống</p><div class="kpi-meter"><span class="small text-secondary" th:text="${dashboard.jobs.isEmpty() ? 0 : (dashboard.openJobs * 100 / dashboard.jobs.size())} + '% công trình đang tuyển'"></span><div class="kyc-progress" role="progressbar" aria-label="công trình đang tuyển" aria-valuemin="0" aria-valuemax="100" th:attr="aria-valuenow=${dashboard.jobs.isEmpty() ? 0 : (dashboard.openJobs * 100 / dashboard.jobs.size())}"><span th:style="'width: ' + ${dashboard.jobs.isEmpty() ? 0 : (dashboard.openJobs * 100 / dashboard.jobs.size())} + '%'"></span></div></div></article></div>
     <div class="col-12 col-sm-6 col-xl-3"><article class="stat-card"><div class="stat-top"><span>Tỷ lệ xác thực KYC</span><span class="stat-icon violet"><svg class="ui-icon" aria-hidden="true"><use href="#i-shield"/></svg></span></div><strong id="stat-kyc-rate" th:text="${dashboard.verificationRate() + '%'}"></strong><div class="kyc-progress" role="progressbar" aria-label="Tỷ lệ tài khoản đã xác thực" aria-valuemin="0" aria-valuemax="100" th:attr="aria-valuenow=${dashboard.verificationRate()}"><span th:style="'width: ' + ${dashboard.verificationRate()} + '%'"></span></div><p><span th:text="${dashboard.verifiedUsers()}"></span>/<span th:text="${dashboard.users.size()}"></span> tài khoản đã xác thực</p></article></div>
-    <div class="col-12 col-sm-6 col-xl-3"><article class="stat-card"><div class="stat-top"><span>Hồ sơ chờ duyệt</span><span class="stat-icon amber"><svg class="ui-icon" aria-hidden="true"><use href="#i-clock"/></svg></span></div><strong th:text="${dashboard.pendingVerification}"></strong><p>Đã có đủ ảnh CCCD hai mặt</p></article></div>
+    <div class="col-12 col-sm-6 col-xl-3"><article class="stat-card"><div class="stat-top"><span>Hồ sơ chờ duyệt</span><span class="stat-icon amber"><svg class="ui-icon" aria-hidden="true"><use href="#i-clock"/></svg></span></div><strong th:text="${dashboard.pendingVerification}"></strong><p>Đã có đủ ảnh CCCD hai mặt</p><div class="kpi-meter"><span class="small text-secondary" th:text="${dashboard.users.isEmpty() ? 0 : (dashboard.pendingVerification * 100 / dashboard.users.size())} + '% tài khoản chờ duyệt'"></span><div class="kyc-progress" role="progressbar" aria-label="tài khoản chờ duyệt" aria-valuemin="0" aria-valuemax="100" th:attr="aria-valuenow=${dashboard.users.isEmpty() ? 0 : (dashboard.pendingVerification * 100 / dashboard.users.size())}"><span th:style="'width: ' + ${dashboard.users.isEmpty() ? 0 : (dashboard.pendingVerification * 100 / dashboard.users.size())} + '%'"></span></div></div></article></div>
   </div>
-  <section class="card admin-panel mb-4" aria-labelledby="users-heading">
+  <section class="card admin-panel mb-4" aria-labelledby="users-heading" data-filter-panel>
     <div class="panel-heading"><div><h2 id="users-heading"><svg class="ui-icon" aria-hidden="true"><use href="#i-users"/></svg>Tài khoản &amp; xác thực danh tính</h2><p>Kiểm tra đủ hai mặt CCCD trước khi xác thực danh tính.</p></div><span class="count-chip" th:text="${dashboard.users.size() + ' tài khoản'}"></span></div>
+<div class="table-tools">
+  <div class="table-search"><label class="form-label" for="users-search">Tìm họ tên hoặc số điện thoại</label><input id="users-search" type="search" class="form-control" placeholder="Nhập từ khóa…" data-filter-search></div>
+  <div><label class="form-label" for="users-state">Trạng thái</label><select id="users-state" class="form-select" data-filter-select="filterState"><option value="">Tất cả trạng thái</option><option value="VERIFIED">Đã xác thực</option><option value="PENDING">Đủ ảnh chờ duyệt</option><option value="INCOMPLETE">Chưa đủ ảnh</option></select></div>
+  <div><label class="form-label" for="users-active">Hoạt động</label><select id="users-active" class="form-select" data-filter-select="filterActive"><option value="">Tất cả tài khoản</option><option value="ACTIVE">Hoạt động</option><option value="LOCKED">Đã khóa</option></select></div><button type="button" class="btn btn-outline-secondary" data-filter-clear>Xóa bộ lọc</button>
+  <p class="filter-count small text-secondary mb-0" data-filter-count role="status" aria-live="polite"></p>
+  <p class="filter-empty mb-0" data-filter-empty hidden>Không có kết quả phù hợp. Hãy thử từ khóa hoặc trạng thái khác.</p>
+</div>
     <div class="table-responsive" role="region" aria-label="Bảng tài khoản" tabindex="0"><table class="table align-middle mb-0">
       <thead><tr><th scope="col">Họ tên / Điện thoại</th><th scope="col">Vai trò</th><th scope="col">CCCD</th><th scope="col">Trạng thái</th><th scope="col" class="text-end">Thao tác</th></tr></thead>
       <tbody>
         <tr th:if="${dashboard.users.isEmpty()}"><td colspan="5" class="text-center py-5 text-secondary">Chưa có tài khoản.</td></tr>
-        <tr th:each="user : ${dashboard.users}">
+        <tr th:each="user : ${dashboard.users}" data-filter-row th:attr="data-filter-state=${user.verified ? 'VERIFIED' : (user.cccdComplete ? 'PENDING' : 'INCOMPLETE')},data-filter-active=${user.active ? 'ACTIVE' : 'LOCKED'}">
           <td><div class="identity-cell"><span class="person-avatar" aria-hidden="true" th:text="${#strings.isEmpty(user.fullName) ? '?' : #strings.substring(user.fullName,0,1)}"></span><div><strong th:text="${user.fullName}"></strong><div class="small text-secondary" th:text="${user.phoneNumber}"></div></div></div></td>
           <td><span class="badge role-badge" th:classappend="${user.role == 'ROLE_ADMIN' ? 'badge-violet' : (user.role == 'ROLE_CONTRACTOR' ? 'badge-blue' : 'badge-neutral')}" th:text="${user.role == 'ROLE_ADMIN' ? 'Quản trị' : (user.role == 'ROLE_CONTRACTOR' ? 'Chủ thầu' : 'Thợ')}"></span></td>
           <td>
@@ -69,13 +76,20 @@
       </tbody>
     </table></div>
   </section>
-  <section class="card admin-panel" aria-labelledby="jobs-heading">
+  <section class="card admin-panel" aria-labelledby="jobs-heading" data-filter-panel>
     <div class="panel-heading"><div><h2 id="jobs-heading"><svg class="ui-icon" aria-hidden="true"><use href="#i-building"/></svg>Kiểm duyệt công trình</h2><p>Xóa bài vi phạm sẽ xóa cả đơn ứng tuyển và tin nhắn liên quan.</p></div><span class="count-chip" th:text="${dashboard.jobs.size() + ' công trình'}"></span></div>
+<div class="table-tools">
+  <div class="table-search"><label class="form-label" for="jobs-search">Tìm công trình, chủ thầu hoặc địa điểm</label><input id="jobs-search" type="search" class="form-control" placeholder="Nhập từ khóa…" data-filter-search></div>
+  <div><label class="form-label" for="jobs-state">Trạng thái</label><select id="jobs-state" class="form-select" data-filter-select="filterState"><option value="">Tất cả trạng thái</option><option value="OPEN">Đang tuyển</option><option value="IN_PROGRESS">Đang thi công</option><option value="COMPLETED">Hoàn thành</option><option value="CANCELLED">Đã hủy</option></select></div>
+  <button type="button" class="btn btn-outline-secondary" data-filter-clear>Xóa bộ lọc</button>
+  <p class="filter-count small text-secondary mb-0" data-filter-count role="status" aria-live="polite"></p>
+  <p class="filter-empty mb-0" data-filter-empty hidden>Không có kết quả phù hợp. Hãy thử từ khóa hoặc trạng thái khác.</p>
+</div>
     <div class="table-responsive" role="region" aria-label="Bảng công trình" tabindex="0"><table class="table align-middle mb-0">
       <thead><tr><th scope="col">Công trình</th><th scope="col">Chủ thầu</th><th scope="col">Lương / ngày</th><th scope="col">Trạng thái</th><th scope="col" class="text-end">Thao tác</th></tr></thead>
       <tbody>
         <tr th:if="${dashboard.jobs.isEmpty()}"><td colspan="5" class="text-center py-5 text-secondary">Chưa có công trình.</td></tr>
-        <tr th:each="job : ${dashboard.jobs}">
+        <tr th:each="job : ${dashboard.jobs}" data-filter-row th:attr="data-filter-state=${job.status}">
           <td><div class="identity-cell"><span class="job-avatar"><svg class="ui-icon" aria-hidden="true"><use href="#i-building"/></svg></span><div><strong th:text="${job.title}"></strong><div class="small text-secondary address-cell"><svg class="ui-icon" aria-hidden="true"><use href="#i-location"/></svg><span th:text="${job.address}"></span></div></div></div></td>
           <td><span th:text="${job.contractorName}"></span><div class="small text-secondary" th:text="${job.contractorPhone}"></div></td>
           <td class="salary-cell"><span th:text="${#numbers.formatDecimal(job.salaryPerDay, 0, 'POINT', 0, 'COMMA')}"></span> đ<div class="small text-secondary fw-normal">mỗi ngày</div></td>
@@ -96,19 +110,25 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng xem CCCD"></button>
       </div>
       <div class="modal-body">
-        <p class="text-secondary">Đối chiếu rõ cả hai mặt trước khi xác thực danh tính.</p>
+        <p class="text-secondary">Đối chiếu rõ cả hai mặt trước khi xác thực danh tính. Bấm vào ảnh để phóng to.</p>
+<dialog id="kyc-lightbox" aria-labelledby="kyc-zoom-title">
+  <div class="lightbox-toolbar"><h3 id="kyc-zoom-title" class="fs-5 mb-0">Phóng to ảnh CCCD</h3><button type="button" id="kyc-zoom-close" class="btn btn-outline-secondary" aria-label="Đóng ảnh phóng to">Đóng ×</button></div>
+  <div class="lightbox-controls"><button type="button" id="kyc-zoom-out" class="btn btn-outline-secondary" aria-label="Thu nhỏ">−</button><label for="kyc-zoom-range">Mức phóng to</label><input id="kyc-zoom-range" type="range" min="1" max="4" step="0.25" value="1"><output id="kyc-zoom-level" for="kyc-zoom-range">100%</output><button type="button" id="kyc-zoom-in" class="btn btn-outline-secondary" aria-label="Phóng to">+</button></div>
+  <p class="small text-secondary">Kéo thanh để phóng to; cuộn trong ảnh để đối chiếu. Nhấn Esc để đóng.</p>
+  <div class="lightbox-viewport"><img id="kyc-zoom-image" alt="Ảnh CCCD đang phóng to" referrerpolicy="no-referrer"></div>
+</dialog>
         <div class="row g-4">
           <div class="col-12 col-md-6"><figure class="mb-0">
             <figcaption class="fw-semibold mb-2">Mặt trước CCCD</figcaption>
             <div class="kyc-image-frame">
-              <img id="kyc-front-image" class="kyc-image" alt="Ảnh mặt trước CCCD" referrerpolicy="no-referrer" hidden>
+              <img id="kyc-front-image" class="kyc-image" role="button" tabindex="0" title="Bấm để phóng to và đối chiếu" alt="Ảnh mặt trước CCCD" referrerpolicy="no-referrer" hidden>
               <p id="kyc-front-status" class="text-secondary text-center p-3 mb-0" role="status">Chưa cập nhật ảnh mặt trước CCCD.</p>
             </div>
           </figure></div>
           <div class="col-12 col-md-6"><figure class="mb-0">
             <figcaption class="fw-semibold mb-2">Mặt sau CCCD</figcaption>
             <div class="kyc-image-frame">
-              <img id="kyc-back-image" class="kyc-image" alt="Ảnh mặt sau CCCD" referrerpolicy="no-referrer" hidden>
+              <img id="kyc-back-image" class="kyc-image" role="button" tabindex="0" title="Bấm để phóng to và đối chiếu" alt="Ảnh mặt sau CCCD" referrerpolicy="no-referrer" hidden>
               <p id="kyc-back-status" class="text-secondary text-center p-3 mb-0" role="status">Chưa cập nhật ảnh mặt sau CCCD.</p>
             </div>
           </figure></div>
@@ -129,5 +149,6 @@
 </div>
 <script defer th:src="@{/vendor/bootstrap/bootstrap.bundle.min.js}"></script>
 <script defer th:src="@{/js/admin-kyc.js}"></script>
+<script defer th:src="@{/js/admin-ui.js}"></script>
 </body>
 </html>
