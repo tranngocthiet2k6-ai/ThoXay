@@ -17,6 +17,7 @@ public interface JobApplicationRepository extends JpaRepository<JobApplication, 
         + "and j.startsOn<=:end and j.endsOn>=:start")
     List<JobApplication> overlapping(@Param("workerId") Long workerId, @Param("start") java.time.LocalDate start,
         @Param("end") java.time.LocalDate end);
+    boolean existsByJobIdAndWorkerIdAndStatusIn(Long jobId,Long workerId,java.util.Collection<ApplicationStatus> statuses);
     boolean existsByJobIdAndWorkerId(Long jobId, Long workerId);
     boolean existsByJobIdAndWorkerIdAndStatus(Long jobId, Long workerId, ApplicationStatus status);
     List<JobApplication> findByJobIdOrderByAppliedAtDesc(Long jobId);

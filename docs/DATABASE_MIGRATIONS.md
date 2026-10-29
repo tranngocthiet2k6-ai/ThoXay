@@ -87,3 +87,10 @@ không sửa khoản đã thanh toán. SQL: `migrations/016_attendance_work_logs
 Thêm receiving_bank_settings/audit, cột nullable receiving_bank_bin,
 deposit_reference, qr_payload và unique index mã đối soát. Không seed ngân hàng,
 không đổi số dư hoặc tạo QR cho giao dịch legacy. SQL: `migrations/017_vietqr_deposits.sql`.
+
+## V18 — Báo cáo SOS và lịch sử xử lý
+
+Thêm incidents/incident_audit, chỉ mục hàng đợi và người gửi, khóa duy nhất
+reporter/clientRequestId. Gỡ công trình đặt FK về NULL, giữ snapshot và lịch sử.
+Không thay đổi trạng thái công trình hoặc ví khi xử lý báo cáo. SQL:
+`migrations/018_incidents_sos.sql`.

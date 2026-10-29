@@ -21,6 +21,7 @@
   <a class="sidebar-brand" th:href="@{/admin/dashboard}"><span class="brand-mark">TX</span><span>Thợ Xây<small>KẾT NỐI &amp; KIẾN TẠO</small></span></a>
   <p class="sidebar-label">KHÔNG GIAN LÀM VIỆC</p>
   <nav class="sidebar-nav">
+    <a th:href="@{/admin/incidents}">SOS &amp; Sự cố <span class="badge bg-danger ms-auto" data-incident-count data-hide-zero th:text="${incidentCounts.open}" th:hidden="${incidentCounts.open == 0}"></span></a>
     <a th:href="@{/admin/wallet}"><svg class="ui-icon" aria-hidden="true"><use href="#i-shield"/></svg>Đối soát Ví</a>
     <a class="active" href="#overview" aria-current="page"><svg class="ui-icon" aria-hidden="true"><use href="#i-grid"/></svg>Tổng quan</a>
     <a href="#users-heading"><svg class="ui-icon" aria-hidden="true"><use href="#i-users"/></svg>Tài khoản &amp; KYC</a>
@@ -39,6 +40,7 @@
   <div class="page-heading"><div><p class="eyebrow">THỢ XÂY · KHÔNG GIAN QUẢN TRỊ</p><h1>Tổng quan hoạt động</h1><p class="text-secondary mb-0">Mỗi kết nối tốt đẹp bắt đầu từ một cộng đồng đáng tin cậy.</p></div>
     <span class="workspace-chip"><svg class="ui-icon" aria-hidden="true"><use href="#i-shield"/></svg>Quản lý cộng đồng</span>
   </div>
+  <div id="incident-banner" class="alert" role="status" aria-live="polite" th:classappend="${incidentCounts.sos > 0 ? 'alert-danger' : 'alert-warning'}" th:hidden="${incidentCounts.open == 0}"><strong><span data-incident-count th:text="${incidentCounts.open}"></span> báo cáo đang chờ hỗ trợ</strong> · <span data-incident-sos th:text="${incidentCounts.sos}"></span> SOS cần ưu tiên. <a th:href="@{/admin/incidents}" class="alert-link">Mở trang xử lý sự cố</a></div>
   <div th:if="${success}" class="alert alert-success" role="status" th:text="${success}"></div>
   <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
   <div class="row g-3 mb-4" aria-label="Thống kê hệ thống">
@@ -150,5 +152,6 @@
 <script defer th:src="@{/vendor/bootstrap/bootstrap.bundle.min.js}"></script>
 <script defer th:src="@{/js/admin-kyc.js}"></script>
 <script defer th:src="@{/js/admin-ui.js}"></script>
+<script defer th:src="@{/js/admin-incidents.js}"></script>
 </body>
 </html>

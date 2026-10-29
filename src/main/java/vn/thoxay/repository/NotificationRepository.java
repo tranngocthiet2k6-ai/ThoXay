@@ -15,7 +15,7 @@ public interface NotificationRepository extends JpaRepository<AppNotification, L
     @Modifying @Query("update AppNotification n set n.readAt = :now where n.recipient.id = :user and n.readAt is null and (:id is null or n.id = :id)")
     int markRead(@Param("user") Long user, @Param("id") Long id, @Param("now") Instant now);
     boolean existsByIdAndRecipientId(Long id, Long user);
-    @Query("select n.id from AppNotification n where n.pushStatus = 'PENDING' and n.nextAttemptAt <= :now order by n.id")
+    @Query("select n.id from AppNotification n where n.pushStatus = 'PENDING' and n.nextAttemptAt <= :now order by case when n.type='INCIDENT_SOS' then 0 else 1 end,n.id")
     List<Long> due(@Param("now") Instant now, Pageable page);
     @Lock(LockModeType.PESSIMISTIC_WRITE) @Query("select n from AppNotification n where n.id = :id")
     Optional<AppNotification> locked(@Param("id") Long id);

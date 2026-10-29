@@ -17,6 +17,7 @@ import '../models/crew.dart';
 import '../models/portfolio_photo.dart';
 import '../models/attendance.dart';
 import '../models/deposit.dart';
+import '../models/incident.dart';
 import 'location_service.dart';
 import 'chat_connection.dart';
 import 'kyc_camera.dart';
@@ -30,6 +31,26 @@ class ApiException implements Exception {
 }
 
 class ApiService extends ChangeNotifier {
+  Future<IncidentDetail> reportIncident(
+    int jobId,
+    Map<String, dynamic> body,
+  ) async => IncidentDetail.fromJson(
+    await _request('POST', '/api/jobs/$jobId/incidents', body: body)
+        as Map<String, dynamic>,
+  );
+  Future<IncidentDetail> incident(int id) async => IncidentDetail.fromJson(
+    await _request('GET', '/api/incidents/$id') as Map<String, dynamic>,
+  );
+  Future<IncidentPage> myIncidents({
+    int? jobId,
+    int? beforeId,
+  }) async => IncidentPage.fromJson(
+    await _request(
+      'GET',
+      '/api/incidents/me?${Uri(queryParameters: {if (jobId != null) 'jobId': '$jobId', if (beforeId != null) 'beforeId': '$beforeId'}).query}',
+    ) as Map<String, dynamic>,
+  );
+
   Future<Deposit> createDeposit(int amount, String clientRequestId) async =>
       Deposit.fromJson(
         await _request(

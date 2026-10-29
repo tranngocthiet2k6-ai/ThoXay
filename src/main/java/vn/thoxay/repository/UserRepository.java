@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface UserRepository extends JpaRepository<User, Long> {
     java.util.List<User> findByRoleAndActiveTrueAndCompletedJobsGreaterThan(vn.thoxay.entity.Role role, int completed, org.springframework.data.domain.Pageable page);
+    java.util.List<User> findByRoleAndActiveTrue(vn.thoxay.entity.Role role);
     Optional<User> findByPhoneNumber(String phoneNumber);
     boolean existsByPhoneNumber(String phoneNumber);
     @Lock(LockModeType.PESSIMISTIC_WRITE)

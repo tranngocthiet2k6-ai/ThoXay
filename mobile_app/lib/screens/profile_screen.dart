@@ -1,3 +1,4 @@
+import 'incidents_screen.dart';
 import '../widgets/portfolio_uploads.dart';
 import 'saved_screen.dart';
 import 'crew_screen.dart';
@@ -218,6 +219,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(_profile!.phoneNumber),
+                TextButton.icon(
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => IncidentsScreen(api: widget.api),
+                    ),
+                  ),
+                  icon: const Icon(Icons.health_and_safety_outlined),
+                  label: const Text('Sự cố đã gửi'),
+                ),
                 if (_profile!.role == 'ROLE_WORKER')
                   TextButton.icon(
                     onPressed: () => Navigator.of(context).push(

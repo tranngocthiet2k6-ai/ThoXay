@@ -11,12 +11,13 @@ import vn.thoxay.exception.ApiException;
 @Controller @RequiredArgsConstructor
 public class AdminController {
     private final AdminService admin;
+    private final vn.thoxay.incident.IncidentService incidents;
     @GetMapping("/")
     public String index() { return "redirect:/admin/dashboard"; }
     @GetMapping("/admin/login")
     public String login() { return "admin-login"; }
     @GetMapping("/admin/dashboard") @PreAuthorize("hasRole('ADMIN')")
-    public String dashboard(Model model) { model.addAttribute("dashboard", admin.dashboard()); return "admin-dashboard"; }
+    public String dashboard(Model model) { model.addAttribute("dashboard", admin.dashboard()); model.addAttribute("incidentCounts",incidents.counts()); return "admin-dashboard"; }
     @PostMapping("/admin/users/{id}/verify") @PreAuthorize("hasRole('ADMIN')")
     public String verify(@PathVariable Long id,
                          @RequestParam(required = false) String cccdFrontImage,

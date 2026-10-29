@@ -1,3 +1,4 @@
+import '../widgets/incident_actions.dart';
 import 'attendance_screen.dart';
 import '../widgets/design_motion.dart';
 import '../widgets/work_commitment.dart';
@@ -582,6 +583,14 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                                     label: const Text(
                                       'Chấm công & ảnh cuối ngày',
                                     ),
+                                  ),
+                                if ([
+                                  'ACCEPTED',
+                                  'CANCELLED',
+                                ].contains(application.status))
+                                  IncidentActions(
+                                    api: widget.api,
+                                    job: application.job,
                                   ),
                                 if (application.jobRating != null)
                                   Text(

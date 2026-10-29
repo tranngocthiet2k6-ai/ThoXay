@@ -19,7 +19,7 @@ lightbox/bộ lọc/KPI Admin. Các phần này được mở rộng, không t�
 - [x] Tổ đội có mời/xác nhận thành viên và xác nhận công trình; duyệt nguyên nhóm an toàn.
 - [x] Chấm công GPS/QR, ảnh cuối ngày, nghiệm thu và kiểm tra ngày công khi thanh toán.
 - [x] VietQR nội bộ, ngân hàng do Admin cấu hình, mã đối soát và snapshot tài khoản nhận.
-- [ ] SOS/sự cố/tranh chấp, cảnh báo Admin ưu tiên, lịch sử xử lý.
+- [x] SOS/sự cố/tranh chấp, cảnh báo Admin ưu tiên, lịch sử xử lý.
 - [x] Ảnh portfolio từ thiết bị, kiểm tra ảnh và lưu bền vững.
 - [ ] Chat ảnh/GPS, hộp thư và số tin chưa đọc thật.
 - [ ] Thời tiết Open-Meteo, cache và trạng thái mất kết nối.
@@ -228,3 +228,33 @@ Nguồn định dạng: [VietQR account/BIN](https://www.vietqr.io/qr-dong),
 [field definitions của vietqr_core](https://github.com/iamv4g/vietqr.dart/blob/main/packages/vietqr_core/vietqr_field_definitions_en.md).
 Tên người nhận được hiển thị để đối chiếu, không phải trường xác minh chủ tài khoản
 trong payload chuyển khoản QRIBFTTA.
+
+## Checkpoint SOS, sự cố và tranh chấp
+
+- Thợ đã được nhận (kể cả đã hủy) và chủ công trình có **SOS tới Admin** / **Sự cố,
+  tranh chấp**. SOS mở form có nội dung sẵn, chỉ gửi sau khi người dùng bấm xác nhận.
+  GPS tùy chọn; có thể bỏ qua/không cấp quyền mà vẫn gửi. Tọa độ công trình được
+  giữ riêng với GPS người báo cáo, Admin biết rõ nguồn vị trí.
+- Báo cáo riêng tư: chỉ người gửi và Admin đọc được. Chủ thầu không tự xem báo cáo
+  của thợ chỉ vì sở hữu công trình. Lịch sử cá nhân ở Hồ sơ > Sự cố đã gửi.
+- Gửi lại giữ clientRequestId/nội dung ban đầu để tránh tạo trùng báo cáo, audit
+  hoặc thông báo. Chặn người ngoài công trình, không yêu cầu trạng thái Online
+  để thợ đang làm vẫn gửi sự cố khi đã tắt nhận việc mới.
+- Mọi Admin đang hoạt động nhận thông báo lưu DB/FCM khi đã cấu hình Firebase;
+  outbox ưu tiên INCIDENT_SOS. Web Admin có hàng đợi SOS trước, bộ lọc trạng thái/
+  loại/từ khóa và badge/cảnh báo kiểm tra mỗi 20 giây khi tab đang hiển thị.
+  Mất kết nối giữ số đếm đã xác nhận gần nhất, không tự đổi về 0.
+- Admin tiếp nhận/đang xử lý/ghi kết quả. Kiểm tra version chặn ghi đè thao tác của
+  Admin khác, ghi audit và thông báo người gửi. Cần kết quả trước khi kết thúc;
+  lịch sử đã kết thúc giữ nguyên. Module không tự điều chỉnh giao dịch ví.
+- Báo cáo chụp snapshot tên/địa chỉ/vị trí công trình và người gửi, vẫn còn khi gỡ
+  công trình. Xử lý dùng khóa job trước incident để không đảo khóa với thao tác gỡ bài.
+- API: `POST /api/jobs/{id}/incidents`, `GET /api/incidents/me?jobId=&beforeId=`,
+  `GET /api/incidents/{id}`, `GET /api/admin/incidents?status=&type=&q=&page=`,
+  `PUT /api/admin/incidents/{id}` (status/note/version). Web `/admin/incidents`,
+  `/admin/incidents/{id}`, `/admin/incidents/counts` dùng phiên Admin/CSRF.
+- V18 thêm incidents/incident_audit với FK job/reporter SET NULL để giữ lịch sử.
+- Kiểm chứng: 110 test Backend và 82 test Flutter pass; 12 test JS/triển khai pass;
+  JAR/Web release/analyze, Flyway V18/JPA validate/health UP trên QA. Chrome QA đã
+  thực hiện đăng nhập Admin, xem SOS và cập nhật qua CSRF trên DB QA riêng, sau đó
+  xóa đúng dữ liệu giả của lượt kiểm tra. Chưa phát thông báo tới tài khoản thật.

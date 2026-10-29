@@ -1,3 +1,4 @@
+import '../widgets/incident_actions.dart';
 import 'attendance_screen.dart';
 import '../widgets/design_motion.dart';
 import '../widgets/work_commitment.dart';
@@ -264,6 +265,7 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
                                         'Chấm công & nghiệm thu',
                                       ),
                                     ),
+                                    IncidentActions(api: widget.api, job: job),
                                     if (job.status == 'OPEN')
                                       OutlinedButton.icon(
                                         onPressed: () => _edit(job),
