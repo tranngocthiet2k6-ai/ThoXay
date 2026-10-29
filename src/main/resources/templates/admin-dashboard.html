@@ -92,9 +92,9 @@
         <tr th:each="job : ${dashboard.jobs}" data-filter-row th:attr="data-filter-state=${job.status}">
           <td><div class="identity-cell"><span class="job-avatar"><svg class="ui-icon" aria-hidden="true"><use href="#i-building"/></svg></span><div><strong th:text="${job.title}"></strong><div class="small text-secondary address-cell"><svg class="ui-icon" aria-hidden="true"><use href="#i-location"/></svg><span th:text="${job.address}"></span></div></div></div></td>
           <td><span th:text="${job.contractorName}"></span><div class="small text-secondary" th:text="${job.contractorPhone}"></div></td>
-          <td class="salary-cell"><span th:text="${#numbers.formatDecimal(job.salaryPerDay, 0, 'POINT', 0, 'COMMA')}"></span> đ<div class="small text-secondary fw-normal">mỗi ngày</div></td>
+          <td class="salary-cell"><span th:text="${#numbers.formatDecimal(job.salaryPerDay, 0, 'POINT', 0, 'COMMA')}"></span> đ<div class="small text-secondary fw-normal">mỗi ngày</div><div class="small text-secondary" th:if="${job.startsOn != null}" th:text="${job.startsOn} + ' → ' + ${job.endsOn}"></div></td>
           <td><span class="badge" th:classappend="${job.status == 'OPEN' ? 'badge-green' : (job.status == 'IN_PROGRESS' ? 'badge-blue' : (job.status == 'COMPLETED' ? 'badge-violet' : 'badge-red'))}"><span class="status-dot" aria-hidden="true"></span><span th:text="${job.status == 'OPEN' ? 'Đang tuyển' : (job.status == 'IN_PROGRESS' ? 'Đang thi công' : (job.status == 'COMPLETED' ? 'Hoàn thành' : 'Đã hủy'))}"></span></span></td>
-          <td class="text-end"><form th:action="@{/admin/jobs/{id}/delete(id=${job.id})}" method="post" onsubmit="return confirm('Xóa công trình này cùng toàn bộ đơn ứng tuyển và tin nhắn?')"><button class="btn btn-sm btn-outline-danger">Xóa bài</button></form></td>
+          <td class="text-end"><a class="btn btn-sm btn-outline-primary mb-2" th:href="@{/admin/jobs/{id}/commitments(id=${job.id})}">Cam kết</a><form th:action="@{/admin/jobs/{id}/delete(id=${job.id})}" method="post" onsubmit="return confirm('Xóa công trình này cùng toàn bộ đơn ứng tuyển và tin nhắn?')"><button class="btn btn-sm btn-outline-danger">Xóa bài</button></form></td>
         </tr>
       </tbody>
     </table></div>

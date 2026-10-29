@@ -48,3 +48,10 @@ GitHub Actions có PostgreSQL 17 tạm cho cùng bộ test. Test Spring/H2 thôn
 tắt Flyway và để Hibernate tạo schema test; test PostgreSQL kiểm chứng SQL thật.
 Flyway clean bị vô hiệu hóa. Khi deploy migration lớn, chuẩn bị bản sao lưu
 theo hạ tầng vận hành trước khi nâng cấp; không dùng clean trên database thật.
+
+## V12 — Lịch và cam kết
+
+Bổ sung lịch công trình, lương đề xuất/chốt, phiên bản/xác nhận và snapshot cam kết,
+ngày bận riêng của thợ. Đơn ACCEPTED cũ chỉ backfill lương từ giá công trình;
+không tự ghi thời điểm đồng ý hoặc nội dung hợp đồng. Ngày công trình cũ để NULL.
+Bản SQL chạy thủ công tương ứng: `migrations/012_schedule_offers_commitments.sql`.

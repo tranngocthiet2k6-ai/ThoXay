@@ -12,6 +12,7 @@ import '../models/app_notification.dart';
 import '../models/worker_profile.dart';
 import '../models/reputation.dart';
 import '../models/wallet.dart';
+import '../models/scheduling.dart';
 import 'chat_connection.dart';
 import 'kyc_camera.dart';
 
@@ -24,6 +25,89 @@ class ApiException implements Exception {
 }
 
 class ApiService extends ChangeNotifier {
+  Future<Job> fetchJob(int id) async => Job.fromJson(
+    await _request('GET', '/api/jobs/$id') as Map<String, dynamic>,
+  );
+  Future<Job> updateJob(int id, Map<String, dynamic> body) async =>
+      Job.fromJson(
+        await _request('PUT', '/api/jobs/$id', body: body)
+            as Map<String, dynamic>,
+      );
+  Future<CommitmentDocument> jobTerms(
+    int id, {
+    int? proposedRate,
+  }) async => CommitmentDocument.fromJson(
+    await _request(
+      'GET',
+      '/api/jobs/$id/terms${proposedRate == null ? '' : '?proposedDailyRate=$proposedRate'}',
+    ) as Map<String, dynamic>,
+  );
+  Future<CommitmentDocument> commitment(
+    int id, {
+    bool acceptOffer = false,
+  }) async => CommitmentDocument.fromJson(
+    await _request(
+      'GET',
+      '/api/applications/$id/commitment?acceptCounterOffer=$acceptOffer',
+    ) as Map<String, dynamic>,
+  );
+  Future<CommitmentDocument> confirmCommitment(int id, int version) async =>
+      CommitmentDocument.fromJson(
+        await _request(
+          'PUT',
+          '/api/applications/$id/commitment',
+          body: {'accepted': true, 'termsVersion': version},
+        ) as Map<String, dynamic>,
+      );
+  Future<JobApplication> applyWithTerms(int id, WorkProposal proposal) async =>
+      JobApplication.fromJson(
+        await _request(
+          'POST',
+          '/api/applications/apply',
+          body: {
+            'jobId': id,
+            'proposedDailyRate': proposal.rate,
+            'wageNote': proposal.note,
+            'acceptedTerms': true,
+            'termsVersion': proposal.version,
+          },
+        ) as Map<String, dynamic>,
+      );
+  Future<JobApplication> acceptWithTerms(
+    int id,
+    int version, {
+    bool acceptOffer = false,
+  }) async => JobApplication.fromJson(
+    await _request(
+      'PUT',
+      '/api/applications/$id/status',
+      body: {
+        'status': 'ACCEPTED',
+        'acceptedTerms': true,
+        'termsVersion': version,
+        'acceptCounterOffer': acceptOffer,
+      },
+    ) as Map<String, dynamic>,
+  );
+  Future<List<CalendarEntry>> calendar(DateTime from, DateTime to) async =>
+      (await _request(
+            'GET',
+            '/api/users/me/calendar?from=${isoDay(from)}&to=${isoDay(to)}',
+          ) as List)
+          .map((e) => CalendarEntry.fromJson(e as Map<String, dynamic>))
+          .toList();
+  Future<void> blockCalendar(DateTime from, DateTime to, String note) async {
+    await _request(
+      'POST',
+      '/api/users/me/calendar',
+      body: {'from': isoDay(from), 'to': isoDay(to), 'note': note},
+    );
+  }
+
+  Future<void> removeCalendarBlock(int id) async {
+    await _request('DELETE', '/api/users/me/calendar/$id');
+  }
+
   Future<WalletBalance> wallet() async => WalletBalance.fromJson(
     await _request('GET', '/api/wallet') as Map<String, dynamic>,
   );

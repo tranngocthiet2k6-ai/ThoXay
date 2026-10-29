@@ -32,4 +32,8 @@ public class Job {
     private JobStatus status = JobStatus.OPEN;
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
+    @Column(name = "starts_on") private java.time.LocalDate startsOn;
+    @Column(name = "ends_on") private java.time.LocalDate endsOn;
+    @Column(name = "terms_version", nullable = false) @org.hibernate.annotations.ColumnDefault("1")
+    private int termsVersion = 1;
 }

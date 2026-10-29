@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="vi" data-bs-theme="dark" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cam kết công trình · ThoXay Admin</title>
+  <link th:href="@{/vendor/bootstrap/bootstrap.min.css}" rel="stylesheet">
+  <link th:href="@{/css/admin.css}" rel="stylesheet">
+</head>
+<body><main class="container py-4">
+  <a th:href="@{/admin/dashboard}" class="btn btn-outline-primary mb-4">← Quản trị</a>
+  <h1 class="h3">Cam kết và lương công trình</h1>
+  <p class="text-secondary">Tối đa 100 đơn mới nhất. Bản nháp và dữ liệu cũ được phân biệt với cam kết đã chốt.</p>
+  <div th:if="${documents.isEmpty()}" class="alert alert-info">Chưa có đơn ứng tuyển.</div>
+  <article th:each="document : ${documents}" class="card p-4 mb-3">
+    <div class="d-flex flex-wrap gap-3 align-items-center justify-content-between mb-3">
+      <h2 class="h5 mb-0" th:text="'Đơn #' + ${document.applicationId}"></h2>
+      <span class="badge" th:classappend="${document.state == 'FINAL' ? 'bg-success' : 'bg-secondary'}"
+        th:text="${document.state == 'FINAL' ? 'Đã chốt' : (document.state == 'LEGACY' ? 'Dữ liệu cũ' : 'Bản nháp')}"></span>
+    </div>
+    <pre class="mb-3" style="white-space: pre-wrap; font: inherit" th:text="${document.text}"></pre>
+    <small class="text-secondary text-break" th:if="${document.hash != null}" th:text="'SHA-256: ' + ${document.hash}"></small>
+  </article>
+</main></body></html>

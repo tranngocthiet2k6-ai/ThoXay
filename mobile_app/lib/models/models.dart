@@ -48,12 +48,19 @@ class Job {
     required this.requiredWorkers,
     required this.status,
     this.distanceKm,
+    this.startsOn,
+    this.endsOn,
+    this.termsVersion = 1,
+    this.contractorVerified = false,
   });
   final int id, contractorId, requiredWorkers;
   final String? contractorPhone;
   final String contractorName, title, description, jobType, address, status;
   final double salaryPerDay, latitude, longitude;
   final double? distanceKm;
+  final DateTime? startsOn, endsOn;
+  final int termsVersion;
+  final bool contractorVerified;
   factory Job.fromJson(Map<String, dynamic> json) => Job(
     id: (json['id'] as num).toInt(),
     contractorId: (json['contractorId'] as num).toInt(),
@@ -69,6 +76,14 @@ class Job {
     requiredWorkers: (json['requiredWorkers'] as num).toInt(),
     status: json['status'] as String,
     distanceKm: (json['distanceKm'] as num?)?.toDouble(),
+    startsOn: json['startsOn'] == null
+        ? null
+        : DateTime.parse(json['startsOn'] as String),
+    endsOn: json['endsOn'] == null
+        ? null
+        : DateTime.parse(json['endsOn'] as String),
+    termsVersion: (json['termsVersion'] as num?)?.toInt() ?? 1,
+    contractorVerified: json['contractorVerified'] as bool? ?? false,
   );
 }
 
@@ -88,6 +103,12 @@ class JobApplication {
     this.cancelledAt,
     this.cancellationPenalty = 0,
     this.workerAvailable = true,
+    this.proposedDailyRate,
+    this.agreedDailyRate,
+    this.wageNote,
+    this.consentVersion,
+    this.acceptedTermsAt,
+    this.contractHash,
   });
   final int id, workerId;
   final Job job;
@@ -98,6 +119,9 @@ class JobApplication {
   final DateTime? cancelledAt;
   final int cancellationPenalty;
   final bool workerAvailable;
+  final int? proposedDailyRate, agreedDailyRate, consentVersion;
+  final String? wageNote, contractHash;
+  final DateTime? acceptedTermsAt;
   final double workerRating;
   final bool workerVerified, workerActive;
   factory JobApplication.fromJson(Map<String, dynamic> json) => JobApplication(
@@ -117,6 +141,14 @@ class JobApplication {
         : DateTime.parse(json['cancelledAt'] as String),
     cancellationPenalty: (json['cancellationPenalty'] as num?)?.toInt() ?? 0,
     workerAvailable: json['workerAvailable'] as bool? ?? true,
+    proposedDailyRate: (json['proposedDailyRate'] as num?)?.toInt(),
+    agreedDailyRate: (json['agreedDailyRate'] as num?)?.toInt(),
+    consentVersion: (json['consentVersion'] as num?)?.toInt(),
+    wageNote: json['wageNote'] as String?,
+    contractHash: json['contractHash'] as String?,
+    acceptedTermsAt: json['acceptedTermsAt'] == null
+        ? null
+        : DateTime.parse(json['acceptedTermsAt'] as String),
   );
 }
 

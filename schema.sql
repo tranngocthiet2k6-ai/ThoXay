@@ -42,6 +42,8 @@ CREATE TABLE IF NOT EXISTS jobs (
   latitude DOUBLE PRECISION NOT NULL CHECK (latitude BETWEEN -90 AND 90),
   longitude DOUBLE PRECISION NOT NULL CHECK (longitude BETWEEN -180 AND 180),
   required_workers INTEGER NOT NULL CHECK (required_workers > 0),
+  starts_on DATE, ends_on DATE, terms_version INTEGER NOT NULL DEFAULT 1,
+  CONSTRAINT chk_job_schedule CHECK ((starts_on IS NULL AND ends_on IS NULL) OR (starts_on IS NOT NULL AND ends_on IS NOT NULL AND ends_on>=starts_on AND ends_on-starts_on<=365)),
   status VARCHAR(30) NOT NULL DEFAULT 'OPEN' CHECK (status IN ('OPEN','IN_PROGRESS','COMPLETED','CANCELLED')),
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -54,12 +56,22 @@ CREATE TABLE IF NOT EXISTS job_applications (
   cancellation_penalty INTEGER NOT NULL DEFAULT 0,
   worker_rating INTEGER CONSTRAINT chk_worker_rating CHECK (worker_rating IS NULL OR (worker_rating BETWEEN 1 AND 5 AND status = 'ACCEPTED')),
   reviewed_at TIMESTAMPTZ,
+  proposed_daily_rate BIGINT CHECK(proposed_daily_rate IS NULL OR proposed_daily_rate BETWEEN 1 AND 1000000000),
+  wage_note VARCHAR(500), agreed_daily_rate BIGINT CHECK(agreed_daily_rate IS NULL OR agreed_daily_rate BETWEEN 1 AND 1000000000),
+  consent_version INTEGER, accepted_terms_at TIMESTAMPTZ,
+  contract_snapshot TEXT, contract_hash VARCHAR(64), contractor_confirmed_at TIMESTAMPTZ,
   applied_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   UNIQUE (job_id, worker_id)
 );
 CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status);
 CREATE INDEX IF NOT EXISTS idx_jobs_contractor ON jobs(contractor_id);
 CREATE INDEX IF NOT EXISTS idx_applications_worker ON job_applications(worker_id);
+CREATE TABLE IF NOT EXISTS worker_calendar_blocks (
+  id BIGSERIAL PRIMARY KEY, worker_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  work_day DATE NOT NULL, note VARCHAR(200) NOT NULL DEFAULT '', UNIQUE(worker_id,work_day)
+);
+CREATE INDEX IF NOT EXISTS idx_jobs_schedule ON jobs(starts_on,ends_on);
+CREATE INDEX IF NOT EXISTS idx_calendar_worker ON worker_calendar_blocks(worker_id,work_day);
 CREATE TABLE IF NOT EXISTS messages (
   id BIGSERIAL PRIMARY KEY,
   sender_id BIGINT NOT NULL REFERENCES users(id),

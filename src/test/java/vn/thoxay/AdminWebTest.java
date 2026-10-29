@@ -101,6 +101,16 @@ class AdminWebTest {
         assertThat(dashboard.verificationRate()).isZero();
         assertThat(dashboard.verifiedUsers()).isZero();
     }
+    @Test @WithMockUser(username = "0944444441", roles = "ADMIN")
+    void adminCanInspectCommitmentPageWithoutSigningForParticipants() throws Exception {
+        var owner=user("0944444443",Role.ROLE_CONTRACTOR);
+        var job=new Job(); job.setContractor(owner); job.setTitle("Lịch công trình QA"); job.setJobType("Phụ hồ");
+        job.setAddress("QA"); job.setSalaryPerDay(300000); job.setRequiredWorkers(1); jobs.saveAndFlush(job);
+        mvc.perform(get("/admin/jobs/"+job.getId()+"/commitments")).andExpect(status().isOk())
+            .andExpect(content().string(containsString("Cam kết và lương công trình")));
+        mvc.perform(get("/admin/dashboard")).andExpect(status().isOk())
+            .andExpect(content().string(containsString("/admin/jobs/"+job.getId()+"/commitments")));
+    }
     private User user(String phone, Role role) {
         User u = new User(); u.setPhoneNumber(phone); u.setPassword("hash"); u.setFullName("Tài khoản quản trị thử");
         u.setRole(role); return users.saveAndFlush(u);

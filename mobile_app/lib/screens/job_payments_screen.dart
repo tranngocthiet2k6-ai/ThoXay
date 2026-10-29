@@ -186,7 +186,8 @@ class _PayDialogState extends State<_PayDialog> {
   bool _confirmed = false, _busy = false;
   String? _error;
   int get _total =>
-      widget.job.salaryPerDay.round() * (int.tryParse(_days.text) ?? 0) +
+      (widget.application.agreedDailyRate ?? widget.job.salaryPerDay.round()) *
+          (int.tryParse(_days.text) ?? 0) +
       (int.tryParse(_tip.text) ?? 0) +
       (int.tryParse(_bonus.text) ?? 0);
   @override
@@ -254,7 +255,7 @@ class _PayDialogState extends State<_PayDialog> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Đơn giá: ${money(widget.job.salaryPerDay.roundToDouble())}/ngày. Khả dụng: ${money(widget.available.toDouble())}.',
+                'Đơn giá: ${money((widget.application.agreedDailyRate ?? widget.job.salaryPerDay.round()).toDouble())}/ngày. Khả dụng: ${money(widget.available.toDouble())}.',
               ),
               _number(_days, 'Số ngày công đã xác nhận', 1, 365),
               _number(_tip, 'Tiền tip (VND)', 0, 100000000),

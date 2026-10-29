@@ -9,9 +9,16 @@ import java.util.List;
 import java.util.Optional;
 
 public interface JobApplicationRepository extends JpaRepository<JobApplication, Long> {
+    @Query("select a from JobApplication a join fetch a.job j where a.worker.id=:workerId "
+        + "and a.status=vn.thoxay.entity.ApplicationStatus.ACCEPTED "
+        + "and j.status in (vn.thoxay.entity.JobStatus.OPEN,vn.thoxay.entity.JobStatus.IN_PROGRESS) "
+        + "and j.startsOn<=:end and j.endsOn>=:start")
+    List<JobApplication> overlapping(@Param("workerId") Long workerId, @Param("start") java.time.LocalDate start,
+        @Param("end") java.time.LocalDate end);
     boolean existsByJobIdAndWorkerId(Long jobId, Long workerId);
     boolean existsByJobIdAndWorkerIdAndStatus(Long jobId, Long workerId, ApplicationStatus status);
     List<JobApplication> findByJobIdOrderByAppliedAtDesc(Long jobId);
+    List<JobApplication> findByJobIdOrderByAppliedAtDesc(Long jobId,org.springframework.data.domain.Pageable page);
     List<JobApplication> findByWorkerIdOrderByAppliedAtDesc(Long workerId);
     long countByJobIdAndStatus(Long jobId, ApplicationStatus status);
     void deleteByJobId(Long jobId);

@@ -1,4 +1,6 @@
 import '../widgets/design_motion.dart';
+import '../widgets/work_commitment.dart';
+import '../models/scheduling.dart';
 import '../widgets/app_snack_bar.dart';
 
 import 'package:flutter/material.dart';
@@ -55,6 +57,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
   bool _availabilityBusy = false;
   bool _loading = false;
   bool _showMap = false;
+  bool _proposalOpen = false;
   String? _error;
   @override
   void initState() {
@@ -126,12 +129,28 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
   }
 
   Future<void> _apply(Job job) async {
-    if (_applying != null || _applications.any((a) => a.job.id == job.id)) {
+    if (_proposalOpen ||
+        _applying != null ||
+        _applications.any((a) => a.job.id == job.id)) {
       return;
+    }
+    WorkProposal? proposal;
+    if (job.startsOn != null) {
+      setState(() => _proposalOpen = true);
+      try {
+        proposal = await showWorkProposal(context, widget.api, job);
+      } finally {
+        if (mounted) setState(() => _proposalOpen = false);
+      }
+      if (proposal == null || !mounted) return;
     }
     setState(() => _applying = job.id);
     try {
-      await widget.api.apply(job.id);
+      if (proposal != null) {
+        await widget.api.applyWithTerms(job.id, proposal);
+      } else {
+        await widget.api.apply(job.id);
+      }
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         AppSnackBar(
@@ -169,6 +188,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
   Widget _applyButton(Job job, {BuildContext? sheetContext}) => FilledButton(
     onPressed:
         _applying != null ||
+            _proposalOpen ||
             _cancelling ||
             _loading ||
             _applications.any((a) => a.job.id == job.id)
@@ -210,6 +230,25 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
       }
     } finally {
       if (mounted) setState(() => _cancelling = false);
+    }
+  }
+
+  Future<void> _confirmTerms(JobApplication application) async {
+    final proposal = await showWorkerCommitment(
+      context,
+      widget.api,
+      application,
+    );
+    if (proposal == null || !mounted) return;
+    try {
+      await widget.api.confirmCommitment(application.id, proposal.version);
+      if (mounted) await _refresh();
+    } on ApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          AppSnackBar(content: Text(e.message), kind: NoticeKind.error),
+        );
+      }
     }
   }
 
@@ -495,6 +534,19 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                                     job: application.job,
                                     peerId: application.job.contractorId,
                                     peerName: application.job.contractorName,
+                                  ),
+                                if (application.status == 'PENDING' &&
+                                    application.job.startsOn != null)
+                                  TextButton.icon(
+                                    onPressed: () => _confirmTerms(application),
+                                    icon: const Icon(
+                                      Icons.description_outlined,
+                                    ),
+                                    label: const Text('Xem & xác nhận cam kết'),
+                                  ),
+                                if (application.agreedDailyRate != null)
+                                  Text(
+                                    'Lương chốt: ${money(application.agreedDailyRate!.toDouble())}/ngày',
                                   ),
                                 if (application.status == 'ACCEPTED' &&
                                     application.job.contractorPhone != null)

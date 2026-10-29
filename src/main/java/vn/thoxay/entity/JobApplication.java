@@ -29,4 +29,12 @@ public class JobApplication {
     private int cancellationPenalty;
     @Column(name = "applied_at", nullable = false, updatable = false)
     private LocalDateTime appliedAt = LocalDateTime.now();
+    @Column(name = "proposed_daily_rate") private Long proposedDailyRate;
+    @Column(name = "wage_note", length = 500) private String wageNote;
+    @Column(name = "agreed_daily_rate") private Long agreedDailyRate;
+    @Column(name = "consent_version") private Integer consentVersion;
+    @Column(name = "accepted_terms_at") private java.time.Instant acceptedTermsAt;
+    @Column(name = "contract_snapshot", columnDefinition = "TEXT") private String contractSnapshot;
+    @Column(name = "contract_hash", length = 64) private String contractHash;
+    @Column(name = "contractor_confirmed_at") private java.time.Instant contractorConfirmedAt;
 }

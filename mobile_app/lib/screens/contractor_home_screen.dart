@@ -1,4 +1,6 @@
 import '../widgets/design_motion.dart';
+import '../widgets/work_commitment.dart';
+import '../models/scheduling.dart';
 import '../widgets/app_snack_bar.dart';
 
 import 'package:flutter/material.dart';
@@ -303,6 +305,10 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
   final _workers = TextEditingController(text: '1');
   String _type = 'Thợ chính';
   GeoPoint? _position;
+  late DateTimeRange _schedule = DateTimeRange(
+    start: DateTime.now(),
+    end: DateTime.now(),
+  );
   bool _busy = false, _gps = false;
   String? _error;
   @override
@@ -374,6 +380,8 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
         'latitude': _position!.latitude,
         'longitude': _position!.longitude,
         'requiredWorkers': int.parse(_workers.text.trim()),
+        'startsOn': isoDay(_schedule.start),
+        'endsOn': isoDay(_schedule.end),
       });
       if (mounted) Navigator.pop(context, true);
     } on ApiException catch (e) {
@@ -477,6 +485,27 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
                       ? 'Chưa chọn vị trí công trình'
                       : 'Vị trí: ${_position!.latitude.toStringAsFixed(5)}, ${_position!.longitude.toStringAsFixed(5)}',
                 ),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: _busy
+                      ? null
+                      : () async {
+                          final now = DateTime.now();
+                          final range = await showDateRangePicker(
+                            context: context,
+                            initialDateRange: _schedule,
+                            firstDate: DateTime(now.year, now.month, now.day),
+                            lastDate: now.add(const Duration(days: 365)),
+                          );
+                          if (range != null && mounted) {
+                            setState(() => _schedule = range);
+                          }
+                        },
+                  icon: const Icon(Icons.date_range),
+                  label: Text(
+                    'Lịch: ${isoDay(_schedule.start)} – ${isoDay(_schedule.end)}',
+                  ),
+                ),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
@@ -566,7 +595,21 @@ class _ApplicantsSheetState extends State<_ApplicantsSheet> {
       _error = null;
     });
     try {
-      await widget.api.updateApplication(application.id, status);
+      if (status == 'ACCEPTED' && application.job.startsOn != null) {
+        final decision = await showHiringCommitment(
+          context,
+          widget.api,
+          application,
+        );
+        if (decision == null || !mounted) return;
+        await widget.api.acceptWithTerms(
+          application.id,
+          decision.version,
+          acceptOffer: decision.acceptOffer,
+        );
+      } else {
+        await widget.api.updateApplication(application.id, status);
+      }
       if (mounted) await _refresh();
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.message);

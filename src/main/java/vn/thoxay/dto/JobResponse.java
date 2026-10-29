@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 public record JobResponse(Long id, Long contractorId, String contractorName, String contractorPhone,
     String title, String description, String jobType, double salaryPerDay, String address,
     double latitude, double longitude, int requiredWorkers, String status, LocalDateTime createdAt,
-    Double distanceKm) {
+    Double distanceKm, java.time.LocalDate startsOn, java.time.LocalDate endsOn, int termsVersion, boolean contractorVerified) {
     public static JobResponse of(Job job, Double distanceKm) {
         return of(job, distanceKm, true);
     }
@@ -15,6 +15,6 @@ public record JobResponse(Long id, Long contractorId, String contractorName, Str
         return new JobResponse(job.getId(), owner.getId(), owner.getFullName(), contactAllowed ? owner.getPhoneNumber() : null,
             job.getTitle(), job.getDescription(), job.getJobType(), job.getSalaryPerDay(), job.getAddress(),
             job.getLatitude(), job.getLongitude(), job.getRequiredWorkers(), job.getStatus().name(),
-            job.getCreatedAt(), distanceKm);
+            job.getCreatedAt(), distanceKm, job.getStartsOn(), job.getEndsOn(), job.getTermsVersion(), owner.isVerified());
     }
 }

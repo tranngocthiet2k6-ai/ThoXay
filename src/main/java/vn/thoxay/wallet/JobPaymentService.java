@@ -37,7 +37,7 @@ public class JobPaymentService {
         }
         var balances=wallets.lockAccounts(List.of(owner.getId(),a.getWorker().getId()));
         var p=new JobPayment();p.setApplication(a);p.setJob(job);p.setContractor(owner);p.setWorker(a.getWorker());p.setJobTitle(job.getTitle());
-        p.setWorkDays(input.workDays());p.setDailyRate(BigDecimal.valueOf(job.getSalaryPerDay()).setScale(0,RoundingMode.HALF_UP).longValueExact());
+        p.setWorkDays(input.workDays());p.setDailyRate(a.getAgreedDailyRate()!=null?a.getAgreedDailyRate():BigDecimal.valueOf(job.getSalaryPerDay()).setScale(0,RoundingMode.HALF_UP).longValueExact());
         p.setBase(Math.multiplyExact(p.getDailyRate(),p.getWorkDays()));p.setTip(input.tip());p.setBonus(input.bonus());p.setTotal(p.getBase()+p.getTip()+p.getBonus());payments.saveAndFlush(p);
         var sender=balances.get(owner.getId()); var recipient=balances.get(a.getWorker().getId()); String ref="payment:"+p.getId();
         wallets.record(sender,"JOB_PAYMENT",p.getTotal(),-p.getTotal(),0,0,ref+":payer","Thanh toán: "+job.getTitle(),null,p);

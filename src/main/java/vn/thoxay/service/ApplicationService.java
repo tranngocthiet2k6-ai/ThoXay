@@ -18,11 +18,15 @@ public class ApplicationService {
     private final CurrentUser current;
     private final NotificationService notifications;
     private final WorkerRatingService workerLocks;
+    private final vn.thoxay.scheduling.WorkerCalendarService calendar;
+    private final vn.thoxay.scheduling.CommitmentService commitments;
+    private final java.time.Clock clock;
 
     @Transactional
     public ApplicationResponse apply(ApplicationRequest request) {
         User worker = current.require(Role.ROLE_WORKER);
         Job job = lockedJob(request.jobId());
+        requireRecruitingDate(job);
         worker = workerLocks.lockWorkers(List.of(worker.getId())).get(0);
         if (!worker.isAvailable()) throw new ApiException(HttpStatus.CONFLICT, "Bạn đang Offline. Bật trạng thái nhận việc để ứng tuyển.");
         if (applications.existsByJobIdAndWorkerId(job.getId(), worker.getId()))
@@ -31,6 +35,14 @@ public class ApplicationService {
             || applications.countByJobIdAndStatus(job.getId(), ApplicationStatus.ACCEPTED) >= job.getRequiredWorkers())
             throw new ApiException(HttpStatus.CONFLICT, "Công trình đã ngừng tuyển thợ");
         JobApplication application = new JobApplication(); application.setJob(job); application.setWorker(worker);
+        application.setProposedDailyRate(request.proposedDailyRate()); application.setWageNote(request.wageNote()==null?null:request.wageNote().trim());
+        if(Boolean.TRUE.equals(request.acceptedTerms())) {
+            if(!java.util.Objects.equals(request.termsVersion(),job.getTermsVersion()))
+                throw new ApiException(HttpStatus.CONFLICT,"Điều khoản đã thay đổi; hãy xem lại công trình");
+            application.setConsentVersion(job.getTermsVersion()); application.setAcceptedTermsAt(clock.instant());
+        }
+        if(job.getStartsOn()!=null && application.getAcceptedTermsAt()==null)
+            throw new ApiException(HttpStatus.BAD_REQUEST,"Cần đọc và đồng ý cam kết nhận việc");
         applications.saveAndFlush(application);
         notifications.create(job.getContractor(), job, "application:" + application.getId(), "APPLICATION_RECEIVED",
             "Có đơn ứng tuyển mới", "Một người thợ vừa ứng tuyển công trình: " + job.getTitle());
@@ -57,20 +69,32 @@ public class ApplicationService {
         current.requireOwner(job.getContractor().getId(), Role.ROLE_CONTRACTOR);
         JobApplication application = applications.findById(id).orElseThrow(() -> notFound("Đơn ứng tuyển"));
         ApplicationStatus status = ApplicationStatus.valueOf(request.status());
-        if (application.getStatus() == status) return ApplicationResponse.of(application);
+        if (application.getStatus() == status) {
+            if(status==ApplicationStatus.ACCEPTED && request.acceptCounterOffer()!=null && application.getAgreedDailyRate()!=null) {
+                long selected=Boolean.TRUE.equals(request.acceptCounterOffer())&&application.getProposedDailyRate()!=null?application.getProposedDailyRate():vn.thoxay.scheduling.CommitmentService.original(job);
+                if(selected!=application.getAgreedDailyRate()) throw new ApiException(HttpStatus.CONFLICT,"Lương đã chốt không thể sửa");
+            }
+            return ApplicationResponse.of(application);
+        }
         if (application.getStatus() != ApplicationStatus.PENDING)
             throw new ApiException(HttpStatus.CONFLICT, "Đơn ứng tuyển đã được xử lý");
         if (job.getStatus() == JobStatus.COMPLETED || job.getStatus() == JobStatus.CANCELLED)
             throw new ApiException(HttpStatus.CONFLICT, "Công trình đã kết thúc");
         if (status == ApplicationStatus.ACCEPTED) {
+            requireRecruitingDate(job);
             User worker = workerLocks.lockWorkers(List.of(application.getWorker().getId())).get(0);
             if (!worker.isAvailable()) throw new ApiException(HttpStatus.CONFLICT, "Thợ đã tạm ngưng nhận việc mới");
             if (!application.getWorker().isActive())
                 throw new ApiException(HttpStatus.CONFLICT, "Tài khoản thợ đã bị khóa");
+            if(job.getStartsOn()!=null && (!Boolean.TRUE.equals(request.acceptedTerms())||!java.util.Objects.equals(request.termsVersion(),job.getTermsVersion())))
+                throw new ApiException(HttpStatus.CONFLICT,"Cần xác nhận đúng phiên bản cam kết trước khi nhận thợ");
+            calendar.requireAvailable(worker,job,application.getId());
+            commitments.requireWorkerConsent(application);
             long accepted = applications.countByJobIdAndStatus(jobId, ApplicationStatus.ACCEPTED);
             if (accepted >= job.getRequiredWorkers())
                 throw new ApiException(HttpStatus.CONFLICT, "Công trình đã đủ số lượng thợ");
             if (accepted + 1 >= job.getRequiredWorkers()) job.setStatus(JobStatus.IN_PROGRESS);
+            commitments.freeze(application,Boolean.TRUE.equals(request.acceptCounterOffer()));
         }
         application.setStatus(status);
         applications.saveAndFlush(application);
@@ -81,6 +105,10 @@ public class ApplicationService {
         return ApplicationResponse.of(application);
     }
 
+    private void requireRecruitingDate(Job job) {
+        if (job.getEndsOn() != null && job.getEndsOn().isBefore(java.time.LocalDate.now(clock)))
+            throw new ApiException(HttpStatus.CONFLICT, "Công trình đã hết thời gian tuyển");
+    }
     private Job lockedJob(Long id) { return jobs.findLockedById(id).orElseThrow(() -> notFound("Công trình")); }
     private ApiException notFound(String resource) { return new ApiException(HttpStatus.NOT_FOUND, resource + " không tồn tại"); }
 }

@@ -1,5 +1,6 @@
 import '../theme/app_theme.dart';
 import '../widgets/design_motion.dart';
+import 'calendar_screen.dart';
 import '../widgets/content_skeleton.dart';
 import '../widgets/app_snack_bar.dart';
 
@@ -214,6 +215,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(_profile!.phoneNumber),
+                if (_profile!.role == 'ROLE_WORKER')
+                  TextButton.icon(
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => CalendarScreen(api: widget.api),
+                      ),
+                    ),
+                    icon: const Icon(Icons.calendar_month_outlined),
+                    label: const Text('Lịch làm việc'),
+                  ),
                 if (_profile!.role == 'ROLE_WORKER')
                   TextButton.icon(
                     onPressed: () => Navigator.of(context).push(

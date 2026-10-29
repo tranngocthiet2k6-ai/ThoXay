@@ -38,6 +38,35 @@ class ApplicationApiTest {
     }
     @AfterEach void clean() { applications.deleteAllInBatch(); jobs.deleteAllInBatch(); users.deleteAllInBatch(); }
 
+    @Test void concurrentAcceptancesCannotDoubleBookWorkerAcrossJobs() throws Exception {
+        var start=java.time.LocalDate.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh")).plusDays(7);
+        job.setStartsOn(start); job.setEndsOn(start.plusDays(2)); jobs.saveAndFlush(job);
+        var second=new Job(); second.setContractor(owner); second.setTitle("Công trình trùng lịch"); second.setAddress("QA");
+        second.setJobType("Phụ hồ"); second.setSalaryPerDay(400000); second.setRequiredWorkers(1);
+        second.setStartsOn(start.plusDays(1)); second.setEndsOn(start.plusDays(3)); jobs.saveAndFlush(second);
+        var ids=new java.util.ArrayList<Long>();
+        for(var target:List.of(job,second)) {
+            var result=mvc.perform(post("/api/applications/apply").header("Authorization",token(worker)).contentType("application/json")
+                .content(json.writeValueAsString(java.util.Map.of("jobId",target.getId(),"acceptedTerms",true,"termsVersion",1))))
+                .andExpect(status().isCreated()).andReturn();
+            ids.add(json.readTree(result.getResponse().getContentAsString()).get("id").asLong());
+        }
+        var gate=new CountDownLatch(1); var pool=Executors.newFixedThreadPool(2);
+        try {
+            var futures=ids.stream().map(id -> pool.submit(() -> {
+                gate.await();
+                return mvc.perform(put("/api/applications/"+id+"/status").header("Authorization",token(owner)).contentType("application/json")
+                    .content("{\"status\":\"ACCEPTED\",\"acceptedTerms\":true,\"termsVersion\":1}"))
+                    .andReturn().getResponse().getStatus();
+            })).toList();
+            gate.countDown();
+            assertThat(List.of(futures.get(0).get(20,TimeUnit.SECONDS),futures.get(1).get(20,TimeUnit.SECONDS)))
+                .containsExactlyInAnyOrder(200,409);
+            assertThat(applications.findByWorkerIdOrderByAppliedAtDesc(worker.getId()).stream()
+                .filter(a -> a.getStatus()==ApplicationStatus.ACCEPTED).count()).isEqualTo(1);
+        } finally { pool.shutdownNow(); }
+    }
+
     @Test void applyDuplicatePrivacyAndAcceptWorkflow() throws Exception {
         long id = apply(worker);
         mvc.perform(post("/api/applications/apply").header("Authorization", token(worker))

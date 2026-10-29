@@ -16,6 +16,8 @@ public class JobController {
     private final JobCompletionService completions;
     @PostMapping @ResponseStatus(HttpStatus.CREATED)
     public JobResponse create(@Valid @RequestBody JobRequest request) { return jobs.create(request); }
+    @GetMapping("/{id}") public JobResponse detail(@PathVariable @Positive Long id) { return jobs.detail(id); }
+    @PutMapping("/{id}") public JobResponse update(@PathVariable @Positive Long id,@Valid @RequestBody JobRequest request) { return jobs.update(id,request); }
     @GetMapping("/nearby")
     public List<JobResponse> nearby(
         @RequestParam @DecimalMin("-90") @DecimalMax("90") double lat,

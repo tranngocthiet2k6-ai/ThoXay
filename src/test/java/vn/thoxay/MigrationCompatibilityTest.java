@@ -60,4 +60,24 @@ class MigrationCompatibilityTest {
         assertThat(migrations().migrate().migrationsExecuted).isZero();
         assertThat(migrations().validateWithResult().validationSuccessful).isTrue();
     }
+    @Test void upgradeBackfillsAcceptedRateWithoutInventingConsent() throws Exception {
+        try(var c=connect()) {
+            c.setSchema(schema);
+            ScriptUtils.executeSqlScript(c,new ClassPathResource("db/migration/V1__initial_schema.sql"));
+            try(var s=c.createStatement()) {
+                s.executeUpdate("INSERT INTO users(phone_number,password,full_name,role,is_verified,rating,is_active,created_at) VALUES"
+                    + "('0999999921','qa-hash','QA owner','ROLE_CONTRACTOR',false,5,true,CURRENT_TIMESTAMP),"
+                    + "('0999999922','qa-hash','QA worker','ROLE_WORKER',false,5,true,CURRENT_TIMESTAMP)");
+                s.executeUpdate("INSERT INTO jobs(contractor_id,title,job_type,salary_per_day,address,latitude,longitude,required_workers) "
+                    + "SELECT id,'Legacy paid rate','Thợ chính',450000.75,'QA',10,106,1 FROM users WHERE phone_number='0999999921'");
+                s.executeUpdate("INSERT INTO job_applications(job_id,worker_id,status) SELECT j.id,u.id,'ACCEPTED' FROM jobs j,users u WHERE u.phone_number='0999999922'");
+            }
+        }
+        migrations().migrate();
+        try(var c=connect();var s=c.createStatement();var r=s.executeQuery("SELECT agreed_daily_rate,accepted_terms_at,contract_snapshot FROM "+schema+".job_applications")) {
+            assertThat(r.next()).isTrue(); assertThat(r.getLong(1)).isEqualTo(450001);
+            assertThat(r.getTimestamp(2)).isNull(); assertThat(r.getString(3)).isNull();
+        }
+        assertThat(migrations().migrate().migrationsExecuted).isZero();
+    }
 }

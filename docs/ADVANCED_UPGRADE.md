@@ -13,8 +13,8 @@ lightbox/bộ lọc/KPI Admin. Các phần này được mở rộng, không t�
 
 ## Thứ tự checkpoint
 
-- [ ] Tự động migration: baseline dữ liệu cũ, migrate trước JPA validate, kiểm chứng PostgreSQL.
-- [ ] Lịch công trình, thương lượng lương, cam kết có phiên bản và khóa giao dịch chống trùng lịch.
+- [x] Tự động migration: baseline dữ liệu cũ, migrate trước JPA validate, kiểm chứng PostgreSQL.
+- [x] Lịch công trình, thương lượng lương, cam kết có phiên bản và khóa giao dịch chống trùng lịch.
 - [ ] Bản đồ ghim lương, 2km, sửa vị trí, chỉ đường, link/QR công trình; lưu việc/thợ quen.
 - [ ] Tổ đội có mời/xác nhận thành viên và xác nhận công trình; duyệt nguyên nhóm an toàn.
 - [ ] Chấm công GPS/QR, ảnh cuối ngày, nghiệm thu và kiểm tra ngày công khi thanh toán.
@@ -67,3 +67,22 @@ Maven verify, Flutter analyze/test/build web, PostgreSQL fresh + upgrade + migra
 lần hai, luồng quyền sở hữu/khóa tài khoản/đua giao dịch, asset ACL, QR sai/hết hạn,
 lịch trùng, lương chốt, nhóm thợ, day-count khi chi trả và công tắc theme lưu lại.
 Ảnh QA chỉ dùng fixture riêng; không ghi tài khoản demo vào database production.
+
+## Checkpoint lịch, lương và cam kết
+
+- API công trình hỗ trợ `startsOn`, `endsOn`, `termsVersion`; chủ thầu sửa công trình
+  còn OPEN/chưa nhận thợ bằng `PUT /api/jobs/{id}`. Thay đổi tăng phiên bản,
+  gửi thông báo và yêu cầu thợ đọc lại cam kết.
+- `GET /api/jobs/{id}/terms` và `GET/PUT /api/applications/{id}/commitment`
+  cung cấp nội dung/xác nhận. Admin có trang `/admin/jobs/{id}/commitments`.
+- Khi ứng tuyển gửi `proposedDailyRate`, `wageNote`, `acceptedTerms`, `termsVersion`.
+  Khi duyệt gửi `acceptCounterOffer`, `acceptedTerms`, `termsVersion`. Mặc định
+  giữ giá gốc; lương chốt và snapshot SHA-256 không sửa sau khi duyệt.
+- `GET/POST /api/users/me/calendar`, `DELETE /api/users/me/calendar/{id}` quản lý
+  lịch riêng của thợ. Khóa worker ngăn hai chủ thầu duyệt trùng ngày đồng thời.
+- Flutter có chọn ngày công trình, hộp cam kết, đề xuất lương, màn hình lịch/ngày
+  bận và tính tiền theo lương đã chốt. Công trình legacy thiếu ngày vẫn tương thích;
+  không tạo xác nhận giả cho các đơn cũ.
+- Kiểm chứng: PostgreSQL fresh/upgrade/repeat, production profile health UP/JPA
+  validate, giao dịch duyệt đồng thời và thanh toán idempotent; kiểm thử Flutter
+  cam kết, lịch, tiền xem trước. Không thay đổi database production trong QA.
