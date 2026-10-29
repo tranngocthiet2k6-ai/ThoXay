@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../services/api_service.dart';
 import '../services/chat_controller.dart';
+import '../widgets/job_card.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({
@@ -92,6 +93,22 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Card(
+              margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+              child: ListTile(
+                leading: const Icon(Icons.apartment_outlined),
+                title: Text(
+                  widget.job.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                subtitle: Text(
+                  '${money(widget.job.salaryPerDay)} / ngày · ${widget.job.jobType}',
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => showJobDetails<void>(context, widget.job),
+              ),
+            ),
             Text(widget.peerName, maxLines: 1, overflow: TextOverflow.ellipsis),
             Text(
               widget.job.title,
@@ -184,7 +201,12 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                               color: mine
                                   ? theme.colorScheme.primaryContainer
                                   : theme.colorScheme.surfaceContainerHighest,
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.only(
+                                topLeft: const Radius.circular(20),
+                                topRight: const Radius.circular(20),
+                                bottomLeft: Radius.circular(mine ? 20 : 4),
+                                bottomRight: Radius.circular(mine ? 4 : 20),
+                              ),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,

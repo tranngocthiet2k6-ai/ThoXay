@@ -7,7 +7,7 @@ import '../models/models.dart';
 import '../services/api_service.dart';
 import '../widgets/profile_editor.dart';
 import '../widgets/portfolio_gallery.dart';
-import '../widgets/tier_badge.dart';
+import '../widgets/profile_summary.dart';
 import 'leaderboard_screen.dart';
 import 'reputation_screen.dart';
 
@@ -197,17 +197,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           if (_loading) const LinearProgressIndicator(),
           if (_profile != null) ...[
-            Text(
-              _profile!.fullName,
-              style: Theme.of(context).textTheme.headlineSmall,
+            ProfileSummary(
+              name: _profile!.fullName,
+              worker: _profile!.role == 'ROLE_WORKER',
+              rating: _profile!.rating,
+              score: _profile!.reputationScore,
+              completed: _profile!.completedJobs,
+              tier: _profile!.workerTier ?? 'SILVER',
+              verified: _profile!.verified,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 16),
             Text(_profile!.phoneNumber),
-            if (_profile!.role == 'ROLE_WORKER') ...[
-              TierBadge(tier: _profile!.workerTier ?? 'SILVER'),
-              Text(
-                '${_profile!.reputationScore}/100 điểm uy tín · ${_profile!.completedJobs} công trình hoàn thành',
-              ),
+            if (_profile!.role == 'ROLE_WORKER')
               TextButton.icon(
                 onPressed: () => Navigator.of(context).push(
                   MaterialPageRoute<void>(
@@ -217,7 +218,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 icon: const Icon(Icons.history),
                 label: const Text('Lịch sử uy tín'),
               ),
-            ],
             TextButton.icon(
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(

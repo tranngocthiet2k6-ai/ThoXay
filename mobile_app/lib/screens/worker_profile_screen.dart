@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/worker_profile.dart';
 import '../services/api_service.dart';
 import '../widgets/portfolio_gallery.dart';
-import '../widgets/tier_badge.dart';
+import '../widgets/profile_summary.dart';
 import '../widgets/worker_reviews.dart';
 
 class WorkerProfileScreen extends StatefulWidget {
@@ -56,34 +56,17 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                 TextButton(onPressed: _load, child: const Text('Thử lại')),
               ],
               if (_person case final person?) ...[
-                Text(
-                  person.fullName,
-                  style: Theme.of(context).textTheme.headlineSmall,
+                ProfileSummary(
+                  name: person.fullName,
+                  worker: true,
+                  rating: person.rating,
+                  score: person.reputationScore,
+                  completed: person.completedJobs,
+                  tier: person.workerTier,
+                  verified: person.verified,
                 ),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    TierBadge(tier: person.workerTier),
-                    Chip(label: Text('${person.reputationScore}/100 uy tín')),
-                    Chip(
-                      label: Text('${person.experienceYears} năm kinh nghiệm'),
-                    ),
-                    Chip(
-                      label: Text(
-                        person.completedJobs == 0
-                            ? 'Chưa có đánh giá'
-                            : '${person.rating.toStringAsFixed(1)}/5 sao · ${person.completedJobs} công trình',
-                      ),
-                    ),
-                    if (person.verified)
-                      const Chip(
-                        avatar: Icon(Icons.verified),
-                        label: Text('Đã xác thực CCCD'),
-                      ),
-                  ],
-                ),
+                const SizedBox(height: 16),
+                Text('${person.experienceYears} năm kinh nghiệm'),
                 const SizedBox(height: 20),
                 Text(
                   person.experienceSummary.isEmpty

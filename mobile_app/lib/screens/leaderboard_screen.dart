@@ -4,6 +4,7 @@ import '../models/reputation.dart';
 import '../services/api_service.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/tier_badge.dart';
+import '../widgets/ranking_podium.dart';
 import 'worker_profile_screen.dart';
 
 class LeaderboardScreen extends StatefulWidget {
@@ -77,7 +78,19 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
               title: 'Chưa có dữ liệu xếp hạng',
               message: 'Hoàn thành công trình và nhận đánh giá để bắt đầu hành trình uy tín.',
             ),
-          for (final worker in _rows)
+          if (!_loading && _error == null && _rows.isNotEmpty)
+            RankingPodium(
+              workers: _rows.take(3).toList(),
+              onTap: (worker) => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => WorkerProfileScreen(
+                    api: widget.api,
+                    workerId: worker.workerId,
+                  ),
+                ),
+              ),
+            ),
+          for (final worker in _rows.skip(3))
             Card(
               child: InkWell(
                 borderRadius: BorderRadius.circular(16),
