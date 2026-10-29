@@ -11,6 +11,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 class RepositoryTest {
     @Autowired UserRepository users;
     @Autowired JobRepository jobs;
+    @Autowired vn.thoxay.wallet.WalletEntryRepository entries;
+
+    @Test void incomeDateProjectionKeepsVietnamCalendarDateInAnyJvmTimezone() {
+        User worker=new User();worker.setPhoneNumber("0009998877665");worker.setPassword("QA");worker.setFullName("Income timezone QA");worker.setRole(Role.ROLE_WORKER);users.saveAndFlush(worker);
+        var entry=new vn.thoxay.wallet.WalletEntry();entry.setUser(worker);entry.setKind("WORK_EARNING");entry.setAmount(600000);
+        entry.setReference("qa-timezone-income");entry.setDescription("Timezone fixture");entry.setCreatedAt(java.time.Instant.parse("2026-01-04T17:00:00Z"));entries.saveAndFlush(entry);
+        var rows=entries.daily(worker.getId(),java.time.Instant.parse("2026-01-04T17:00:00Z"),java.time.Instant.parse("2026-01-05T17:00:00Z"));
+        assertThat(rows).hasSize(1);
+        assertThat(rows.get(0).getIncomeDay()).isEqualTo(java.time.LocalDate.of(2026,1,5));
+        assertThat(rows.get(0).getBase()).isEqualTo(600000);
+    }
 
     @Test void haversineIncludesNearbyOpenJobsOnly() {
         User owner = new User();

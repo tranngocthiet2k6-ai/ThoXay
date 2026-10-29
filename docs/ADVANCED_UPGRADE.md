@@ -382,3 +382,18 @@ Tham khảo thông số và mã WMO: [Open-Meteo Forecast API](https://open-mete
   Production-profile QA xác nhận alias/CORS và Flyway đến V21. Chrome giữ health
   ở trạng thái chờ: chỉ một GET health, không có request nghiệp vụ trước UP,
   lời dẫn hiển thị và trang chủ hồi phục sau khi mở gate. Mọi fixture chỉ ở QA.
+
+## Hồi quy ngày thu nhập trên môi trường UTC
+
+Render báo đỏ hai test WalletApiTest dù máy Windows/giờ Việt Nam pass. Đã tái hiện
+bằng JVM UTC và thu gọn thành một khoản thu tại 2026-01-04T17:00Z. H2 CAST timestamp
+có timezone sang DATE dùng ngày theo session UTC, khác kết quả AT TIME ZONE của
+PostgreSQL: bị gom vào 04/01 thay vì 05/01. Không sửa số dư hay dữ liệu người dùng.
+
+Truy vấn dùng TO_CHAR sau AT TIME ZONE để tạo ngày ISO, rồi parse LocalDate từ
+chuỗi rõ ràng, tránh CAST DATE/ánh xạ java.sql.Date phụ thuộc môi trường. Surefire
+mặc định UTC giống Render; có thể đối chiếu bằng -Dthoxay.test.timezone=Asia/Ho_Chi_Minh.
+Test repository một khoản thu và test REST ranh giới ngày đã đỏ trước sửa, xanh
+sau sửa ở UTC lẫn giờ Việt Nam. Toàn bộ 125 Backend pass (không skip, có PostgreSQL
+migration), JAR build; REST production-profile/JVM UTC trên PostgreSQL QA cũng
+xác nhận các ngày, số tiền và loại tiền nạp đúng. Không có log debug trong mã nguồn.
