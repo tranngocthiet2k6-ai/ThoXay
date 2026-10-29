@@ -40,7 +40,11 @@ void main() {
         ),
       );
       await tester.pump(const Duration(milliseconds: 200));
-      await tester.scrollUntilVisible(find.byType(LoadingJobs), 180);
+      await tester.scrollUntilVisible(
+        find.byType(LoadingJobs),
+        180,
+        scrollable: find.byType(Scrollable).first,
+      );
       expect(find.byType(LoadingJobs), findsOneWidget);
       expect(find.byType(EmptyState), findsNothing);
       api.result.complete([]);
@@ -72,6 +76,7 @@ void main() {
       await tester.scrollUntilVisible(
         find.text('Không kết nối được máy chủ'),
         180,
+        scrollable: find.byType(Scrollable).first,
       );
       expect(find.text('Không kết nối được máy chủ'), findsOneWidget);
       expect(find.byType(EmptyState), findsNothing);

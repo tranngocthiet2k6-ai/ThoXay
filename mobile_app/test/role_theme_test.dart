@@ -49,6 +49,19 @@ void main() {
               200,
             );
           }
+          if (request.url.path == '/api/users/me') {
+            return http.Response(
+              jsonEncode({
+                'id': 3,
+                'fullName': 'Demo',
+                'phoneNumber': '0900000003',
+                'role': role,
+                'verified': false,
+                'rating': 5,
+              }),
+              200,
+            );
+          }
           if (request.url.path.endsWith('/availability')) {
             return http.Response('{"available":false}', 200);
           }

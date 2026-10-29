@@ -8,12 +8,11 @@ import '../widgets/job_card.dart';
 import '../widgets/call_button.dart';
 import '../widgets/chat_button.dart';
 import '../widgets/job_completion_dialog.dart';
-import 'profile_screen.dart';
 import 'location_picker_screen.dart';
 import '../widgets/loading_jobs.dart';
 import '../widgets/empty_state.dart';
-import '../widgets/feature_banner.dart';
-import '../widgets/notification_button.dart';
+import '../widgets/hero_greeting.dart';
+import '../widgets/job_search_header.dart';
 import 'worker_profile_screen.dart';
 import '../widgets/finance_menu.dart';
 import 'job_payments_screen.dart';
@@ -28,6 +27,23 @@ class ContractorHomeScreen extends StatefulWidget {
 
 class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
   List<Job> _jobs = [];
+  final _search = TextEditingController();
+  String _query = '', _status = '';
+  List<Job> get _visibleJobs => _jobs
+      .where(
+        (j) =>
+            (_status.isEmpty || j.status == _status) &&
+            '${j.title} ${j.address}'.toLowerCase().contains(
+              _query.toLowerCase().trim(),
+            ),
+      )
+      .toList();
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
   bool _loading = false;
   String? _error;
   @override
@@ -95,16 +111,6 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
       title: const Text('Công trình của tôi'),
       actions: [
         FinanceMenu(api: widget.api),
-        NotificationButton(api: widget.api),
-        IconButton(
-          tooltip: 'Hồ sơ & CCCD',
-          icon: const Icon(Icons.person_outline),
-          onPressed: () => Navigator.of(context).push(
-            MaterialPageRoute<void>(
-              builder: (_) => ProfileScreen(api: widget.api),
-            ),
-          ),
-        ),
         IconButton(
           tooltip: 'Làm mới',
           onPressed: _loading ? null : _refresh,
@@ -122,82 +128,135 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
         Expanded(
           child: RefreshIndicator(
             onRefresh: _refresh,
-            child: ListView(
-              padding: EdgeInsets.fromLTRB(
-                MediaQuery.sizeOf(context).width > 920
-                    ? (MediaQuery.sizeOf(context).width - 880) / 2
-                    : 20,
-                20,
-                MediaQuery.sizeOf(context).width > 920
-                    ? (MediaQuery.sizeOf(context).width - 880) / 2
-                    : 20,
-                100,
-              ),
+            child: CustomScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
-              children: [
-                FeatureBanner(
-                  greeting:
-                      'Chào ${widget.api.session?.fullName ?? 'chủ thầu'},',
-                  title: 'Tìm thợ cho công trình',
-                  icon: Icons.apartment_outlined,
-                  subtitle: _loading
-                      ? 'Đang cập nhật công trình của bạn…'
-                      : '${_jobs.length} công trình · ${_jobs.where((j) => j.status == 'OPEN').length} đang tuyển',
+              slivers: [
+                SliverPadding(
+                  padding: const EdgeInsets.all(16),
+                  sliver: SliverToBoxAdapter(
+                    child: HeroGreeting(
+                      api: widget.api,
+                      title: 'Tìm thợ cho công trình',
+                      subtitle: _loading
+                          ? 'Đang cập nhật công trình của bạn…'
+                          : '${_jobs.length} công trình · ${_jobs.where((j) => j.status == 'OPEN').length} đang tuyển',
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 24),
-                if (_error != null)
-                  Card(
-                    color: Theme.of(context).colorScheme.errorContainer,
+                SliverPersistentHeader(
+                  pinned: true,
+                  delegate: JobSearchHeader(
+                    height:
+                        144 * MediaQuery.textScalerOf(context).scale(14) / 14,
                     child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Text(_error!),
-                    ),
-                  ),
-                if (_loading) const LoadingJobs(),
-                if (!_loading && _jobs.isEmpty && _error == null)
-                  EmptyState(
-                    title: 'Công trình mới, cơ hội mới',
-                    message: 'Đăng công trình đầu tiên để kết nối với người thợ quanh bạn.',
-                    action: FilledButton.icon(
-                      onPressed: _create,
-                      icon: const Icon(Icons.add),
-                      label: const Text('Tạo công trình đầu tiên'),
-                    ),
-                  ),
-                if (!_loading)
-                  for (final job in _jobs)
-                    JobCard(
-                      job: job,
-                      action: Wrap(
-                        spacing: 12,
-                        runSpacing: 8,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          if (job.status == 'COMPLETED')
-                            OutlinedButton.icon(
-                              onPressed: () => Navigator.of(context).push(
-                                MaterialPageRoute<void>(
-                                  builder: (_) => JobPaymentsScreen(
-                                    api: widget.api,
-                                    job: job,
-                                  ),
-                                ),
-                              ),
-                              icon: const Icon(Icons.payments_outlined),
-                              label: const Text('Thanh toán thu nhập'),
+                          TextField(
+                            controller: _search,
+                            onChanged: (q) => setState(() => _query = q),
+                            decoration: const InputDecoration(
+                              prefixIcon: Icon(Icons.search),
+                              hintText: 'Tìm công trình của bạn…',
                             ),
-                          FilledButton.tonal(
-                            onPressed: () => _applicants(job),
-                            child: const Text('Xem & duyệt thợ'),
                           ),
-                          if (job.status == 'IN_PROGRESS')
-                            OutlinedButton.icon(
-                              onPressed: () => _complete(job),
-                              icon: const Icon(Icons.task_alt),
-                              label: const Text('Hoàn thành công trình'),
+                          const SizedBox(height: 8),
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: [
+                                for (final status in [
+                                  '',
+                                  'OPEN',
+                                  'IN_PROGRESS',
+                                  'COMPLETED',
+                                  'CANCELLED',
+                                ])
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 8),
+                                    child: ChoiceChip(
+                                      label: Text(
+                                        status.isEmpty
+                                            ? 'Tất cả'
+                                            : statusLabel(status),
+                                      ),
+                                      selected: status == _status,
+                                      onSelected: (_) =>
+                                          setState(() => _status = status),
+                                    ),
+                                  ),
+                              ],
                             ),
+                          ),
                         ],
                       ),
                     ),
+                  ),
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+                  sliver: SliverList.list(
+                    children: [
+                      if (_error != null)
+                        Card(
+                          color: Theme.of(context).colorScheme.errorContainer,
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Text(_error!),
+                          ),
+                        ),
+                      if (_loading) const LoadingJobs(),
+                      if (!_loading && _visibleJobs.isEmpty && _error == null)
+                        EmptyState(
+                          title: 'Công trình mới, cơ hội mới',
+                          message: 'Đăng công trình đầu tiên để kết nối với người thợ quanh bạn.',
+                          action: FilledButton.icon(
+                            onPressed: _create,
+                            icon: const Icon(Icons.add),
+                            label: const Text('Tạo công trình đầu tiên'),
+                          ),
+                        ),
+                      if (!_loading)
+                        for (final job in _visibleJobs)
+                          JobCard(
+                            job: job,
+                            action: Wrap(
+                              spacing: 12,
+                              runSpacing: 8,
+                              children: [
+                                if (job.status == 'COMPLETED')
+                                  OutlinedButton.icon(
+                                    onPressed: () => Navigator.of(context).push(
+                                      MaterialPageRoute<void>(
+                                        builder: (_) => JobPaymentsScreen(
+                                          api: widget.api,
+                                          job: job,
+                                        ),
+                                      ),
+                                    ),
+                                    icon: const Icon(Icons.payments_outlined),
+                                    label: const Text('Thanh toán thu nhập'),
+                                  ),
+                                FilledButton.tonal(
+                                  onPressed: () => _applicants(job),
+                                  child: const Text('Xem & duyệt thợ'),
+                                ),
+                                if (job.status == 'IN_PROGRESS')
+                                  OutlinedButton.icon(
+                                    onPressed: () => _complete(job),
+                                    icon: const Icon(Icons.task_alt),
+                                    label: const Text('Hoàn thành công trình'),
+                                  ),
+                              ],
+                            ),
+                          ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),

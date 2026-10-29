@@ -86,6 +86,45 @@ class WorkerApi extends ApiService {
 
 void main() {
   testWidgets(
+    'sticky search filters local results without changing server filters',
+    (tester) async {
+      final api = WorkerApi();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: WorkerHomeScreen(api: api, location: FixedLocation()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'không khớp');
+      await tester.pumpAndSettle();
+      expect(find.text('Xây nhà phố'), findsNothing);
+      await tester.tap(find.byTooltip('Xóa tìm kiếm'));
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text('Xây nhà phố'),
+        160,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(find.text('Xây nhà phố'), findsOneWidget);
+      expect(find.byType(TextField).hitTestable(), findsOneWidget);
+      await tester.ensureVisible(find.text('Xem chi tiết'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Xem chi tiết'));
+      await tester.pumpAndSettle();
+      expect(
+        find
+            .descendant(
+              of: find.byKey(const ValueKey('job-detail-actions')),
+              matching: find.byType(FilledButton),
+            )
+            .hitTestable(),
+        findsOneWidget,
+      );
+      await tester.pumpWidget(const SizedBox());
+      api.dispose();
+    },
+  );
+  testWidgets(
     'offline skips GPS and job discovery until the server confirms online',
     (tester) async {
       final api = WorkerApi()..online = false;
@@ -101,7 +140,11 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('availability-switch')));
       await tester.pumpAndSettle();
       expect(api.online, isTrue);
-      await tester.scrollUntilVisible(find.text('Xây nhà phố'), 180);
+      await tester.scrollUntilVisible(
+        find.text('Xây nhà phố'),
+        180,
+        scrollable: find.byType(Scrollable).first,
+      );
       expect(find.text('Xây nhà phố'), findsOneWidget);
       api.dispose();
     },
@@ -160,7 +203,11 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.scrollUntilVisible(find.text('Xây nhà phố'), 180);
+      await tester.scrollUntilVisible(
+        find.text('Xây nhà phố'),
+        180,
+        scrollable: find.byType(Scrollable).first,
+      );
       expect(find.text('Xây nhà phố'), findsOneWidget);
       await tester.ensureVisible(find.text('Nhận việc'));
       await tester.pumpAndSettle();
@@ -185,13 +232,12 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Tất cả'));
+    await tester.tap(find.widgetWithText(ChoiceChip, 'Phụ hồ'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Phụ hồ').last);
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Gần nhất'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Lương cao nhất').last);
+    await tester.ensureVisible(
+      find.widgetWithText(FilterChip, 'Lương cao nhất'),
+    );
+    await tester.tap(find.widgetWithText(FilterChip, 'Lương cao nhất'));
     await tester.pumpAndSettle();
     expect(api.lastJobType, 'Phụ hồ');
     expect(api.lastSort, 'SALARY_DESC');

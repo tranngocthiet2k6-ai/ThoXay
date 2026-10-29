@@ -52,7 +52,12 @@ void main() {
     final api = ContractorApi();
     await tester.pumpWidget(MaterialApp(home: ContractorHomeScreen(api: api)));
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.text('Xem & duyệt thợ'));
+    await tester.scrollUntilVisible(
+      find.text('Xem & duyệt thợ'),
+      180,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Xem & duyệt thợ'));
     await tester.pumpAndSettle();
     expect(find.text('Nguyễn Văn Thợ'), findsOneWidget);
