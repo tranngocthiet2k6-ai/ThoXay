@@ -123,6 +123,9 @@ void main() {
     expect(find.text('500.000 đ'), findsOneWidget);
     expect(find.textContaining('Ký quỹ thấp hơn'), findsOneWidget);
     await tester.scrollUntilVisible(find.text('Tải giao dịch cũ'), 180);
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Tải giao dịch cũ'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Tải giao dịch cũ'));
     await tester.pumpAndSettle();
     expect(api.cursor, 2);

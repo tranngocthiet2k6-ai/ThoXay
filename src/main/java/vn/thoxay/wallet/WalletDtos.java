@@ -19,8 +19,8 @@ public final class WalletDtos {
     public record Balance(long mainBalance,long escrowBalance,long heldBalance,long minimumEscrow,boolean lowEscrow,String currency) { }
     public record Request(Long id,Long userId,String fullName,String kind,String status,long amount,
         String transferReference,String bankName,String bankAccount,String accountName,String externalReference,
-        String note,Instant createdAt,Instant processedAt) {
-        public static Request of(WalletRequest r) {return new Request(r.getId(),r.getUser().getId(),r.getUser().getFullName(),r.getKind().name(),r.getStatus().name(),r.getAmount(),r.getTransferReference(),r.getBankName(),r.getBankAccount(),r.getAccountName(),r.getExternalReference(),r.getNote(),r.getCreatedAt(),r.getProcessedAt());}
+        String note,Instant createdAt,Instant processedAt,String depositReference) {
+        public static Request of(WalletRequest r) {return new Request(r.getId(),r.getUser().getId(),r.getUser().getFullName(),r.getKind().name(),r.getStatus().name(),r.getAmount(),r.getTransferReference(),r.getBankName(),r.getBankAccount(),r.getAccountName(),r.getExternalReference(),r.getNote(),r.getCreatedAt(),r.getProcessedAt(),r.getDepositReference());}
     }
     public record Entry(Long id,String kind,long amount,long mainDelta,long escrowDelta,long heldDelta,
         long mainAfter,long escrowAfter,long heldAfter,String description,Instant createdAt) {

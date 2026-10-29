@@ -16,6 +16,7 @@ import '../models/scheduling.dart';
 import '../models/crew.dart';
 import '../models/portfolio_photo.dart';
 import '../models/attendance.dart';
+import '../models/deposit.dart';
 import 'location_service.dart';
 import 'chat_connection.dart';
 import 'kyc_camera.dart';
@@ -29,6 +30,18 @@ class ApiException implements Exception {
 }
 
 class ApiService extends ChangeNotifier {
+  Future<Deposit> createDeposit(int amount, String clientRequestId) async =>
+      Deposit.fromJson(
+        await _request(
+          'POST',
+          '/api/wallet/deposits',
+          body: {'amount': amount, 'clientRequestId': clientRequestId},
+        ) as Map<String, dynamic>,
+      );
+  Future<Deposit> deposit(int id) async => Deposit.fromJson(
+    await _request('GET', '/api/wallet/deposits/$id') as Map<String, dynamic>,
+  );
+
   Future<AttendancePage> attendance(
     int id, {
     DateTime? beforeDay,

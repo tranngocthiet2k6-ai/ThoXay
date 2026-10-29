@@ -81,3 +81,9 @@ Thêm attendance_records / attendance_shift_codes / work_logs, version ảnh,
 `jobs.attendance_required NOT NULL DEFAULT FALSE`; không sinh ngày công cho đơn
 cũ. JobService bật cờ cho công trình tạo mới. CHECK work_days mở rộng 366 ngày,
 không sửa khoản đã thanh toán. SQL: `migrations/016_attendance_work_logs.sql`.
+
+## V17 — Ngân hàng nhận tiền và VietQR
+
+Thêm receiving_bank_settings/audit, cột nullable receiving_bank_bin,
+deposit_reference, qr_payload và unique index mã đối soát. Không seed ngân hàng,
+không đổi số dư hoặc tạo QR cho giao dịch legacy. SQL: `migrations/017_vietqr_deposits.sql`.

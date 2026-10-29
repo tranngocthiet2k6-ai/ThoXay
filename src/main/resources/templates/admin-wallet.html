@@ -4,6 +4,7 @@
 <body><main class="container wallet-main py-4" data-filter-panel>
   <a class="btn btn-outline-secondary mb-4" th:href="@{/admin/dashboard}">← Tổng quan quản trị</a>
   <h1 class="h2">Đối soát nạp / rút tiền</h1>
+  <a th:href="@{/admin/wallet/bank-settings}" class="btn btn-primary mb-3">Ngân hàng nhận tiền VietQR</a>
   <p class="text-secondary">Kiểm tra tiền thực nhận hoặc tiền đã chuyển tới đúng tài khoản trước khi duyệt. Ứng dụng chưa tự động chuyển tiền ngân hàng.</p>
   <div th:if="${success}" class="alert alert-success" role="status" th:text="${success}"></div>
   <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
@@ -18,7 +19,8 @@
   <article class="card shadow-sm border-0 p-4 mb-4" th:each="r:${queue.items}" data-filter-row data-filter-state="PENDING" th:attr="data-filter-kind=${r.kind}">
     <div class="d-flex flex-wrap justify-content-between gap-2"><h2 class="h5"><span th:text="${r.kind == 'TOP_UP' ? 'Nạp tiền' : 'Rút tiền'}"></span> #<span th:text="${r.id}"></span></h2><strong class="text-success"><span th:text="${#numbers.formatInteger(r.amount,1,'POINT')}"></span> đ</strong></div>
     <p><strong th:text="${r.fullName}"></strong> · Tài khoản #<span th:text="${r.userId}"></span> · <span th:text="${r.createdAt}"></span></p>
-    <p th:if="${r.kind == 'TOP_UP'}">Mã / nội dung do người nạp cung cấp: <strong th:text="${r.transferReference}"></strong></p>
+    <p th:if="${r.kind == 'TOP_UP' and r.depositReference == null}">Mã / nội dung do người nạp cung cấp: <strong th:text="${r.transferReference}"></strong></p>
+    <div th:if="${r.depositReference != null}" class="alert alert-info"><strong th:text="'Nạp VietQR · Nội dung: ' + ${r.depositReference}"></strong><div th:text="'Ngân hàng nhận tại lúc tạo: ' + ${r.bankName} + ' · ' + ${r.bankAccount} + ' · ' + ${r.accountName}"></div></div>
     <div th:if="${r.kind == 'WITHDRAW'}" class="alert alert-warning">Tiền đã được giữ chỗ. Chỉ xác nhận sau khi chuyển tiền thực tế đến: <strong th:text="${r.bankName + ' · ' + r.bankAccount + ' · ' + r.accountName}"></strong></div>
     <div class="row g-3"><div class="col-md-7">
       <form th:action="@{/admin/wallet/requests/{id}/review(id=${r.id})}" method="post">

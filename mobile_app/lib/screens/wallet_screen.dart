@@ -10,6 +10,7 @@ import '../models/models.dart';
 import '../services/api_service.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/wallet_operation_dialog.dart';
+import '../widgets/deposit_dialog.dart';
 
 class WalletScreen extends StatefulWidget {
   const WalletScreen({super.key, required this.api});
@@ -95,6 +96,15 @@ class _WalletScreenState extends State<WalletScreen> {
       );
     }
     await _load();
+  }
+
+  Future<void> _deposit([int? id]) async {
+    if (_busy) return;
+    await showDialog<bool>(
+      context: context,
+      builder: (_) => DepositDialog(api: widget.api, requestId: id),
+    );
+    if (mounted) await _load();
   }
 
   Widget _smallBalance(String title, int amount, IconData icon) => Expanded(
@@ -293,6 +303,11 @@ class _WalletScreenState extends State<WalletScreen> {
                 runSpacing: 12,
                 children: [
                   OutlinedButton.icon(
+                    onPressed: _busy ? null : () => _deposit(),
+                    icon: const Icon(Icons.qr_code_2),
+                    label: const Text('Nạp tiền bằng VietQR'),
+                  ),
+                  OutlinedButton.icon(
                     onPressed: _busy || balance.main < 1000
                         ? null
                         : () => _operate('LOCK'),
@@ -411,6 +426,12 @@ class _WalletScreenState extends State<WalletScreen> {
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                         const SizedBox(height: 8),
+                        if (r.depositReference != null)
+                          TextButton.icon(
+                            onPressed: _busy ? null : () => _deposit(r.id),
+                            icon: const Icon(Icons.qr_code_2),
+                            label: const Text('Chi tiết nạp VietQR'),
+                          ),
                         Chip(
                           backgroundColor: r.status == 'APPROVED'
                               ? Colors.green.shade50

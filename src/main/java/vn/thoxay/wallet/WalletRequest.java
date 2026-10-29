@@ -6,7 +6,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import java.time.Instant;
 
-@Entity @Table(name="wallet_requests", uniqueConstraints={@UniqueConstraint(columnNames={"user_id","client_request_id"}),@UniqueConstraint(columnNames="external_reference")}) @Getter @Setter
+@Entity @Table(name="wallet_requests", uniqueConstraints={@UniqueConstraint(columnNames={"user_id","client_request_id"}),@UniqueConstraint(columnNames="external_reference"),@UniqueConstraint(columnNames="deposit_reference")}) @Getter @Setter
 @org.hibernate.annotations.Check(constraints="amount BETWEEN 1000 AND 100000000")
 public class WalletRequest {
     public enum Kind { TOP_UP, WITHDRAW }
@@ -26,4 +26,7 @@ public class WalletRequest {
     @ManyToOne(fetch=FetchType.LAZY) @JoinColumn(name="processed_by") @OnDelete(action=OnDeleteAction.SET_NULL) private User processedBy;
     @Column(name="created_at",nullable=false,updatable=false) private Instant createdAt=Instant.now();
     @Column(name="processed_at") private Instant processedAt;
+    @Column(name="receiving_bank_bin",length=6) private String receivingBankBin;
+    @Column(name="deposit_reference",length=25) private String depositReference;
+    @Column(name="qr_payload",columnDefinition="TEXT") private String qrPayload;
 }

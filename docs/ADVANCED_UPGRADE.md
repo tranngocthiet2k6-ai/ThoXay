@@ -18,7 +18,7 @@ lightbox/bộ lọc/KPI Admin. Các phần này được mở rộng, không t�
 - [x] Bản đồ ghim lương, 2km, sửa vị trí, chỉ đường, link/QR công trình; lưu việc/thợ quen.
 - [x] Tổ đội có mời/xác nhận thành viên và xác nhận công trình; duyệt nguyên nhóm an toàn.
 - [x] Chấm công GPS/QR, ảnh cuối ngày, nghiệm thu và kiểm tra ngày công khi thanh toán.
-- [ ] VietQR nội bộ, ngân hàng do Admin cấu hình, mã đối soát và snapshot tài khoản nhận.
+- [x] VietQR nội bộ, ngân hàng do Admin cấu hình, mã đối soát và snapshot tài khoản nhận.
 - [ ] SOS/sự cố/tranh chấp, cảnh báo Admin ưu tiên, lịch sử xử lý.
 - [x] Ảnh portfolio từ thiết bị, kiểm tra ảnh và lưu bền vững.
 - [ ] Chat ảnh/GPS, hộp thư và số tin chưa đọc thật.
@@ -194,3 +194,37 @@ Tài liệu tích hợp: [qr_flutter](https://pub.dev/documentation/qr_flutter/l
   desktop với fixture. Camera quét QR cần kiểm tra thêm trên thiết bị thật.
 
 Tham khảo tích hợp camera QR: [mobile_scanner](https://pub.dev/packages/mobile_scanner).
+
+## Checkpoint nạp tiền VietQR
+
+- Admin vào **Đối soát ví > Ngân hàng nhận tiền VietQR** (`/admin/wallet/bank-settings`),
+  nhập BIN 6 chữ số, tên ngân hàng, tài khoản nhận (giữ số 0 đầu, tối đa 19 ký tự
+  chữ/số), tên chủ tài khoản, đối chiếu và chọn Bật. Mặc định chưa có cấu hình/bị tắt.
+  Tất cả giá trị thử nghiệm chỉ ở test/QA, không seed tài khoản ngân hàng nhận tiền.
+- Mỗi lần đổi lưu audit và kiểm tra version, chặn ghi đè cấu hình vừa bị Admin
+  khác thay. Tắt cấu hình ngừng tạo QR mới. Yêu cầu đã tạo vẫn giữ thông tin gốc
+  để đối soát, kể cả sau đổi/tắt cấu hình.
+- Flutter Ví có **Nạp tiền bằng VietQR**, tạo yêu cầu với số tiền và idempotency key.
+  Backend sinh nội dung `TX{requestId base36}` duy nhất, snapshot ngân hàng và payload
+  NAPAS QRIBFTTA; Flutter vẽ QR bằng qr_flutter. Không cộng số dư khi tạo/xem/quét QR.
+- Lịch sử yêu cầu cho xem lại mã, số tiền và ngân hàng snapshot. Yêu cầu đã xử lý
+  ẩn QR/chỉ dẫn chuyển tiền. Dòng yêu cầu trong Admin hiển thị nội dung đối soát
+  do server sinh và ngân hàng nhận tại lúc tạo.
+- Quy trình nạp/rút thủ công hiện có giữ nguyên. Admin vẫn xác nhận tiền thực nhận,
+  đúng tài khoản/số tiền/nội dung và nhập mã giao dịch ngân hàng không dùng lại.
+  Gửi lại cùng yêu cầu không cộng hai lần; thay số tiền với cùng key bị chặn.
+- API: `POST /api/wallet/deposits` (amount/clientRequestId), `GET
+  /api/wallet/deposits/{id}` (chỉ chủ yêu cầu hoặc Admin), `GET/PUT
+  /api/admin/wallet/bank-settings` (chỉ Admin).
+- V17 thêm cấu hình/audit và các cột nullable receiving_bank_bin, deposit_reference,
+  qr_payload của wallet_requests. Dữ liệu ví và giao dịch cũ giữ nguyên.
+- Kiểm chứng: 104 test Backend, 79 test Flutter; JAR/Web release/analyze pass,
+  production-profile QA health UP với V17. Payload mẫu QA được giải mã độc lập
+  bằng @viet-qr/core 1.4.0: CRC, BIN/tài khoản, số tiền, nội dung đều khớp. Cần Admin
+  nhập ngân hàng thật và thử quét đối chiếu người nhận bằng ứng dụng ngân hàng trước
+  khi dùng trong vận hành; tác vụ này chưa cấu hình/chuyển tiền thực tế.
+
+Nguồn định dạng: [VietQR account/BIN](https://www.vietqr.io/qr-dong),
+[field definitions của vietqr_core](https://github.com/iamv4g/vietqr.dart/blob/main/packages/vietqr_core/vietqr_field_definitions_en.md).
+Tên người nhận được hiển thị để đối chiếu, không phải trường xác minh chủ tài khoản
+trong payload chuyển khoản QRIBFTTA.

@@ -28,10 +28,11 @@ class WalletRequest {
       status = j['status'] as String,
       amount = (j['amount'] as num).toInt(),
       note = j['note'] as String?,
+      depositReference = j['depositReference'] as String?,
       createdAt = DateTime.parse(j['createdAt'] as String);
   final int id, amount;
   final String kind, status;
-  final String? note;
+  final String? note, depositReference;
   final DateTime createdAt;
 }
 
