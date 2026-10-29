@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tho_xay_mobile/main.dart';
+import 'package:tho_xay_mobile/screens/register_screen.dart';
 import 'package:tho_xay_mobile/services/api_service.dart';
 import 'package:tho_xay_mobile/theme/app_theme.dart';
 import 'package:tho_xay_mobile/theme/appearance_controller.dart';
@@ -12,6 +13,44 @@ double _contrast(Color a, Color b) =>
     (math.max(a.computeLuminance(), b.computeLuminance()) + .05) /
     (math.min(a.computeLuminance(), b.computeLuminance()) + .05);
 void main() {
+  testWidgets(
+    'registration previews role colors while retaining dark and outdoor display modes',
+    (tester) async {
+      SharedPreferences.setMockInitialValues({});
+      final controller = AppearanceController();
+      await controller.setMode(DisplayMode.dark);
+      final api = ApiService();
+      await tester.pumpWidget(ThoXayApp(api: api, appearance: controller));
+      await tester.pumpAndSettle();
+      final root = tester.element(find.byType(Scaffold).first);
+      Navigator.of(
+        root,
+      ).push(MaterialPageRoute<void>(builder: (_) => RegisterScreen(api: api)));
+      await tester.pumpAndSettle();
+      ThemeData registrationTheme() =>
+          Theme.of(tester.element(find.text('Bắt đầu kết nối')));
+      expect(registrationTheme().brightness, Brightness.dark);
+      await tester.ensureVisible(find.text('Tôi là chủ thầu'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Tôi là chủ thầu'));
+      await tester.pumpAndSettle();
+      expect(
+        registrationTheme().colorScheme.primary,
+        AppTheme.contractorEmerald,
+      );
+      expect(registrationTheme().brightness, Brightness.dark);
+      await controller.setMode(DisplayMode.outdoor);
+      await tester.pumpAndSettle();
+      expect(registrationTheme().extension<AppPalette>()!.outdoor, isTrue);
+      expect(
+        registrationTheme().colorScheme.primary,
+        AppTheme.contractorEmerald,
+      );
+      await tester.pumpWidget(const SizedBox());
+      controller.dispose();
+      api.dispose();
+    },
+  );
   test('all display modes preserve role colors and readable semantic text', () {
     for (final role in ['ROLE_WORKER', 'ROLE_CONTRACTOR']) {
       for (final mode in DisplayMode.values) {

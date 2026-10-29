@@ -401,11 +401,11 @@ xác nhận các ngày, số tiền và loại tiền nạp đúng. Không có l
 ## Kiểm chứng phát hành
 
 - 125 test Backend pass dưới UTC mặc định, không skip khi bật PostgreSQL QA.
-- 107 test Flutter và 12 test JavaScript/Admin/triển khai pass; analyzer sạch,
+- 108 test Flutter và 12 test JavaScript/Admin/triển khai pass; analyzer sạch,
   JAR/Web release và kiểm tra workflow bằng actionlint thành công.
-- Mã Flutter ở checkpoint 06db6f9 đã build APK thành công trên GitHub Actions;
-  các checkpoint sửa SQL/timezone sau đó không thay đổi mã Flutter. Các lần push
-  tiếp theo tiếp tục build APK với API https://thoxay-api.onrender.com.
+- APK được build tự động trên GitHub Actions với API https://thoxay-api.onrender.com.
+  Các checkpoint trước đã build thành công; artifact và trạng thái của mã mới nhất
+  được đối chiếu tại Actions sau mỗi lần push.
 - Pipeline chạy cả scripts/tests/*.test.cjs. Concurrency tách theo workflow/nhánh,
   hủy run đang chạy khi có push mới cùng nhóm, ưu tiên artifact của mã mới nhất.
   [Trạng thái và APK hiện tại](https://github.com/tranngocthiet2k6-ai/ThoXay/actions)
@@ -419,3 +419,12 @@ xác nhận các ngày, số tiền và loại tiền nạp đúng. Không có l
 - Hai thay đổi riêng ở báo cáo Word/application.properties vẫn ngoài checkpoint.
 
 Tham khảo concurrency: [GitHub Actions](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency).
+
+## Hồi quy theme xem trước vai trò ở Đăng ký
+
+Theme riêng của màn hình Đăng ký từng lấy mặc định sáng, ghi đè Dark/Outdoor của
+người dùng. Đã có test điều hướng thật tái hiện lỗi, sau đó cho theme xem trước
+vai trò kế thừa brightness/palette Outdoor từ cha. Đổi vai trò vẫn đổi đúng màu
+Cam/Xanh mà giữ chế độ hiển thị; đổi mode khi màn hình đang mở cũng cập nhật.
+Toàn bộ 108 Flutter pass, analyzer/Web release pass; Chrome QA 390/1440px ở ba
+mode và xem trước hai vai trò, không gửi form hoặc tạo tài khoản thật.

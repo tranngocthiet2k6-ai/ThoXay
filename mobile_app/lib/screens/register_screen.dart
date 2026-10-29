@@ -54,7 +54,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) => Theme(
-    data: AppTheme.forRole(_role),
+    data: AppTheme.forRole(
+      _role,
+      brightness: Theme.of(context).brightness,
+      outdoor: AppPalette.of(context).outdoor,
+    ),
     child: Builder(
       builder: (context) => AuthShell(
         api: widget.api,
