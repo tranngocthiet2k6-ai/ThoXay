@@ -21,7 +21,7 @@ lightbox/bộ lọc/KPI Admin. Các phần này được mở rộng, không t�
 - [x] VietQR nội bộ, ngân hàng do Admin cấu hình, mã đối soát và snapshot tài khoản nhận.
 - [x] SOS/sự cố/tranh chấp, cảnh báo Admin ưu tiên, lịch sử xử lý.
 - [x] Ảnh portfolio từ thiết bị, kiểm tra ảnh và lưu bền vững.
-- [ ] Chat ảnh/GPS, hộp thư và số tin chưa đọc thật.
+- [x] Chat ảnh/GPS, hộp thư và số tin chưa đọc thật.
 - [ ] Thời tiết Open-Meteo, cache và trạng thái mất kết nối.
 - [ ] Sáng/Tối/Outdoor, hoàn thiện các màn hình Flutter và công cụ Admin.
 - [ ] Toàn bộ test, build Web/APK, kiểm tra UI, migration lặp an toàn và push cuối.
@@ -281,3 +281,25 @@ trong payload chuyển khoản QRIBFTTA.
 - Kiểm chứng: 112 test Backend (gồm PostgreSQL migration), 85 test Flutter pass;
   analyze không lỗi và JAR/Web release build thành công. Hộp thư/số chưa đọc là
   checkpoint kế tiếp, chưa đánh dấu hoàn tất nhóm chat tổng thể.
+
+## Checkpoint hộp thư và tin chưa đọc
+
+- `GET /api/messages/inbox?beforeId=` trả tối đa 30 cuộc trò chuyện theo tin mới
+  nhất, kèm công trình, tên người trao đổi, tóm tắt và số tin chưa đọc. Không trả
+  điện thoại trong metadata hộp thư. Chỉ cặp ACCEPTED/tài khoản hoạt động được tính.
+- `GET /api/messages/unread` đếm tin gửi đến sau con trỏ đọc của chính tài khoản.
+  Badge thông báo và badge chat dùng hai nguồn độc lập. REST polling mỗi 20 giây
+  khi app/tab đang hiển thị; chat mở vẫn nhận tin trực tiếp qua WebSocket.
+- `PUT /api/jobs/{id}/messages/read` nhận peerId/lastReadMessageId. Con trỏ phải là
+  tin thực thuộc đúng cặp và công trình; không chấp nhận ID tương lai hoặc tin của
+  người/công trình khác. Khóa job và cập nhật max bảo đảm không lùi khi nhiều thiết
+  bị ghi nhận đọc. V20 tạo chat_read_states, không sửa nội dung/lịch sử chat cũ.
+- Flutter chỉ xác nhận đọc khi màn hình chat đang hiện, app foreground và ở cuối
+  danh sách. Cuộn xem tin cũ không tự đọc tin vừa đến. Hộp thư có empty state/CTA,
+  skeleton, kéo làm mới, phân trang và giữ dữ liệu đã thấy khi mất mạng.
+- Navigation thêm Tin nhắn với badge thực; màn hình nhỏ chỉ hiện nhãn mục đang
+  chọn để sáu biểu tượng không chen chúc, desktop hiện đầy đủ nhãn.
+- Kiểm chứng: 114 test Backend, 89 test Flutter pass; analyze/JAR/Web release pass.
+  PostgreSQL QA kiểm thử cả truy vấn SQL và REST production profile: V20 migrate,
+  projection hộp thư, quyền metadata và con trỏ/số chưa đọc chính xác. Fixture tạm
+  đã xóa, không tạo tài khoản/tin nhắn trên production.

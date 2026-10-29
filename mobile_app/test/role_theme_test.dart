@@ -43,6 +43,9 @@ void main() {
               200,
             );
           }
+          if (request.url.path == '/api/messages/unread') {
+            return http.Response('{"unreadCount":0}', 200);
+          }
           if (request.url.path.contains('notifications')) {
             return http.Response(
               '{"items":[],"hasMore":false,"unreadCount":0}',

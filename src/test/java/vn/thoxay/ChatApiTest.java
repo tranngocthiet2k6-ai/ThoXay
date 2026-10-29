@@ -123,6 +123,59 @@ class ChatApiTest {
             .content(location.replace(owner.getId().toString(), worker.getId().toString()))).andExpect(status().isForbidden());
     }
 
+    @Test void inboxAndReadReceiptsArePerPairMonotonicAndRejectForeignOrFutureCursor() throws Exception {
+        long first = send(owner, job, worker, "Một", "inbox1").path("id").asLong();
+        long second = send(owner, job, worker, "Hai", "inbox2").path("id").asLong();
+        long other = send(owner, job, otherWorker, "Riêng cho thợ khác", "inbox-other").path("id").asLong();
+        mvc.perform(get("/api/messages/inbox").header("Authorization", token(worker)))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.unreadCount").value(2))
+            .andExpect(jsonPath("$.conversations.length()").value(1))
+            .andExpect(jsonPath("$.conversations[0].peerId").value(owner.getId()))
+            .andExpect(jsonPath("$.conversations[0].latest.id").value(second))
+            .andExpect(jsonPath("$.conversations[0].job.contractorPhone").isEmpty());
+        read(worker, job, owner, second, 200);
+        read(worker, job, owner, first, 200); // A late receipt never rewinds the cursor.
+        mvc.perform(get("/api/messages/unread").header("Authorization", token(worker)))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.unreadCount").value(0));
+        mvc.perform(get("/api/messages/unread").header("Authorization", token(otherWorker)))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.unreadCount").value(1));
+        read(worker, job, owner, other, 400); read(worker, job, owner, Long.MAX_VALUE, 400);
+        Job different = job(); accept(different, worker);
+        long foreign = send(owner, different, worker, "Công trình khác", "inbox-other-job").path("id").asLong();
+        read(worker, job, owner, foreign, 400);
+        send(worker, job, owner, "Trả lời", "reply-inbox");
+        mvc.perform(get("/api/messages/unread").header("Authorization", token(owner)))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.unreadCount").value(1));
+        for (User actor : List.of(admin, stranger)) {
+            read(actor, job, worker, second, 403);
+        }
+        mvc.perform(get("/api/messages/inbox").header("Authorization", token(admin))).andExpect(status().isForbidden());
+    }
+
+    @Test void inboxPaginatesConversationsByLatestMessageAndExcludesRevokedPairs() throws Exception {
+        long older = send(owner, job, worker, "Cũ", "inbox-old").path("id").asLong();
+        Job another = job(); accept(another, worker);
+        long newer = send(owner, another, worker, "Mới", "inbox-new").path("id").asLong();
+        mvc.perform(get("/api/messages/inbox").header("Authorization", token(worker)).param("beforeId", String.valueOf(newer)))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.conversations.length()").value(1))
+            .andExpect(jsonPath("$.conversations[0].latest.id").value(older));
+        var application = applications.findByJobIdOrderByAppliedAtDesc(another.getId()).stream()
+            .filter(a -> a.getWorker().getId().equals(worker.getId())).findFirst().orElseThrow();
+        application.setStatus(ApplicationStatus.CANCELLED); applications.saveAndFlush(application);
+        mvc.perform(get("/api/messages/unread").header("Authorization", token(worker)))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.unreadCount").value(1));
+        owner.setActive(false); users.saveAndFlush(owner);
+        mvc.perform(get("/api/messages/inbox").header("Authorization", token(worker)))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.conversations.length()").value(0))
+            .andExpect(jsonPath("$.unreadCount").value(0));
+    }
+
+    private void read(User actor, Job job, User peer, long messageId, int status) throws Exception {
+        mvc.perform(put(path(job) + "/read").header("Authorization", token(actor)).contentType("application/json")
+            .content(json.writeValueAsString(Map.of("peerId", peer.getId(), "lastReadMessageId", messageId))))
+            .andExpect(status().is(status));
+    }
+
     private JsonNode upload(byte[] bytes, String key, String caption) throws Exception {
         return json.readTree(mvc.perform(multipart(path(job) + "/photo")
             .file(new MockMultipartFile("photo", "photo.png", "image/png", bytes))

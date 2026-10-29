@@ -40,12 +40,15 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
   final _draft = TextEditingController();
   final _scroll = ScrollController();
   int _lastMessageId = 0;
+  int _lastRead = 0;
+  bool _reading = false, _foreground = true;
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _chat = ChatController(widget.api, widget.job.id, widget.peerId);
     _chat.addListener(_changed);
+    _scroll.addListener(_markVisible);
     _chat.start();
   }
 
@@ -57,6 +60,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
         (!_scroll.hasClients || _scroll.offset < 100);
     _lastMessageId = latest;
     setState(() {});
+    WidgetsBinding.instance.addPostFrameCallback((_) => _markVisible());
     if (scrollDown) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted && _scroll.hasClients) {
@@ -72,7 +76,37 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    _foreground = state == AppLifecycleState.resumed;
     if (state == AppLifecycleState.resumed) _chat.reconnect();
+  }
+
+  Future<void> _markVisible() async {
+    if (!mounted ||
+        _reading ||
+        !_foreground ||
+        _chat.loading ||
+        _chat.messages.isEmpty ||
+        !(ModalRoute.of(context)?.isCurrent ?? true) ||
+        (_scroll.hasClients && _scroll.offset > 8)) {
+      return;
+    }
+    final latest = _chat.messages.last.id;
+    if (latest <= _lastRead) return;
+    _reading = true;
+    try {
+      await widget.api.readMessages(widget.job.id, widget.peerId, latest);
+      _lastRead = latest;
+    } on ApiException {
+      // A failed read receipt leaves the badge intact and is retried on the next visible update.
+    } finally {
+      _reading = false;
+      if (mounted &&
+          _lastRead == latest &&
+          _chat.messages.isNotEmpty &&
+          _chat.messages.last.id > latest) {
+        WidgetsBinding.instance.addPostFrameCallback((_) => _markVisible());
+      }
+    }
   }
 
   Future<void> _send() async {
@@ -97,6 +131,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
         location: widget.location,
       ),
     );
+    if (mounted) _markVisible();
   }
 
   Future<void> _openLocation(double lat, double lng) async {
@@ -122,6 +157,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
     _chat.removeListener(_changed);
     _chat.dispose();
     _draft.dispose();
+    _scroll.removeListener(_markVisible);
     _scroll.dispose();
     super.dispose();
   }

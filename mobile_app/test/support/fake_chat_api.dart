@@ -58,6 +58,16 @@ class FakeChatApi extends ApiService {
   final connections = <StreamController<Map<String, dynamic>>>[];
   final sentIds = <String>[];
   final historyQueries = <({int? after, int? before})>[];
+  final readIds = <int>[];
+  @override
+  Future<void> readMessages(
+    int jobId,
+    int peerId,
+    int lastReadMessageId,
+  ) async {
+    readIds.add(lastReadMessageId);
+  }
+
   Completer<MessagePage>? initialHistory;
   @override
   AuthSession? get session => loggedOut

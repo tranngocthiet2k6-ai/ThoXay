@@ -8,6 +8,7 @@ import '../services/api_service.dart';
 import '../screens/notifications_screen.dart';
 import '../screens/profile_screen.dart';
 import '../screens/wallet_screen.dart';
+import '../screens/chat_inbox_screen.dart';
 
 class HomeNavigation extends StatefulWidget {
   const HomeNavigation({
@@ -30,6 +31,8 @@ class HomeNavigation extends StatefulWidget {
 class _HomeNavigationState extends State<HomeNavigation>
     with WidgetsBindingObserver {
   int _unread = 0;
+  int _unreadChat = 0;
+  bool _foreground = true;
   bool _loading = false;
   Timer? _timer;
   @override
@@ -37,7 +40,7 @@ class _HomeNavigationState extends State<HomeNavigation>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) => _refresh());
-    _timer = Timer.periodic(const Duration(seconds: 45), (_) => _refresh());
+    _timer = Timer.periodic(const Duration(seconds: 20), (_) => _refresh());
   }
 
   @override
@@ -49,11 +52,13 @@ class _HomeNavigationState extends State<HomeNavigation>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    _foreground = state == AppLifecycleState.resumed;
     if (state == AppLifecycleState.resumed) _refresh();
   }
 
   Future<void> _refresh() async {
     if (_loading ||
+        !_foreground ||
         widget.api.session == null ||
         !mounted ||
         !(ModalRoute.of(context)?.isCurrent ?? true)) {
@@ -61,10 +66,30 @@ class _HomeNavigationState extends State<HomeNavigation>
     }
     _loading = true;
     try {
-      final page = await widget.api.notifications();
-      if (mounted) setState(() => _unread = page.unreadCount);
-    } on ApiException {
-      // Keep the last confirmed count; badge failures never hide the home page.
+      final userId = widget.api.session!.userId;
+      Future<void> notifications() async {
+        try {
+          final page = await widget.api.notifications();
+          if (mounted && widget.api.session?.userId == userId) {
+            setState(() => _unread = page.unreadCount);
+          }
+        } on ApiException {
+          /* Retain the last confirmed count. */
+        }
+      }
+
+      Future<void> messages() async {
+        try {
+          final count = await widget.api.unreadMessages();
+          if (mounted && widget.api.session?.userId == userId) {
+            setState(() => _unreadChat = count);
+          }
+        } on ApiException {
+          /* Retain the last confirmed count. */
+        }
+      }
+
+      await Future.wait([notifications(), messages()]);
     } finally {
       _loading = false;
     }
@@ -85,6 +110,8 @@ class _HomeNavigationState extends State<HomeNavigation>
             ? WalletScreen(api: widget.api)
             : index == 3
             ? NotificationsScreen(api: widget.api)
+            : index == 5
+            ? ChatInboxScreen(api: widget.api)
             : ProfileScreen(api: widget.api),
       ),
     );
@@ -96,7 +123,9 @@ class _HomeNavigationState extends State<HomeNavigation>
     final bar = NavigationBar(
       selectedIndex: widget.selectedIndex,
       onDestinationSelected: _select,
-      labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+      labelBehavior: MediaQuery.sizeOf(context).width < 520
+          ? NavigationDestinationLabelBehavior.onlyShowSelected
+          : NavigationDestinationLabelBehavior.alwaysShow,
       destinations: [
         NavigationDestination(
           icon: Icon(
@@ -131,6 +160,14 @@ class _HomeNavigationState extends State<HomeNavigation>
         const NavigationDestination(
           icon: Icon(Icons.person_outline),
           label: 'Hồ sơ',
+        ),
+        NavigationDestination(
+          icon: Badge(
+            isLabelVisible: _unreadChat > 0,
+            label: Text(_unreadChat > 99 ? '99+' : '$_unreadChat'),
+            child: const Icon(Icons.forum_outlined),
+          ),
+          label: 'Tin nhắn',
         ),
       ],
     );

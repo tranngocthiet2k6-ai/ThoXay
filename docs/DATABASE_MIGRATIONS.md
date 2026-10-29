@@ -102,3 +102,10 @@ vào messages, cùng message_attachments (BYTEA tối đa 2 MB, FK CASCADE theo 
 CHECK phân biệt ba loại payload. Không sửa nội dung chat cũ. Migration thủ công
 `migrations/019_chat_media.sql` chạy lại an toàn; Flyway chạy một lần và validate
 checksum. Ảnh đọc bằng JWT theo đúng cặp chat đã ACCEPTED.
+
+### V20 — con trỏ đọc và hộp thư
+
+`V20__chat_inbox.sql` tạo chat_read_states, UNIQUE(user_id,job_id,peer_id), FK CASCADE
+và index messages(recipient_id,job_id,id). Chưa có con trỏ nghĩa là các tin gửi đến
+đang chưa đọc; không suy diễn đã đọc từ thông báo. Service kiểm tra ID tin thực và
+cặp chat, chỉ tiến con trỏ dưới khóa job. Migration thủ công 020 chạy lại an toàn.

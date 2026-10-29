@@ -87,6 +87,21 @@ class MigrationCompatibilityTest {
             assertThat(r.next()).isTrue();assertThat(r.getString(1)).isEqualTo("Legacy text");assertThat(r.getString(2)).isEqualTo("TEXT");
             assertThat(r.getObject(3)).isNull();assertThat(r.getObject(4)).isNull();assertThat(r.getObject(5)).isNull();
         }
+        // Run the shared inbox ACL on PostgreSQL too, not only H2's compatibility mode.
+        try(var c=connect();var s=c.createStatement()) {
+            c.setSchema(schema);
+            long owner;
+            try(var r=s.executeQuery("SELECT contractor_id FROM jobs")) { r.next(); owner=r.getLong(1); }
+            String acl=vn.thoxay.repository.MessageRepository.ACTIVE_PAIR.replace(":actor",String.valueOf(owner));
+            String count="SELECT COUNT(*) "+acl+"AND m.recipient_id="+owner+" AND m.id>COALESCE(r.last_read_message_id,0)";
+            try(var r=s.executeQuery(count)) { r.next(); assertThat(r.getLong(1)).isEqualTo(1); }
+            try(var r=s.executeQuery("SELECT MAX(m.id) AS latestId, SUM(CASE WHEN m.recipient_id="+owner+" AND m.id>COALESCE(r.last_read_message_id,0) THEN 1 ELSE 0 END) AS unreadCount "
+                +acl+"GROUP BY m.job_id,CASE WHEN m.sender_id="+owner+" THEN m.recipient_id ELSE m.sender_id END ORDER BY MAX(m.id) DESC")) {
+                assertThat(r.next()).isTrue(); assertThat(r.getLong("unreadCount")).isEqualTo(1);
+            }
+            s.executeUpdate("INSERT INTO chat_read_states(user_id,job_id,peer_id,last_read_message_id) SELECT recipient_id,job_id,sender_id,id FROM messages");
+            try(var r=s.executeQuery(count)) { r.next(); assertThat(r.getLong(1)).isZero(); }
+        }
         assertThat(migrations().migrate().migrationsExecuted).isZero();
     }
 }

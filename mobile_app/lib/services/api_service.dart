@@ -8,6 +8,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../models/models.dart';
 import '../models/chat_message.dart';
+import '../models/chat_inbox.dart';
 import '../models/app_notification.dart';
 import '../models/worker_profile.dart';
 import '../models/reputation.dart';
@@ -775,6 +776,35 @@ class ApiService extends ChangeNotifier {
       },
     ) as Map<String, dynamic>,
   );
+
+  Future<ChatInbox> chatInbox({int? beforeId}) async => ChatInbox.fromJson(
+    await _request(
+      'GET',
+      '/api/messages/inbox${beforeId == null ? '' : '?beforeId=$beforeId'}',
+    ) as Map<String, dynamic>,
+  );
+
+  Future<int> unreadMessages() async {
+    final data = await _request('GET', '/api/messages/unread');
+    if (data is! Map ||
+        data['unreadCount'] is! int ||
+        (data['unreadCount'] as int) < 0) {
+      throw const ApiException('Không đọc được số tin nhắn chưa đọc');
+    }
+    return data['unreadCount'] as int;
+  }
+
+  Future<void> readMessages(
+    int jobId,
+    int peerId,
+    int lastReadMessageId,
+  ) async {
+    await _request(
+      'PUT',
+      '/api/jobs/$jobId/messages/read',
+      body: {'peerId': peerId, 'lastReadMessageId': lastReadMessageId},
+    );
+  }
 
   Future<ChatConnection> connectChat(int jobId, int peerId) async {
     final auth = _requireSession();
