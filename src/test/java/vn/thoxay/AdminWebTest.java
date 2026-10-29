@@ -2,6 +2,8 @@ package vn.thoxay;
 
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mock.web.MockHttpSession;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -22,6 +24,7 @@ class AdminWebTest {
     @Autowired UserRepository users;
     @Autowired JobRepository jobs;
     @Autowired JobApplicationRepository applications;
+    @Autowired BCryptPasswordEncoder encoder;
     User admin, worker;
     @BeforeEach void setup() {
         admin = user("0944444441", Role.ROLE_ADMIN);
@@ -32,6 +35,28 @@ class AdminWebTest {
     @Test void anonymousCanSeeLoginButCannotSeeDashboard() throws Exception {
         mvc.perform(get("/admin/login")).andExpect(status().isOk()).andExpect(content().string(containsString("Số điện thoại quản trị")));
         mvc.perform(get("/admin/dashboard")).andExpect(status().is3xxRedirection());
+    }
+    @Test void missingOrInvalidLoginCsrfReturnsToFreshForm() throws Exception {
+        mvc.perform(post("/admin/login"))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrl("/admin/login?expired"));
+        mvc.perform(post("/admin/login").with(csrf().useInvalidToken()))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrl("/admin/login?expired"));
+        mvc.perform(get("/admin/login?expired"))
+            .andExpect(status().isOk())
+            .andExpect(content().string(containsString("Phiên đăng nhập đã hết hạn")))
+            .andExpect(content().string(containsString("name=\"_csrf\"")));
+    }
+    @Test void freshAdminLoginOpensDashboard() throws Exception {
+        admin.setPassword(encoder.encode("test-admin-password"));
+        users.saveAndFlush(admin);
+        var login = mvc.perform(post("/admin/login").with(csrf())
+                .param("phoneNumber", admin.getPhoneNumber()).param("password", "test-admin-password"))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrl("/admin/dashboard")).andReturn();
+        mvc.perform(get("/admin/dashboard").session((MockHttpSession) login.getRequest().getSession(false)))
+            .andExpect(status().isOk());
     }
     @Test @WithMockUser(username = "0944444442", roles = "WORKER")
     void workersCannotManageUsers() throws Exception {

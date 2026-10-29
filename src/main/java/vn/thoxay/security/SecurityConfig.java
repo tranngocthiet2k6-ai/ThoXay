@@ -13,6 +13,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.access.AccessDeniedHandlerImpl;
+import org.springframework.security.web.csrf.CsrfException;
 import org.springframework.web.cors.*;
 import java.util.List;
 
@@ -51,8 +53,17 @@ public class SecurityConfig {
 
     @Bean @Order(2)
     SecurityFilterChain web(HttpSecurity http, AuthenticationManager manager) throws Exception {
+        var forbidden = new AccessDeniedHandlerImpl();
         return http.authenticationManager(manager)
             .authorizeHttpRequests(a -> a.requestMatchers("/health", "/ws/chat", "/admin/**", "/", "/error", "/css/**", "/js/**", "/vendor/**").permitAll().anyRequest().denyAll())
+            .exceptionHandling(e -> e.accessDeniedHandler((request, response, exception) -> {
+                if (exception instanceof CsrfException && "POST".equals(request.getMethod())
+                        && (request.getContextPath() + "/admin/login").equals(request.getRequestURI())) {
+                    response.sendRedirect(request.getContextPath() + "/admin/login?expired");
+                    return;
+                }
+                forbidden.handle(request, response, exception);
+            }))
             .formLogin(f -> f.loginPage("/admin/login").loginProcessingUrl("/admin/login")
                 .usernameParameter("phoneNumber").defaultSuccessUrl("/admin/dashboard", true).permitAll())
             .logout(l -> l.logoutUrl("/admin/logout").logoutSuccessUrl("/admin/login?logout"))

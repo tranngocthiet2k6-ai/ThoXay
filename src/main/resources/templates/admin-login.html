@@ -13,6 +13,7 @@
     <h1 class="h3 fw-bold mb-2">Chào mừng trở lại</h1>
     <p class="text-secondary mb-4">Đăng nhập để quản lý tài khoản và công trình.</p>
     <div th:if="${param.error}" class="alert alert-danger" role="alert">Sai thông tin đăng nhập hoặc tài khoản đã bị khóa.</div>
+    <div th:if="${param.expired}" class="alert alert-warning" role="alert">Phiên đăng nhập đã hết hạn. Vui lòng nhập lại thông tin để tiếp tục.</div>
     <div th:if="${param.logout}" class="alert alert-success" role="status">Bạn đã đăng xuất thành công.</div>
     <form th:action="@{/admin/login}" method="post">
       <label class="form-label" for="phoneNumber">Số điện thoại quản trị</label>
