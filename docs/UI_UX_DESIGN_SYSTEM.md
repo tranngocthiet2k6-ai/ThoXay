@@ -67,3 +67,37 @@ Kiểm tra giao diện ở điện thoại 320/390px, tablet 768px và desktop r
 kiểm tra cả phóng lớn chữ, thao tác bàn phím và trạng thái dữ liệu trống.
 Không thay đổi Controller, Service, Entity, schema hoặc URL API trong đợt
 nâng cấp giao diện này.
+
+## Redesign Flutter Web/App theo skill web-design (L2)
+
+Phương án đã được người dùng duyệt trong `DESIGN.md` tại thư mục gốc.
+Đợt này chỉ đổi frontend Flutter và phần khởi động Flutter Web, giữ nguyên
+các tệp Thymeleaf/CSS/JS của Admin, Backend, models và ApiService.
+
+- Canvas trung tính `#F7F8FA`, bề mặt trắng, chữ đậm `#182230`; điểm nhấn
+  Thợ `#EA580C`, Chủ thầu `#059669`. Token tập trung tại `AppColors`/`AppTheme`.
+- Font Plus Jakarta Sans có hỗ trợ tiếng Việt được đóng gói trong app;
+  giấy phép OFL đi kèm trong `mobile_app/assets/fonts/`, không tải font runtime.
+- Auth desktop hai cột; mobile thu gọn phần thương hiệu và ưu tiên form.
+- Công trình hai cột khi vùng danh sách rộng từ 820px, một cột ở điện thoại.
+  Các trang tài chính/hồ sơ/thông báo giới hạn chiều rộng nội dung 840px.
+- L2 dùng reveal khi vào viewport, hover spotlight, pill/segmented controls
+  và minh họa công trình có parallax giới hạn; tôn trọng disableAnimations.
+  Không thêm thư viện animation hoặc ticker nền chạy vô hạn.
+- Context công trình trong Chat nằm dưới AppBar, không bị toolbar cắt mất.
+- Ví, thu nhập, thông báo, bảng xếp hạng, uy tín, hồ sơ, KYC và các dialog
+  dùng chung typography, border, card, trường nhập và trạng thái tương tác.
+- Flutter Web có trạng thái khởi động và favicon SVG theo thương hiệu;
+  loader tự gỡ khi nhận flutter-first-frame, có chế độ giảm chuyển động.
+
+Kiểm chứng đợt redesign: 66 test Backend tại checkpoint trước thay đổi;
+56 test Flutter pass; flutter analyze sạch; build Web release thành công.
+Test mới kiểm tra Auth 320/1440px khi chữ phóng 1.4 lần, reveal theo viewport,
+giảm chuyển động và lưới công trình một/hai cột. Kiểm tra Chromium headless
+ở 390px và 1440px cho Auth, Thợ, Chủ thầu, Ví và Hồ sơ; dữ liệu QA chỉ ở trình duyệt,
+không ghi vào database. Ảnh kiểm tra nằm trong `.local/redesign/` (không commit).
+
+Các checkpoint: `02a5a2d` trước redesign, `8024042` hệ thiết kế/Auth,
+`cc2081a` trang chủ/công trình, `3db4662` các màn hình và responsive.
+Hai chỉnh sửa riêng đang có trong báo cáo Word và application.properties
+được giữ nguyên ngoài các commit redesign.

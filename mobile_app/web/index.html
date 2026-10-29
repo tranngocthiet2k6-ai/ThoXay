@@ -19,6 +19,7 @@
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="Thợ Xây — Kết nối lao động phổ thông và chủ thầu.">
+  <meta name="theme-color" content="#EA580C">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
@@ -27,12 +28,36 @@
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="icon" type="image/svg+xml" href="brand.svg"/>
 
-  <title>Thợ Xây</title>
+  <title>ThoXay · Kết nối công trình</title>
   <link rel="manifest" href="manifest.json">
+  <style>
+    :root { --boot-bg: #f7f8fa; --boot-ink: #182230; --boot-muted: #64748b; --boot-accent: #ea580c; --boot-track: #e4e7ec; }
+    body { margin: 0; background: var(--boot-bg); }
+    #thoxay-boot { position: fixed; inset: 0; display: grid; place-content: center; gap: 16px; justify-items: center;
+      color: var(--boot-ink); background: var(--boot-bg); font: 14px/1.6 Arial, sans-serif; }
+    #thoxay-boot strong { font-size: 26px; letter-spacing: -1px; }
+    #thoxay-boot p { margin: 0; color: var(--boot-muted); }
+    .boot-track { width: 160px; height: 3px; background: var(--boot-track); overflow: hidden; border-radius: 4px; }
+    .boot-track::after { content: ''; display: block; width: 50%; height: 100%; background: var(--boot-accent); animation: boot-slide 1.2s ease-in-out infinite alternate; }
+    @keyframes boot-slide { from { transform: translateX(-50%); } to { transform: translateX(150%); } }
+    @media(prefers-reduced-motion: reduce) { .boot-track::after { animation: none; } }
+  </style>
 </head>
 <body>
+  <div id="thoxay-boot" role="status" aria-live="polite">
+    <img src="brand.svg" alt="" width="56" height="56">
+    <strong>ThoXay</strong>
+    <p>Đang mở không gian của bạn…</p>
+    <div class="boot-track" aria-hidden="true"></div>
+  </div>
+  <noscript>Vui lòng bật JavaScript để sử dụng ThoXay.</noscript>
+  <script>
+    window.addEventListener('flutter-first-frame', function () {
+      document.getElementById('thoxay-boot')?.remove();
+    }, {once: true});
+  </script>
   <!--
     You can customize the "flutter_bootstrap.js" script.
     This is useful to provide a custom configuration to the Flutter loader

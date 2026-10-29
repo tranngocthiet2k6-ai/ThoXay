@@ -137,3 +137,12 @@ Không nhập mã React/Vue vào Flutter. Các hiệu ứng được triển kha
 Material, TweenAnimationBuilder và CustomPainter; không có ticker nền vô hạn.
 Khung hình phụ thuộc cuộn chỉ cập nhật phần minh họa. Không dùng chuyển động
 để làm giả trạng thái kết nối, thu nhập hoặc tiến độ công trình.
+
+### Kết quả rà soát triển khai
+
+- Đã giữ nguyên source Backend, Web Admin, models và ApiService.
+- Không có Color(hex) trong screens/widgets; màu tập trung tại AppColors.
+- Các phép tính số dư/thu nhập, điều kiện ACCEPTED/KYC và hạng thợ dùng dữ liệu cũ.
+- Lưới công trình desktop 2 cột từ 820px; ContentFrame tối đa 840px cho trang phụ.
+- Reduced motion và text scale có test thực thi; font có OFL đi kèm.
+- Mẫu hình trong screenshot là fixture QA trong browser riêng, không phải số liệu vận hành.
