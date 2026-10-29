@@ -25,7 +25,7 @@ lightbox/bộ lọc/KPI Admin. Các phần này được mở rộng, không t�
 - [x] Thời tiết Open-Meteo, cache và trạng thái mất kết nối.
 - [x] Sáng/Tối/Outdoor, hoàn thiện các màn hình Flutter và công cụ Admin.
 - [x] Biểu đồ thu nhập theo ngày từ dữ liệu thanh toán thật, theo kỳ Ngày/Tuần/Tháng.
-- [ ] Toàn bộ test, build Web/APK, kiểm tra UI, migration lặp an toàn và push cuối.
+- [x] Kiểm thử, build Web/APK, QA giao diện, migration lặp an toàn; checkpoint và pipeline main.
 
 Mỗi nhóm chỉ đánh dấu xong sau khi code thực thi, kiểm thử/build và push thành công.
 
@@ -397,3 +397,25 @@ Test repository một khoản thu và test REST ranh giới ngày đã đỏ tr�
 sau sửa ở UTC lẫn giờ Việt Nam. Toàn bộ 125 Backend pass (không skip, có PostgreSQL
 migration), JAR build; REST production-profile/JVM UTC trên PostgreSQL QA cũng
 xác nhận các ngày, số tiền và loại tiền nạp đúng. Không có log debug trong mã nguồn.
+
+## Kiểm chứng phát hành
+
+- 125 test Backend pass dưới UTC mặc định, không skip khi bật PostgreSQL QA.
+- 107 test Flutter và 12 test JavaScript/Admin/triển khai pass; analyzer sạch,
+  JAR/Web release và kiểm tra workflow bằng actionlint thành công.
+- Mã Flutter ở checkpoint 06db6f9 đã build APK thành công trên GitHub Actions;
+  các checkpoint sửa SQL/timezone sau đó không thay đổi mã Flutter. Các lần push
+  tiếp theo tiếp tục build APK với API https://thoxay-api.onrender.com.
+- Pipeline chạy cả scripts/tests/*.test.cjs. Concurrency tách theo workflow/nhánh,
+  hủy run đang chạy khi có push mới cùng nhóm, ưu tiên artifact của mã mới nhất.
+  [Trạng thái và APK hiện tại](https://github.com/tranngocthiet2k6-ai/ThoXay/actions)
+  là nguồn theo dõi động sau mỗi push.
+- Đã kiểm tra Web release trên Chrome 390/1440px cho Thợ/Chủ thầu và ba mode;
+  kiểm tra Admin navy/SOS/CSRF, ảnh riêng tư, giữ readiness và chuỗi thu nhập.
+  Các thử nghiệm ghi dữ liệu chỉ dùng DB QA hoặc API mock trong trình duyệt.
+- VietQR chờ Admin cấu hình tài khoản nhận thật; FCM cần cấu hình Firebase theo
+  hướng dẫn đã có. Chưa thực hiện chuyển tiền, quét bằng app ngân hàng thật hoặc
+  kiểm thử camera/QR trên điện thoại vật lý trong phiên này.
+- Hai thay đổi riêng ở báo cáo Word/application.properties vẫn ngoài checkpoint.
+
+Tham khảo concurrency: [GitHub Actions](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency).

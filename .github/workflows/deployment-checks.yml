@@ -6,6 +6,10 @@ on:
   pull_request:
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -56,7 +60,7 @@ jobs:
         with:
           node-version: '24'
       - name: Check deployment settings
-        run: node --test scripts/deployment.test.mjs
+        run: node --test scripts/deployment.test.mjs scripts/tests/*.test.cjs
       - name: Exercise the Vercel build command
         env:
           # Validation build only. Vercel uses its own real API_BASE_URL setting.
