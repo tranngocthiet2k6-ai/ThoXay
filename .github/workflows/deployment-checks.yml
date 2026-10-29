@@ -10,6 +10,35 @@ permissions:
   contents: read
 
 jobs:
+  postgres-migrations:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: thoxay_upgrade_qa
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d thoxay_upgrade_qa"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - name: Verify PostgreSQL fresh install, existing data and repeat migrations
+        env:
+          THOXAY_PG_TEST_URL: jdbc:postgresql://localhost:5432/thoxay_upgrade_qa
+        run: |
+          chmod +x mvnw
+          ./mvnw -B -Dtest=MigrationCompatibilityTest test
+
   backend-container:
     runs-on: ubuntu-latest
     timeout-minutes: 30
