@@ -24,7 +24,7 @@ lightbox/bộ lọc/KPI Admin. Các phần này được mở rộng, không t�
 - [x] Chat ảnh/GPS, hộp thư và số tin chưa đọc thật.
 - [x] Thời tiết Open-Meteo, cache và trạng thái mất kết nối.
 - [x] Sáng/Tối/Outdoor, hoàn thiện các màn hình Flutter và công cụ Admin.
-- [ ] Biểu đồ thu nhập theo ngày từ dữ liệu thanh toán thật, theo kỳ Ngày/Tuần/Tháng.
+- [x] Biểu đồ thu nhập theo ngày từ dữ liệu thanh toán thật, theo kỳ Ngày/Tuần/Tháng.
 - [ ] Toàn bộ test, build Web/APK, kiểm tra UI, migration lặp an toàn và push cuối.
 
 Mỗi nhóm chỉ đánh dấu xong sau khi code thực thi, kiểm thử/build và push thành công.
@@ -345,3 +345,21 @@ Tham khảo thông số và mã WMO: [Open-Meteo Forecast API](https://open-mete
   chủ/ví/hồ sơ/hộp thư/thông báo; đã xem ảnh và sửa nhãn bộ lọc/chú thích ví thiếu
   tương phản rồi chạy lại. Không gửi fixture hoặc thao tác tới production.
   Backend không đổi trong checkpoint này; 122 test/JAR đã pass ở nhóm thời tiết.
+
+## Checkpoint biểu đồ thu nhập theo ngày
+
+- API `/api/wallet/earnings` giữ các trường tổng cũ và bổ sung days: date/base/tip/
+  bonus/total/settledJobs. Chỉ tài khoản Thợ được xem thu nhập của chính mình.
+- Gom ledger WORK_EARNING/TIP/BONUS theo ngày Asia/Ho_Chi_Minh, không tính nạp,
+  rút hoặc ký quỹ. Tổng kỳ và chuỗi ngày lấy từ cùng truy vấn để không lệch khi có
+  khoản thanh toán được ghi nhận đồng thời. Ngày không có khoản thu có giá trị 0.
+- Ngày có 1 cột, tuần có 7 ngày từ thứ Hai, tháng có đúng 28–31 ngày. Đã kiểm tra
+  tháng nhuận, tuần qua năm và mốc nửa đêm Việt Nam/end exclusive.
+- Flutter có biểu đồ cột theo ngày bên cạnh biểu đồ cơ cấu công/tip/thưởng. Tháng
+  cuộn ngang với thanh kéo trên điện thoại, tooltip/semantics hiển thị số tiền đầy
+  đủ; cột 0 có chiều cao 0. API cũ chưa có days không bị chia đều tổng thành dữ liệu giả.
+- V21 chỉ thêm index wallet_entries(user_id,created_at), không thay dữ liệu/số dư.
+- Kiểm chứng: 123 test Backend, 98 test Flutter pass; analyze/JAR/Web release pass.
+  PostgreSQL production-profile REST QA kiểm tra ngày và số tiền thật trong ledger
+  fixture riêng, loại TOP_UP và dọn fixture sau kiểm tra. Chrome QA 390/1440px ở ba
+  mode không có lỗi JS; đã xem ảnh biểu đồ điện thoại để kiểm tra cuộn và nhãn.

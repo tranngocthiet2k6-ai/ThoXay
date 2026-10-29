@@ -109,3 +109,9 @@ checksum. Ảnh đọc bằng JWT theo đúng cặp chat đã ACCEPTED.
 và index messages(recipient_id,job_id,id). Chưa có con trỏ nghĩa là các tin gửi đến
 đang chưa đọc; không suy diễn đã đọc từ thông báo. Service kiểm tra ID tin thực và
 cặp chat, chỉ tiến con trỏ dưới khóa job. Migration thủ công 020 chạy lại an toàn.
+
+### V21 — index thống kê thu nhập
+
+`V21__earnings_timeline.sql` thêm index wallet_entries(user_id,created_at) phục vụ
+truy vấn thu nhập theo khoảng thời gian. Không sửa bảng, ledger, số dư hoặc dữ liệu
+cũ; IF NOT EXISTS cho phép chạy lại script thủ công 021 an toàn.

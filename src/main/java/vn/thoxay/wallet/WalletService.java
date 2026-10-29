@@ -137,9 +137,16 @@ public class WalletService {
         if(anchor.getYear()<1900 || anchor.getYear()>2100) throw bad("Chọn ngày trong khoảng 1900–2100");
         LocalDate start=switch(period){case "DAY"->anchor;case "WEEK"->anchor.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));case "MONTH"->anchor.withDayOfMonth(1);default->throw bad("Kỳ thống kê không hợp lệ");};
         LocalDate end=switch(period){case "DAY"->start.plusDays(1);case "WEEK"->start.plusWeeks(1);default->start.plusMonths(1);};
-        var totals=entries.earnings(worker.getId(),start.atStartOfDay(ZONE).toInstant(),end.atStartOfDay(ZONE).toInstant());
-        long base=zero(totals.getBase()),tip=zero(totals.getTip()),bonus=zero(totals.getBonus());
-        return new Earnings(period,start,end,ZONE.getId(),base,tip,bonus,base+tip+bonus,zero(totals.getJobs()));
+        var rows=entries.daily(worker.getId(),start.atStartOfDay(ZONE).toInstant(),end.atStartOfDay(ZONE).toInstant());
+        var byDay=new HashMap<LocalDate,WalletEntryRepository.DailyTotals>();
+        for(var row:rows)byDay.put(row.getIncomeDay(),row);
+        var days=new ArrayList<EarningsDay>();long base=0,tip=0,bonus=0,jobs=0;
+        for(LocalDate day=start;day.isBefore(end);day=day.plusDays(1)) {
+            var row=byDay.get(day);long b=row==null?0:zero(row.getBase()),t=row==null?0:zero(row.getTip()),p=row==null?0:zero(row.getBonus()),n=row==null?0:zero(row.getJobs());
+            days.add(new EarningsDay(day,b,t,p,b+t+p,n));base+=b;tip+=t;bonus+=p;jobs+=n;
+        }
+        // Aggregate and chart derive from one query snapshot, even if another payment commits concurrently.
+        return new Earnings(period,start,end,ZONE.getId(),base,tip,bonus,base+tip+bonus,jobs,List.copyOf(days));
     }
     private long zero(Long n){return n==null?0:n;}
     private String clean(String s){return s==null||s.isBlank()?null:s.strip();}

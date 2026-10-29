@@ -49,11 +49,26 @@ class Earnings {
       bonus = (j['bonus'] as num).toInt(),
       total = (j['total'] as num).toInt(),
       jobs = (j['settledJobs'] as num).toInt(),
+      days = (j['days'] as List? ?? [])
+          .map((day) => EarningsDay.fromJson(day as Map<String, dynamic>))
+          .toList(),
       from = DateTime.parse(j['from'] as String),
       to = DateTime.parse(j['toExclusive'] as String)
           .subtract(const Duration(days: 1));
   final int base, tip, bonus, total, jobs;
   final DateTime from, to;
+  final List<EarningsDay> days;
+}
+
+class EarningsDay {
+  EarningsDay.fromJson(Map<String, dynamic> json)
+    : date = DateTime.parse(json['date'] as String),
+      base = (json['base'] as num).toInt(),
+      tip = (json['tip'] as num).toInt(),
+      bonus = (json['bonus'] as num).toInt(),
+      total = (json['total'] as num).toInt();
+  final DateTime date;
+  final int base, tip, bonus, total;
 }
 
 class JobPayment {

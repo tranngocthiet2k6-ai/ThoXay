@@ -289,4 +289,6 @@ CREATE TABLE IF NOT EXISTS chat_read_states (
  UNIQUE(user_id,job_id,peer_id), CHECK(user_id<>peer_id)
 );
 CREATE INDEX IF NOT EXISTS idx_messages_recipient_unread ON messages(recipient_id,job_id,id);
+
+CREATE INDEX IF NOT EXISTS idx_wallet_entries_user_time ON wallet_entries(user_id,created_at);
 COMMIT;

@@ -27,7 +27,8 @@ public final class WalletDtos {
         public static Entry of(WalletEntry e) {return new Entry(e.getId(),e.getKind(),e.getAmount(),e.getMainDelta(),e.getEscrowDelta(),e.getHeldDelta(),e.getMainAfter(),e.getEscrowAfter(),e.getHeldAfter(),e.getDescription(),e.getCreatedAt());}
     }
     public record Page<T>(List<T> items,boolean hasMore) { }
-    public record Earnings(String period,LocalDate from,LocalDate toExclusive,String timeZone,long base,long tip,long bonus,long total,long settledJobs) { }
+    public record EarningsDay(LocalDate date,long base,long tip,long bonus,long total,long settledJobs) { }
+    public record Earnings(String period,LocalDate from,LocalDate toExclusive,String timeZone,long base,long tip,long bonus,long total,long settledJobs,List<EarningsDay> days) { }
     public record Payment(Long id,Long applicationId,Long workerId,String workerName,int workDays,long dailyRate,long base,long tip,long bonus,long total,Instant createdAt) {
         public static Payment of(JobPayment p) {return new Payment(p.getId(),p.getApplication()==null?null:p.getApplication().getId(),p.getWorker().getId(),p.getWorker().getFullName(),p.getWorkDays(),p.getDailyRate(),p.getBase(),p.getTip(),p.getBonus(),p.getTotal(),p.getCreatedAt());}
     }

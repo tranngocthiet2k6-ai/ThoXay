@@ -83,10 +83,25 @@ class WalletApiTest {
         LocalDate start=LocalDate.of(2026,1,5);Instant midnight=start.atStartOfDay(ZoneId.of("Asia/Ho_Chi_Minh")).toInstant();
         jdbc.update("update wallet_entries set created_at=? where user_id=?",Timestamp.from(midnight),worker.getId());
         jdbc.update("update wallet_entries set created_at=? where user_id=? and kind='BONUS'",Timestamp.from(midnight.plusSeconds(86400)),worker.getId());
-        mvc.perform(get("/api/wallet/earnings?period=DAY&date=2026-01-05").header("Authorization",token(worker))).andExpect(jsonPath("$.total").value(650000));
-        mvc.perform(get("/api/wallet/earnings?period=WEEK&date=2026-01-07").header("Authorization",token(worker))).andExpect(jsonPath("$.from").value("2026-01-05")).andExpect(jsonPath("$.total").value(670000));
+        mvc.perform(get("/api/wallet/earnings?period=DAY&date=2026-01-05").header("Authorization",token(worker)))
+            .andExpect(jsonPath("$.total").value(650000)).andExpect(jsonPath("$.days.length()").value(1))
+            .andExpect(jsonPath("$.days[0].date").value("2026-01-05")).andExpect(jsonPath("$.days[0].base").value(600000))
+            .andExpect(jsonPath("$.days[0].tip").value(50000)).andExpect(jsonPath("$.days[0].bonus").value(0));
+        mvc.perform(get("/api/wallet/earnings?period=WEEK&date=2026-01-07").header("Authorization",token(worker)))
+            .andExpect(jsonPath("$.from").value("2026-01-05")).andExpect(jsonPath("$.total").value(670000))
+            .andExpect(jsonPath("$.days.length()").value(7)).andExpect(jsonPath("$.days[0].total").value(650000))
+            .andExpect(jsonPath("$.days[1].total").value(20000)).andExpect(jsonPath("$.days[2].total").value(0));
         mvc.perform(get("/api/wallet/earnings?period=MONTH&date=2026-01-15").header("Authorization",token(worker))).andExpect(jsonPath("$.total").value(670000));
         mvc.perform(get("/api/wallet/earnings?period=DAY&date=2026-01-04").header("Authorization",token(worker))).andExpect(jsonPath("$.total").value(0));
+    }
+    @Test void emptyTimelineIncludesLeapMonthAndCrossYearWeekWithoutInventingIncome() throws Exception {
+        mvc.perform(get("/api/wallet/earnings?period=MONTH&date=2024-02-15").header("Authorization",token(worker)))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.days.length()").value(29))
+            .andExpect(jsonPath("$.days[28].date").value("2024-02-29")).andExpect(jsonPath("$.total").value(0));
+        mvc.perform(get("/api/wallet/earnings?period=WEEK&date=2026-01-01").header("Authorization",token(worker)))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.days[0].date").value("2025-12-29"))
+            .andExpect(jsonPath("$.days[6].date").value("2026-01-04")).andExpect(jsonPath("$.days.length()").value(7));
+        mvc.perform(get("/api/wallet/earnings?period=DAY").header("Authorization",token(owner))).andExpect(status().isForbidden());
     }
     @Test void validationOwnershipAndPaginationPreventForgedCreditOrSensitiveLeak()throws Exception{
         mvc.perform(get("/api/wallet")).andExpect(status().isUnauthorized());
