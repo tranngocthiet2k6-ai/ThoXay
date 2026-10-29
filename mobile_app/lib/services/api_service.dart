@@ -25,6 +25,22 @@ class ApiException implements Exception {
 }
 
 class ApiService extends ChangeNotifier {
+  Future<List<Job>> savedJobs() async =>
+      (await _request('GET', '/api/users/me/saved/jobs') as List)
+          .map((e) => Job.fromJson(e as Map<String, dynamic>))
+          .toList();
+  Future<List<WorkerProfile>> savedWorkers() async =>
+      (await _request('GET', '/api/users/me/saved/workers') as List)
+          .map((e) => WorkerProfile.fromJson(e as Map<String, dynamic>))
+          .toList();
+  Future<void> saveJob(int id, bool saved) async {
+    await _request(saved ? 'PUT' : 'DELETE', '/api/users/me/saved/jobs/$id');
+  }
+
+  Future<void> saveWorker(int id, bool saved) async {
+    await _request(saved ? 'PUT' : 'DELETE', '/api/users/me/saved/workers/$id');
+  }
+
   Future<Job> fetchJob(int id) async => Job.fromJson(
     await _request('GET', '/api/jobs/$id') as Map<String, dynamic>,
   );

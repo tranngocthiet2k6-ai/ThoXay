@@ -1,4 +1,6 @@
 import 'widgets/app_snack_bar.dart';
+import 'screens/shared_job_screen.dart';
+import 'services/job_links.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -79,10 +81,18 @@ class ThoXayApp extends StatelessWidget {
           if (api.session == null) return LoginScreen(api: api);
           final session = api.session!;
           if (session.role == 'ROLE_WORKER') {
-            return WorkerHomeScreen(api: api);
+            return SharedJobGate(
+              api: api,
+              jobId: JobLinks.parse(Uri.base),
+              child: WorkerHomeScreen(api: api),
+            );
           }
           if (session.role == 'ROLE_CONTRACTOR') {
-            return ContractorHomeScreen(api: api);
+            return SharedJobGate(
+              api: api,
+              jobId: JobLinks.parse(Uri.base),
+              child: ContractorHomeScreen(api: api),
+            );
           }
           return Scaffold(
             appBar: AppBar(title: const Text('Tài khoản Thợ Xây')),

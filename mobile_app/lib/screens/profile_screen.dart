@@ -1,3 +1,4 @@
+import 'saved_screen.dart';
 import '../theme/app_theme.dart';
 import '../widgets/design_motion.dart';
 import 'calendar_screen.dart';
@@ -215,6 +216,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(_profile!.phoneNumber),
+                TextButton.icon(
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => SavedScreen(
+                        api: widget.api,
+                        worker: _profile!.role == 'ROLE_WORKER',
+                      ),
+                    ),
+                  ),
+                  icon: const Icon(Icons.bookmarks_outlined),
+                  label: Text(
+                    _profile!.role == 'ROLE_WORKER'
+                        ? 'Công trình yêu thích'
+                        : 'Thợ quen',
+                  ),
+                ),
                 if (_profile!.role == 'ROLE_WORKER')
                   TextButton.icon(
                     onPressed: () => Navigator.of(context).push(

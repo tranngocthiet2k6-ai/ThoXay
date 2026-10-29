@@ -15,7 +15,7 @@ lightbox/bộ lọc/KPI Admin. Các phần này được mở rộng, không t�
 
 - [x] Tự động migration: baseline dữ liệu cũ, migrate trước JPA validate, kiểm chứng PostgreSQL.
 - [x] Lịch công trình, thương lượng lương, cam kết có phiên bản và khóa giao dịch chống trùng lịch.
-- [ ] Bản đồ ghim lương, 2km, sửa vị trí, chỉ đường, link/QR công trình; lưu việc/thợ quen.
+- [x] Bản đồ ghim lương, 2km, sửa vị trí, chỉ đường, link/QR công trình; lưu việc/thợ quen.
 - [ ] Tổ đội có mời/xác nhận thành viên và xác nhận công trình; duyệt nguyên nhóm an toàn.
 - [ ] Chấm công GPS/QR, ảnh cuối ngày, nghiệm thu và kiểm tra ngày công khi thanh toán.
 - [ ] VietQR nội bộ, ngân hàng do Admin cấu hình, mã đối soát và snapshot tài khoản nhận.
@@ -86,3 +86,25 @@ lịch trùng, lương chốt, nhóm thợ, day-count khi chi trả và công t�
 - Kiểm chứng: PostgreSQL fresh/upgrade/repeat, production profile health UP/JPA
   validate, giao dịch duyệt đồng thời và thanh toán idempotent; kiểm thử Flutter
   cam kết, lịch, tiền xem trước. Không thay đổi database production trong QA.
+
+## Checkpoint bản đồ và mục đã lưu
+
+- Ghim bản đồ hiển thị lương/ngày, chạm mở tóm tắt và ứng tuyển; thêm bán kính 2km
+  vào các lựa chọn Haversine hiện có. OSM attribution và test tile trong bộ nhớ giữ nguyên.
+- Chủ thầu bấm **Sửa công trình**, chỉnh nội dung/lịch và ghim bản đồ. Backend vẫn
+  chặn sửa sau khi nhận thợ; thay điều khoản yêu cầu xác nhận lại như V12.
+- Chi tiết có **Chỉ đường** mở Google Maps URL (không cần API key), **Chia sẻ** tạo
+  QR cục bộ và sao chép `https://thoxay.vercel.app/?job={id}`. Link mở đúng công
+  trình sau đăng nhập trên Web; không chứa JWT/điện thoại. APK có nút chia sẻ cùng link Web.
+- Hồ sơ có **Công trình yêu thích** cho thợ / **Thợ quen** cho chủ thầu. Lưu/bỏ lưu
+  nằm trong chi tiết công trình/hồ sơ thợ. Tối đa 300 mục/tài khoản; PUT và DELETE
+  idempotent, ẩn tài khoản bị khóa, không mở quyền liên hệ khi chỉ lưu mục.
+- API: `GET /api/users/me/saved/jobs|workers`, `PUT/DELETE
+  /api/users/me/saved/jobs/{id}`, `PUT/DELETE /api/users/me/saved/workers/{id}`.
+- Migration V13 chỉ thêm `saved_jobs`, `saved_workers`; FK cascade dọn bookmark
+  khi xóa đối tượng. Không sửa V1/V12 đã phát hành.
+- Kiểm chứng checkpoint: 81 test Backend, 66 test Flutter, analyze không lỗi,
+  JAR/Web release build thành công, production-profile QA health UP sau V13.
+
+Tài liệu tích hợp: [qr_flutter](https://pub.dev/documentation/qr_flutter/latest/),
+[Google Maps URLs](https://developers.google.com/maps/documentation/urls/get-started).

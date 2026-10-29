@@ -8,6 +8,7 @@ import '../services/api_service.dart';
 import '../widgets/portfolio_gallery.dart';
 import '../widgets/profile_summary.dart';
 import '../widgets/worker_reviews.dart';
+import '../widgets/job_utilities.dart';
 
 class WorkerProfileScreen extends StatefulWidget {
   const WorkerProfileScreen({
@@ -77,6 +78,12 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                     tier: person.workerTier,
                     verified: person.verified,
                   ),
+                  if (widget.api.session?.role == 'ROLE_CONTRACTOR')
+                    FavoriteButton(
+                      api: widget.api,
+                      id: person.id,
+                      worker: true,
+                    ),
                   const SizedBox(height: 16),
                   Text('${person.experienceYears} năm kinh nghiệm'),
                   const SizedBox(height: 20),

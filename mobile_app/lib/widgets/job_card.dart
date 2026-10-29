@@ -4,6 +4,8 @@ import '../models/models.dart';
 import '../theme/app_theme.dart';
 import 'design_motion.dart';
 import 'call_button.dart';
+import 'job_utilities.dart';
+import '../services/api_service.dart';
 
 class JobCard extends StatelessWidget {
   const JobCard({
@@ -12,7 +14,9 @@ class JobCard extends StatelessWidget {
     required this.action,
     this.canContactContractor = false,
     this.detailsActionBuilder,
+    this.api,
   });
+  final ApiService? api;
   final Job job;
   final Widget action;
   final bool canContactContractor;
@@ -51,6 +55,11 @@ class JobCard extends StatelessWidget {
                         ?.copyWith(fontSize: 18),
                   ),
                 ),
+                if (job.contractorVerified)
+                  const Tooltip(
+                    message: 'Đã xác thực CCCD',
+                    child: Icon(Icons.verified, color: Colors.blue, size: 20),
+                  ),
               ],
             ),
             const SizedBox(height: 16),
@@ -140,6 +149,7 @@ class JobCard extends StatelessWidget {
                   onPressed: () => showJobDetails<void>(
                     context,
                     job,
+                    api: api,
                     canContactContractor: canContactContractor,
                     action: action,
                     actionBuilder: detailsActionBuilder,
@@ -209,6 +219,7 @@ class _JobInfo extends StatelessWidget {
 Future<T?> showJobDetails<T>(
   BuildContext context,
   Job job, {
+  ApiService? api,
   bool canContactContractor = false,
   Widget? action,
   WidgetBuilder? actionBuilder,
@@ -260,6 +271,17 @@ Future<T?> showJobDetails<T>(
                 ),
                 const Divider(height: 40),
                 Text('Chủ thầu: ${job.contractorName}'),
+                if (job.contractorVerified)
+                  const Chip(
+                    avatar: Icon(Icons.verified, size: 18),
+                    label: Text('Chủ thầu đã xác thực CCCD'),
+                  ),
+                if (job.startsOn != null)
+                  Text(
+                    'Lịch: ${job.startsOn!.toIso8601String().split('T').first} – ${job.endsOn!.toIso8601String().split('T').first}',
+                  ),
+                const SizedBox(height: 16),
+                JobUtilities(job: job, api: api),
                 if (canContactContractor && job.contractorPhone != null) ...[
                   const SizedBox(height: 8),
                   CallButton(

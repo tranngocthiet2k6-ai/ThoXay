@@ -122,6 +122,7 @@ void main() {
     expect(find.byKey(const ValueKey('job-marker-1')), findsOneWidget);
     expect(find.byKey(const ValueKey('job-marker-2')), findsOneWidget);
     expect(find.text('OpenStreetMap contributors'), findsOneWidget);
+    expect(find.text('500.000 đ'), findsNWidgets(2));
     await tester.tap(find.byKey(const ValueKey('job-marker-2')));
     await settleMap(tester);
     expect(chosen?.id, 2);

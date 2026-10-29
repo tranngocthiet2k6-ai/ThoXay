@@ -162,6 +162,21 @@ CREATE INDEX IF NOT EXISTS idx_wallet_income_date ON wallet_entries(user_id,crea
 CREATE INDEX IF NOT EXISTS idx_wallet_pending ON wallet_requests(status,id);
 
 
+CREATE TABLE IF NOT EXISTS saved_jobs (
+    id BIGSERIAL PRIMARY KEY,
+    owner_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    job_id BIGINT NOT NULL REFERENCES jobs(id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(owner_id,job_id)
+);
+CREATE TABLE IF NOT EXISTS saved_workers (
+    id BIGSERIAL PRIMARY KEY,
+    owner_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    worker_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(owner_id,worker_id), CHECK(owner_id<>worker_id)
+);
+
 -- Demo-only password for all three accounts: password
 INSERT INTO users (phone_number,password,full_name,role,is_verified)
 VALUES

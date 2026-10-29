@@ -42,8 +42,8 @@ class JobsMap extends StatelessWidget {
       for (final job in jobs)
         Marker(
           point: LatLng(job.latitude, job.longitude),
-          width: 44,
-          height: 44,
+          width: 112,
+          height: 56,
           alignment: Alignment.topCenter,
           child: Tooltip(
             message: '${job.title} · ${money(job.salaryPerDay)}/ngày',
@@ -53,10 +53,42 @@ class JobsMap extends StatelessWidget {
               child: GestureDetector(
                 key: ValueKey('job-marker-${job.id}'),
                 onTap: () => onJobTap(job),
-                child: Icon(
-                  Icons.location_on,
-                  color: Theme.of(context).colorScheme.primary,
-                  size: 44,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.white, width: 2),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0x22000000),
+                            blurRadius: 8,
+                            offset: Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        money(job.salaryPerDay),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 12,
+                        ),
+                        maxLines: 1,
+                      ),
+                    ),
+                    Icon(
+                      Icons.arrow_drop_down,
+                      color: Theme.of(context).colorScheme.primary,
+                      size: 18,
+                    ),
+                  ],
                 ),
               ),
             ),

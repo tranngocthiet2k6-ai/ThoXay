@@ -88,6 +88,15 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
     }
   }
 
+  Future<void> _edit(Job job) async {
+    final changed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => _CreateJobDialog(api: widget.api, job: job),
+    );
+    if (changed == true && mounted) await _refresh();
+  }
+
   Future<void> _applicants(Job job) async {
     await showModalBottomSheet<void>(
       context: context,
@@ -231,11 +240,20 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
                           children: [
                             for (final job in _visibleJobs)
                               JobCard(
+                                api: widget.api,
                                 job: job,
                                 action: Wrap(
                                   spacing: 12,
                                   runSpacing: 8,
                                   children: [
+                                    if (job.status == 'OPEN')
+                                      OutlinedButton.icon(
+                                        onPressed: () => _edit(job),
+                                        icon: const Icon(
+                                          Icons.edit_location_alt_outlined,
+                                        ),
+                                        label: const Text('Sửa công trình'),
+                                      ),
                                     if (job.status == 'COMPLETED')
                                       OutlinedButton.icon(
                                         onPressed: () =>
@@ -291,8 +309,9 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
 }
 
 class _CreateJobDialog extends StatefulWidget {
-  const _CreateJobDialog({required this.api});
+  const _CreateJobDialog({required this.api, this.job});
   final ApiService api;
+  final Job? job;
   @override
   State<_CreateJobDialog> createState() => _CreateJobDialogState();
 }
@@ -309,6 +328,30 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
     start: DateTime.now(),
     end: DateTime.now(),
   );
+  @override
+  void initState() {
+    super.initState();
+    final j = widget.job;
+    if (j != null) {
+      _title.text = j.title;
+      _description.text = j.description;
+      _salary.text = j.salaryPerDay.toString();
+      _address.text = j.address;
+      _workers.text = '${j.requiredWorkers}';
+      _type = j.jobType;
+      _position = GeoPoint(j.latitude, j.longitude);
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final start = j.startsOn == null || j.startsOn!.isBefore(today)
+          ? today
+          : j.startsOn!;
+      final end = j.endsOn == null || j.endsOn!.isBefore(start)
+          ? start
+          : j.endsOn!;
+      _schedule = DateTimeRange(start: start, end: end);
+    }
+  }
+
   bool _busy = false, _gps = false;
   String? _error;
   @override
@@ -371,7 +414,7 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
       _error = null;
     });
     try {
-      await widget.api.createJob({
+      final body = <String, dynamic>{
         'title': _title.text.trim(),
         'description': _description.text.trim(),
         'jobType': _type,
@@ -382,7 +425,12 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
         'requiredWorkers': int.parse(_workers.text.trim()),
         'startsOn': isoDay(_schedule.start),
         'endsOn': isoDay(_schedule.end),
-      });
+      };
+      if (widget.job == null) {
+        await widget.api.createJob(body);
+      } else {
+        await widget.api.updateJob(widget.job!.id, body);
+      }
       if (mounted) Navigator.pop(context, true);
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.message);
@@ -395,7 +443,9 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
   Widget build(BuildContext context) => PopScope(
     canPop: !_busy && !_gps,
     child: AlertDialog(
-      title: const Text('Đăng công trình mới'),
+      title: Text(
+        widget.job == null ? 'Đăng công trình mới' : 'Chỉnh sửa công trình',
+      ),
       content: SizedBox(
         width: 480,
         child: SingleChildScrollView(
@@ -548,7 +598,13 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
         ),
         FilledButton(
           onPressed: _busy || _gps ? null : _submit,
-          child: Text(_busy ? 'Đang đăng…' : 'Đăng việc'),
+          child: Text(
+            _busy
+                ? 'Đang lưu…'
+                : widget.job == null
+                ? 'Đăng việc'
+                : 'Lưu thay đổi',
+          ),
         ),
       ],
     ),

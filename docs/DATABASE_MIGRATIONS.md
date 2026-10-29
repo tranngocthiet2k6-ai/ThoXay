@@ -55,3 +55,9 @@ Bổ sung lịch công trình, lương đề xuất/chốt, phiên bản/xác nh
 ngày bận riêng của thợ. Đơn ACCEPTED cũ chỉ backfill lương từ giá công trình;
 không tự ghi thời điểm đồng ý hoặc nội dung hợp đồng. Ngày công trình cũ để NULL.
 Bản SQL chạy thủ công tương ứng: `migrations/012_schedule_offers_commitments.sql`.
+
+## V13 — Công trình yêu thích và thợ quen
+
+Hai bảng bookmark riêng theo chủ sở hữu, khóa unique(owner,target), FK cascade;
+không backfill hoặc thay đổi công trình/tài khoản hiện hữu. Bản SQL tương ứng:
+`migrations/013_saved_jobs_workers.sql`.

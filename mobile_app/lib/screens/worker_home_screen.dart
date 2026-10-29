@@ -175,6 +175,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
     final apply = await showJobDetails<bool>(
       context,
       job,
+      api: widget.api,
       action: FilledButton(
         onPressed: alreadyApplied || _applying != null
             ? null
@@ -313,14 +314,15 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                                   decoration: const InputDecoration(
                                     labelText: 'Bán kính tìm việc',
                                   ),
-                                  items: [5.0, 10.0, 20.0, 50.0, 100.0, 200.0]
-                                      .map(
-                                        (r) => DropdownMenuItem(
-                                          value: r,
-                                          child: Text('${r.toInt()} km'),
-                                        ),
-                                      )
-                                      .toList(),
+                                  items:
+                                      [2.0, 5.0, 10.0, 20.0, 50.0, 100.0, 200.0]
+                                          .map(
+                                            (r) => DropdownMenuItem(
+                                              value: r,
+                                              child: Text('${r.toInt()} km'),
+                                            ),
+                                          )
+                                          .toList(),
                                   onChanged: _loading
                                       ? null
                                       : (r) {
@@ -461,6 +463,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                             children: [
                               for (final job in _visibleJobs)
                                 JobCard(
+                                  api: widget.api,
                                   job: job,
                                   action: _applyButton(job),
                                   detailsActionBuilder: (sheetContext) =>
@@ -483,6 +486,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                           ),
                         for (final application in _applications)
                           JobCard(
+                            api: widget.api,
                             job: application.job,
                             canContactContractor:
                                 application.status == 'ACCEPTED',
