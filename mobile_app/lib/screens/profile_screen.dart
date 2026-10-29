@@ -1,3 +1,4 @@
+import '../widgets/portfolio_uploads.dart';
 import 'saved_screen.dart';
 import 'crew_screen.dart';
 import '../theme/app_theme.dart';
@@ -314,6 +315,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ],
                   ),
+                ),
+                PortfolioUploads(
+                  api: widget.api,
+                  ownerId: _profile!.id,
+                  editable: true,
                 ),
                 if (_profile!.projectImages.isNotEmpty) ...[
                   const SizedBox(height: 16),

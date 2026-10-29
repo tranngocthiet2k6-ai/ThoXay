@@ -71,7 +71,7 @@
               th:attr="data-user-name=${user.fullName},data-front-image=${user.cccdFrontImage},data-back-image=${user.cccdBackImage},data-verified=${user.verified},data-verify-url=@{/admin/users/{id}/verify(id=${user.id})}"><svg class="ui-icon" aria-hidden="true"><use href="#i-eye"/></svg>Xem CCCD</button>
           </td>
           <td><span class="badge" th:classappend="${user.active ? 'badge-green' : 'badge-red'}"><span class="status-dot" aria-hidden="true"></span><span th:text="${user.active ? 'Hoạt động' : 'Đã khóa'}"></span></span></td>
-          <td class="text-end"><div class="d-flex gap-2 justify-content-end flex-wrap"><form th:if="${user.role != 'ROLE_ADMIN'}" th:action="@{/admin/users/{id}/toggle-active(id=${user.id})}" method="post"><button class="btn btn-sm btn-outline-secondary" th:text="${user.active ? 'Khóa' : 'Mở khóa'}"></button></form></div></td>
+          <td class="text-end"><div class="d-flex gap-2 justify-content-end flex-wrap"><a th:if="${user.role != 'ROLE_ADMIN'}" th:href="@{/admin/users/{id}/portfolio(id=${user.id})}" class="btn btn-sm btn-outline-primary">Ảnh tay nghề</a><form th:if="${user.role != 'ROLE_ADMIN'}" th:action="@{/admin/users/{id}/toggle-active(id=${user.id})}" method="post"><button class="btn btn-sm btn-outline-secondary" th:text="${user.active ? 'Khóa' : 'Mở khóa'}"></button></form></div></td>
         </tr>
       </tbody>
     </table></div>

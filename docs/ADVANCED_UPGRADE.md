@@ -20,7 +20,8 @@ lightbox/bộ lọc/KPI Admin. Các phần này được mở rộng, không t�
 - [ ] Chấm công GPS/QR, ảnh cuối ngày, nghiệm thu và kiểm tra ngày công khi thanh toán.
 - [ ] VietQR nội bộ, ngân hàng do Admin cấu hình, mã đối soát và snapshot tài khoản nhận.
 - [ ] SOS/sự cố/tranh chấp, cảnh báo Admin ưu tiên, lịch sử xử lý.
-- [ ] Ảnh portfolio từ thiết bị, chat ảnh/GPS, hộp thư và số tin chưa đọc thật.
+- [x] Ảnh portfolio từ thiết bị, kiểm tra ảnh và lưu bền vững.
+- [ ] Chat ảnh/GPS, hộp thư và số tin chưa đọc thật.
 - [ ] Thời tiết Open-Meteo, cache và trạng thái mất kết nối.
 - [ ] Sáng/Tối/Outdoor, hoàn thiện các màn hình Flutter và công cụ Admin.
 - [ ] Toàn bộ test, build Web/APK, kiểm tra UI, migration lặp an toàn và push cuối.
@@ -130,3 +131,26 @@ Tài liệu tích hợp: [qr_flutter](https://pub.dev/documentation/qr_flutter/l
 - V14 thêm crews/crew_members/crew_batches và FK nullable trên đơn ứng tuyển;
   đơn cá nhân cũ giữ nguyên. Test rollback chạy qua các giao dịch request thật,
   không dùng transaction bao quanh test để che lỗi commit/rollback.
+
+## Checkpoint ảnh tay nghề từ thiết bị
+
+- Hồ sơ Thợ/Chủ thầu có chụp ảnh hoặc chọn từ thư viện, xem trước/phóng to,
+  nhập chú thích và xác nhận trước tải. Mỗi hồ sơ tối đa 12 ảnh; chủ ảnh xóa sau
+  xác nhận. Thợ có bộ ảnh hiển thị trong hồ sơ cho người dùng đã đăng nhập.
+- URL portfolio legacy vẫn giữ nguyên, ảnh tải lên được quản lý riêng; không thay
+  đổi danh sách URL khi cập nhật họ tên/kỹ năng hoặc gửi CCCD.
+- Tệp thực tế phải JPEG/PNG, đầu vào tối đa 5 MB / 16 triệu pixel / 6000px mỗi cạnh.
+  Ảnh portfolio được thu nhỏ tối đa 1800px và mã hóa lại JPEG tối đa 2 MB, bỏ EXIF.
+  Bộ xử lý dùng chung cho KYC nhưng giữ giới hạn/độ phân giải KYC cũ.
+- Ảnh lưu BYTEA trong PostgreSQL, không phụ thuộc ổ đĩa Render. API danh sách
+  chỉ query metadata, không kéo toàn bộ ảnh vào bộ nhớ khi mở hồ sơ.
+- API: `GET /api/users/{id}/portfolio`, `POST /api/users/me/portfolio` (multipart
+  photo/caption), `GET /api/portfolio/photos/{uuid}`, `DELETE
+  /api/users/me/portfolio/{uuid}`. Đọc ảnh cần JWT header, no-store, không theo
+  redirect; không đặt token trên URL. Hồ sơ chủ thầu chỉ chủ ảnh/Admin xem;
+  hồ sơ thợ đang hoạt động xem được bởi người dùng đăng nhập như hồ sơ hiện có.
+- Admin bấm Ảnh tay nghề tại bảng tài khoản để xem ảnh/chú thích và modal phóng to
+  bằng phiên quản trị. Đóng modal xóa src ảnh. Đây là ảnh nghề, độc lập ảnh CCCD.
+- V15 chỉ thêm portfolio_photos, FK owner cascade và giới hạn kích thước BYTEA.
+- Kiểm thử gồm ảnh giả/quá lớn/quá nhỏ, loại bỏ metadata thừa, resize, quota,
+  JWT/khóa tài khoản, quyền xóa, preview/zoom và đọc ảnh bằng phiên Admin.

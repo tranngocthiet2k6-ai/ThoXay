@@ -9,6 +9,7 @@ import '../widgets/portfolio_gallery.dart';
 import '../widgets/profile_summary.dart';
 import '../widgets/worker_reviews.dart';
 import '../widgets/job_utilities.dart';
+import '../widgets/portfolio_uploads.dart';
 
 class WorkerProfileScreen extends StatefulWidget {
   const WorkerProfileScreen({
@@ -107,6 +108,8 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                         .map((s) => Chip(label: Text(s)))
                         .toList(),
                   ),
+                  const SizedBox(height: 24),
+                  PortfolioUploads(api: widget.api, ownerId: person.id),
                   const SizedBox(height: 24),
                   PortfolioGallery(images: person.projectImages),
                   const SizedBox(height: 24),

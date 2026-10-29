@@ -14,6 +14,7 @@ import '../models/reputation.dart';
 import '../models/wallet.dart';
 import '../models/scheduling.dart';
 import '../models/crew.dart';
+import '../models/portfolio_photo.dart';
 import 'chat_connection.dart';
 import 'kyc_camera.dart';
 
@@ -26,6 +27,119 @@ class ApiException implements Exception {
 }
 
 class ApiService extends ChangeNotifier {
+  Future<List<PortfolioPhoto>> portfolio(int userId) async =>
+      (await _request('GET', '/api/users/$userId/portfolio') as List)
+          .map((e) => PortfolioPhoto.fromJson(e as Map<String, dynamic>))
+          .toList();
+  Future<void> deletePortfolio(String id) async {
+    await _request('DELETE', '/api/users/me/portfolio/$id');
+  }
+
+  Future<PortfolioPhoto> uploadPortfolio(
+    Uint8List bytes,
+    String caption,
+  ) async => PortfolioPhoto.fromJson(
+    await uploadPhoto(
+      '/api/users/me/portfolio',
+      bytes,
+      fields: {'caption': caption},
+    ),
+  );
+  Future<Map<String, dynamic>> uploadPhoto(
+    String path,
+    Uint8List bytes, {
+    Map<String, String> fields = const {},
+  }) async {
+    if (!path.startsWith('/api/') || path.contains('://')) {
+      throw const ApiException('Đường dẫn tải ảnh không hợp lệ');
+    }
+    final auth = _requireSession();
+    if (!auth.expiresAt.isAfter(DateTime.now())) {
+      await logout();
+      throw const ApiException('Phiên đăng nhập đã hết hạn', 401);
+    }
+    if (bytes.isEmpty || bytes.length > 5 * 1024 * 1024) {
+      throw const ApiException('Mỗi ảnh tối đa 5 MB');
+    }
+    final request = http.MultipartRequest('POST', Uri.parse('$baseUrl$path'))
+      ..followRedirects = false
+      ..headers['Authorization'] = 'Bearer ${auth.token}'
+      ..fields.addAll(fields)
+      ..files.add(
+        http.MultipartFile.fromBytes('photo', bytes, filename: 'photo.jpg'),
+      );
+    try {
+      final response = await _client
+          .send(request)
+          .then(http.Response.fromStream)
+          .timeout(const Duration(seconds: 60));
+      final data = jsonDecode(utf8.decode(response.bodyBytes));
+      if (response.statusCode == 401 ||
+          (response.statusCode == 403 &&
+              data is Map &&
+              data['code'] == 'ACCOUNT_LOCKED')) {
+        await logout();
+      }
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        throw ApiException(
+          data is Map && data['message'] is String
+              ? data['message'] as String
+              : 'Không tải được ảnh',
+          response.statusCode,
+        );
+      }
+      if (data is! Map<String, dynamic>) throw const FormatException();
+      return data;
+    } on FormatException {
+      throw const ApiException('Máy chủ trả về dữ liệu không hợp lệ');
+    } on TimeoutException {
+      throw const ApiException('Tải ảnh quá thời gian. Hãy thử lại.');
+    } on http.ClientException {
+      throw const ApiException('Không kết nối được máy chủ tải ảnh');
+    }
+  }
+
+  Future<Uint8List> privateImage(String path) async {
+    if (!path.startsWith('/api/') || path.contains('://')) {
+      throw const ApiException('Đường dẫn ảnh không hợp lệ');
+    }
+    final auth = _requireSession();
+    if (!auth.expiresAt.isAfter(DateTime.now())) {
+      await logout();
+      throw const ApiException('Phiên đăng nhập đã hết hạn', 401);
+    }
+    try {
+      final request = http.Request('GET', Uri.parse('$baseUrl$path'))
+        ..followRedirects = false
+        ..headers['Authorization'] = 'Bearer ${auth.token}';
+      final response = await _client
+          .send(request)
+          .then(http.Response.fromStream)
+          .timeout(const Duration(seconds: 30));
+      if (response.statusCode == 200 &&
+          response.headers['content-type']?.startsWith('image/') == true) {
+        return response.bodyBytes;
+      }
+      if (response.statusCode == 401) await logout();
+      if (response.statusCode == 403) {
+        try {
+          final data = jsonDecode(utf8.decode(response.bodyBytes));
+          if (data is Map && data['code'] == 'ACCOUNT_LOCKED') await logout();
+        } on FormatException {
+          /* Use generic image error. */
+        }
+      }
+      throw ApiException(
+        'Không có quyền xem ảnh hoặc ảnh không còn tồn tại',
+        response.statusCode,
+      );
+    } on TimeoutException {
+      throw const ApiException('Tải ảnh quá thời gian');
+    } on http.ClientException {
+      throw const ApiException('Không tải được ảnh. Kiểm tra kết nối mạng.');
+    }
+  }
+
   Future<List<Crew>> crews() async =>
       (await _request('GET', '/api/crews') as List)
           .map((e) => Crew.fromJson(e as Map<String, dynamic>))

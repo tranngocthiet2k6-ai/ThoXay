@@ -68,3 +68,9 @@ Thêm crews, crew_members, crew_batches và `job_applications.crew_batch_id` nul
 Đơn cũ giữ nguyên NULL, không đổi trạng thái/đánh giá/lương đã chốt. Mỗi thành viên
 trong đơn tổ đội vẫn có một job_application riêng. SQL thủ công tương ứng:
 `migrations/014_crew_hiring.sql`.
+
+## V15 — Ảnh tay nghề
+
+Thêm portfolio_photos (UUID, owner, caption, BYTEA, created_at), chỉ mục owner/ngày,
+CHECK dung lượng 2 MB. Không thay đổi ảnh URL legacy hoặc ảnh CCCD. Bản SQL:
+`migrations/015_portfolio_photos.sql`.

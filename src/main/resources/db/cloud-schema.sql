@@ -197,4 +197,12 @@ CREATE TABLE IF NOT EXISTS crew_batches (
 );
 ALTER TABLE job_applications ADD COLUMN IF NOT EXISTS crew_batch_id BIGINT REFERENCES crew_batches(id) ON DELETE SET NULL;
 CREATE INDEX IF NOT EXISTS idx_application_crew ON job_applications(crew_batch_id);
+
+CREATE TABLE IF NOT EXISTS portfolio_photos (
+ id UUID PRIMARY KEY,owner_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+ caption VARCHAR(160) NOT NULL DEFAULT '',content BYTEA NOT NULL,
+ created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ CHECK(octet_length(content)<=2097152)
+);
+CREATE INDEX IF NOT EXISTS idx_portfolio_owner ON portfolio_photos(owner_id,created_at);
 COMMIT;
