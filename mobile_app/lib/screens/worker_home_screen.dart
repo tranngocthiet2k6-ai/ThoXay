@@ -234,6 +234,43 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
     }
   }
 
+  Future<void> _withdrawCrew(JobApplication application) async {
+    if (_cancelling || _loading) return;
+    final accepted = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Rút đơn tổ đội?'),
+        content: const Text(
+          'Rút đơn đang chờ sẽ rút toàn bộ tổ khỏi công trình. Không trừ điểm uy tín khi tổ chưa được duyệt.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Quay lại'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Rút toàn bộ tổ'),
+          ),
+        ],
+      ),
+    );
+    if (accepted != true || !mounted) return;
+    setState(() => _cancelling = true);
+    try {
+      await widget.api.withdrawCrew(application.crewBatchId!);
+      if (mounted) await _refresh();
+    } on ApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          AppSnackBar(content: Text(e.message), kind: NoticeKind.error),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _cancelling = false);
+    }
+  }
+
   Future<void> _confirmTerms(JobApplication application) async {
     final proposal = await showWorkerCommitment(
       context,
@@ -506,6 +543,29 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                                     size: 18,
                                   ),
                                 ),
+                                if (application.crewBatchId != null)
+                                  Chip(
+                                    avatar: const Icon(
+                                      Icons.groups_outlined,
+                                      size: 18,
+                                    ),
+                                    label: Text(
+                                      'Tổ đội #${application.crewBatchId}',
+                                    ),
+                                  ),
+                                if (application.crewBatchId != null &&
+                                    application.status == 'PENDING')
+                                  TextButton.icon(
+                                    onPressed: _cancelling || _loading
+                                        ? null
+                                        : () => _withdrawCrew(application),
+                                    icon: const Icon(
+                                      Icons.group_remove_outlined,
+                                    ),
+                                    label: const Text(
+                                      'Không tham gia công trình tổ đội',
+                                    ),
+                                  ),
                                 if (application.jobRating != null)
                                   Text(
                                     'Đánh giá công trình: ${application.jobRating}/5 ★',

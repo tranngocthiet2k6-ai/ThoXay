@@ -9,6 +9,13 @@
   <a th:href="@{/admin/dashboard}" class="btn btn-outline-primary mb-4">← Quản trị</a>
   <h1 class="h3">Cam kết và lương công trình</h1>
   <p class="text-secondary">Tối đa 100 đơn mới nhất. Bản nháp và dữ liệu cũ được phân biệt với cam kết đã chốt.</p>
+  <section class="card p-4 mb-4" th:each="crew : ${crews}">
+    <h2 class="h5" th:text="${crew.crewName}"></h2>
+    <p th:text="'Tổ đội #' + ${crew.id} + ' · ' + ${crew.status}"></p>
+    <div class="table-responsive"><table class="table"><thead><tr><th>Thợ</th><th>Xác nhận điều khoản</th></tr></thead>
+      <tbody><tr th:each="member : ${crew.members}"><td th:text="${member.name}"></td><td><span class="badge" th:classappend="${member.status == 'CONFIRMED' ? 'bg-success' : 'bg-warning text-dark'}" th:text="${member.status == 'CONFIRMED' ? 'Đã xác nhận' : 'Đang chờ'}"></span></td></tr></tbody>
+    </table></div>
+  </section>
   <div th:if="${documents.isEmpty()}" class="alert alert-info">Chưa có đơn ứng tuyển.</div>
   <article th:each="document : ${documents}" class="card p-4 mb-3">
     <div class="d-flex flex-wrap gap-3 align-items-center justify-content-between mb-3">

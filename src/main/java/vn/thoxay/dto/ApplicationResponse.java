@@ -8,7 +8,7 @@ public record ApplicationResponse(Long id, JobResponse job, Long workerId, Strin
     String status, LocalDateTime appliedAt, Integer jobRating, String cancellationReason,
     java.time.Instant cancelledAt, int cancellationPenalty, boolean workerAvailable,
     Long proposedDailyRate, String wageNote, Long agreedDailyRate, Integer consentVersion,
-    java.time.Instant acceptedTermsAt, String contractHash) {
+    java.time.Instant acceptedTermsAt, String contractHash, Long crewBatchId) {
     public static ApplicationResponse of(JobApplication application) {
         var worker = application.getWorker();
         boolean accepted = application.getStatus() == vn.thoxay.entity.ApplicationStatus.ACCEPTED;
@@ -17,6 +17,6 @@ public record ApplicationResponse(Long id, JobResponse job, Long workerId, Strin
             worker.isVerified(), worker.isActive(), application.getStatus().name(), application.getAppliedAt(), application.getWorkerRating(),
             application.getCancellationReason(), application.getCancelledAt(), application.getCancellationPenalty(), worker.isAvailable(),
             application.getProposedDailyRate(), application.getWageNote(), application.getAgreedDailyRate(), application.getConsentVersion(),
-            application.getAcceptedTermsAt(), application.getContractHash());
+            application.getAcceptedTermsAt(), application.getContractHash(), application.getCrewBatch()==null?null:application.getCrewBatch().getId());
     }
 }

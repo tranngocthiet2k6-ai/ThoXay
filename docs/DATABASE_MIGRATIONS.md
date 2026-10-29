@@ -61,3 +61,10 @@ Bản SQL chạy thủ công tương ứng: `migrations/012_schedule_offers_comm
 Hai bảng bookmark riêng theo chủ sở hữu, khóa unique(owner,target), FK cascade;
 không backfill hoặc thay đổi công trình/tài khoản hiện hữu. Bản SQL tương ứng:
 `migrations/013_saved_jobs_workers.sql`.
+
+## V14 — Tuyển tổ đội
+
+Thêm crews, crew_members, crew_batches và `job_applications.crew_batch_id` nullable.
+Đơn cũ giữ nguyên NULL, không đổi trạng thái/đánh giá/lương đã chốt. Mỗi thành viên
+trong đơn tổ đội vẫn có một job_application riêng. SQL thủ công tương ứng:
+`migrations/014_crew_hiring.sql`.

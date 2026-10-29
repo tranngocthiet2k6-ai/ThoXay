@@ -99,6 +99,7 @@ class JobApplication {
     required this.workerActive,
     required this.status,
     this.jobRating,
+    this.crewBatchId,
     this.cancellationReason,
     this.cancelledAt,
     this.cancellationPenalty = 0,
@@ -115,6 +116,7 @@ class JobApplication {
   final String workerName, status;
   final String? workerPhone;
   final int? jobRating;
+  final int? crewBatchId;
   final String? cancellationReason;
   final DateTime? cancelledAt;
   final int cancellationPenalty;
@@ -135,6 +137,7 @@ class JobApplication {
     workerActive: json['workerActive'] as bool,
     status: json['status'] as String,
     jobRating: (json['jobRating'] as num?)?.toInt(),
+    crewBatchId: (json['crewBatchId'] as num?)?.toInt(),
     cancellationReason: json['cancellationReason'] as String?,
     cancelledAt: json['cancelledAt'] == null
         ? null

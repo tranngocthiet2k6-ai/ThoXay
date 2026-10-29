@@ -646,6 +646,35 @@ class _ApplicantsSheetState extends State<_ApplicantsSheet> {
   }
 
   Future<void> _decide(JobApplication application, String status) async {
+    if (application.crewBatchId != null) {
+      final roster = _applications
+          .where((a) => a.crewBatchId == application.crewBatchId)
+          .toList();
+      final agreed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(
+            status == 'ACCEPTED'
+                ? 'Nhận toàn bộ tổ đội?'
+                : 'Từ chối toàn bộ tổ đội?',
+          ),
+          content: Text(
+            '${roster.length} thợ: ${roster.map((a) => a.workerName).join(', ')}.\nThao tác áp dụng cho toàn nhóm; mỗi người có cam kết, chấm công và đánh giá riêng.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Quay lại'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Tiếp tục'),
+            ),
+          ],
+        ),
+      );
+      if (agreed != true || !mounted) return;
+    }
     setState(() {
       _updating = application.id;
       _error = null;
@@ -658,13 +687,26 @@ class _ApplicantsSheetState extends State<_ApplicantsSheet> {
           application,
         );
         if (decision == null || !mounted) return;
-        await widget.api.acceptWithTerms(
-          application.id,
-          decision.version,
-          acceptOffer: decision.acceptOffer,
-        );
+        if (application.crewBatchId != null) {
+          await widget.api.crewDecision(
+            application.crewBatchId!,
+            status,
+            version: decision.version,
+            acceptOffer: decision.acceptOffer,
+          );
+        } else {
+          await widget.api.acceptWithTerms(
+            application.id,
+            decision.version,
+            acceptOffer: decision.acceptOffer,
+          );
+        }
       } else {
-        await widget.api.updateApplication(application.id, status);
+        if (application.crewBatchId != null) {
+          await widget.api.crewDecision(application.crewBatchId!, status);
+        } else {
+          await widget.api.updateApplication(application.id, status);
+        }
       }
       if (mounted) await _refresh();
     } on ApiException catch (e) {
@@ -783,6 +825,27 @@ class _ApplicantsSheetState extends State<_ApplicantsSheet> {
                             ),
                           const SizedBox(height: 8),
                           Chip(label: Text(statusLabel(application.status))),
+                          if (application.crewBatchId != null &&
+                              application.status == 'PENDING')
+                            Text(
+                              application.acceptedTermsAt != null &&
+                                      application.consentVersion ==
+                                          application.job.termsVersion
+                                  ? 'Đã xác nhận cam kết'
+                                  : 'Chờ thợ xác nhận cam kết',
+                              style: TextStyle(
+                                color:
+                                    application.acceptedTermsAt != null &&
+                                        application.consentVersion ==
+                                            application.job.termsVersion
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Theme.of(context).colorScheme.error,
+                              ),
+                            ),
+                          if (application.crewBatchId != null)
+                            Text(
+                              'Tổ đội #${application.crewBatchId} · duyệt/từ chối áp dụng cho toàn nhóm',
+                            ),
                           if (!application.workerAvailable &&
                               application.status == 'PENDING')
                             const Text('Thợ đang tạm ngưng nhận việc'),
@@ -814,6 +877,8 @@ class _ApplicantsSheetState extends State<_ApplicantsSheet> {
                                   child: Text(
                                     _updating == application.id
                                         ? 'Đang xử lý…'
+                                        : application.crewBatchId != null
+                                        ? 'Nhận toàn tổ'
                                         : 'Nhận thợ',
                                   ),
                                 ),
@@ -821,7 +886,11 @@ class _ApplicantsSheetState extends State<_ApplicantsSheet> {
                                   onPressed: _updating != null || _loading
                                       ? null
                                       : () => _decide(application, 'REJECTED'),
-                                  child: const Text('Từ chối'),
+                                  child: Text(
+                                    application.crewBatchId != null
+                                        ? 'Từ chối toàn tổ'
+                                        : 'Từ chối',
+                                  ),
                                 ),
                               ],
                             ),

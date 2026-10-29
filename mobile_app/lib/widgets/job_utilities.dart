@@ -7,6 +7,7 @@ import '../models/models.dart';
 import '../services/api_service.dart';
 import '../services/job_links.dart';
 import 'app_snack_bar.dart';
+import '../screens/crew_screen.dart';
 
 class FavoriteButton extends StatefulWidget {
   const FavoriteButton({
@@ -127,6 +128,18 @@ class JobUtilities extends StatelessWidget {
     children: [
       if (api?.session?.role == 'ROLE_WORKER')
         FavoriteButton(api: api!, id: job.id),
+      if (api?.session?.role == 'ROLE_WORKER' &&
+          job.startsOn != null &&
+          ['OPEN', 'IN_PROGRESS'].contains(job.status))
+        OutlinedButton.icon(
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => CrewScreen(api: api!, job: job),
+            ),
+          ),
+          icon: const Icon(Icons.groups_outlined),
+          label: const Text('Ứng tuyển tổ đội'),
+        ),
       OutlinedButton.icon(
         onPressed: () => _navigate(context),
         icon: const Icon(Icons.directions_outlined),

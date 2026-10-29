@@ -64,10 +64,21 @@ public class ApplicationService {
 
     @Transactional
     public ApplicationResponse updateStatus(Long id, ApplicationStatusRequest request) {
+        return decide(id,request,false);
+    }
+
+    /** Internal entry point: CrewService holds the job and every member lock in ID order. */
+    @Transactional
+    public ApplicationResponse updateCrewMemberStatus(Long id, ApplicationStatusRequest request) {
+        return decide(id,request,true);
+    }
+    private ApplicationResponse decide(Long id, ApplicationStatusRequest request,boolean crewDecision) {
         Long jobId = applications.findJobIdById(id).orElseThrow(() -> notFound("Đơn ứng tuyển"));
         Job job = lockedJob(jobId);
         current.requireOwner(job.getContractor().getId(), Role.ROLE_CONTRACTOR);
         JobApplication application = applications.findById(id).orElseThrow(() -> notFound("Đơn ứng tuyển"));
+        if(application.getCrewBatch()!=null && !crewDecision)
+            throw new ApiException(HttpStatus.CONFLICT,"Đơn thuộc tổ đội; hãy duyệt hoặc từ chối toàn bộ tổ");
         ApplicationStatus status = ApplicationStatus.valueOf(request.status());
         if (application.getStatus() == status) {
             if(status==ApplicationStatus.ACCEPTED && request.acceptCounterOffer()!=null && application.getAgreedDailyRate()!=null) {

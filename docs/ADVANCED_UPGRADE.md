@@ -16,7 +16,7 @@ lightbox/bộ lọc/KPI Admin. Các phần này được mở rộng, không t�
 - [x] Tự động migration: baseline dữ liệu cũ, migrate trước JPA validate, kiểm chứng PostgreSQL.
 - [x] Lịch công trình, thương lượng lương, cam kết có phiên bản và khóa giao dịch chống trùng lịch.
 - [x] Bản đồ ghim lương, 2km, sửa vị trí, chỉ đường, link/QR công trình; lưu việc/thợ quen.
-- [ ] Tổ đội có mời/xác nhận thành viên và xác nhận công trình; duyệt nguyên nhóm an toàn.
+- [x] Tổ đội có mời/xác nhận thành viên và xác nhận công trình; duyệt nguyên nhóm an toàn.
 - [ ] Chấm công GPS/QR, ảnh cuối ngày, nghiệm thu và kiểm tra ngày công khi thanh toán.
 - [ ] VietQR nội bộ, ngân hàng do Admin cấu hình, mã đối soát và snapshot tài khoản nhận.
 - [ ] SOS/sự cố/tranh chấp, cảnh báo Admin ưu tiên, lịch sử xử lý.
@@ -108,3 +108,25 @@ lịch trùng, lương chốt, nhóm thợ, day-count khi chi trả và công t�
 
 Tài liệu tích hợp: [qr_flutter](https://pub.dev/documentation/qr_flutter/latest/),
 [Google Maps URLs](https://developers.google.com/maps/documentation/urls/get-started).
+
+## Checkpoint tuyển tổ đội
+
+- Thợ tạo tổ (tối đa 10 tổ/tổ trưởng), mời tài khoản thợ bằng số điện thoại.
+  Người được mời tự xác nhận/từ chối; tổ tối đa 20 thành viên. Lời mời chưa đồng ý
+  không được tính vào số thợ ứng tuyển. Roster không trả số điện thoại.
+- Tổ trưởng chọn công trình có lịch và xem cam kết trước khi gửi tổ. Backend tạo
+  một đơn riêng cho mỗi thành viên đã tham gia; chỉ ghi đồng ý của tổ trưởng.
+  Mỗi người còn lại phải mở Đã ứng tuyển để tự xác nhận điều khoản công trình.
+- Chủ thầu bấm Nhận/Từ chối toàn tổ, xem danh sách người trước khi xác nhận.
+  Khóa job trước rồi toàn bộ workers theo ID; kiểm tra số chỗ/lịch/Online/khóa
+  tài khoản/phiên bản cam kết. Một người lỗi thì rollback toàn bộ nhóm.
+- Trước duyệt, bất kỳ thành viên nào có thể rút cả tổ mà không trừ điểm. Sau duyệt,
+  hủy việc/đánh giá/chấm công tiếp tục theo từng tài khoản và quy định hiện hành.
+- Admin xem roster và trạng thái đồng ý tại trang Cam kết công trình.
+- API: `GET/POST /api/crews`, `POST /api/crews/{id}/invitations`,
+  `PUT /api/crews/{id}/membership`, `POST /api/crews/{id}/applications`,
+  `PUT /api/crew-applications/{id}/status`, `DELETE
+  /api/crew-applications/{id}/participation`, `GET /api/jobs/{id}/crew-applications`.
+- V14 thêm crews/crew_members/crew_batches và FK nullable trên đơn ứng tuyển;
+  đơn cá nhân cũ giữ nguyên. Test rollback chạy qua các giao dịch request thật,
+  không dùng transaction bao quanh test để che lỗi commit/rollback.

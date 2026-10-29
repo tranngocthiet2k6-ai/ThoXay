@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface JobApplicationRepository extends JpaRepository<JobApplication, Long> {
+    java.util.List<vn.thoxay.entity.JobApplication> findByCrewBatchIdOrderByWorkerIdAsc(Long id);
+
     @Query("select a from JobApplication a join fetch a.job j where a.worker.id=:workerId "
         + "and a.status=vn.thoxay.entity.ApplicationStatus.ACCEPTED "
         + "and j.status in (vn.thoxay.entity.JobStatus.OPEN,vn.thoxay.entity.JobStatus.IN_PROGRESS) "

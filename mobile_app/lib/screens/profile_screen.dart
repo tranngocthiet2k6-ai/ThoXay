@@ -1,4 +1,5 @@
 import 'saved_screen.dart';
+import 'crew_screen.dart';
 import '../theme/app_theme.dart';
 import '../widgets/design_motion.dart';
 import 'calendar_screen.dart';
@@ -216,6 +217,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(_profile!.phoneNumber),
+                if (_profile!.role == 'ROLE_WORKER')
+                  TextButton.icon(
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => CrewScreen(api: widget.api),
+                      ),
+                    ),
+                    icon: const Icon(Icons.groups_outlined),
+                    label: const Text('Tổ đội của tôi'),
+                  ),
                 TextButton.icon(
                   onPressed: () => Navigator.of(context).push(
                     MaterialPageRoute<void>(

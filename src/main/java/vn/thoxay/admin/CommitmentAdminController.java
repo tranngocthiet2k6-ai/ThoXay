@@ -10,9 +10,11 @@ import vn.thoxay.scheduling.CommitmentService;
 @Controller @RequiredArgsConstructor
 public class CommitmentAdminController {
     private final CommitmentService commitments;
+    private final vn.thoxay.crew.CrewService crews;
     @GetMapping("/admin/jobs/{id}/commitments") @PreAuthorize("hasRole('ADMIN')")
     public String list(@PathVariable Long id,Model model) {
         model.addAttribute("documents",commitments.adminByJob(id));
+        model.addAttribute("crews",crews.byJob(id));
         return "admin-commitments";
     }
 }

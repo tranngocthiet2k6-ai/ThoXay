@@ -177,6 +177,26 @@ CREATE TABLE IF NOT EXISTS saved_workers (
     UNIQUE(owner_id,worker_id), CHECK(owner_id<>worker_id)
 );
 
+CREATE TABLE IF NOT EXISTS crews (
+ id BIGSERIAL PRIMARY KEY, leader_id BIGINT NOT NULL REFERENCES users(id), name VARCHAR(100) NOT NULL,
+ created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS crew_members (
+ id BIGSERIAL PRIMARY KEY, crew_id BIGINT NOT NULL REFERENCES crews(id) ON DELETE CASCADE,
+ worker_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+ status VARCHAR(20) NOT NULL DEFAULT 'INVITED' CHECK(status IN ('INVITED','CONFIRMED','DECLINED')),
+ confirmed_at TIMESTAMPTZ, UNIQUE(crew_id,worker_id)
+);
+CREATE INDEX IF NOT EXISTS idx_crew_member_worker ON crew_members(worker_id,id);
+CREATE TABLE IF NOT EXISTS crew_batches (
+ id BIGSERIAL PRIMARY KEY, crew_id BIGINT NOT NULL REFERENCES crews(id),
+ job_id BIGINT NOT NULL REFERENCES jobs(id) ON DELETE CASCADE,
+ status VARCHAR(20) NOT NULL DEFAULT 'PENDING' CHECK(status IN ('PENDING','ACCEPTED','REJECTED')),
+ created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP, UNIQUE(crew_id,job_id)
+);
+ALTER TABLE job_applications ADD COLUMN IF NOT EXISTS crew_batch_id BIGINT REFERENCES crew_batches(id) ON DELETE SET NULL;
+CREATE INDEX IF NOT EXISTS idx_application_crew ON job_applications(crew_batch_id);
+
 -- Demo-only password for all three accounts: password
 INSERT INTO users (phone_number,password,full_name,role,is_verified)
 VALUES

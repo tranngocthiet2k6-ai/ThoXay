@@ -13,6 +13,7 @@ import '../models/worker_profile.dart';
 import '../models/reputation.dart';
 import '../models/wallet.dart';
 import '../models/scheduling.dart';
+import '../models/crew.dart';
 import 'chat_connection.dart';
 import 'kyc_camera.dart';
 
@@ -25,6 +26,66 @@ class ApiException implements Exception {
 }
 
 class ApiService extends ChangeNotifier {
+  Future<List<Crew>> crews() async =>
+      (await _request('GET', '/api/crews') as List)
+          .map((e) => Crew.fromJson(e as Map<String, dynamic>))
+          .toList();
+  Future<void> createCrew(String name) async {
+    await _request('POST', '/api/crews', body: {'name': name});
+  }
+
+  Future<void> inviteCrew(int id, String phone) async {
+    await _request(
+      'POST',
+      '/api/crews/$id/invitations',
+      body: {'phoneNumber': phone},
+    );
+  }
+
+  Future<void> crewMembership(int id, bool accepted) async {
+    await _request(
+      'PUT',
+      '/api/crews/$id/membership',
+      body: {'accepted': accepted},
+    );
+  }
+
+  Future<void> crewApply(int id, int jobId, WorkProposal p) async {
+    await _request(
+      'POST',
+      '/api/crews/$id/applications',
+      body: {
+        'jobId': jobId,
+        'proposedDailyRate': p.rate,
+        'wageNote': p.note,
+        'acceptedTerms': true,
+        'termsVersion': p.version,
+      },
+    );
+  }
+
+  Future<void> crewDecision(
+    int id,
+    String status, {
+    int? version,
+    bool acceptOffer = false,
+  }) async {
+    await _request(
+      'PUT',
+      '/api/crew-applications/$id/status',
+      body: {
+        'status': status,
+        'termsVersion': version,
+        'acceptedTerms': status == 'ACCEPTED',
+        'acceptCounterOffer': acceptOffer,
+      },
+    );
+  }
+
+  Future<void> withdrawCrew(int id) async {
+    await _request('DELETE', '/api/crew-applications/$id/participation');
+  }
+
   Future<List<Job>> savedJobs() async =>
       (await _request('GET', '/api/users/me/saved/jobs') as List)
           .map((e) => Job.fromJson(e as Map<String, dynamic>))
