@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 
 /// Shared desktop frame. Local MediaQuery matches the navigator's real width.
 class AdaptiveViewport extends StatelessWidget {
@@ -12,7 +13,7 @@ class AdaptiveViewport extends StatelessWidget {
     builder: (context, bounds) {
       final width = math.min(bounds.maxWidth, maxWidth);
       return ColoredBox(
-        color: const Color(0xffe2e8f0),
+        color: AppColors.canvas,
         child: Center(
           child: SizedBox(
             width: width,

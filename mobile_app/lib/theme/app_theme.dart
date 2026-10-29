@@ -1,15 +1,28 @@
 import 'package:flutter/material.dart';
 
+abstract final class AppColors {
+  static const canvas = Color(0xfff7f8fa);
+  static const surface = Color(0xffffffff);
+  static const ink = Color(0xff182230);
+  static const muted = Color(0xff64748b);
+  static const border = Color(0xffe4e7ec);
+  static const soft = Color(0xfff2f4f7);
+  static const success = Color(0xff15803d);
+  static const warning = Color(0xffb45309);
+  static const error = Color(0xffb42318);
+  static const gold = Color(0xfffbbf24);
+}
+
 abstract final class AppTheme {
   static List<Color> brandGradient(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     if (primary == workerOrange) {
-      return const [Color(0xff7c2d12), Color(0xffc2410c)];
+      return const [AppColors.ink, Color(0xff413025)];
     }
     if (primary == contractorEmerald) {
-      return const [Color(0xff064e3b), Color(0xff047857)];
+      return const [AppColors.ink, Color(0xff133e36)];
     }
-    return const [Color(0xff0f172a), Color(0xff1d4ed8)];
+    return const [AppColors.ink, Color(0xff293c52)];
   }
 
   static const workerOrange = Color(0xffea580c);
@@ -22,12 +35,10 @@ abstract final class AppTheme {
         ? workerOrange
         : contractor
         ? contractorEmerald
+        : role == null
+        ? workerOrange
         : const Color(0xff1d4ed8);
-    final background = worker
-        ? const Color(0xfffff7ed)
-        : contractor
-        ? const Color(0xfff0fdf4)
-        : const Color(0xfff1f5f9);
+    const background = AppColors.canvas;
     final container = worker
         ? const Color(0xffffedd5)
         : contractor
@@ -36,31 +47,36 @@ abstract final class AppTheme {
     final colors =
         ColorScheme.fromSeed(seedColor: accent, surface: Colors.white).copyWith(
           primary: accent,
-          onPrimary: worker
+          onPrimary: worker || role == null
               ? const Color(0xff1c0a00)
               : contractor
               ? const Color(0xff011b12)
               : Colors.white,
           primaryContainer: container,
           onPrimaryContainer: const Color(0xff0f172a),
-          onSurface: const Color(0xff0f172a),
-          onSurfaceVariant: const Color(0xff64748b),
+          onSurface: AppColors.ink,
+          onSurfaceVariant: AppColors.muted,
+          outline: AppColors.border,
+          error: AppColors.error,
         );
     final rounded = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(20),
+      side: const BorderSide(color: AppColors.border),
     );
     return ThemeData(
       useMaterial3: true,
+      fontFamily: 'PlusJakartaSans',
       colorScheme: colors,
       scaffoldBackgroundColor: background,
       textTheme: const TextTheme(
         headlineSmall: TextStyle(
           fontSize: 28,
           fontWeight: FontWeight.w800,
+          letterSpacing: -.8,
           height: 1.2,
         ),
         titleLarge: TextStyle(
-          fontSize: 22,
+          fontSize: 20,
           fontWeight: FontWeight.w800,
           height: 1.3,
         ),
@@ -69,46 +85,63 @@ abstract final class AppTheme {
         bodyMedium: TextStyle(fontSize: 14, height: 1.5),
       ),
       appBarTheme: AppBarTheme(
-        backgroundColor: background,
-        foregroundColor: const Color(0xff0f172a),
+        backgroundColor: AppColors.surface,
+        foregroundColor: AppColors.ink,
+        centerTitle: false,
+        toolbarHeight: 72,
+        titleSpacing: 24,
+        shape: const Border(bottom: BorderSide(color: AppColors.border)),
         elevation: 0,
         scrolledUnderElevation: 0,
         titleTextStyle: const TextStyle(
-          fontSize: 21,
+          fontFamily: 'PlusJakartaSans',
+          fontSize: 18,
           fontWeight: FontWeight.w800,
-          color: Color(0xff0f172a),
+          color: AppColors.ink,
         ),
       ),
       cardTheme: CardThemeData(
         color: Colors.white,
-        elevation: 1,
-        shadowColor: const Color(0x140f172a),
+        elevation: 0,
+        shadowColor: AppColors.ink,
         margin: const EdgeInsets.only(bottom: 16),
         shape: rounded,
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: Colors.white,
+        fillColor: AppColors.soft,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 16,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xffdce5e1)),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.border),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xffdce5e1)),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.border),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: accent, width: 2),
+        ),
+        floatingLabelStyle: TextStyle(
+          color: accent,
+          fontWeight: FontWeight.w700,
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          minimumSize: const Size(48, 46),
+          minimumSize: const Size(48, 48),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+          textStyle: const TextStyle(
+            fontFamily: 'PlusJakartaSans',
+            fontSize: 14,
+            fontWeight: FontWeight.w800,
+          ),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -123,17 +156,38 @@ abstract final class AppTheme {
         backgroundColor: Colors.white,
         indicatorColor: container,
         elevation: 0,
-        height: 72,
+        height: 80,
         labelTextStyle: const WidgetStatePropertyAll(
           TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
         ),
+      ),
+      listTileTheme: const ListTileThemeData(
+        contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        iconColor: AppColors.muted,
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: AppColors.soft,
+        selectedColor: container,
+        side: const BorderSide(color: AppColors.border),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        labelStyle: const TextStyle(
+          fontFamily: 'PlusJakartaSans',
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+      tabBarTheme: TabBarThemeData(
+        labelColor: accent,
+        unselectedLabelColor: AppColors.muted,
+        indicatorColor: accent,
+        dividerColor: AppColors.border,
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         shape: rounded,
       ),
       dividerTheme: const DividerThemeData(
-        color: Color(0xffedf1ef),
+        color: AppColors.border,
         thickness: 1,
       ),
       bottomSheetTheme: const BottomSheetThemeData(

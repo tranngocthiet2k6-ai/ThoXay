@@ -1,8 +1,8 @@
-import '../theme/app_theme.dart';
-
 import 'package:flutter/material.dart';
 
-/// A shared, keyboard-safe entry point for both account flows.
+import '../theme/app_theme.dart';
+import 'design_motion.dart';
+
 class AuthShell extends StatelessWidget {
   const AuthShell({
     super.key,
@@ -14,131 +14,190 @@ class AuthShell extends StatelessWidget {
   final String title, subtitle;
   final Widget child;
   final bool canGoBack;
+
   @override
   Widget build(BuildContext context) => Scaffold(
-    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-    appBar: canGoBack
-        ? AppBar(
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            title: const Text('Đăng ký'),
-          )
-        : null,
+    appBar: canGoBack ? AppBar(title: const Text('Đăng ký')) : null,
     body: SafeArea(
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final wide = constraints.maxWidth >= 960;
-          final brand = Container(
+          final wide = constraints.maxWidth >= 900;
+          final compact = constraints.maxWidth < 600;
+          final brand = DesignSurface(
+            dark: true,
             padding: EdgeInsets.all(wide ? 36 : 24),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(28),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: AppTheme.brandGradient(context),
-              ),
-            ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: .13),
-                        borderRadius: BorderRadius.circular(18),
+                        color: Theme.of(context).colorScheme.primary,
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Icon(
-                        Icons.construction_rounded,
-                        color: Color(0xffffdb8e),
-                        size: 30,
+                        Icons.roofing_rounded,
+                        color: AppColors.ink,
+                        size: 26,
                       ),
                     ),
-                    const SizedBox(width: 14),
-                    const Text(
-                      'Thợ Xây',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 27,
-                        fontWeight: FontWeight.w800,
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Text(
+                        'ThoXay',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: AppColors.surface,
+                          fontSize: 24,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -1,
+                        ),
                       ),
                     ),
+                    if (compact)
+                      const Icon(
+                        Icons.north_east_rounded,
+                        color: AppColors.surface,
+                        size: 22,
+                      ),
                   ],
                 ),
-                const SizedBox(height: 24),
-                Text(
-                  'Việc gần nhà.\nThợ đúng nghề.',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: wide ? 38 : 28,
-                    height: 1.2,
-                    fontWeight: FontWeight.w800,
+                SizedBox(height: wide ? 48 : 20),
+                DesignReveal(
+                  child: Text(
+                    wide
+                        ? 'Cùng xây\nngày mai.'
+                        : 'Việc gần nhà. Thợ đúng nghề.',
+                    style: TextStyle(
+                      color: AppColors.surface,
+                      fontSize: wide ? 48 : 23,
+                      height: 1.15,
+                      letterSpacing: wide ? -2 : -.6,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
-                const SizedBox(height: 14),
-                const Text(
-                  'Kết nối đôi bàn tay lành nghề với những công trình đang chờ bạn.',
-                  style: TextStyle(color: Color(0xffd5eae3), height: 1.6),
-                ),
-                const SizedBox(height: 24),
-                const Wrap(
-                  spacing: 16,
-                  runSpacing: 10,
-                  children: [
-                    _TrustLabel(Icons.near_me_outlined, 'Công trình gần bạn'),
-                    _TrustLabel(Icons.verified_user_outlined, 'Hồ sơ xác thực'),
-                  ],
-                ),
+                if (!compact) ...[
+                  const SizedBox(height: 20),
+                  const DesignReveal(
+                    child: Text(
+                      'Kết nối người thợ lành nghề và chủ thầu.\nMỗi công trình, một cơ hội mới.',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        height: 1.7,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  const ConstructionArtwork(height: 190),
+                  const SizedBox(height: 28),
+                  const Divider(color: Colors.white24),
+                  const SizedBox(height: 16),
+                  const Wrap(
+                    spacing: 20,
+                    runSpacing: 12,
+                    children: [
+                      _TrustLabel(Icons.near_me_outlined, 'Tìm việc quanh bạn'),
+                      _TrustLabel(
+                        Icons.handshake_outlined,
+                        'Kết nối trực tiếp',
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           );
-          final form = Container(
-            padding: EdgeInsets.all(constraints.maxWidth < 380 ? 20 : 28),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(28),
-              border: Border.all(color: const Color(0xffe2e8f0)),
-              boxShadow: [
-                BoxShadow(
-                  color: Theme.of(context).colorScheme.primary
-                      .withValues(alpha: .07),
-                  blurRadius: 40,
-                  offset: const Offset(0, 16),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: Theme.of(context).colorScheme.onSurface,
+          final form = DesignReveal(
+            child: DesignSurface(
+              padding: EdgeInsets.all(compact ? 24 : 36),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 24,
+                        height: 3,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          canGoBack
+                              ? 'BẮT ĐẦU HÀNH TRÌNH'
+                              : 'KHÔNG GIAN CỦA BẠN',
+                          style: const TextStyle(
+                            fontSize: 10,
+                            letterSpacing: 1.5,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.muted,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  subtitle,
-                  style: const TextStyle(color: Color(0xff64748b), height: 1.5),
-                ),
-                const SizedBox(height: 28),
-                child,
-              ],
+                  const SizedBox(height: 20),
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.headlineSmall
+                        ?.copyWith(fontSize: wide ? 30 : 26),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      color: AppColors.muted,
+                      height: 1.65,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  child,
+                  const SizedBox(height: 24),
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.lock_outline_rounded,
+                        size: 14,
+                        color: AppColors.muted,
+                      ),
+                      SizedBox(width: 6),
+                      Flexible(
+                        child: Text(
+                          'Kết nối an toàn · Thông tin được bảo vệ',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: AppColors.muted,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           );
           return Center(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.symmetric(
+                horizontal: compact ? 16 : 32,
+                vertical: compact ? 20 : 40,
+              ),
               child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: wide ? 1060 : 510),
+                constraints: BoxConstraints(maxWidth: wide ? 1060 : 520),
                 child: wide
                     ? Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(child: brand),
-                          const SizedBox(width: 28),
+                          const SizedBox(width: 24),
                           Expanded(child: form),
                         ],
                       )
@@ -162,9 +221,9 @@ class _TrustLabel extends StatelessWidget {
   Widget build(BuildContext context) => Row(
     mainAxisSize: MainAxisSize.min,
     children: [
-      Icon(icon, size: 17, color: const Color(0xffffdb8e)),
-      const SizedBox(width: 7),
-      Text(label, style: const TextStyle(color: Colors.white, fontSize: 12)),
+      Icon(icon, size: 17, color: AppColors.gold),
+      const SizedBox(width: 8),
+      Text(label, style: const TextStyle(color: Colors.white70, fontSize: 12)),
     ],
   );
 }
