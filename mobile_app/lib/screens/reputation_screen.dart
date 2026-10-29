@@ -1,3 +1,5 @@
+import '../widgets/content_skeleton.dart';
+
 import 'package:flutter/material.dart';
 
 import '../models/reputation.dart';
@@ -52,13 +54,13 @@ class _ReputationScreenState extends State<ReputationScreen> {
       onRefresh: () => _load(),
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         children: [
           const Text(
             'Điểm khởi đầu 100. Hoàn thành công trình +2 điểm (tối đa 100), hủy việc đang làm -15 điểm (tối thiểu 0).',
           ),
           const SizedBox(height: 16),
-          if (_loading) const LinearProgressIndicator(),
+          if (_loading && _items.isEmpty) const ContentSkeleton(compact: true),
           if (_error != null) ...[
             Text(_error!),
             TextButton(onPressed: () => _load(), child: const Text('Thử lại')),
@@ -71,7 +73,7 @@ class _ReputationScreenState extends State<ReputationScreen> {
           for (final entry in _items)
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(18),
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

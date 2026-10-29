@@ -130,7 +130,7 @@ class AuthShell extends StatelessWidget {
           );
           return Center(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(16),
               child: ConstrainedBox(
                 constraints: BoxConstraints(maxWidth: wide ? 1060 : 510),
                 child: wide

@@ -1,3 +1,5 @@
+import '../widgets/content_skeleton.dart';
+import '../widgets/app_snack_bar.dart';
 import '../theme/app_theme.dart';
 
 import 'package:flutter/material.dart';
@@ -82,7 +84,7 @@ class _WalletScreenState extends State<WalletScreen> {
     if (!mounted) return;
     if (done == true) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        AppSnackBar(
           content: Text(
             kind == 'TOP_UP' || kind == 'WITHDRAW'
                 ? 'Đã gửi yêu cầu chờ đối soát.'
@@ -135,10 +137,10 @@ class _WalletScreenState extends State<WalletScreen> {
     body: RefreshIndicator(
       onRefresh: () => _load(),
       child: ListView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         physics: const AlwaysScrollableScrollPhysics(),
         children: [
-          if (_busy) const LinearProgressIndicator(),
+          if (_busy && _balance == null) const ContentSkeleton(compact: true),
           if (_error != null) ...[
             Text(
               _error!,
@@ -305,7 +307,13 @@ class _WalletScreenState extends State<WalletScreen> {
           const SizedBox(height: 16),
           if (_tab == 0) ...[
             if (!_busy && _error == null && _entries.isEmpty)
-              const EmptyState(
+              EmptyState(
+                icon: Icons.receipt_long_outlined,
+                action: OutlinedButton.icon(
+                  onPressed: () => _load(),
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Kiểm tra lại'),
+                ),
                 title: 'Chưa có giao dịch',
                 message: 'Mọi biến động số dư sẽ được ghi lại tại đây.',
               ),
@@ -362,7 +370,13 @@ class _WalletScreenState extends State<WalletScreen> {
               ),
           ] else ...[
             if (!_busy && _error == null && _requests.isEmpty)
-              const EmptyState(
+              EmptyState(
+                icon: Icons.account_balance_wallet_outlined,
+                action: OutlinedButton.icon(
+                  onPressed: () => _load(),
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Kiểm tra lại'),
+                ),
                 title: 'Chưa có yêu cầu',
                 message: 'Yêu cầu nạp và rút được theo dõi tại đây.',
               ),

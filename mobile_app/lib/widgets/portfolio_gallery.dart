@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'loading_jobs.dart';
+
 class PortfolioGallery extends StatelessWidget {
   const PortfolioGallery({super.key, required this.images});
   final List<String> images;
@@ -8,7 +10,7 @@ class PortfolioGallery extends StatelessWidget {
     fit: fit,
     loadingBuilder: (context, child, loading) => loading == null
         ? child
-        : const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+        : const ShimmerSurface(child: SkeletonLine(height: 105)),
     errorBuilder: (_, error, stack) =>
         const Center(child: Icon(Icons.broken_image_outlined)),
   );

@@ -1,3 +1,5 @@
+import '../widgets/content_skeleton.dart';
+
 import 'package:flutter/material.dart';
 
 import '../models/reputation.dart';
@@ -46,7 +48,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
       onRefresh: _load,
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         children: [
           const Text(
             'Uy tín được xây từ công việc thật',
@@ -68,13 +70,19 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
               ],
             ),
           ),
-          if (_loading) const LinearProgressIndicator(),
+          if (_loading && _rows.isEmpty) const ContentSkeleton(compact: true),
           if (_error != null) ...[
             Text(_error!),
             TextButton(onPressed: _load, child: const Text('Thử lại')),
           ],
           if (!_loading && _error == null && _rows.isEmpty)
-            const EmptyState(
+            EmptyState(
+              icon: Icons.emoji_events_outlined,
+              action: OutlinedButton.icon(
+                onPressed: _load,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Kiểm tra lại'),
+              ),
               title: 'Chưa có dữ liệu xếp hạng',
               message: 'Hoàn thành công trình và nhận đánh giá để bắt đầu hành trình uy tín.',
             ),
@@ -103,7 +111,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                   ),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(18),
+                  padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

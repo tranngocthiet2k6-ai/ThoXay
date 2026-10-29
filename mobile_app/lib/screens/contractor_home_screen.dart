@@ -1,3 +1,5 @@
+import '../widgets/app_snack_bar.dart';
+
 import 'package:flutter/material.dart';
 
 import '../models/models.dart';
@@ -10,6 +12,7 @@ import '../widgets/chat_button.dart';
 import '../widgets/job_completion_dialog.dart';
 import 'location_picker_screen.dart';
 import '../widgets/loading_jobs.dart';
+import '../widgets/content_skeleton.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/hero_greeting.dart';
 import '../widgets/job_search_header.dart';
@@ -75,9 +78,9 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
       builder: (_) => _CreateJobDialog(api: widget.api),
     );
     if (created == true && mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Đã đăng công trình mới.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        AppSnackBar(content: const Text('Đã đăng công trình mới.')),
+      );
       await _refresh();
     }
   }
@@ -97,7 +100,7 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
     final completed = await showJobCompletionDialog(context, widget.api, job);
     if (completed == true && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        AppSnackBar(
           content: Text('Đã hoàn thành công trình và lưu đánh giá cho thợ.'),
         ),
       );
@@ -597,10 +600,10 @@ class _ApplicantsSheetState extends State<_ApplicantsSheet> {
               ],
             ),
           ),
-          if (_loading) const LinearProgressIndicator(),
+          if (_loading) const ContentSkeleton(compact: true),
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(16),
               children: [
                 if (_error != null)
                   Card(
@@ -621,7 +624,7 @@ class _ApplicantsSheetState extends State<_ApplicantsSheet> {
                 for (final application in _applications)
                   Card(
                     child: Padding(
-                      padding: const EdgeInsets.all(18),
+                      padding: const EdgeInsets.all(16),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [

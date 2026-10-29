@@ -6,6 +6,37 @@ import 'support/fake_chat_api.dart';
 
 void main() {
   testWidgets(
+    'empty chat greeting prepares a draft and never sends automatically',
+    (tester) async {
+      final api = FakeChatApi();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ChatScreen(
+            api: api,
+            job: chatJob,
+            peerId: 2,
+            peerName: 'Chủ thầu A',
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Soạn lời chào'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Soạn lời chào'));
+      await tester.pumpAndSettle();
+      expect(api.sentIds, isEmpty);
+      expect(
+        tester
+            .widget<TextField>(find.byKey(const ValueKey('chat-input')))
+            .controller!
+            .text,
+        contains('Xin chào'),
+      );
+      await tester.pumpWidget(const SizedBox());
+      api.dispose();
+    },
+  );
+  testWidgets(
     'chat receives new messages, keeps failed draft and retries without duplicates',
     (tester) async {
       final api = FakeChatApi()..rows.add(message(1));

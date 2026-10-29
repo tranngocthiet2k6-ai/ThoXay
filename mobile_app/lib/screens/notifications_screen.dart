@@ -1,3 +1,5 @@
+import '../widgets/content_skeleton.dart';
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -170,11 +172,11 @@ class _NotificationsScreenState extends State<NotificationsScreen>
       onRefresh: _refresh,
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         children: [
           Card(
             child: Padding(
-              padding: const EdgeInsets.all(18),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -211,7 +213,7 @@ class _NotificationsScreenState extends State<NotificationsScreen>
               ),
             ],
           ),
-          if (_loading) const LinearProgressIndicator(),
+          if (_loading && _items.isEmpty) const ContentSkeleton(compact: true),
           if (_error != null)
             Padding(
               padding: const EdgeInsets.all(12),
@@ -221,7 +223,13 @@ class _NotificationsScreenState extends State<NotificationsScreen>
               ),
             ),
           if (!_loading && _error == null && _items.isEmpty)
-            const EmptyState(
+            EmptyState(
+              icon: Icons.notifications_none,
+              action: OutlinedButton.icon(
+                onPressed: _refresh,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Kiểm tra lại'),
+              ),
               title: 'Chưa có thông báo',
               message: 'Thông tin về công việc và hồ sơ của bạn sẽ xuất hiện tại đây.',
             ),

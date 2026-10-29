@@ -165,7 +165,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               FilledButton(
                 onPressed: _busy ? null : _submit,
                 style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.all(18),
+                  padding: const EdgeInsets.all(16),
                 ),
                 child: _busy
                     ? const SizedBox(

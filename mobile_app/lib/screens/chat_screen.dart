@@ -1,3 +1,6 @@
+import '../widgets/empty_state.dart';
+import '../widgets/content_skeleton.dart';
+
 import 'package:flutter/material.dart';
 
 import '../models/models.dart';
@@ -159,11 +162,28 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
               ),
             Expanded(
               child: _chat.loading
-                  ? const Center(child: CircularProgressIndicator())
+                  ? const SingleChildScrollView(
+                      child: ContentSkeleton(chat: true),
+                    )
                   : rows.isEmpty
-                  ? const Center(
-                      child: Text(
-                        'Chưa có tin nhắn. Hãy bắt đầu trao đổi về công việc.',
+                  ? Center(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.all(16),
+                        child: EmptyState(
+                          icon: Icons.forum_outlined,
+                          title: 'Bắt đầu cuộc trò chuyện',
+                          message: 'Chưa có tin nhắn. Hãy bắt đầu trao đổi về công việc.',
+                          action: FilledButton.icon(
+                            icon: const Icon(Icons.waving_hand_outlined),
+                            label: const Text('Soạn lời chào'),
+                            onPressed: _chat.status == ChatStatus.stopped
+                                ? null
+                                : () {
+                                    _draft.text = 'Xin chào, tôi muốn trao đổi về công trình này.';
+                                    setState(() {});
+                                  },
+                          ),
+                        ),
                       ),
                     )
                   : ListView.builder(

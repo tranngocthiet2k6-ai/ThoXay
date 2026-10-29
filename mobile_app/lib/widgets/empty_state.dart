@@ -6,27 +6,41 @@ class EmptyState extends StatelessWidget {
     required this.title,
     required this.message,
     this.action,
+    this.icon,
   });
   final String title, message;
   final Widget? action;
+  final IconData? icon;
   @override
   Widget build(BuildContext context) => Container(
     width: double.infinity,
     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
     decoration: BoxDecoration(
       color: Colors.white,
-      borderRadius: BorderRadius.circular(24),
+      borderRadius: BorderRadius.circular(16),
       border: Border.all(color: const Color(0xffe4ebe7)),
     ),
     child: Column(
       children: [
         ExcludeSemantics(
-          child: CustomPaint(
-            size: const Size(180, 130),
-            painter: _WorksiteIllustration(
-              Theme.of(context).colorScheme.primary,
-            ),
-          ),
+          child: icon != null
+              ? CircleAvatar(
+                  radius: 48,
+                  backgroundColor: Theme.of(context)
+                      .colorScheme
+                      .primaryContainer,
+                  child: Icon(
+                    icon,
+                    size: 48,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                )
+              : CustomPaint(
+                  size: const Size(180, 130),
+                  painter: _WorksiteIllustration(
+                    Theme.of(context).colorScheme.primary,
+                  ),
+                ),
         ),
         const SizedBox(height: 20),
         Text(

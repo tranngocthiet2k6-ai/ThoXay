@@ -96,7 +96,7 @@ class LoadingJobs extends StatelessWidget {
             margin: const EdgeInsets.only(bottom: 16),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(22),
+              borderRadius: BorderRadius.circular(16),
             ),
             child: const Center(
               child: Icon(
@@ -109,10 +109,10 @@ class LoadingJobs extends StatelessWidget {
         for (var i = 0; i < (mapMode ? 1 : 3); i++)
           Container(
             margin: const EdgeInsets.only(bottom: 16),
-            padding: const EdgeInsets.all(22),
+            padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(22),
+              borderRadius: BorderRadius.circular(16),
             ),
             child: const Column(
               crossAxisAlignment: CrossAxisAlignment.start,

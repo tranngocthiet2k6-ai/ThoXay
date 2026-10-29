@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'content_skeleton.dart';
+
 import '../models/models.dart';
 import '../services/api_service.dart';
 
@@ -86,7 +88,7 @@ class _JobCompletionDialogState extends State<_JobCompletionDialog> {
               if (_loading)
                 const Padding(
                   padding: EdgeInsets.all(24),
-                  child: Center(child: CircularProgressIndicator()),
+                  child: ContentSkeleton(compact: true),
                 ),
               for (final application in _workers)
                 Padding(

@@ -1,9 +1,12 @@
+import '../widgets/app_snack_bar.dart';
+
 import 'package:flutter/material.dart';
 
 import '../models/models.dart';
 import '../models/wallet.dart';
 import '../services/api_service.dart';
 import 'wallet_screen.dart';
+import '../widgets/content_skeleton.dart';
 
 class JobPaymentsScreen extends StatefulWidget {
   const JobPaymentsScreen({super.key, required this.api, required this.job});
@@ -63,9 +66,7 @@ class _JobPaymentsScreenState extends State<JobPaymentsScreen> {
     if (mounted) {
       if (done == true) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Đã thanh toán thu nhập vào ví của thợ.'),
-          ),
+          AppSnackBar(content: Text('Đã thanh toán thu nhập vào ví của thợ.')),
         );
       }
       await _load();
@@ -78,7 +79,7 @@ class _JobPaymentsScreenState extends State<JobPaymentsScreen> {
     body: RefreshIndicator(
       onRefresh: _load,
       child: ListView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         physics: const AlwaysScrollableScrollPhysics(),
         children: [
           Text(
@@ -109,7 +110,7 @@ class _JobPaymentsScreenState extends State<JobPaymentsScreen> {
             icon: const Icon(Icons.account_balance_wallet_outlined),
             label: const Text('Mở ví / nạp tiền'),
           ),
-          if (_busy) const LinearProgressIndicator(),
+          if (_busy && _wallet == null) const ContentSkeleton(compact: true),
           if (_error != null) ...[
             Text(_error!),
             TextButton(onPressed: _load, child: const Text('Thử lại')),
@@ -117,7 +118,7 @@ class _JobPaymentsScreenState extends State<JobPaymentsScreen> {
           for (final worker in _workers)
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(18),
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [

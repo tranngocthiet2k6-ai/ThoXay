@@ -100,7 +100,7 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(height: 24),
             FilledButton(
               onPressed: _busy ? null : _submit,
-              style: FilledButton.styleFrom(padding: const EdgeInsets.all(18)),
+              style: FilledButton.styleFrom(padding: const EdgeInsets.all(16)),
               child: _busy
                   ? const SizedBox(
                       width: 22,

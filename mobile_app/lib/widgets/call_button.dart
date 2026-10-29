@@ -1,3 +1,5 @@
+import 'app_snack_bar.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -24,7 +26,8 @@ class CallButton extends StatelessWidget {
     }
     if (!opened && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        AppSnackBar(
+          kind: NoticeKind.error,
           content: Text(
             'Thiết bị chưa có ứng dụng gọi điện. Số liên hệ: $phone',
           ),

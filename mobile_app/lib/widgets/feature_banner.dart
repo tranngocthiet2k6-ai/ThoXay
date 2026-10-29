@@ -16,7 +16,7 @@ class FeatureBanner extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.all(24),
     decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(24),
+      borderRadius: BorderRadius.circular(16),
       gradient: LinearGradient(
         colors: AppTheme.brandGradient(context),
         begin: Alignment.topLeft,
@@ -65,10 +65,10 @@ class FeatureBanner extends StatelessWidget {
         if (MediaQuery.sizeOf(context).width > 480) ...[
           const SizedBox(width: 24),
           Container(
-            padding: const EdgeInsets.all(18),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: .1),
-              borderRadius: BorderRadius.circular(22),
+              borderRadius: BorderRadius.circular(16),
             ),
             child: Icon(icon, color: Colors.white, size: 42),
           ),

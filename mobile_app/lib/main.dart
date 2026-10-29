@@ -1,3 +1,5 @@
+import 'widgets/app_snack_bar.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
@@ -40,7 +42,9 @@ Future<void> main() async {
   };
   push.onForeground = (title) {
     if (api.session != null) {
-      _messenger.currentState?.showSnackBar(SnackBar(content: Text(title)));
+      _messenger.currentState?.showSnackBar(
+        AppSnackBar(content: Text(title), kind: NoticeKind.info),
+      );
     }
   };
   runApp(ThoXayApp(api: api));

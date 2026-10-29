@@ -1,3 +1,5 @@
+import 'app_snack_bar.dart';
+
 import 'package:flutter/material.dart';
 
 import '../models/models.dart';
@@ -105,7 +107,7 @@ class _ProfileEditorState extends State<ProfileEditor> {
       _populate(person);
       widget.onSaved(person);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        AppSnackBar(
           content: Text(
             'Đã lưu hồ sơ. Thay đổi họ tên hoặc ngày sinh cần được xác thực lại CCCD.',
           ),

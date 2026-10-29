@@ -1,3 +1,5 @@
+import '../widgets/app_snack_bar.dart';
+
 import 'package:flutter/material.dart';
 
 import '../models/models.dart';
@@ -131,13 +133,16 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
       await widget.api.apply(job.id);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Đã gửi ứng tuyển. Chờ chủ thầu duyệt.')),
+        AppSnackBar(
+          content: const Text('Đã gửi ứng tuyển. Chờ chủ thầu duyệt.'),
+        ),
       );
       await _refresh();
     } on ApiException catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(e.message)));
+        ScaffoldMessenger.of(context).showSnackBar(
+          AppSnackBar(content: Text(e.message), kind: NoticeKind.error),
+        );
       }
     } finally {
       if (mounted) setState(() => _applying = null);
@@ -169,7 +174,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
       final result = await widget.api.cancelApplication(application.id, reason);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        AppSnackBar(
           content: Text(
             'Đã hủy việc. Trừ ${result.cancellationPenalty} điểm uy tín.',
           ),
@@ -178,8 +183,9 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
       await _refresh();
     } on ApiException catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(e.message)));
+        ScaffoldMessenger.of(context).showSnackBar(
+          AppSnackBar(content: Text(e.message), kind: NoticeKind.error),
+        );
       }
     } finally {
       if (mounted) setState(() => _cancelling = false);

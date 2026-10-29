@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/reputation.dart';
 import '../services/api_service.dart';
+import 'content_skeleton.dart';
 
 class WorkerReviews extends StatefulWidget {
   const WorkerReviews({super.key, required this.api, required this.workerId});
@@ -54,7 +55,7 @@ class _WorkerReviewsState extends State<WorkerReviews> {
         'Đánh giá từ công trình',
         style: Theme.of(context).textTheme.titleMedium,
       ),
-      if (_loading) const LinearProgressIndicator(),
+      if (_loading) const ContentSkeleton(compact: true),
       if (_error != null) ...[
         Text(_error!),
         TextButton(

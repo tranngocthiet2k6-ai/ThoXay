@@ -1,3 +1,5 @@
+import '../widgets/content_skeleton.dart';
+
 import 'package:flutter/material.dart';
 
 import '../models/models.dart';
@@ -83,7 +85,7 @@ class _EarningsScreenState extends State<EarningsScreen> {
     body: RefreshIndicator(
       onRefresh: _load,
       child: ListView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         physics: const AlwaysScrollableScrollPhysics(),
         children: [
           const Text(
@@ -112,7 +114,7 @@ class _EarningsScreenState extends State<EarningsScreen> {
               'Chọn ngày: ${MaterialLocalizations.of(context).formatShortDate(_date)}',
             ),
           ),
-          if (_busy) const LinearProgressIndicator(),
+          if (_busy && _data == null) const ContentSkeleton(compact: true),
           if (_error != null) ...[
             Text(_error!),
             TextButton(onPressed: _load, child: const Text('Thử lại')),
