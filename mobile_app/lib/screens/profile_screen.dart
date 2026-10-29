@@ -1,3 +1,4 @@
+import '../widgets/appearance_button.dart';
 import 'incidents_screen.dart';
 import '../widgets/portfolio_uploads.dart';
 import 'saved_screen.dart';
@@ -90,7 +91,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         AppSnackBar(
-          content: Text(
+          content: const Text(
             'Đã cập nhật đủ hai ảnh CCCD. Vui lòng chờ quản trị viên xác thực.',
           ),
         ),
@@ -146,11 +147,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 12),
           KycScannerFrame(label: label, photo: photo),
           if (photo != null)
-            const Padding(
-              padding: EdgeInsets.only(top: 8),
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
               child: Text(
                 'Bấm ảnh để phóng to kiểm tra trước khi gửi.',
-                style: TextStyle(color: AppColors.muted),
+                style: TextStyle(color: AppPalette.of(context).muted),
               ),
             ),
           const SizedBox(height: 12),
@@ -182,6 +183,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     appBar: AppBar(
       title: const Text('Hồ sơ & xác thực CCCD'),
       actions: [
+        const AppearanceButton(),
         IconButton(
           tooltip: 'Làm mới hồ sơ',
           onPressed: _loading ? null : _load,

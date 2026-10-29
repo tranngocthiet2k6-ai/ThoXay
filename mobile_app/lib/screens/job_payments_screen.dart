@@ -67,7 +67,7 @@ class _JobPaymentsScreenState extends State<JobPaymentsScreen> {
     if (mounted) {
       if (done == true) {
         ScaffoldMessenger.of(context).showSnackBar(
-          AppSnackBar(content: Text('Đã thanh toán thu nhập vào ví của thợ.')),
+          AppSnackBar(content: const Text('Đã thanh toán thu nhập vào ví của thợ.')),
         );
       }
       await _load();

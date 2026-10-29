@@ -76,7 +76,7 @@ class SkeletonLine extends StatelessWidget {
     width: width,
     height: height,
     decoration: BoxDecoration(
-      color: AppColors.skeleton,
+      color: AppPalette.of(context).skeleton,
       borderRadius: BorderRadius.circular(8),
     ),
   );
@@ -97,14 +97,14 @@ class LoadingJobs extends StatelessWidget {
             height: 300,
             margin: const EdgeInsets.only(bottom: 16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppPalette.of(context).surface,
               borderRadius: BorderRadius.circular(16),
             ),
-            child: const Center(
+            child: Center(
               child: Icon(
                 Icons.map_outlined,
                 size: 88,
-                color: AppColors.skeleton,
+                color: AppPalette.of(context).skeleton,
               ),
             ),
           ),
@@ -113,7 +113,7 @@ class LoadingJobs extends StatelessWidget {
             margin: const EdgeInsets.only(bottom: 16),
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppPalette.of(context).surface,
               borderRadius: BorderRadius.circular(16),
             ),
             child: const Column(
@@ -130,7 +130,10 @@ class LoadingJobs extends StatelessWidget {
                 SizedBox(height: 18),
                 SkeletonLine(),
                 SizedBox(height: 10),
-                FractionallySizedBox(widthFactor: .6, child: SkeletonLine()),
+                FractionallySizedBox(
+                  widthFactor: .6,
+                  child: SkeletonLine(),
+                ),
                 SizedBox(height: 22),
                 SkeletonLine(width: 120, height: 40),
               ],

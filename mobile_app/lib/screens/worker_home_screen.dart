@@ -1,3 +1,4 @@
+import '../widgets/appearance_button.dart';
 import '../widgets/incident_actions.dart';
 import '../widgets/weather_card.dart';
 import 'attendance_screen.dart';
@@ -298,6 +299,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
     appBar: AppBar(
       title: const Text('Thợ Xây'),
       actions: [
+        const AppearanceButton(),
         FinanceMenu(api: widget.api, worker: true),
         IconButton(
           tooltip: 'Làm mới',

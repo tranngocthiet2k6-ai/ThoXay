@@ -36,6 +36,65 @@ abstract final class AppColors {
   static const goldTier = Color(0xffaa771c);
 }
 
+/// Semantic surfaces and readable status colors for all supported display modes.
+class AppPalette extends ThemeExtension<AppPalette> {
+  const AppPalette({this.brightness = Brightness.light, this.outdoor = false});
+  final Brightness brightness;
+  final bool outdoor;
+  bool get dark => brightness == Brightness.dark;
+  static AppPalette of(BuildContext context) =>
+      Theme.of(context).extension<AppPalette>() ?? const AppPalette();
+  Color tone(Color light, Color night, [Color? sun]) => outdoor
+      ? sun ?? light
+      : dark
+      ? night
+      : light;
+  Color get canvas =>
+      tone(AppColors.canvas, const Color(0xff0b1120), Colors.white);
+  Color get surface =>
+      tone(AppColors.surface, const Color(0xff172033), Colors.white);
+  Color get ink => tone(AppColors.ink, const Color(0xfff8fafc), Colors.black);
+  Color get muted =>
+      tone(AppColors.muted, const Color(0xffb5c2d6), const Color(0xff262626));
+  Color get border =>
+      tone(AppColors.border, const Color(0xff475569), const Color(0xff182230));
+  Color get soft => tone(AppColors.soft, const Color(0xff253147), Colors.white);
+  Color get success => tone(AppColors.success, const Color(0xff86efac));
+  Color get successStrong =>
+      tone(AppColors.successStrong, const Color(0xff6ee7b7));
+  Color get successSoft => tone(AppColors.successSoft, const Color(0xff103c32));
+  Color get warning => tone(AppColors.warning, const Color(0xfffcd34d));
+  Color get warningSoft => tone(AppColors.warningSoft, const Color(0xff483414));
+  Color get warningPale => tone(AppColors.warningPale, const Color(0xff392d19));
+  Color get error => tone(AppColors.error, const Color(0xfffca5a5));
+  Color get errorStrong => tone(AppColors.errorStrong, const Color(0xfffca5a5));
+  Color get errorSoft => tone(AppColors.errorSoft, const Color(0xff481f2a));
+  Color get blue => tone(AppColors.blue, const Color(0xff93c5fd));
+  Color get purple => tone(AppColors.purple, const Color(0xffc4b5fd));
+  Color get sky => tone(AppColors.sky, const Color(0xff7dd3fc));
+  Color get goldInk => tone(AppColors.goldInk, const Color(0xfffcd34d));
+  Color get goldSoft => tone(AppColors.goldSoft, const Color(0xff493919));
+  Color get goldTier => tone(AppColors.goldTier, const Color(0xfffcd34d));
+  Color get slateLight => tone(AppColors.slateLight, const Color(0xff253147));
+  Color get slateBorder => border;
+  Color get skeleton => tone(
+    AppColors.skeleton,
+    const Color(0xff43536d),
+    const Color(0xffb1b1b1),
+  );
+  Color get chartBlue => tone(AppColors.chartBlue, const Color(0xff93c5fd));
+  Color get chartGold => tone(AppColors.chartGold, const Color(0xfffcd34d));
+  Color get silverInk => tone(AppColors.silverInk, const Color(0xffcbd5e1));
+  @override
+  AppPalette copyWith({Brightness? brightness, bool? outdoor}) => AppPalette(
+    brightness: brightness ?? this.brightness,
+    outdoor: outdoor ?? this.outdoor,
+  );
+  @override
+  AppPalette lerp(covariant AppPalette? other, double t) =>
+      other == null || t < .5 ? this : other;
+}
+
 abstract final class AppTheme {
   static List<Color> brandGradient(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
@@ -51,7 +110,13 @@ abstract final class AppTheme {
   static const workerOrange = Color(0xffea580c);
   static const contractorEmerald = Color(0xff059669);
   static ThemeData get light => forRole(null);
-  static ThemeData forRole(String? role) {
+  static ThemeData forRole(
+    String? role, {
+    Brightness brightness = Brightness.light,
+    bool outdoor = false,
+  }) {
+    brightness = outdoor ? Brightness.light : brightness;
+    final palette = AppPalette(brightness: brightness, outdoor: outdoor);
     final worker = role == 'ROLE_WORKER';
     final contractor = role == 'ROLE_CONTRACTOR';
     final accent = worker
@@ -61,14 +126,24 @@ abstract final class AppTheme {
         : role == null
         ? workerOrange
         : const Color(0xff1d4ed8);
-    const background = AppColors.canvas;
-    final container = worker
+    final background = palette.canvas;
+    final container = brightness == Brightness.dark
+        ? (worker
+              ? const Color(0xff5c2c15)
+              : contractor
+              ? const Color(0xff064e3b)
+              : const Color(0xff1e3a5f))
+        : worker
         ? const Color(0xffffedd5)
         : contractor
         ? const Color(0xffd1fae5)
         : const Color(0xffdbeafe);
     final colors =
-        ColorScheme.fromSeed(seedColor: accent, surface: Colors.white).copyWith(
+        ColorScheme.fromSeed(
+          seedColor: accent,
+          surface: palette.surface,
+          brightness: brightness,
+        ).copyWith(
           primary: accent,
           onPrimary: worker || role == null
               ? const Color(0xff1c0a00)
@@ -76,87 +151,105 @@ abstract final class AppTheme {
               ? const Color(0xff011b12)
               : Colors.white,
           primaryContainer: container,
-          onPrimaryContainer: const Color(0xff0f172a),
-          onSurface: AppColors.ink,
-          onSurfaceVariant: AppColors.muted,
-          outline: AppColors.border,
-          error: AppColors.error,
+          onPrimaryContainer: palette.ink,
+          onSurface: palette.ink,
+          onSurfaceVariant: palette.muted,
+          outline: palette.border,
+          error: palette.error,
         );
     final rounded = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(20),
-      side: const BorderSide(color: AppColors.border),
+      borderRadius: BorderRadius.circular(16),
+      side: BorderSide(color: palette.border, width: outdoor ? 2 : 1),
     );
     return ThemeData(
       useMaterial3: true,
+      brightness: brightness,
+      extensions: [palette],
       fontFamily: 'PlusJakartaSans',
       colorScheme: colors,
       scaffoldBackgroundColor: background,
-      textTheme: const TextTheme(
-        headlineSmall: TextStyle(
+      textTheme: TextTheme(
+        headlineSmall: const TextStyle(
           fontSize: 28,
           fontWeight: FontWeight.w800,
           letterSpacing: -.8,
           height: 1.2,
         ),
-        titleLarge: TextStyle(
+        titleLarge: const TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.w800,
           height: 1.3,
         ),
-        titleMedium: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-        bodyLarge: TextStyle(fontSize: 16, height: 1.5),
-        bodyMedium: TextStyle(fontSize: 14, height: 1.5),
-      ),
+        titleMedium: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+        bodyLarge: const TextStyle(fontSize: 16, height: 1.5),
+        bodyMedium: TextStyle(fontSize: outdoor ? 16 : 14, height: 1.5),
+      ).apply(bodyColor: palette.ink, displayColor: palette.ink),
       appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.surface,
-        foregroundColor: AppColors.ink,
+        backgroundColor: palette.surface,
+        foregroundColor: palette.ink,
         centerTitle: false,
         toolbarHeight: 72,
         titleSpacing: 24,
-        shape: const Border(bottom: BorderSide(color: AppColors.border)),
+        shape: Border(bottom: BorderSide(color: palette.border)),
         elevation: 0,
         scrolledUnderElevation: 0,
-        titleTextStyle: const TextStyle(
+        titleTextStyle: TextStyle(
           fontFamily: 'PlusJakartaSans',
           fontSize: 18,
           fontWeight: FontWeight.w800,
-          color: AppColors.ink,
+          color: palette.ink,
         ),
       ),
       cardTheme: CardThemeData(
-        color: Colors.white,
+        color: palette.surface,
         elevation: 0,
-        shadowColor: AppColors.ink,
+        shadowColor: palette.ink,
         margin: const EdgeInsets.only(bottom: 16),
         shape: rounded,
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.soft,
+        fillColor: palette.soft,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 16,
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.border),
+          borderSide: BorderSide(color: palette.border, width: outdoor ? 2 : 1),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.border),
+          borderSide: BorderSide(color: palette.border, width: outdoor ? 2 : 1),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: accent, width: 2),
         ),
         floatingLabelStyle: TextStyle(
-          color: accent,
+          color: outdoor ? palette.ink : accent,
           fontWeight: FontWeight.w700,
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: outdoor
+              ? palette.ink
+              : brightness == Brightness.dark
+              ? accent
+              : worker || role == null
+              ? const Color(0xff9a3412)
+              : contractor
+              ? const Color(0xff065f46)
+              : accent,
+          minimumSize: const Size(48, 48),
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           minimumSize: const Size(48, 48),
+          backgroundColor: outdoor ? Colors.black : null,
+          foregroundColor: outdoor ? Colors.white : null,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -169,31 +262,54 @@ abstract final class AppTheme {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          minimumSize: const Size(48, 44),
+          minimumSize: const Size(48, 48),
+          foregroundColor: outdoor
+              ? palette.ink
+              : brightness == Brightness.dark
+              ? accent
+              : worker || role == null
+              ? const Color(0xff9a3412)
+              : contractor
+              ? const Color(0xff065f46)
+              : accent,
+          side: BorderSide(
+            color: outdoor ? palette.ink : palette.border,
+            width: outdoor ? 2 : 1,
+          ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
         ),
       ),
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: Colors.white,
+        backgroundColor: palette.surface,
         indicatorColor: container,
         elevation: 0,
         height: 80,
-        labelTextStyle: const WidgetStatePropertyAll(
-          TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+        labelTextStyle: WidgetStatePropertyAll(
+          TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            color: palette.ink,
+          ),
         ),
       ),
-      listTileTheme: const ListTileThemeData(
-        contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        iconColor: AppColors.muted,
+      listTileTheme: ListTileThemeData(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        iconColor: palette.muted,
       ),
       chipTheme: ChipThemeData(
-        backgroundColor: AppColors.soft,
+        backgroundColor: palette.soft,
         selectedColor: container,
-        side: const BorderSide(color: AppColors.border),
+        side: BorderSide(color: palette.border, width: outdoor ? 2 : 1),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        labelStyle: const TextStyle(
+        checkmarkColor: palette.ink,
+        secondaryLabelStyle: TextStyle(
+          color: palette.ink,
+          fontWeight: FontWeight.w700,
+        ),
+        labelStyle: TextStyle(
+          color: palette.ink,
           fontFamily: 'PlusJakartaSans',
           fontSize: 12,
           fontWeight: FontWeight.w700,
@@ -201,30 +317,27 @@ abstract final class AppTheme {
       ),
       tabBarTheme: TabBarThemeData(
         labelColor: accent,
-        unselectedLabelColor: AppColors.muted,
+        unselectedLabelColor: palette.muted,
         indicatorColor: accent,
-        dividerColor: AppColors.border,
+        dividerColor: palette.border,
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         shape: rounded,
       ),
-      dividerTheme: const DividerThemeData(
-        color: AppColors.border,
-        thickness: 1,
-      ),
-      bottomSheetTheme: const BottomSheetThemeData(
-        backgroundColor: Colors.white,
+      dividerTheme: DividerThemeData(color: palette.border, thickness: 1),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: palette.surface,
         showDragHandle: true,
       ),
       dialogTheme: DialogThemeData(
-        backgroundColor: AppColors.surface,
+        backgroundColor: palette.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        titleTextStyle: const TextStyle(
+        titleTextStyle: TextStyle(
           fontFamily: 'PlusJakartaSans',
           fontSize: 22,
           fontWeight: FontWeight.w800,
-          color: AppColors.ink,
+          color: palette.ink,
         ),
       ),
     );

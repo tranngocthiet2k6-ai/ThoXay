@@ -23,7 +23,8 @@ lightbox/bộ lọc/KPI Admin. Các phần này được mở rộng, không t�
 - [x] Ảnh portfolio từ thiết bị, kiểm tra ảnh và lưu bền vững.
 - [x] Chat ảnh/GPS, hộp thư và số tin chưa đọc thật.
 - [x] Thời tiết Open-Meteo, cache và trạng thái mất kết nối.
-- [ ] Sáng/Tối/Outdoor, hoàn thiện các màn hình Flutter và công cụ Admin.
+- [x] Sáng/Tối/Outdoor, hoàn thiện các màn hình Flutter và công cụ Admin.
+- [ ] Biểu đồ thu nhập theo ngày từ dữ liệu thanh toán thật, theo kỳ Ngày/Tuần/Tháng.
 - [ ] Toàn bộ test, build Web/APK, kiểm tra UI, migration lặp an toàn và push cuối.
 
 Mỗi nhóm chỉ đánh dấu xong sau khi code thực thi, kiểm thử/build và push thành công.
@@ -325,3 +326,22 @@ trong payload chuyển khoản QRIBFTTA.
   đồng thời xác nhận các module chat/V20 vẫn hoạt động. Đã xóa fixture QA tạm.
 
 Tham khảo thông số và mã WMO: [Open-Meteo Forecast API](https://open-meteo.com/en/docs).
+
+## Checkpoint Sáng/Tối/Outdoor
+
+- AppPalette cung cấp màu nền/chữ/viền/trạng thái theo mode. Màu nhấn vai trò giữ
+  nguyên #EA580C/#059669; các card, chat, ví, hồ sơ, bộ lọc, KYC, skeleton và bảng
+  xếp hạng lấy màu ngữ nghĩa. Các nền QR/ảnh và chữ trắng trên card thương hiệu
+  được giữ phù hợp với nội dung, không đảo màu toàn bộ cây widget.
+- Nút chọn giao diện ở Auth/trang chủ/Hồ sơ. Lựa chọn lưu trên thiết bị, phục hồi
+  trước khung hình đầu; thay đổi áp dụng cả route đang mở, không đăng xuất.
+  Ghi preference nối tiếp để thao tác chọn nhanh vẫn giữ lựa chọn cuối cùng.
+- Outdoor: nền trắng/chữ đen, chữ phụ đậm, body 16px, viền 2px và nút đen/trắng
+  tối thiểu 48px; bớt gradient/shadow trang trí trên card sáng. Card dùng radius16.
+- Kiểm thử tự động kiểm tra tương phản chữ chính >=7:1, chữ phụ/trạng thái >=4.5:1,
+  màu vai trò, nhãn chip/navigation và phục hồi/chuyển mode trên route đang mở.
+- 95 test Flutter pass, analyze sạch, Web release build thành công. Chrome QA dùng
+  API chặn/mô phỏng cục bộ: 390/1440px, Thợ/Chủ thầu, Sáng/Tối/Outdoor, các trang
+  chủ/ví/hồ sơ/hộp thư/thông báo; đã xem ảnh và sửa nhãn bộ lọc/chú thích ví thiếu
+  tương phản rồi chạy lại. Không gửi fixture hoặc thao tác tới production.
+  Backend không đổi trong checkpoint này; 122 test/JAR đã pass ở nhóm thời tiết.

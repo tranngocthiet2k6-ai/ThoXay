@@ -172,9 +172,9 @@ class _HomeNavigationState extends State<HomeNavigation>
       ],
     );
     return DecoratedBox(
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        border: Border(top: BorderSide(color: AppColors.border)),
+      decoration: BoxDecoration(
+        color: AppPalette.of(context).surface,
+        border: Border(top: BorderSide(color: AppPalette.of(context).border)),
       ),
       child: SafeArea(
         top: false,

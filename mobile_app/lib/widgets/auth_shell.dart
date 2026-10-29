@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
 import 'design_motion.dart';
+import 'appearance_button.dart';
 
 class AuthShell extends StatelessWidget {
   const AuthShell({
@@ -17,7 +18,12 @@ class AuthShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: canGoBack ? AppBar(title: const Text('Đăng ký')) : null,
+    appBar: canGoBack
+        ? AppBar(
+            title: const Text('Đăng ký'),
+            actions: const [AppearanceButton()],
+          )
+        : null,
     body: SafeArea(
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -38,9 +44,9 @@ class AuthShell extends StatelessWidget {
                         color: Theme.of(context).colorScheme.primary,
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.roofing_rounded,
-                        color: AppColors.ink,
+                        color: Theme.of(context).colorScheme.onPrimary,
                         size: 26,
                       ),
                     ),
@@ -132,14 +138,15 @@ class AuthShell extends StatelessWidget {
                           canGoBack
                               ? 'BẮT ĐẦU HÀNH TRÌNH'
                               : 'KHÔNG GIAN CỦA BẠN',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 10,
                             letterSpacing: 1.5,
                             fontWeight: FontWeight.w800,
-                            color: AppColors.muted,
+                            color: AppPalette.of(context).muted,
                           ),
                         ),
                       ),
+                      if (!canGoBack) const AppearanceButton(),
                     ],
                   ),
                   const SizedBox(height: 20),
@@ -151,30 +158,30 @@ class AuthShell extends StatelessWidget {
                   const SizedBox(height: 12),
                   Text(
                     subtitle,
-                    style: const TextStyle(
-                      color: AppColors.muted,
+                    style: TextStyle(
+                      color: AppPalette.of(context).muted,
                       height: 1.65,
                     ),
                   ),
                   const SizedBox(height: 32),
                   child,
                   const SizedBox(height: 24),
-                  const Row(
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
                         Icons.lock_outline_rounded,
                         size: 14,
-                        color: AppColors.muted,
+                        color: AppPalette.of(context).muted,
                       ),
-                      SizedBox(width: 6),
+                      const SizedBox(width: 6),
                       Flexible(
                         child: Text(
                           'Kết nối an toàn · Thông tin được bảo vệ',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 11,
-                            color: AppColors.muted,
+                            color: AppPalette.of(context).muted,
                           ),
                         ),
                       ),

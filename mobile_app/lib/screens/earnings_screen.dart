@@ -175,9 +175,12 @@ class _EarningsScreenState extends State<EarningsScreen> {
                 ),
             ],
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'Chỉ thống kê tiền công, tip và thưởng đã được thanh toán vào ví. Tiền nạp và chuyển ký quỹ không tính là thu nhập.',
-              style: TextStyle(color: Colors.blueGrey, height: 1.5),
+              style: TextStyle(
+                color: AppPalette.of(context).muted,
+                height: 1.5,
+              ),
             ),
           ],
         ),

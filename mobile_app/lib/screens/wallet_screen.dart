@@ -260,14 +260,14 @@ class _WalletScreenState extends State<WalletScreen> {
                         ? 1
                         : (balance.escrow / balance.minimum).clamp(0.0, 1.0),
                     color: balance.lowEscrow
-                        ? AppColors.warning
-                        : AppColors.successStrong,
+                        ? AppPalette.of(context).warning
+                        : AppPalette.of(context).successStrong,
                   ),
                 ),
               ),
               if (balance.lowEscrow)
                 Card(
-                  color: AppColors.warningSoft,
+                  color: AppPalette.of(context).warningSoft,
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Text(
@@ -324,9 +324,12 @@ class _WalletScreenState extends State<WalletScreen> {
                 ],
               ),
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 'Nạp/rút được quản trị viên đối soát thủ công. Tiền đang giữ rút không nằm trong số dư khả dụng. Chưa tích hợp chuyển tiền ngân hàng tự động.',
-                style: TextStyle(color: Colors.blueGrey, height: 1.5),
+                style: TextStyle(
+                  color: AppPalette.of(context).muted,
+                  height: 1.5,
+                ),
               ),
             ],
             const SizedBox(height: 24),
@@ -357,10 +360,10 @@ class _WalletScreenState extends State<WalletScreen> {
                     isThreeLine: true,
                     leading: CircleAvatar(
                       backgroundColor: walletEntrySign(e.kind) == '− '
-                          ? AppColors.errorSoft
+                          ? AppPalette.of(context).errorSoft
                           : walletEntrySign(e.kind) == '+ '
                           ? AppColors.successSoft
-                          : AppColors.warningPale,
+                          : AppPalette.of(context).warningPale,
                       child: Icon(
                         walletEntrySign(e.kind) == '− '
                             ? Icons.north_east
@@ -368,10 +371,10 @@ class _WalletScreenState extends State<WalletScreen> {
                             ? Icons.south_west
                             : Icons.swap_horiz,
                         color: walletEntrySign(e.kind) == '− '
-                            ? AppColors.errorStrong
+                            ? AppPalette.of(context).errorStrong
                             : walletEntrySign(e.kind) == '+ '
-                            ? AppColors.successStrong
-                            : AppColors.warning,
+                            ? AppPalette.of(context).successStrong
+                            : AppPalette.of(context).warning,
                       ),
                     ),
                     title: Text(walletKind(e.kind)),
@@ -389,8 +392,8 @@ class _WalletScreenState extends State<WalletScreen> {
                             color: walletEntrySign(e.kind) == '− '
                                 ? Colors.red.shade700
                                 : walletEntrySign(e.kind) == '+ '
-                                ? AppColors.successStrong
-                                : AppColors.warning,
+                                ? AppPalette.of(context).successStrong
+                                : AppPalette.of(context).warning,
                           ),
                         ),
                       ),

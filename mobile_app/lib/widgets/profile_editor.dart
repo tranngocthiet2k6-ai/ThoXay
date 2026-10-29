@@ -108,7 +108,7 @@ class _ProfileEditorState extends State<ProfileEditor> {
       widget.onSaved(person);
       ScaffoldMessenger.of(context).showSnackBar(
         AppSnackBar(
-          content: Text(
+          content: const Text(
             'Đã lưu hồ sơ. Thay đổi họ tên hoặc ngày sinh cần được xác thực lại CCCD.',
           ),
         ),

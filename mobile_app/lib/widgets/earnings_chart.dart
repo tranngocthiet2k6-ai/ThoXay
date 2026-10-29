@@ -18,8 +18,8 @@ class EarningsChart extends StatelessWidget {
     final max = math.max(1, values.reduce(math.max));
     final colors = [
       Theme.of(context).colorScheme.primary,
-      AppColors.sky,
-      AppColors.goldInk,
+      AppPalette.of(context).sky,
+      AppPalette.of(context).goldInk,
     ];
     return Card(
       child: Padding(
@@ -32,9 +32,9 @@ class EarningsChart extends StatelessWidget {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Tiền công, tip và thưởng đã thanh toán',
-              style: TextStyle(color: AppColors.muted),
+              style: TextStyle(color: AppPalette.of(context).muted),
             ),
             const SizedBox(height: 16),
             Row(
@@ -55,10 +55,10 @@ class EarningsChart extends StatelessWidget {
                                 key: ValueKey('income-bar-$i'),
                                 height: 144,
                                 alignment: Alignment.bottomCenter,
-                                decoration: const BoxDecoration(
+                                decoration: BoxDecoration(
                                   border: Border(
                                     bottom: BorderSide(
-                                      color: AppColors.slateBorder,
+                                      color: AppPalette.of(context).slateBorder,
                                     ),
                                   ),
                                 ),

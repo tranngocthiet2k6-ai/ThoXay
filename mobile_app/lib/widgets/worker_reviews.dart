@@ -80,7 +80,7 @@ class _WorkerReviewsState extends State<WorkerReviews> {
                       Icon(
                         i <= review.stars ? Icons.star : Icons.star_outline,
                         size: 18,
-                        color: AppColors.goldTier,
+                        color: AppPalette.of(context).goldTier,
                       ),
                     const SizedBox(width: 8),
                     Text('${review.stars}/5'),

@@ -125,7 +125,7 @@ class SectionIntro extends StatelessWidget {
           Text(
             subtitle,
             style: Theme.of(context).textTheme.bodyMedium
-                ?.copyWith(color: AppColors.muted),
+                ?.copyWith(color: AppPalette.of(context).muted),
           ),
         ],
       ),
@@ -184,41 +184,46 @@ class _DesignSurfaceState extends State<DesignSurface> {
         clipBehavior: Clip.antiAlias,
         padding: widget.padding,
         decoration: BoxDecoration(
-          color: widget.dark ? AppColors.ink : AppColors.surface,
-          borderRadius: BorderRadius.circular(24),
+          color: widget.dark ? AppColors.ink : AppPalette.of(context).surface,
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
+            width: AppPalette.of(context).outdoor ? 2 : 1,
             color: _hover
                 ? primary.withValues(alpha: .4)
                 : widget.dark
                 ? AppColors.ink
-                : AppColors.border,
+                : AppPalette.of(context).border,
           ),
-          gradient: RadialGradient(
-            center: _light,
-            radius: 1.6,
-            colors: widget.dark
-                ? [
-                    Color.alphaBlend(
-                      primary.withValues(alpha: .22),
-                      AppColors.ink,
-                    ),
-                    AppColors.ink,
-                  ]
-                : [
-                    Color.alphaBlend(
-                      primary.withValues(alpha: _hover ? .06 : .015),
-                      AppColors.surface,
-                    ),
-                    AppColors.surface,
-                  ],
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.ink.withValues(alpha: _hover ? .07 : .025),
-              blurRadius: _hover ? 28 : 16,
-              offset: const Offset(0, 8),
-            ),
-          ],
+          gradient: AppPalette.of(context).outdoor && !widget.dark
+              ? null
+              : RadialGradient(
+                  center: _light,
+                  radius: 1.6,
+                  colors: widget.dark
+                      ? [
+                          Color.alphaBlend(
+                            primary.withValues(alpha: .22),
+                            AppColors.ink,
+                          ),
+                          AppColors.ink,
+                        ]
+                      : [
+                          Color.alphaBlend(
+                            primary.withValues(alpha: _hover ? .06 : .015),
+                            AppPalette.of(context).surface,
+                          ),
+                          AppPalette.of(context).surface,
+                        ],
+                ),
+          boxShadow: AppPalette.of(context).outdoor
+              ? []
+              : [
+                  BoxShadow(
+                    color: AppColors.ink.withValues(alpha: _hover ? .07 : .025),
+                    blurRadius: _hover ? 28 : 16,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
         ),
         child: widget.child,
       ),

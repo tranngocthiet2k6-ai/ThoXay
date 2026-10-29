@@ -101,3 +101,20 @@ Các checkpoint: `02a5a2d` trước redesign, `8024042` hệ thiết kế/Auth,
 `cc2081a` trang chủ/công trình, `3db4662` các màn hình và responsive.
 Hai chỉnh sửa riêng đang có trong báo cáo Word và application.properties
 được giữ nguyên ngoài các commit redesign.
+
+## Hiển thị Sáng/Tối/Outdoor
+
+AppTheme/AppPalette dùng màu ngữ nghĩa, thay các màu nền/chữ cố định của widget.
+Cam #EA580C và xanh #059669 được giữ làm màu vai trò. Chữ trên nút đầy màu dùng
+onPrimary; chữ liên kết dùng sắc tương phản phù hợp. QR và ảnh giữ màu nguyên bản.
+AppearanceController lưu display_mode trong preference của thiết bị, độc lập JWT.
+Nút chọn ở Auth, trang chủ và Hồ sơ; đổi mode cập nhật các màn hình đang mở.
+
+Outdoor ưu tiên đọc ngoài trời: nền trắng, chữ đen, chú thích đậm, body16, viền2,
+CTA đen/trắng 48px và giảm bóng/gradient trên bề mặt sáng. Vai trò vẫn được phân
+biệt bằng màu nhấn/avatar/biểu tượng. L2 và cài đặt giảm chuyển động hệ thống được giữ.
+
+Checkpoint mới: 95 test Flutter, analyze và Web release pass. Kiểm tra Chrome
+390/1440px cho hai vai trò và ba mode ở trang chủ/ví/hồ sơ/hộp thư/thông báo.
+Ảnh QA ở .local/appearance-browser/ không commit; dữ liệu mock chỉ trong trình duyệt.
+Admin tiếp tục dùng Navy, không phụ thuộc lựa chọn mode Flutter.

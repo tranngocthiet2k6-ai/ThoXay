@@ -1,3 +1,4 @@
+import '../widgets/appearance_button.dart';
 import '../widgets/incident_actions.dart';
 import '../widgets/weather_card.dart';
 import 'attendance_screen.dart';
@@ -124,7 +125,7 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
     if (completed == true && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         AppSnackBar(
-          content: Text('Đã hoàn thành công trình và lưu đánh giá cho thợ.'),
+          content: const Text('Đã hoàn thành công trình và lưu đánh giá cho thợ.'),
         ),
       );
       await _refresh();
@@ -136,6 +137,7 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
     appBar: AppBar(
       title: const Text('Công trình của tôi'),
       actions: [
+        const AppearanceButton(),
         FinanceMenu(api: widget.api),
         IconButton(
           tooltip: 'Làm mới',

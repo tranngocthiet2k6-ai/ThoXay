@@ -115,7 +115,7 @@ class _OsmMapViewState extends State<OsmMapView> {
             initialZoom: 13,
             minZoom: 2,
             maxZoom: 19,
-            backgroundColor: AppColors.soft,
+            backgroundColor: AppPalette.of(context).soft,
             interactionOptions: const InteractionOptions(
               flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
             ),
@@ -146,8 +146,8 @@ class _OsmMapViewState extends State<OsmMapView> {
                   ? Stack(
                       fit: StackFit.expand,
                       children: [
-                        const ShimmerSurface(
-                          child: ColoredBox(color: AppColors.soft),
+                        ShimmerSurface(
+                          child: ColoredBox(color: AppPalette.of(context).soft),
                         ),
                         image,
                       ],
@@ -157,7 +157,10 @@ class _OsmMapViewState extends State<OsmMapView> {
             ),
             MarkerLayer(markers: widget.markers),
             SimpleAttributionWidget(
-              source: const Text('OpenStreetMap contributors'),
+              source: const Text(
+                'OpenStreetMap contributors',
+                style: TextStyle(color: Colors.black),
+              ),
               onTap: () => launchUrl(
                 Uri.parse('https://www.openstreetmap.org/copyright'),
               ),
@@ -168,7 +171,7 @@ class _OsmMapViewState extends State<OsmMapView> {
           top: 8,
           right: 8,
           child: Material(
-            color: Colors.white,
+            color: AppPalette.of(context).surface,
             borderRadius: BorderRadius.circular(12),
             elevation: 2,
             child: Column(
@@ -200,7 +203,7 @@ class _OsmMapViewState extends State<OsmMapView> {
             right: 64,
             child: Container(
               padding: const EdgeInsets.all(10),
-              color: Colors.white.withValues(alpha: .95),
+              color: AppPalette.of(context).surface.withValues(alpha: .95),
               child: const Text(
                 'Chưa tải được nền bản đồ. Kiểm tra mạng; bạn vẫn có thể chọn vị trí hoặc dùng danh sách.',
                 style: TextStyle(fontSize: 12),

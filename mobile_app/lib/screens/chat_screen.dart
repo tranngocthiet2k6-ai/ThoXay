@@ -210,10 +210,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Row(
                     children: [
                       Icon(
@@ -314,7 +311,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                                 decoration: BoxDecoration(
                                   color: mine
                                       ? theme.colorScheme.primaryContainer
-                                      : AppColors.surface,
+                                      : AppPalette.of(context).surface,
                                   borderRadius: BorderRadius.only(
                                     topLeft: const Radius.circular(20),
                                     topRight: const Radius.circular(20),
@@ -363,12 +360,8 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                                           message.latitude!,
                                           message.longitude!,
                                         ),
-                                        icon: const Icon(
-                                          Icons.location_on_outlined,
-                                        ),
-                                        label: const Text(
-                                          'Mở vị trí trên bản đồ',
-                                        ),
+                                        icon: const Icon(Icons.location_on_outlined),
+                                        label: const Text('Mở vị trí trên bản đồ'),
                                       ),
                                     Text(message.content),
                                     if (message.kind == 'LOCATION' &&
@@ -402,16 +395,16 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                           enabled: _chat.canSend,
                           onSelected: _attach,
                           icon: const Icon(Icons.add_circle_outline),
-                          itemBuilder: (_) => const [
-                            PopupMenuItem(
+                          itemBuilder: (_) => [
+                            const PopupMenuItem(
                               value: 'camera',
                               child: Text('Chụp ảnh công trường'),
                             ),
-                            PopupMenuItem(
+                            const PopupMenuItem(
                               value: 'gallery',
                               child: Text('Chọn ảnh từ thư viện'),
                             ),
-                            PopupMenuItem(
+                            const PopupMenuItem(
                               value: 'gps',
                               child: Text('Chia sẻ vị trí GPS'),
                             ),

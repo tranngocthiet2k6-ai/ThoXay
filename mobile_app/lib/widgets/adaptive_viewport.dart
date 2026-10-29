@@ -14,7 +14,7 @@ class AdaptiveViewport extends StatelessWidget {
     builder: (context, bounds) {
       final width = math.min(bounds.maxWidth, maxWidth);
       return ColoredBox(
-        color: AppColors.canvas,
+        color: AppPalette.of(context).canvas,
         child: Center(
           child: SizedBox(
             width: width,

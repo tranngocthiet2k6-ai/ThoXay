@@ -14,9 +14,9 @@ class TierBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = switch (tier) {
-      'DIAMOND' => AppColors.chartBlue,
-      'GOLD' => AppColors.chartGold,
-      _ => AppColors.silverInk,
+      'DIAMOND' => AppPalette.of(context).chartBlue,
+      'GOLD' => AppPalette.of(context).chartGold,
+      _ => AppPalette.of(context).silverInk,
     };
     return Chip(
       avatar: Icon(

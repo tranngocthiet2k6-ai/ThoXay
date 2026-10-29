@@ -69,7 +69,7 @@ class KycScannerFrame extends StatelessWidget {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(16),
                   child: ColoredBox(
-                    color: AppColors.slateLight,
+                    color: AppPalette.of(context).slateLight,
                     child: photo == null
                         ? Column(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -90,7 +90,9 @@ class KycScannerFrame extends StatelessWidget {
                             photo!.bytes,
                             fit: BoxFit.contain,
                             errorBuilder: (_, _, _) => const Center(
-                              child: Text('Không xem được ảnh, hãy chụp lại.'),
+                              child: Text(
+                                'Không xem được ảnh, hãy chụp lại.',
+                              ),
                             ),
                           ),
                   ),

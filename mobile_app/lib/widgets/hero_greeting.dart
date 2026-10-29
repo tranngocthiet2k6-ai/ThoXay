@@ -64,8 +64,8 @@ class _HeroGreetingState extends State<HeroGreeting> {
                         name.isEmpty
                             ? 'TX'
                             : name.characters.first.toUpperCase(),
-                        style: const TextStyle(
-                          color: AppColors.ink,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onPrimary,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
@@ -144,7 +144,7 @@ class _HeroGreetingState extends State<HeroGreeting> {
                 if (worker) ...[
                   const SizedBox(height: 24),
                   Material(
-                    color: AppColors.surface,
+                    color: AppPalette.of(context).surface,
                     borderRadius: BorderRadius.circular(16),
                     child: SwitchListTile(
                       key: const ValueKey('availability-switch'),
@@ -156,8 +156,8 @@ class _HeroGreetingState extends State<HeroGreeting> {
                             ? Icons.wifi_rounded
                             : Icons.pause_circle_outline,
                         color: widget.availability == true
-                            ? AppColors.success
-                            : AppColors.muted,
+                            ? AppPalette.of(context).success
+                            : AppPalette.of(context).muted,
                       ),
                       title: AnimatedSwitcher(
                         duration: MediaQuery.disableAnimationsOf(context)

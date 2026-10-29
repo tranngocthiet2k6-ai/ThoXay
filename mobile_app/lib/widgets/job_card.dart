@@ -58,7 +58,11 @@ class JobCard extends StatelessWidget {
                 if (job.contractorVerified)
                   const Tooltip(
                     message: 'Đã xác thực CCCD',
-                    child: Icon(Icons.verified, color: Colors.blue, size: 20),
+                    child: Icon(
+                      Icons.verified,
+                      color: Colors.blue,
+                      size: 20,
+                    ),
                   ),
               ],
             ),
@@ -79,10 +83,10 @@ class JobCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 20),
-            const Text(
+            Text(
               'THU NHẬP NGÀY CÔNG',
               style: TextStyle(
-                color: AppColors.muted,
+                color: AppPalette.of(context).muted,
                 fontSize: 10,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 1.2,
@@ -91,10 +95,10 @@ class JobCard extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               '${money(job.salaryPerDay)} / ngày',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 26,
                 fontWeight: FontWeight.w800,
-                color: AppColors.ink,
+                color: AppPalette.of(context).ink,
                 letterSpacing: -.8,
               ),
             ),
@@ -108,13 +112,13 @@ class JobCard extends StatelessWidget {
             const Divider(height: 32),
             Row(
               children: [
-                const CircleAvatar(
+                CircleAvatar(
                   radius: 18,
-                  backgroundColor: AppColors.soft,
+                  backgroundColor: AppPalette.of(context).soft,
                   child: Icon(
                     Icons.apartment_outlined,
                     size: 19,
-                    color: AppColors.muted,
+                    color: AppPalette.of(context).muted,
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -122,12 +126,12 @@ class JobCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'CHỦ THẦU',
                         style: TextStyle(
                           fontSize: 9,
                           letterSpacing: 1,
-                          color: AppColors.muted,
+                          color: AppPalette.of(context).muted,
                         ),
                       ),
                       Text(
@@ -173,10 +177,10 @@ class JobStatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = switch (status) {
-      'OPEN' => AppColors.successStrong,
-      'IN_PROGRESS' => AppColors.blue,
-      'COMPLETED' => AppColors.purple,
-      _ => AppColors.errorStrong,
+      'OPEN' => AppPalette.of(context).successStrong,
+      'IN_PROGRESS' => AppPalette.of(context).blue,
+      'COMPLETED' => AppPalette.of(context).purple,
+      _ => AppPalette.of(context).errorStrong,
     };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -204,12 +208,12 @@ class _JobInfo extends StatelessWidget {
   Widget build(BuildContext context) => Row(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Icon(icon, size: 18, color: AppColors.muted),
+      Icon(icon, size: 18, color: AppPalette.of(context).muted),
       const SizedBox(width: 8),
       Expanded(
         child: Text(
           label,
-          style: const TextStyle(color: AppColors.muted, height: 1.5),
+          style: TextStyle(color: AppPalette.of(context).muted, height: 1.5),
         ),
       ),
     ],
@@ -305,9 +309,11 @@ Future<T?> showJobDetails<T>(
             key: const ValueKey('job-detail-actions'),
             width: double.infinity,
             padding: const EdgeInsets.all(16),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              border: Border(top: BorderSide(color: AppColors.border)),
+            decoration: BoxDecoration(
+              color: AppPalette.of(context).surface,
+              border: Border(
+                top: BorderSide(color: AppPalette.of(context).border),
+              ),
             ),
             child: SafeArea(
               top: false,

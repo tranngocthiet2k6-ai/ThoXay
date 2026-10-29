@@ -25,20 +25,20 @@ class ContentSkeleton extends StatelessWidget {
                   : Alignment.centerLeft,
               child: FractionallySizedBox(
                 widthFactor: chat ? .72 : 1,
-                child: Card(
+                child: const Card(
                   child: Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: EdgeInsets.all(16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const FractionallySizedBox(
+                        FractionallySizedBox(
                           widthFactor: .6,
                           child: SkeletonLine(height: 20),
                         ),
-                        const SizedBox(height: 16),
-                        const SkeletonLine(),
-                        const SizedBox(height: 8),
-                        const FractionallySizedBox(
+                        SizedBox(height: 16),
+                        SkeletonLine(),
+                        SizedBox(height: 8),
+                        FractionallySizedBox(
                           widthFactor: .8,
                           child: SkeletonLine(),
                         ),

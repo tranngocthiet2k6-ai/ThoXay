@@ -36,8 +36,8 @@ class RankingPodium extends StatelessWidget {
                                   ? Icons.emoji_events
                                   : Icons.workspace_premium_outlined,
                               color: index == 0
-                                  ? AppColors.warning
-                                  : AppColors.muted,
+                                  ? AppPalette.of(context).warning
+                                  : AppPalette.of(context).muted,
                             ),
                             const SizedBox(height: 8),
                             CircleAvatar(
@@ -89,8 +89,8 @@ class RankingPodium extends StatelessWidget {
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
                                 color: index == 0
-                                    ? AppColors.goldSoft
-                                    : AppColors.border,
+                                    ? AppPalette.of(context).goldSoft
+                                    : AppPalette.of(context).border,
                                 borderRadius: const BorderRadius.vertical(
                                   top: Radius.circular(16),
                                 ),

@@ -20,7 +20,9 @@ class JobSearchHeader extends SliverPersistentHeaderDelegate {
     elevation: 0,
     shape: Border(
       bottom: BorderSide(
-        color: overlapsContent ? AppColors.border : Colors.transparent,
+        color: overlapsContent
+            ? AppPalette.of(context).border
+            : Colors.transparent,
       ),
     ),
     child: child,

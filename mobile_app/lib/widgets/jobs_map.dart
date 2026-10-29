@@ -75,8 +75,8 @@ class JobsMap extends StatelessWidget {
                       ),
                       child: Text(
                         money(job.salaryPerDay),
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onPrimary,
                           fontWeight: FontWeight.w800,
                           fontSize: 12,
                         ),

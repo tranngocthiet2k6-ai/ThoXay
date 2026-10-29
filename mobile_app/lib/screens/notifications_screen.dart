@@ -1,5 +1,6 @@
 import '../widgets/design_motion.dart';
 import '../widgets/content_skeleton.dart';
+import '../theme/app_theme.dart';
 
 import 'dart:async';
 
@@ -242,7 +243,7 @@ class _NotificationsScreenState extends State<NotificationsScreen>
             for (final item in _items)
               Card(
                 color: item.isRead
-                    ? Colors.white
+                    ? AppPalette.of(context).surface
                     : Theme.of(context).colorScheme.primaryContainer
                           .withValues(alpha: .35),
                 child: ListTile(
