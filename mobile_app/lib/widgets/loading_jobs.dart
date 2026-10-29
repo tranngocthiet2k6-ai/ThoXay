@@ -1,3 +1,5 @@
+import '../theme/app_theme.dart';
+
 import 'package:flutter/material.dart';
 
 /// A shared sweep for a skeleton group. Respects reduced motion and inactive routes.
@@ -46,9 +48,9 @@ class _ShimmerSurfaceState extends State<ShimmerSurface>
               blendMode: BlendMode.srcATop,
               shaderCallback: (rect) => LinearGradient(
                 colors: const [
-                  Color(0x00ffffff),
-                  Color(0xb3ffffff),
-                  Color(0x00ffffff),
+                  AppColors.transparentWhite,
+                  AppColors.whiteMuted,
+                  AppColors.transparentWhite,
                 ],
                 begin: Alignment(-3 + _animation.value * 6, -.3),
                 end: Alignment(-1 + _animation.value * 6, .3),
@@ -74,7 +76,7 @@ class SkeletonLine extends StatelessWidget {
     width: width,
     height: height,
     decoration: BoxDecoration(
-      color: const Color(0xffdfe7e2),
+      color: AppColors.skeleton,
       borderRadius: BorderRadius.circular(8),
     ),
   );
@@ -102,7 +104,7 @@ class LoadingJobs extends StatelessWidget {
               child: Icon(
                 Icons.map_outlined,
                 size: 88,
-                color: Color(0xffdfe7e2),
+                color: AppColors.skeleton,
               ),
             ),
           ),

@@ -1,3 +1,5 @@
+import '../theme/app_theme.dart';
+
 import 'package:flutter/material.dart';
 
 enum NoticeKind { success, error, info }
@@ -11,9 +13,9 @@ class AppSnackBar extends SnackBar {
          behavior: SnackBarBehavior.floating,
          showCloseIcon: true,
          backgroundColor: switch (kind) {
-           NoticeKind.success => const Color(0xff047857),
-           NoticeKind.error => const Color(0xff991b1b),
-           NoticeKind.info => const Color(0xff0f172a),
+           NoticeKind.success => AppColors.successStrong,
+           NoticeKind.error => AppColors.errorDeep,
+           NoticeKind.info => AppColors.ink,
          },
          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
          content: Row(

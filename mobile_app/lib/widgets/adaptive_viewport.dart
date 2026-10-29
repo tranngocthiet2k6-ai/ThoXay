@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+
 import '../theme/app_theme.dart';
 
 /// Shared desktop frame. Local MediaQuery matches the navigator's real width.
@@ -34,5 +35,5 @@ abstract final class AppSpacing {
   static const gap = 16.0;
   static const section = 24.0;
   static const radius = 16.0;
-  static const muted = Color(0xff64748b);
+  static const muted = AppColors.muted;
 }

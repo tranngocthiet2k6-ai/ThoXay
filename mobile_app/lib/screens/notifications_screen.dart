@@ -1,3 +1,4 @@
+import '../widgets/design_motion.dart';
 import '../widgets/content_skeleton.dart';
 
 import 'dart:async';
@@ -168,113 +169,121 @@ class _NotificationsScreenState extends State<NotificationsScreen>
         ),
       ],
     ),
-    body: RefreshIndicator(
-      onRefresh: _refresh,
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(16),
-        children: [
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Không bỏ lỡ cơ hội',
-                    style: TextStyle(fontSize: 19, fontWeight: FontWeight.w700),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    _pushStatus ?? 'Nhận thông báo khi có đơn ứng tuyển, tin nhắn, kết quả xác thực và đánh giá mới.',
-                  ),
-                  const SizedBox(height: 12),
-                  OutlinedButton.icon(
-                    onPressed: _enabling ? null : _enable,
-                    icon: const Icon(Icons.notifications_active_outlined),
-                    label: Text(_enabling ? 'Đang bật…' : 'Bật thông báo đẩy'),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Wrap(
-            alignment: WrapAlignment.spaceBetween,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              Text(
-                'Lịch sử · $_unread chưa đọc',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              TextButton(
-                onPressed: _unread == 0 ? null : () => _read(null),
-                child: const Text('Đọc tất cả'),
-              ),
-            ],
-          ),
-          if (_loading && _items.isEmpty) const ContentSkeleton(compact: true),
-          if (_error != null)
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Text(
-                _error!,
-                style: TextStyle(color: Theme.of(context).colorScheme.error),
-              ),
-            ),
-          if (!_loading && _error == null && _items.isEmpty)
-            EmptyState(
-              icon: Icons.notifications_none,
-              action: OutlinedButton.icon(
-                onPressed: _refresh,
-                icon: const Icon(Icons.refresh),
-                label: const Text('Kiểm tra lại'),
-              ),
-              title: 'Chưa có thông báo',
-              message: 'Thông tin về công việc và hồ sơ của bạn sẽ xuất hiện tại đây.',
-            ),
-          for (final item in _items)
+    body: ContentFrame(
+      child: RefreshIndicator(
+        onRefresh: _refresh,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(16),
+          children: [
             Card(
-              color: item.isRead
-                  ? Colors.white
-                  : Theme.of(context).colorScheme.primaryContainer
-                        .withValues(alpha: .35),
-              child: ListTile(
-                key: ValueKey('notification-${item.id}'),
-                contentPadding: const EdgeInsets.all(16),
-                isThreeLine: true,
-                leading: Icon(_icon(item.type)),
-                title: Text(
-                  item.title,
-                  style: TextStyle(
-                    fontWeight: item.isRead ? FontWeight.w500 : FontWeight.w800,
-                  ),
-                ),
-                subtitle: Column(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 6),
-                    Text(item.body),
+                    const SectionIntro(
+                      title: 'Không bỏ lỡ cơ hội',
+                      subtitle: 'Mọi kết nối quan trọng, trong một nơi.',
+                      eyebrow: 'HỘP THƯ',
+                    ),
                     const SizedBox(height: 8),
                     Text(
-                      MaterialLocalizations.of(context)
-                          .formatFullDate(item.createdAt.toLocal()),
-                      style: Theme.of(context).textTheme.labelSmall,
+                      _pushStatus ?? 'Nhận thông báo khi có đơn ứng tuyển, tin nhắn, kết quả xác thực và đánh giá mới.',
+                    ),
+                    const SizedBox(height: 12),
+                    OutlinedButton.icon(
+                      onPressed: _enabling ? null : _enable,
+                      icon: const Icon(Icons.notifications_active_outlined),
+                      label: Text(
+                        _enabling ? 'Đang bật…' : 'Bật thông báo đẩy',
+                      ),
                     ),
                   ],
                 ),
-                trailing: item.isRead
-                    ? null
-                    : const Icon(Icons.circle, size: 9),
-                onTap: () => _read(item),
               ),
             ),
-          if (_hasMore)
-            TextButton(
-              onPressed: _loadingMore ? null : _more,
-              child: Text(_loadingMore ? 'Đang tải…' : 'Tải thông báo cũ'),
+            const SizedBox(height: 12),
+            Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Text(
+                  'Lịch sử · $_unread chưa đọc',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                TextButton(
+                  onPressed: _unread == 0 ? null : () => _read(null),
+                  child: const Text('Đọc tất cả'),
+                ),
+              ],
             ),
-        ],
+            if (_loading && _items.isEmpty)
+              const ContentSkeleton(compact: true),
+            if (_error != null)
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Text(
+                  _error!,
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
+              ),
+            if (!_loading && _error == null && _items.isEmpty)
+              EmptyState(
+                icon: Icons.notifications_none,
+                action: OutlinedButton.icon(
+                  onPressed: _refresh,
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Kiểm tra lại'),
+                ),
+                title: 'Chưa có thông báo',
+                message: 'Thông tin về công việc và hồ sơ của bạn sẽ xuất hiện tại đây.',
+              ),
+            for (final item in _items)
+              Card(
+                color: item.isRead
+                    ? Colors.white
+                    : Theme.of(context).colorScheme.primaryContainer
+                          .withValues(alpha: .35),
+                child: ListTile(
+                  key: ValueKey('notification-${item.id}'),
+                  contentPadding: const EdgeInsets.all(16),
+                  isThreeLine: true,
+                  leading: Icon(_icon(item.type)),
+                  title: Text(
+                    item.title,
+                    style: TextStyle(
+                      fontWeight: item.isRead
+                          ? FontWeight.w500
+                          : FontWeight.w800,
+                    ),
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 6),
+                      Text(item.body),
+                      const SizedBox(height: 8),
+                      Text(
+                        MaterialLocalizations.of(context)
+                            .formatFullDate(item.createdAt.toLocal()),
+                        style: Theme.of(context).textTheme.labelSmall,
+                      ),
+                    ],
+                  ),
+                  trailing: item.isRead
+                      ? null
+                      : const Icon(Icons.circle, size: 9),
+                  onTap: () => _read(item),
+                ),
+              ),
+            if (_hasMore)
+              TextButton(
+                onPressed: _loadingMore ? null : _more,
+                child: Text(_loadingMore ? 'Đang tải…' : 'Tải thông báo cũ'),
+              ),
+          ],
+        ),
       ),
     ),
   );

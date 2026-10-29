@@ -2,6 +2,37 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
 
+/// Reading-width content for secondary routes on desktop, full width on mobile.
+class ContentFrame extends StatelessWidget {
+  const ContentFrame({super.key, required this.child});
+  final Widget child;
+  @override
+  Widget build(BuildContext context) => Center(
+    child: ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 840),
+      child: child,
+    ),
+  );
+}
+
+class ResponsiveJobGrid extends StatelessWidget {
+  const ResponsiveJobGrid({super.key, required this.children});
+  final List<Widget> children;
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, bounds) {
+      final columns = bounds.maxWidth >= 820 ? 2 : 1;
+      final width = (bounds.maxWidth - (columns - 1) * 16) / columns;
+      return Wrap(
+        spacing: 16,
+        children: [
+          for (final child in children) SizedBox(width: width, child: child),
+        ],
+      );
+    },
+  );
+}
+
 /// One-shot viewport reveal. No repeating ticker and no hidden-route work.
 class DesignReveal extends StatefulWidget {
   const DesignReveal({super.key, required this.child, this.distance = 18});

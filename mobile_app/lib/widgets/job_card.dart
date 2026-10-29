@@ -163,10 +163,10 @@ class JobStatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = switch (status) {
-      'OPEN' => const Color(0xff047857),
-      'IN_PROGRESS' => const Color(0xff1d4ed8),
-      'COMPLETED' => const Color(0xff6d28d9),
-      _ => const Color(0xffb91c1c),
+      'OPEN' => AppColors.successStrong,
+      'IN_PROGRESS' => AppColors.blue,
+      'COMPLETED' => AppColors.purple,
+      _ => AppColors.errorStrong,
     };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -194,12 +194,12 @@ class _JobInfo extends StatelessWidget {
   Widget build(BuildContext context) => Row(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Icon(icon, size: 18, color: const Color(0xff64748b)),
+      Icon(icon, size: 18, color: AppColors.muted),
       const SizedBox(width: 8),
       Expanded(
         child: Text(
           label,
-          style: const TextStyle(color: Color(0xff64748b), height: 1.5),
+          style: const TextStyle(color: AppColors.muted, height: 1.5),
         ),
       ),
     ],

@@ -1,3 +1,4 @@
+import '../widgets/design_motion.dart';
 import '../widgets/content_skeleton.dart';
 import '../widgets/app_snack_bar.dart';
 import '../theme/app_theme.dart';
@@ -134,288 +135,307 @@ class _WalletScreenState extends State<WalletScreen> {
         ),
       ],
     ),
-    body: RefreshIndicator(
-      onRefresh: () => _load(),
-      child: ListView(
-        padding: const EdgeInsets.all(16),
-        physics: const AlwaysScrollableScrollPhysics(),
-        children: [
-          if (_busy && _balance == null) const ContentSkeleton(compact: true),
-          if (_error != null) ...[
-            Text(
-              _error!,
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
+    body: ContentFrame(
+      child: RefreshIndicator(
+        onRefresh: () => _load(),
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: [
+            const SectionIntro(
+              title: 'Ví của bạn',
+              subtitle: 'Quản lý số dư, ký quỹ và các giao dịch.',
+              eyebrow: 'TÀI CHÍNH',
             ),
-            TextButton(
-              onPressed: _busy ? null : () => _load(),
-              child: const Text('Thử lại'),
-            ),
-          ],
-          if (_balance case final balance?) ...[
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                gradient: LinearGradient(
-                  colors: AppTheme.brandGradient(context),
-                ),
+            if (_busy && _balance == null) const ContentSkeleton(compact: true),
+            if (_error != null) ...[
+              Text(
+                _error!,
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Expanded(
-                        child: Text(
-                          'THOXAY · VÍ CỦA BẠN',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 1,
+              TextButton(
+                onPressed: _busy ? null : () => _load(),
+                child: const Text('Thử lại'),
+              ),
+            ],
+            if (_balance case final balance?) ...[
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(24),
+                  gradient: LinearGradient(
+                    colors: AppTheme.brandGradient(context),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Expanded(
+                          child: Text(
+                            'THOXAY · VÍ CỦA BẠN',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 1,
+                            ),
                           ),
                         ),
-                      ),
-                      IconButton(
-                        tooltip: _hideBalance ? 'Hiện số dư' : 'Ẩn số dư',
-                        onPressed: () =>
-                            setState(() => _hideBalance = !_hideBalance),
-                        icon: Icon(
-                          _hideBalance
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined,
+                        IconButton(
+                          tooltip: _hideBalance ? 'Hiện số dư' : 'Ẩn số dư',
+                          onPressed: () =>
+                              setState(() => _hideBalance = !_hideBalance),
+                          icon: Icon(
+                            _hideBalance
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    const Icon(
+                      Icons.contactless_outlined,
+                      color: Colors.white54,
+                      size: 32,
+                    ),
+                    const SizedBox(height: 18),
+                    const Text(
+                      'Số dư khả dụng',
+                      style: TextStyle(color: Colors.white70),
+                    ),
+                    const SizedBox(height: 8),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        _hideBalance
+                            ? '••••••'
+                            : money(balance.main.toDouble()),
+                        style: const TextStyle(
                           color: Colors.white,
+                          fontSize: 34,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
-                    ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  _smallBalance(
+                    'Ký quỹ',
+                    balance.escrow,
+                    Icons.shield_outlined,
                   ),
-                  const SizedBox(height: 14),
-                  const Text(
-                    'Số dư khả dụng',
-                    style: TextStyle(color: Colors.white70),
+                  const SizedBox(width: 8),
+                  _smallBalance(
+                    'Đang giữ rút',
+                    balance.held,
+                    Icons.hourglass_top,
                   ),
-                  const SizedBox(height: 8),
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Semantics(
+                  label: 'Mức ký quỹ so với ngưỡng cảnh báo',
+                  child: LinearProgressIndicator(
+                    minHeight: 8,
+                    borderRadius: BorderRadius.circular(8),
+                    value: balance.minimum <= 0
+                        ? 1
+                        : (balance.escrow / balance.minimum).clamp(0.0, 1.0),
+                    color: balance.lowEscrow
+                        ? AppColors.warning
+                        : AppColors.successStrong,
+                  ),
+                ),
+              ),
+              if (balance.lowEscrow)
+                Card(
+                  color: AppColors.warningSoft,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
                     child: Text(
-                      _hideBalance ? '••••••' : money(balance.main.toDouble()),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 34,
-                        fontWeight: FontWeight.w800,
-                      ),
+                      'Ký quỹ thấp hơn ${money(balance.minimum.toDouble())}. Bạn có thể chuyển thêm từ số dư chính. Đây là cảnh báo, chưa chặn nhận việc.',
+                    ),
+                  ),
+                ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: _busy ? null : () => _operate('TOP_UP'),
+                      icon: const Icon(Icons.add),
+                      label: const Text('Nạp tiền'),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: _busy || balance.main < 1000
+                          ? null
+                          : () => _operate('WITHDRAW'),
+                      icon: const Icon(Icons.north_east),
+                      label: const Text('Rút nhanh'),
                     ),
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                _smallBalance('Ký quỹ', balance.escrow, Icons.shield_outlined),
-                const SizedBox(width: 8),
-                _smallBalance(
-                  'Đang giữ rút',
-                  balance.held,
-                  Icons.hourglass_top,
-                ),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Semantics(
-                label: 'Mức ký quỹ so với ngưỡng cảnh báo',
-                child: LinearProgressIndicator(
-                  minHeight: 8,
-                  borderRadius: BorderRadius.circular(8),
-                  value: balance.minimum <= 0
-                      ? 1
-                      : (balance.escrow / balance.minimum).clamp(0.0, 1.0),
-                  color: balance.lowEscrow
-                      ? const Color(0xffb45309)
-                      : const Color(0xff047857),
-                ),
-              ),
-            ),
-            if (balance.lowEscrow)
-              Card(
-                color: const Color(0xfffff1d8),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Text(
-                    'Ký quỹ thấp hơn ${money(balance.minimum.toDouble())}. Bạn có thể chuyển thêm từ số dư chính. Đây là cảnh báo, chưa chặn nhận việc.',
-                  ),
-                ),
-              ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: FilledButton.icon(
-                    onPressed: _busy ? null : () => _operate('TOP_UP'),
-                    icon: const Icon(Icons.add),
-                    label: const Text('Nạp tiền'),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: FilledButton.icon(
+              const SizedBox(height: 16),
+              Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: [
+                  OutlinedButton.icon(
                     onPressed: _busy || balance.main < 1000
                         ? null
-                        : () => _operate('WITHDRAW'),
-                    icon: const Icon(Icons.north_east),
-                    label: const Text('Rút nhanh'),
+                        : () => _operate('LOCK'),
+                    icon: const Icon(Icons.shield_outlined),
+                    label: const Text('Nạp ký quỹ'),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              children: [
-                OutlinedButton.icon(
-                  onPressed: _busy || balance.main < 1000
-                      ? null
-                      : () => _operate('LOCK'),
-                  icon: const Icon(Icons.shield_outlined),
-                  label: const Text('Nạp ký quỹ'),
-                ),
-                OutlinedButton.icon(
-                  onPressed: _busy || balance.escrow < 1000
-                      ? null
-                      : () => _operate('RELEASE'),
-                  icon: const Icon(Icons.swap_horiz),
-                  label: const Text('Hoàn ký quỹ'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Nạp/rút được quản trị viên đối soát thủ công. Tiền đang giữ rút không nằm trong số dư khả dụng. Chưa tích hợp chuyển tiền ngân hàng tự động.',
-              style: TextStyle(color: Colors.blueGrey, height: 1.5),
-            ),
-          ],
-          const SizedBox(height: 24),
-          SegmentedButton<int>(
-            segments: const [
-              ButtonSegment(value: 0, label: Text('Giao dịch')),
-              ButtonSegment(value: 1, label: Text('Yêu cầu')),
-            ],
-            selected: {_tab},
-            onSelectionChanged: (s) => setState(() => _tab = s.first),
-          ),
-          const SizedBox(height: 16),
-          if (_tab == 0) ...[
-            if (!_busy && _error == null && _entries.isEmpty)
-              EmptyState(
-                icon: Icons.receipt_long_outlined,
-                action: OutlinedButton.icon(
-                  onPressed: () => _load(),
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Kiểm tra lại'),
-                ),
-                title: 'Chưa có giao dịch',
-                message: 'Mọi biến động số dư sẽ được ghi lại tại đây.',
+                  OutlinedButton.icon(
+                    onPressed: _busy || balance.escrow < 1000
+                        ? null
+                        : () => _operate('RELEASE'),
+                    icon: const Icon(Icons.swap_horiz),
+                    label: const Text('Hoàn ký quỹ'),
+                  ),
+                ],
               ),
-            for (final e in _entries)
-              Card(
-                child: ListTile(
-                  isThreeLine: true,
-                  leading: CircleAvatar(
-                    backgroundColor: walletEntrySign(e.kind) == '− '
-                        ? const Color(0xfffef2f2)
-                        : walletEntrySign(e.kind) == '+ '
-                        ? const Color(0xffecfdf5)
-                        : const Color(0xfffffbeb),
-                    child: Icon(
-                      walletEntrySign(e.kind) == '− '
-                          ? Icons.north_east
+              const SizedBox(height: 16),
+              const Text(
+                'Nạp/rút được quản trị viên đối soát thủ công. Tiền đang giữ rút không nằm trong số dư khả dụng. Chưa tích hợp chuyển tiền ngân hàng tự động.',
+                style: TextStyle(color: Colors.blueGrey, height: 1.5),
+              ),
+            ],
+            const SizedBox(height: 24),
+            SegmentedButton<int>(
+              segments: const [
+                ButtonSegment(value: 0, label: Text('Giao dịch')),
+                ButtonSegment(value: 1, label: Text('Yêu cầu')),
+              ],
+              selected: {_tab},
+              onSelectionChanged: (s) => setState(() => _tab = s.first),
+            ),
+            const SizedBox(height: 16),
+            if (_tab == 0) ...[
+              if (!_busy && _error == null && _entries.isEmpty)
+                EmptyState(
+                  icon: Icons.receipt_long_outlined,
+                  action: OutlinedButton.icon(
+                    onPressed: () => _load(),
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Kiểm tra lại'),
+                  ),
+                  title: 'Chưa có giao dịch',
+                  message: 'Mọi biến động số dư sẽ được ghi lại tại đây.',
+                ),
+              for (final e in _entries)
+                Card(
+                  child: ListTile(
+                    isThreeLine: true,
+                    leading: CircleAvatar(
+                      backgroundColor: walletEntrySign(e.kind) == '− '
+                          ? AppColors.errorSoft
                           : walletEntrySign(e.kind) == '+ '
-                          ? Icons.south_west
-                          : Icons.swap_horiz,
-                      color: walletEntrySign(e.kind) == '− '
-                          ? const Color(0xffb91c1c)
-                          : walletEntrySign(e.kind) == '+ '
-                          ? const Color(0xff047857)
-                          : const Color(0xffb45309),
+                          ? AppColors.successSoft
+                          : AppColors.warningPale,
+                      child: Icon(
+                        walletEntrySign(e.kind) == '− '
+                            ? Icons.north_east
+                            : walletEntrySign(e.kind) == '+ '
+                            ? Icons.south_west
+                            : Icons.swap_horiz,
+                        color: walletEntrySign(e.kind) == '− '
+                            ? AppColors.errorStrong
+                            : walletEntrySign(e.kind) == '+ '
+                            ? AppColors.successStrong
+                            : AppColors.warning,
+                      ),
                     ),
-                  ),
-                  title: Text(walletKind(e.kind)),
-                  subtitle: Text(
-                    '${e.description}\n${MaterialLocalizations.of(context).formatShortDate(e.createdAt.toLocal())}',
-                  ),
-                  trailing: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 125),
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(
-                        '${walletEntrySign(e.kind)}${money(e.amount.toDouble())}',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          color: walletEntrySign(e.kind) == '− '
-                              ? Colors.red.shade700
-                              : walletEntrySign(e.kind) == '+ '
-                              ? const Color(0xff047857)
-                              : const Color(0xffb45309),
+                    title: Text(walletKind(e.kind)),
+                    subtitle: Text(
+                      '${e.description}\n${MaterialLocalizations.of(context).formatShortDate(e.createdAt.toLocal())}',
+                    ),
+                    trailing: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 125),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          '${walletEntrySign(e.kind)}${money(e.amount.toDouble())}',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: walletEntrySign(e.kind) == '− '
+                                ? Colors.red.shade700
+                                : walletEntrySign(e.kind) == '+ '
+                                ? AppColors.successStrong
+                                : AppColors.warning,
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            if (_entryMore)
-              TextButton(
-                onPressed: _busy ? null : () => _load(more: true),
-                child: const Text('Tải giao dịch cũ'),
-              ),
-          ] else ...[
-            if (!_busy && _error == null && _requests.isEmpty)
-              EmptyState(
-                icon: Icons.account_balance_wallet_outlined,
-                action: OutlinedButton.icon(
-                  onPressed: () => _load(),
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Kiểm tra lại'),
+              if (_entryMore)
+                TextButton(
+                  onPressed: _busy ? null : () => _load(more: true),
+                  child: const Text('Tải giao dịch cũ'),
                 ),
-                title: 'Chưa có yêu cầu',
-                message: 'Yêu cầu nạp và rút được theo dõi tại đây.',
-              ),
-            for (final r in _requests)
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${walletKind(r.kind)} · ${money(r.amount.toDouble())}',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      const SizedBox(height: 8),
-                      Chip(
-                        backgroundColor: r.status == 'APPROVED'
-                            ? Colors.green.shade50
-                            : r.status == 'REJECTED'
-                            ? Colors.red.shade50
-                            : Colors.amber.shade50,
-                        label: Text(requestStatus(r.status)),
-                      ),
-                      if (r.note != null) Text(r.note!),
-                      Text(
-                        MaterialLocalizations.of(context)
-                            .formatShortDate(r.createdAt.toLocal()),
-                      ),
-                    ],
+            ] else ...[
+              if (!_busy && _error == null && _requests.isEmpty)
+                EmptyState(
+                  icon: Icons.account_balance_wallet_outlined,
+                  action: OutlinedButton.icon(
+                    onPressed: () => _load(),
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Kiểm tra lại'),
+                  ),
+                  title: 'Chưa có yêu cầu',
+                  message: 'Yêu cầu nạp và rút được theo dõi tại đây.',
+                ),
+              for (final r in _requests)
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${walletKind(r.kind)} · ${money(r.amount.toDouble())}',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: 8),
+                        Chip(
+                          backgroundColor: r.status == 'APPROVED'
+                              ? Colors.green.shade50
+                              : r.status == 'REJECTED'
+                              ? Colors.red.shade50
+                              : Colors.amber.shade50,
+                          label: Text(requestStatus(r.status)),
+                        ),
+                        if (r.note != null) Text(r.note!),
+                        Text(
+                          MaterialLocalizations.of(context)
+                              .formatShortDate(r.createdAt.toLocal()),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            if (_requestMore)
-              TextButton(
-                onPressed: _busy ? null : () => _load(more: true),
-                child: const Text('Tải yêu cầu cũ'),
-              ),
+              if (_requestMore)
+                TextButton(
+                  onPressed: _busy ? null : () => _load(more: true),
+                  child: const Text('Tải yêu cầu cũ'),
+                ),
+            ],
           ],
-        ],
+        ),
       ),
     ),
   );

@@ -1,3 +1,4 @@
+import '../widgets/design_motion.dart';
 import '../widgets/content_skeleton.dart';
 
 import 'package:flutter/material.dart';
@@ -50,66 +51,78 @@ class _ReputationScreenState extends State<ReputationScreen> {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(title: const Text('Lịch sử uy tín')),
-    body: RefreshIndicator(
-      onRefresh: () => _load(),
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(16),
-        children: [
-          const Text(
-            'Điểm khởi đầu 100. Hoàn thành công trình +2 điểm (tối đa 100), hủy việc đang làm -15 điểm (tối thiểu 0).',
-          ),
-          const SizedBox(height: 16),
-          if (_loading && _items.isEmpty) const ContentSkeleton(compact: true),
-          if (_error != null) ...[
-            Text(_error!),
-            TextButton(onPressed: () => _load(), child: const Text('Thử lại')),
-          ],
-          if (!_loading && _error == null && _items.isEmpty)
-            const EmptyState(
-              title: 'Hành trình uy tín của bạn',
-              message: 'Các thay đổi điểm từ công việc sẽ được ghi lại ở đây.',
+    body: ContentFrame(
+      child: RefreshIndicator(
+        onRefresh: () => _load(),
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(16),
+          children: [
+            const SectionIntro(
+              title: 'Uy tín qua từng công trình',
+              subtitle: 'Theo dõi thay đổi điểm và hành trình lên hạng.',
+              eyebrow: 'HÀNH TRÌNH',
             ),
-          for (final entry in _items)
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      entry.type == 'COMPLETED'
-                          ? 'Hoàn thành công trình'
-                          : 'Hủy việc đang làm',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(entry.jobTitle),
-                    const SizedBox(height: 8),
-                    Text(
-                      '${entry.delta >= 0 ? '+' : ''}${entry.delta} điểm · Uy tín sau thay đổi: ${entry.scoreAfter}/100',
-                      style: TextStyle(
-                        color: entry.delta < 0
-                            ? Colors.red.shade700
-                            : Theme.of(context).colorScheme.primary,
-                        fontWeight: FontWeight.w700,
+            const Text(
+              'Điểm khởi đầu 100. Hoàn thành công trình +2 điểm (tối đa 100), hủy việc đang làm -15 điểm (tối thiểu 0).',
+            ),
+            const SizedBox(height: 16),
+            if (_loading && _items.isEmpty)
+              const ContentSkeleton(compact: true),
+            if (_error != null) ...[
+              Text(_error!),
+              TextButton(
+                onPressed: () => _load(),
+                child: const Text('Thử lại'),
+              ),
+            ],
+            if (!_loading && _error == null && _items.isEmpty)
+              const EmptyState(
+                title: 'Hành trình uy tín của bạn',
+                message:
+                    'Các thay đổi điểm từ công việc sẽ được ghi lại ở đây.',
+              ),
+            for (final entry in _items)
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        entry.type == 'COMPLETED'
+                            ? 'Hoàn thành công trình'
+                            : 'Hủy việc đang làm',
+                        style: Theme.of(context).textTheme.titleMedium,
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      MaterialLocalizations.of(context)
-                          .formatFullDate(entry.createdAt.toLocal()),
-                    ),
-                  ],
+                      const SizedBox(height: 8),
+                      Text(entry.jobTitle),
+                      const SizedBox(height: 8),
+                      Text(
+                        '${entry.delta >= 0 ? '+' : ''}${entry.delta} điểm · Uy tín sau thay đổi: ${entry.scoreAfter}/100',
+                        style: TextStyle(
+                          color: entry.delta < 0
+                              ? Colors.red.shade700
+                              : Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        MaterialLocalizations.of(context)
+                            .formatFullDate(entry.createdAt.toLocal()),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          if (_hasMore)
-            TextButton(
-              onPressed: _loading ? null : () => _load(more: true),
-              child: const Text('Tải lịch sử cũ'),
-            ),
-        ],
+            if (_hasMore)
+              TextButton(
+                onPressed: _loading ? null : () => _load(more: true),
+                child: const Text('Tải lịch sử cũ'),
+              ),
+          ],
+        ),
       ),
     ),
   );

@@ -1,3 +1,5 @@
+import '../theme/app_theme.dart';
+import '../widgets/design_motion.dart';
 import '../widgets/content_skeleton.dart';
 import '../widgets/app_snack_bar.dart';
 
@@ -143,7 +145,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               padding: EdgeInsets.only(top: 8),
               child: Text(
                 'Bấm ảnh để phóng to kiểm tra trước khi gửi.',
-                style: TextStyle(color: Color(0xff64748b)),
+                style: TextStyle(color: AppColors.muted),
               ),
             ),
           const SizedBox(height: 12),
@@ -182,118 +184,129 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ],
     ),
-    body: RefreshIndicator(
-      onRefresh: () async {
-        if (!_loading) await _load();
-      },
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (_loading && _profile == null) const ContentSkeleton(),
-            if (_loading && _profile != null) const LinearProgressIndicator(),
-            if (_profile != null) ...[
-              ProfileSummary(
-                name: _profile!.fullName,
-                worker: _profile!.role == 'ROLE_WORKER',
-                rating: _profile!.rating,
-                score: _profile!.reputationScore,
-                completed: _profile!.completedJobs,
-                tier: _profile!.workerTier ?? 'SILVER',
-                verified: _profile!.verified,
+    body: ContentFrame(
+      child: RefreshIndicator(
+        onRefresh: () async {
+          if (!_loading) await _load();
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SectionIntro(
+                title: 'Hồ sơ của bạn',
+                subtitle: 'Một hồ sơ rõ ràng giúp kết nối đúng người.',
+                eyebrow: 'TÀI KHOẢN',
               ),
-              const SizedBox(height: 16),
-              Text(_profile!.phoneNumber),
-              if (_profile!.role == 'ROLE_WORKER')
+              if (_loading && _profile == null) const ContentSkeleton(),
+              if (_loading && _profile != null) const LinearProgressIndicator(),
+              if (_profile != null) ...[
+                ProfileSummary(
+                  name: _profile!.fullName,
+                  worker: _profile!.role == 'ROLE_WORKER',
+                  rating: _profile!.rating,
+                  score: _profile!.reputationScore,
+                  completed: _profile!.completedJobs,
+                  tier: _profile!.workerTier ?? 'SILVER',
+                  verified: _profile!.verified,
+                ),
+                const SizedBox(height: 16),
+                Text(_profile!.phoneNumber),
+                if (_profile!.role == 'ROLE_WORKER')
+                  TextButton.icon(
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => ReputationScreen(api: widget.api),
+                      ),
+                    ),
+                    icon: const Icon(Icons.history),
+                    label: const Text('Lịch sử uy tín'),
+                  ),
                 TextButton.icon(
                   onPressed: () => Navigator.of(context).push(
                     MaterialPageRoute<void>(
-                      builder: (_) => ReputationScreen(api: widget.api),
+                      builder: (_) => LeaderboardScreen(api: widget.api),
                     ),
                   ),
-                  icon: const Icon(Icons.history),
-                  label: const Text('Lịch sử uy tín'),
+                  icon: const Icon(Icons.leaderboard_outlined),
+                  label: const Text('Bảng xếp hạng thợ'),
                 ),
-              TextButton.icon(
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => LeaderboardScreen(api: widget.api),
+                const SizedBox(height: 8),
+                if (_profile!.role == 'ROLE_WORKER')
+                  Text(
+                    _profile!.completedJobs == 0
+                        ? 'Chưa có đánh giá công trình'
+                        : 'Đánh giá trung bình: ${_profile!.rating.toStringAsFixed(1)}/5',
                   ),
-                ),
-                icon: const Icon(Icons.leaderboard_outlined),
-                label: const Text('Bảng xếp hạng thợ'),
-              ),
-              const SizedBox(height: 8),
-              if (_profile!.role == 'ROLE_WORKER')
-                Text(
-                  _profile!.completedJobs == 0
-                      ? 'Chưa có đánh giá công trình'
-                      : 'Đánh giá trung bình: ${_profile!.rating.toStringAsFixed(1)}/5',
-                ),
-              const SizedBox(height: 12),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Chip(
-                  avatar: Icon(
-                    _profile!.verified ? Icons.verified : Icons.hourglass_empty,
-                  ),
-                  label: Text(
-                    _profile!.verified
-                        ? 'Đã xác thực CCCD'
-                        : 'Chưa xác thực CCCD',
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-              Card(
-                child: ExpansionTile(
-                  maintainState: true,
-                  enabled: !_loading,
-                  title: const Text('Thông tin cá nhân & kinh nghiệm'),
-                  leading: const Icon(Icons.edit_outlined),
-                  childrenPadding: const EdgeInsets.all(16),
-                  children: [
-                    ProfileEditor(
-                      api: widget.api,
-                      profile: _profile!,
-                      onBusy: (busy) {
-                        if (mounted) setState(() => _loading = busy);
-                      },
-                      onSaved: (person) => setState(() => _profile = person),
+                const SizedBox(height: 12),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Chip(
+                    avatar: Icon(
+                      _profile!.verified
+                          ? Icons.verified
+                          : Icons.hourglass_empty,
                     ),
-                  ],
+                    label: Text(
+                      _profile!.verified
+                          ? 'Đã xác thực CCCD'
+                          : 'Chưa xác thực CCCD',
+                    ),
+                  ),
                 ),
-              ),
-              if (_profile!.projectImages.isNotEmpty) ...[
+                const SizedBox(height: 24),
+                Card(
+                  child: ExpansionTile(
+                    maintainState: true,
+                    enabled: !_loading,
+                    title: const Text('Thông tin cá nhân & kinh nghiệm'),
+                    leading: const Icon(Icons.edit_outlined),
+                    childrenPadding: const EdgeInsets.all(16),
+                    children: [
+                      ProfileEditor(
+                        api: widget.api,
+                        profile: _profile!,
+                        onBusy: (busy) {
+                          if (mounted) setState(() => _loading = busy);
+                        },
+                        onSaved: (person) => setState(() => _profile = person),
+                      ),
+                    ],
+                  ),
+                ),
+                if (_profile!.projectImages.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  PortfolioGallery(images: _profile!.projectImages),
+                ],
+                const SizedBox(height: 24),
+                const Text(
+                  'Chụp rõ toàn bộ CCCD, đủ sáng, tránh lóa và không che thông tin. Hệ thống kiểm tra tệp ảnh tự động; quản trị viên đối chiếu danh tính trước khi xác thực. Mỗi lần gửi cần đủ hai ảnh mới.',
+                ),
                 const SizedBox(height: 16),
-                PortfolioGallery(images: _profile!.projectImages),
-              ],
-              const SizedBox(height: 24),
-              const Text(
-                'Chụp rõ toàn bộ CCCD, đủ sáng, tránh lóa và không che thông tin. Hệ thống kiểm tra tệp ảnh tự động; quản trị viên đối chiếu danh tính trước khi xác thực. Mỗi lần gửi cần đủ hai ảnh mới.',
-              ),
-              const SizedBox(height: 16),
-              _photoCard('front', 'Mặt trước CCCD', _frontImage),
-              const SizedBox(height: 16),
-              _photoCard('back', 'Mặt sau CCCD', _backImage),
-              const SizedBox(height: 16),
-              FilledButton.icon(
-                onPressed: _loading ? null : _save,
-                icon: const Icon(Icons.badge_outlined),
-                label: const Text('Cập nhật CCCD'),
-              ),
-            ],
-            if (_error != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 16),
-                child: Text(
-                  _error!,
-                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                _photoCard('front', 'Mặt trước CCCD', _frontImage),
+                const SizedBox(height: 16),
+                _photoCard('back', 'Mặt sau CCCD', _backImage),
+                const SizedBox(height: 16),
+                FilledButton.icon(
+                  onPressed: _loading ? null : _save,
+                  icon: const Icon(Icons.badge_outlined),
+                  label: const Text('Cập nhật CCCD'),
                 ),
-              ),
-          ],
+              ],
+              if (_error != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: Text(
+                    _error!,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     ),

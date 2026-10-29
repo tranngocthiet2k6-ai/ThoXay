@@ -135,7 +135,11 @@ void main() {
       final api = WalletApi();
       await tester.pumpWidget(MaterialApp(home: WalletScreen(api: api)));
       await tester.pumpAndSettle();
-      await tester.ensureVisible(find.text('Nạp tiền').first);
+      await tester.scrollUntilVisible(
+        find.text('Nạp tiền'),
+        180,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.pumpAndSettle();
       await tester.tap(find.text('Nạp tiền').first);
       await tester.pumpAndSettle();

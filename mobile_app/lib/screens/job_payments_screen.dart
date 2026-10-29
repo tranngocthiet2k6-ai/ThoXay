@@ -1,3 +1,4 @@
+import '../widgets/design_motion.dart';
 import '../widgets/app_snack_bar.dart';
 
 import 'package:flutter/material.dart';
@@ -76,79 +77,87 @@ class _JobPaymentsScreenState extends State<JobPaymentsScreen> {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(title: const Text('Thanh toán thu nhập')),
-    body: RefreshIndicator(
-      onRefresh: _load,
-      child: ListView(
-        padding: const EdgeInsets.all(16),
-        physics: const AlwaysScrollableScrollPhysics(),
-        children: [
-          Text(
-            widget.job.title,
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 12),
-          const Text(
-            'Nhập số ngày công đã xác nhận với từng thợ. Tiền công, tip và thưởng được chuyển từ số dư khả dụng của bạn; mỗi thợ chỉ được thanh toán một lần cho công trình.',
-          ),
-          if (_wallet != null)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              child: Text(
-                'Khả dụng: ${money(_wallet!.main.toDouble())}',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
+    body: ContentFrame(
+      child: RefreshIndicator(
+        onRefresh: _load,
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: [
+            const SectionIntro(
+              title: 'Chi trả công trình',
+              subtitle:
+                  'Kiểm tra ngày công và xác nhận thanh toán cho từng thợ.',
+              eyebrow: 'TÀI CHÍNH',
             ),
-          TextButton.icon(
-            onPressed: () async {
-              await Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => WalletScreen(api: widget.api),
+            Text(
+              widget.job.title,
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'Nhập số ngày công đã xác nhận với từng thợ. Tiền công, tip và thưởng được chuyển từ số dư khả dụng của bạn; mỗi thợ chỉ được thanh toán một lần cho công trình.',
+            ),
+            if (_wallet != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Text(
+                  'Khả dụng: ${money(_wallet!.main.toDouble())}',
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
-              );
-              if (mounted) await _load();
-            },
-            icon: const Icon(Icons.account_balance_wallet_outlined),
-            label: const Text('Mở ví / nạp tiền'),
-          ),
-          if (_busy && _wallet == null) const ContentSkeleton(compact: true),
-          if (_error != null) ...[
-            Text(_error!),
-            TextButton(onPressed: _load, child: const Text('Thử lại')),
+              ),
+            TextButton.icon(
+              onPressed: () async {
+                await Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => WalletScreen(api: widget.api),
+                  ),
+                );
+                if (mounted) await _load();
+              },
+              icon: const Icon(Icons.account_balance_wallet_outlined),
+              label: const Text('Mở ví / nạp tiền'),
+            ),
+            if (_busy && _wallet == null) const ContentSkeleton(compact: true),
+            if (_error != null) ...[
+              Text(_error!),
+              TextButton(onPressed: _load, child: const Text('Thử lại')),
+            ],
+            for (final worker in _workers)
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        worker.workerName,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 8),
+                      if (_payments
+                              .where((p) => p.applicationId == worker.id)
+                              .firstOrNull
+                          case final payment?) ...[
+                        const Chip(label: Text('Đã thanh toán')),
+                        Text(
+                          '${payment.days} ngày công · ${money(payment.total.toDouble())}',
+                        ),
+                        Text(
+                          'Tip ${money(payment.tip.toDouble())} · Thưởng ${money(payment.bonus.toDouble())}',
+                        ),
+                      ] else
+                        FilledButton.icon(
+                          onPressed: _busy ? null : () => _pay(worker),
+                          icon: const Icon(Icons.payments_outlined),
+                          label: Text('Thanh toán cho ${worker.workerName}'),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
           ],
-          for (final worker in _workers)
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      worker.workerName,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 8),
-                    if (_payments
-                            .where((p) => p.applicationId == worker.id)
-                            .firstOrNull
-                        case final payment?) ...[
-                      const Chip(label: Text('Đã thanh toán')),
-                      Text(
-                        '${payment.days} ngày công · ${money(payment.total.toDouble())}',
-                      ),
-                      Text(
-                        'Tip ${money(payment.tip.toDouble())} · Thưởng ${money(payment.bonus.toDouble())}',
-                      ),
-                    ] else
-                      FilledButton.icon(
-                        onPressed: _busy ? null : () => _pay(worker),
-                        icon: const Icon(Icons.payments_outlined),
-                        label: Text('Thanh toán cho ${worker.workerName}'),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-        ],
+        ),
       ),
     ),
   );

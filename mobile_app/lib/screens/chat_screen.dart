@@ -1,3 +1,4 @@
+import '../theme/app_theme.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/content_skeleton.dart';
 
@@ -96,6 +97,19 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(widget.peerName, maxLines: 1, overflow: TextOverflow.ellipsis),
+            Text(
+              widget.job.title,
+              style: theme.textTheme.bodySmall,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
             Card(
               margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
               child: ListTile(
@@ -112,19 +126,6 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                 onTap: () => showJobDetails<void>(context, widget.job),
               ),
             ),
-            Text(widget.peerName, maxLines: 1, overflow: TextOverflow.ellipsis),
-            Text(
-              widget.job.title,
-              style: theme.textTheme.bodySmall,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Row(
@@ -216,11 +217,14 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                               maxWidth: MediaQuery.sizeOf(context).width * .8,
                             ),
                             margin: const EdgeInsets.only(bottom: 10),
-                            padding: const EdgeInsets.all(12),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
                             decoration: BoxDecoration(
                               color: mine
                                   ? theme.colorScheme.primaryContainer
-                                  : theme.colorScheme.surfaceContainerHighest,
+                                  : AppColors.surface,
                               borderRadius: BorderRadius.only(
                                 topLeft: const Radius.circular(20),
                                 topRight: const Radius.circular(20),

@@ -1,3 +1,5 @@
+import '../theme/app_theme.dart';
+
 import 'package:flutter/material.dart';
 
 String tierName(String tier) => switch (tier) {
@@ -12,9 +14,9 @@ class TierBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = switch (tier) {
-      'DIAMOND' => const Color(0xff31699e),
-      'GOLD' => const Color(0xff8d6216),
-      _ => const Color(0xff5f717b),
+      'DIAMOND' => AppColors.chartBlue,
+      'GOLD' => AppColors.chartGold,
+      _ => AppColors.silverInk,
     };
     return Chip(
       avatar: Icon(

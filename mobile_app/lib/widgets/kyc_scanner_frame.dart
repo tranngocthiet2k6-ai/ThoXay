@@ -1,3 +1,5 @@
+import '../theme/app_theme.dart';
+
 import 'package:flutter/material.dart';
 
 import '../services/kyc_camera.dart';
@@ -10,7 +12,7 @@ class KycScannerFrame extends StatelessWidget {
     context: context,
     builder: (_) => Dialog.fullscreen(
       child: Scaffold(
-        backgroundColor: const Color(0xff0f172a),
+        backgroundColor: AppColors.ink,
         appBar: AppBar(
           title: Text(label),
           leading: IconButton(
@@ -67,7 +69,7 @@ class KycScannerFrame extends StatelessWidget {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(16),
                   child: ColoredBox(
-                    color: const Color(0xfff1f5f9),
+                    color: AppColors.slateLight,
                     child: photo == null
                         ? Column(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -107,7 +109,7 @@ class KycScannerFrame extends StatelessWidget {
                     child: CircleAvatar(
                       radius: 18,
                       backgroundColor: Colors.white,
-                      child: Icon(Icons.zoom_in, color: Color(0xff0f172a)),
+                      child: Icon(Icons.zoom_in, color: AppColors.ink),
                     ),
                   ),
               ],

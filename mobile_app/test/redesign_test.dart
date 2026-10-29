@@ -6,6 +6,38 @@ import 'package:tho_xay_mobile/theme/app_theme.dart';
 import 'package:tho_xay_mobile/widgets/design_motion.dart';
 
 void main() {
+  testWidgets('job collections use two desktop columns and one mobile column', (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    for (final width in [390.0, 1100.0]) {
+      tester.view.physicalSize = Size(width, 900);
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: ResponsiveJobGrid(
+              children: [
+                SizedBox(key: ValueKey('first-job'), height: 100),
+                SizedBox(key: ValueKey('second-job'), height: 100),
+              ],
+            ),
+          ),
+        ),
+      );
+      final first = tester.getRect(find.byKey(const ValueKey('first-job')));
+      final second = tester.getRect(find.byKey(const ValueKey('second-job')));
+      if (width > 800) {
+        expect(second.top, first.top);
+        expect(second.left, greaterThan(first.right));
+      } else {
+        expect(second.top, greaterThanOrEqualTo(first.bottom));
+        expect(first.width, width);
+      }
+      expect(tester.takeException(), isNull);
+    }
+  });
   for (final width in [320.0, 1440.0]) {
     testWidgets('auth remains usable at $width with larger text', (
       tester,

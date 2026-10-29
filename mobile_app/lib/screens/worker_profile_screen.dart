@@ -1,3 +1,4 @@
+import '../widgets/design_motion.dart';
 import '../widgets/content_skeleton.dart';
 
 import 'package:flutter/material.dart';
@@ -56,6 +57,12 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
               physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.all(24),
               children: [
+                const SectionIntro(
+                  title: 'Gặp gỡ người thợ',
+                  subtitle:
+                      'Kinh nghiệm và uy tín từ những công trình thực tế.',
+                  eyebrow: 'CỘNG ĐỒNG',
+                ),
                 if (_error != null) ...[
                   Text(_error!),
                   TextButton(onPressed: _load, child: const Text('Thử lại')),

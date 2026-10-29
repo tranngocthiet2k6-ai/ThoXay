@@ -1,3 +1,5 @@
+import '../widgets/design_motion.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -28,8 +30,9 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text(
-              'Chạm vào vị trí công trình để đặt ghim. Kéo hoặc phóng to bản đồ để chọn chính xác.',
+            const SectionIntro(
+              title: 'Đặt ghim công trình',
+              subtitle: 'Chạm vào vị trí công trình để đặt ghim. Kéo hoặc phóng to bản đồ để chọn chính xác.',
             ),
             const SizedBox(height: 12),
             Expanded(

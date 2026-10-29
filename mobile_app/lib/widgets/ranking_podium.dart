@@ -1,3 +1,5 @@
+import '../theme/app_theme.dart';
+
 import 'package:flutter/material.dart';
 
 import '../models/reputation.dart';
@@ -25,7 +27,7 @@ class RankingPodium extends StatelessWidget {
                       button: true,
                       child: InkWell(
                         onTap: () => onTap(workers[index]),
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(20),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -34,8 +36,8 @@ class RankingPodium extends StatelessWidget {
                                   ? Icons.emoji_events
                                   : Icons.workspace_premium_outlined,
                               color: index == 0
-                                  ? const Color(0xffb45309)
-                                  : const Color(0xff64748b),
+                                  ? AppColors.warning
+                                  : AppColors.muted,
                             ),
                             const SizedBox(height: 8),
                             CircleAvatar(
@@ -87,8 +89,8 @@ class RankingPodium extends StatelessWidget {
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
                                 color: index == 0
-                                    ? const Color(0xfffef3c7)
-                                    : const Color(0xffe2e8f0),
+                                    ? AppColors.goldSoft
+                                    : AppColors.border,
                                 borderRadius: const BorderRadius.vertical(
                                   top: Radius.circular(16),
                                 ),

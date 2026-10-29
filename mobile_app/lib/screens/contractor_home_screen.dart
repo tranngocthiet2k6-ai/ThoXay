@@ -1,3 +1,4 @@
+import '../widgets/design_motion.dart';
 import '../widgets/app_snack_bar.dart';
 
 import 'package:flutter/material.dart';
@@ -224,39 +225,51 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
                           ),
                         ),
                       if (!_loading)
-                        for (final job in _visibleJobs)
-                          JobCard(
-                            job: job,
-                            action: Wrap(
-                              spacing: 12,
-                              runSpacing: 8,
-                              children: [
-                                if (job.status == 'COMPLETED')
-                                  OutlinedButton.icon(
-                                    onPressed: () => Navigator.of(context).push(
-                                      MaterialPageRoute<void>(
-                                        builder: (_) => JobPaymentsScreen(
-                                          api: widget.api,
-                                          job: job,
+                        ResponsiveJobGrid(
+                          children: [
+                            for (final job in _visibleJobs)
+                              JobCard(
+                                job: job,
+                                action: Wrap(
+                                  spacing: 12,
+                                  runSpacing: 8,
+                                  children: [
+                                    if (job.status == 'COMPLETED')
+                                      OutlinedButton.icon(
+                                        onPressed: () =>
+                                            Navigator.of(context).push(
+                                              MaterialPageRoute<void>(
+                                                builder: (_) =>
+                                                    JobPaymentsScreen(
+                                                      api: widget.api,
+                                                      job: job,
+                                                    ),
+                                              ),
+                                            ),
+                                        icon: const Icon(
+                                          Icons.payments_outlined,
+                                        ),
+                                        label: const Text(
+                                          'Thanh toán thu nhập',
                                         ),
                                       ),
+                                    FilledButton.tonal(
+                                      onPressed: () => _applicants(job),
+                                      child: const Text('Xem & duyệt thợ'),
                                     ),
-                                    icon: const Icon(Icons.payments_outlined),
-                                    label: const Text('Thanh toán thu nhập'),
-                                  ),
-                                FilledButton.tonal(
-                                  onPressed: () => _applicants(job),
-                                  child: const Text('Xem & duyệt thợ'),
+                                    if (job.status == 'IN_PROGRESS')
+                                      OutlinedButton.icon(
+                                        onPressed: () => _complete(job),
+                                        icon: const Icon(Icons.task_alt),
+                                        label: const Text(
+                                          'Hoàn thành công trình',
+                                        ),
+                                      ),
+                                  ],
                                 ),
-                                if (job.status == 'IN_PROGRESS')
-                                  OutlinedButton.icon(
-                                    onPressed: () => _complete(job),
-                                    icon: const Icon(Icons.task_alt),
-                                    label: const Text('Hoàn thành công trình'),
-                                  ),
-                              ],
-                            ),
-                          ),
+                              ),
+                          ],
+                        ),
                     ],
                   ),
                 ),

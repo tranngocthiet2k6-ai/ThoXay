@@ -1,3 +1,5 @@
+import '../theme/app_theme.dart';
+
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -16,8 +18,8 @@ class EarningsChart extends StatelessWidget {
     final max = math.max(1, values.reduce(math.max));
     final colors = [
       Theme.of(context).colorScheme.primary,
-      const Color(0xff0284c7),
-      const Color(0xffa16207),
+      AppColors.sky,
+      AppColors.goldInk,
     ];
     return Card(
       child: Padding(
@@ -32,7 +34,7 @@ class EarningsChart extends StatelessWidget {
             const SizedBox(height: 8),
             const Text(
               'Tiền công, tip và thưởng đã thanh toán',
-              style: TextStyle(color: Color(0xff64748b)),
+              style: TextStyle(color: AppColors.muted),
             ),
             const SizedBox(height: 16),
             Row(
@@ -56,7 +58,7 @@ class EarningsChart extends StatelessWidget {
                                 decoration: const BoxDecoration(
                                   border: Border(
                                     bottom: BorderSide(
-                                      color: Color(0xffcbd5e1),
+                                      color: AppColors.slateBorder,
                                     ),
                                   ),
                                 ),

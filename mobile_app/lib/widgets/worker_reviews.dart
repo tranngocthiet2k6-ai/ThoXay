@@ -1,3 +1,5 @@
+import '../theme/app_theme.dart';
+
 import 'package:flutter/material.dart';
 
 import '../models/reputation.dart';
@@ -78,7 +80,7 @@ class _WorkerReviewsState extends State<WorkerReviews> {
                       Icon(
                         i <= review.stars ? Icons.star : Icons.star_outline,
                         size: 18,
-                        color: const Color(0xffaa771c),
+                        color: AppColors.goldTier,
                       ),
                     const SizedBox(width: 8),
                     Text('${review.stars}/5'),

@@ -1,3 +1,4 @@
+import '../widgets/design_motion.dart';
 import '../widgets/app_snack_bar.dart';
 
 import 'package:flutter/material.dart';
@@ -417,13 +418,20 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                             ),
                           ),
                         if (!_showMap)
-                          for (final job in _visibleJobs)
-                            JobCard(
-                              job: job,
-                              action: _applyButton(job),
-                              detailsActionBuilder: (sheetContext) =>
-                                  _applyButton(job, sheetContext: sheetContext),
-                            ),
+                          ResponsiveJobGrid(
+                            children: [
+                              for (final job in _visibleJobs)
+                                JobCard(
+                                  job: job,
+                                  action: _applyButton(job),
+                                  detailsActionBuilder: (sheetContext) =>
+                                      _applyButton(
+                                        job,
+                                        sheetContext: sheetContext,
+                                      ),
+                                ),
+                            ],
+                          ),
                       ] else ...[
                         if (_applications.isEmpty && _error == null)
                           EmptyState(

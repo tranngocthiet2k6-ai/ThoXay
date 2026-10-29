@@ -1,3 +1,5 @@
+import '../widgets/design_motion.dart';
+import '../theme/app_theme.dart';
 import '../widgets/content_skeleton.dart';
 
 import 'package:flutter/material.dart';
@@ -82,100 +84,103 @@ class _EarningsScreenState extends State<EarningsScreen> {
         ),
       ],
     ),
-    body: RefreshIndicator(
-      onRefresh: _load,
-      child: ListView(
-        padding: const EdgeInsets.all(16),
-        physics: const AlwaysScrollableScrollPhysics(),
-        children: [
-          const Text(
-            'Thành quả từ đôi bàn tay',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: 16),
-          SegmentedButton<String>(
-            segments: const [
-              ButtonSegment(value: 'DAY', label: Text('Ngày')),
-              ButtonSegment(value: 'WEEK', label: Text('Tuần')),
-              ButtonSegment(value: 'MONTH', label: Text('Tháng')),
-            ],
-            selected: {_period},
-            onSelectionChanged: _busy
-                ? null
-                : (s) {
-                    setState(() => _period = s.first);
-                    _load();
-                  },
-          ),
-          TextButton.icon(
-            onPressed: _busy ? null : _pick,
-            icon: const Icon(Icons.calendar_month_outlined),
-            label: Text(
-              'Chọn ngày: ${MaterialLocalizations.of(context).formatShortDate(_date)}',
-            ),
-          ),
-          if (_busy && _data == null) const ContentSkeleton(compact: true),
-          if (_error != null) ...[
-            Text(_error!),
-            TextButton(onPressed: _load, child: const Text('Thử lại')),
-          ],
-          if (_data case final data? when !_busy && _error == null) ...[
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary,
-                borderRadius: BorderRadius.circular(26),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Tổng thu nhập đã nhận',
-                    style: TextStyle(color: Colors.white70),
-                  ),
-                  const SizedBox(height: 12),
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      money(data.total.toDouble()),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 32,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    '${data.jobs} công trình đã thanh toán',
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 14),
-            Text(
-              '${MaterialLocalizations.of(context).formatShortDate(data.from)} – ${MaterialLocalizations.of(context).formatShortDate(data.to)} · Giờ Việt Nam',
+    body: ContentFrame(
+      child: RefreshIndicator(
+        onRefresh: _load,
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: [
+            const SectionIntro(
+              title: 'Thành quả từ đôi bàn tay',
+              subtitle: 'Nhìn lại tiền công, tip và thưởng đã nhận.',
+              eyebrow: 'THU NHẬP',
             ),
             const SizedBox(height: 16),
-            EarningsChart(data: data),
-            _part('Tiền công', data.base, Icons.construction_outlined),
-            _part('Tiền tip', data.tip, Icons.volunteer_activism_outlined),
-            _part('Tiền thưởng', data.bonus, Icons.stars_outlined),
-            if (data.jobs == 0)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 20),
-                child: Text(
-                  'Chưa có thu nhập trong kỳ này. Thu nhập sẽ xuất hiện khi chủ thầu thanh toán công trình đã hoàn thành.',
+            SegmentedButton<String>(
+              segments: const [
+                ButtonSegment(value: 'DAY', label: Text('Ngày')),
+                ButtonSegment(value: 'WEEK', label: Text('Tuần')),
+                ButtonSegment(value: 'MONTH', label: Text('Tháng')),
+              ],
+              selected: {_period},
+              onSelectionChanged: _busy
+                  ? null
+                  : (s) {
+                      setState(() => _period = s.first);
+                      _load();
+                    },
+            ),
+            TextButton.icon(
+              onPressed: _busy ? null : _pick,
+              icon: const Icon(Icons.calendar_month_outlined),
+              label: Text(
+                'Chọn ngày: ${MaterialLocalizations.of(context).formatShortDate(_date)}',
+              ),
+            ),
+            if (_busy && _data == null) const ContentSkeleton(compact: true),
+            if (_error != null) ...[
+              Text(_error!),
+              TextButton(onPressed: _load, child: const Text('Thử lại')),
+            ],
+            if (_data case final data? when !_busy && _error == null) ...[
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: AppColors.ink,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Tổng thu nhập đã nhận',
+                      style: TextStyle(color: Colors.white70),
+                    ),
+                    const SizedBox(height: 12),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        money(data.total.toDouble()),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 32,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      '${data.jobs} công trình đã thanh toán',
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  ],
                 ),
               ),
+              const SizedBox(height: 14),
+              Text(
+                '${MaterialLocalizations.of(context).formatShortDate(data.from)} – ${MaterialLocalizations.of(context).formatShortDate(data.to)} · Giờ Việt Nam',
+              ),
+              const SizedBox(height: 16),
+              EarningsChart(data: data),
+              _part('Tiền công', data.base, Icons.construction_outlined),
+              _part('Tiền tip', data.tip, Icons.volunteer_activism_outlined),
+              _part('Tiền thưởng', data.bonus, Icons.stars_outlined),
+              if (data.jobs == 0)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 20),
+                  child: Text(
+                    'Chưa có thu nhập trong kỳ này. Thu nhập sẽ xuất hiện khi chủ thầu thanh toán công trình đã hoàn thành.',
+                  ),
+                ),
+            ],
+            const SizedBox(height: 16),
+            const Text(
+              'Chỉ thống kê tiền công, tip và thưởng đã được thanh toán vào ví. Tiền nạp và chuyển ký quỹ không tính là thu nhập.',
+              style: TextStyle(color: Colors.blueGrey, height: 1.5),
+            ),
           ],
-          const SizedBox(height: 16),
-          const Text(
-            'Chỉ thống kê tiền công, tip và thưởng đã được thanh toán vào ví. Tiền nạp và chuyển ký quỹ không tính là thu nhập.',
-            style: TextStyle(color: Colors.blueGrey, height: 1.5),
-          ),
-        ],
+        ),
       ),
     ),
   );

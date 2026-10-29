@@ -11,6 +11,29 @@ abstract final class AppColors {
   static const warning = Color(0xffb45309);
   static const error = Color(0xffb42318);
   static const gold = Color(0xfffbbf24);
+  static const successStrong = Color(0xff047857);
+  static const successSoft = Color(0xffecfdf5);
+  static const warningSoft = Color(0xfffff1d8);
+  static const warningPale = Color(0xfffffbeb);
+  static const errorSoft = Color(0xfffef2f2);
+  static const errorStrong = Color(0xffb91c1c);
+  static const errorDeep = Color(0xff991b1b);
+  static const sky = Color(0xff0284c7);
+  static const skySoft = Color(0xff93c5fd);
+  static const goldInk = Color(0xffa16207);
+  static const goldSoft = Color(0xfffef3c7);
+  static const sand = Color(0xffffdf9e);
+  static const blue = Color(0xff1d4ed8);
+  static const purple = Color(0xff6d28d9);
+  static const slateLight = Color(0xfff1f5f9);
+  static const slateBorder = Color(0xffcbd5e1);
+  static const skeleton = Color(0xffdfe7e2);
+  static const transparentWhite = Color(0x00ffffff);
+  static const whiteMuted = Color(0xb3ffffff);
+  static const chartBlue = Color(0xff31699e);
+  static const chartGold = Color(0xff8d6216);
+  static const silverInk = Color(0xff5f717b);
+  static const goldTier = Color(0xffaa771c);
 }
 
 abstract final class AppTheme {
@@ -193,6 +216,16 @@ abstract final class AppTheme {
       bottomSheetTheme: const BottomSheetThemeData(
         backgroundColor: Colors.white,
         showDragHandle: true,
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        titleTextStyle: const TextStyle(
+          fontFamily: 'PlusJakartaSans',
+          fontSize: 22,
+          fontWeight: FontWeight.w800,
+          color: AppColors.ink,
+        ),
       ),
     );
   }

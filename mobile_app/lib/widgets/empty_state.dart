@@ -83,11 +83,7 @@ class _WorksiteIllustration extends CustomPainter {
     canvas.scale(size.width / 180, size.height / 130);
     final fill = Paint()..color = accent.withValues(alpha: .09);
     canvas.drawCircle(const Offset(88, 67), 59, fill);
-    canvas.drawCircle(
-      const Offset(151, 24),
-      10,
-      fill..color = const Color(0xffffdf9e),
-    );
+    canvas.drawCircle(const Offset(151, 24), 10, fill..color = AppColors.sand);
     final line = Paint()
       ..color = accent.withValues(alpha: .8)
       ..style = PaintingStyle.stroke
