@@ -52,6 +52,7 @@ class Job {
     this.endsOn,
     this.termsVersion = 1,
     this.contractorVerified = false,
+    this.attendanceRequired = false,
   });
   final int id, contractorId, requiredWorkers;
   final String? contractorPhone;
@@ -60,7 +61,7 @@ class Job {
   final double? distanceKm;
   final DateTime? startsOn, endsOn;
   final int termsVersion;
-  final bool contractorVerified;
+  final bool contractorVerified, attendanceRequired;
   factory Job.fromJson(Map<String, dynamic> json) => Job(
     id: (json['id'] as num).toInt(),
     contractorId: (json['contractorId'] as num).toInt(),
@@ -84,6 +85,7 @@ class Job {
         : DateTime.parse(json['endsOn'] as String),
     termsVersion: (json['termsVersion'] as num?)?.toInt() ?? 1,
     contractorVerified: json['contractorVerified'] as bool? ?? false,
+    attendanceRequired: json['attendanceRequired'] as bool? ?? false,
   );
 }
 

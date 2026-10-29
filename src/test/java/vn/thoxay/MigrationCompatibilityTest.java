@@ -78,6 +78,9 @@ class MigrationCompatibilityTest {
             assertThat(r.next()).isTrue(); assertThat(r.getLong(1)).isEqualTo(450001);
             assertThat(r.getTimestamp(2)).isNull(); assertThat(r.getString(3)).isNull();
         }
+        try(var c=connect();var s=c.createStatement();var r=s.executeQuery("SELECT attendance_required FROM "+schema+".jobs")) {
+            assertThat(r.next()).isTrue();assertThat(r.getBoolean(1)).isFalse();
+        }
         assertThat(migrations().migrate().migrationsExecuted).isZero();
     }
 }

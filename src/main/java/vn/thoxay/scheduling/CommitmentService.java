@@ -86,6 +86,7 @@ public class CommitmentService {
             +"\nLương gốc/ngày: "+original(j)+" VND\nLương thợ đề xuất: "+(proposed==null?"Không có":proposed+" VND")
             +"\nLương chốt/ngày: "+(agreed==null?"Chủ thầu sẽ chọn giá gốc hoặc đề xuất":agreed+" VND")
             +"\nNgày công thực tế và ảnh công việc được chủ thầu nghiệm thu trước khi thanh toán."
+            +"\nChấm công bắt buộc: "+(j.isAttendanceRequired()?"Có — GPS trong 200m hoặc mã ca làm, check-out và ảnh được duyệt":"Công trình cũ; nếu có dữ liệu chấm công thì phải đối soát đầy đủ")
             +"\nTiền công, tip và thưởng được ghi nhận khi chủ thầu xác nhận chi trả vào ví."
             +"\nHủy việc đang làm bị trừ 15 điểm uy tín và tính lại bậc thợ."
             +"\nKhông tự động rút tiền; ký quỹ dưới 200.000 VND là cảnh báo."

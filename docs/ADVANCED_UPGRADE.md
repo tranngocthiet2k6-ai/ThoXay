@@ -17,7 +17,7 @@ lightbox/bộ lọc/KPI Admin. Các phần này được mở rộng, không t�
 - [x] Lịch công trình, thương lượng lương, cam kết có phiên bản và khóa giao dịch chống trùng lịch.
 - [x] Bản đồ ghim lương, 2km, sửa vị trí, chỉ đường, link/QR công trình; lưu việc/thợ quen.
 - [x] Tổ đội có mời/xác nhận thành viên và xác nhận công trình; duyệt nguyên nhóm an toàn.
-- [ ] Chấm công GPS/QR, ảnh cuối ngày, nghiệm thu và kiểm tra ngày công khi thanh toán.
+- [x] Chấm công GPS/QR, ảnh cuối ngày, nghiệm thu và kiểm tra ngày công khi thanh toán.
 - [ ] VietQR nội bộ, ngân hàng do Admin cấu hình, mã đối soát và snapshot tài khoản nhận.
 - [ ] SOS/sự cố/tranh chấp, cảnh báo Admin ưu tiên, lịch sử xử lý.
 - [x] Ảnh portfolio từ thiết bị, kiểm tra ảnh và lưu bền vững.
@@ -154,3 +154,43 @@ Tài liệu tích hợp: [qr_flutter](https://pub.dev/documentation/qr_flutter/l
 - V15 chỉ thêm portfolio_photos, FK owner cascade và giới hạn kích thước BYTEA.
 - Kiểm thử gồm ảnh giả/quá lớn/quá nhỏ, loại bỏ metadata thừa, resize, quota,
   JWT/khóa tài khoản, quyền xóa, preview/zoom và đọc ảnh bằng phiên Admin.
+
+## Checkpoint chấm công và ảnh nghiệm thu
+
+- Thợ có nút Chấm công & ảnh cuối ngày tại đơn ACCEPTED; chủ thầu có Chấm công &
+  nghiệm thu tại từng công trình. GPS đo từ thiết bị (không dùng tọa độ tìm việc
+  nhập tay), trong 200m và sai số không quá 100m; có QR/nhập mã khi GPS không tốt.
+- QR tạo cục bộ trong Flutter từ mã ngẫu nhiên 256 bit do chủ thầu yêu cầu. Backend
+  chỉ lưu SHA-256, hết hạn sau 5 phút; tạo mã mới làm mã cũ mất hiệu lực. Mã thuộc
+  đúng job, không phải JWT. DTO debug che token/GPS. QR vẫn cần mạng để xác nhận.
+- Ngày công theo Clock Asia/Ho_Chi_Minh. Mỗi đơn/ngày có một bản ghi; check-in/out
+  lặp không tạo trùng, checkout cần check-in và thực hiện trong cùng ngày Việt Nam.
+  Không cho chọn ngày thiết bị để tự tạo lịch sử chấm công quá khứ.
+- Sau checkout, thợ chụp/chọn ảnh, xem trước/zoom, ghi nội dung cuối ngày và gửi.
+  Chủ thầu nghiệm thu hoặc yêu cầu bổ sung (phải có phản hồi). Ảnh/ngày đã duyệt
+  không thay đổi; phiên bản optimistic lock chặn duyệt nhầm ảnh vừa bị thay.
+  Có thể bổ sung/nghiệm thu ảnh sau COMPLETED khi chưa thanh toán, để không bị
+  kẹt hồ sơ nếu chủ thầu đóng công trình trước khi duyệt hết ảnh.
+- Công trình tạo mới qua API bật attendanceRequired; thanh toán phải khớp toàn bộ
+  ngày checkout/ảnh APPROVED. Công trình cũ giữ false; nếu đã ghi chấm công thì
+  cũng phải đối soát đủ. Không tạo ngày công hoặc xác nhận giả cho dữ liệu cũ.
+- Chủ thầu vẫn chủ động xác nhận trả tiền; không có chuyển tiền tự động từ ảnh.
+  Thanh toán gửi lại cùng nội dung không chi lần hai. Giới hạn ngày thanh toán
+  tăng từ 365 lên 366 để khớp lịch một năm bao gồm cả ngày bắt đầu/kết thúc.
+- Lịch sử thợ phân trang 60 ngày; chủ thầu/Admin xem theo ngày, 100 người/trang.
+  Ảnh lưu PostgreSQL, cần JWT hoặc phiên Admin đúng quyền; outsider nhận 404.
+  Admin có trang đọc/đối chiếu và popup ảnh, không nghiệm thu thay chủ thầu.
+- API: `GET /api/applications/{id}/attendance?beforeDay=...`, `GET
+  /api/jobs/{id}/attendance?day=...&page=0`, `POST
+  /api/jobs/{id}/attendance/shift-code`, `POST
+  /api/applications/{id}/attendance/check-in|check-out`, `POST
+  /api/applications/{id}/work-logs` (photo/day/caption), `PUT
+  /api/work-logs/{id}/review` (approved/feedback/version), `GET
+  /api/work-logs/{id}/photo`.
+- V16 thêm attendance_records, attendance_shift_codes, work_logs và cờ job
+  nullable-compatibility bằng default FALSE; mở rộng CHECK ngày thanh toán.
+- Kiểm chứng: 98 test Backend, 76 test Flutter pass; analyze, JAR/Web release và
+  production-profile QA/Flyway V16/JPA validate thành công. UI có ảnh QA mobile/
+  desktop với fixture. Camera quét QR cần kiểm tra thêm trên thiết bị thật.
+
+Tham khảo tích hợp camera QR: [mobile_scanner](https://pub.dev/packages/mobile_scanner).

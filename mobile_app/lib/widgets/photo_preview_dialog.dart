@@ -2,8 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 
 class PhotoPreviewDialog extends StatefulWidget {
-  const PhotoPreviewDialog({super.key, required this.bytes});
+  const PhotoPreviewDialog({
+    super.key,
+    required this.bytes,
+    this.title = 'Xem trước ảnh dự án',
+    this.maxCaption = 160,
+  });
   final Uint8List bytes;
+  final String title;
+  final int maxCaption;
   @override
   State<PhotoPreviewDialog> createState() => _PhotoPreviewDialogState();
 }
@@ -18,7 +25,7 @@ class _PhotoPreviewDialogState extends State<PhotoPreviewDialog> {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
-    title: const Text('Xem trước ảnh dự án'),
+    title: Text(widget.title),
     scrollable: true,
     content: SizedBox(
       width: 480,
@@ -35,7 +42,7 @@ class _PhotoPreviewDialogState extends State<PhotoPreviewDialog> {
           const SizedBox(height: 16),
           TextField(
             controller: _caption,
-            maxLength: 160,
+            maxLength: widget.maxCaption,
             maxLines: 2,
             decoration: const InputDecoration(
               labelText: 'Chú thích ảnh (không bắt buộc)',

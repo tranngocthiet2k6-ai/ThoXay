@@ -74,3 +74,10 @@ trong đơn tổ đội vẫn có một job_application riêng. SQL thủ công 
 Thêm portfolio_photos (UUID, owner, caption, BYTEA, created_at), chỉ mục owner/ngày,
 CHECK dung lượng 2 MB. Không thay đổi ảnh URL legacy hoặc ảnh CCCD. Bản SQL:
 `migrations/015_portfolio_photos.sql`.
+
+## V16 — Chấm công, ảnh nghiệm thu và thanh toán
+
+Thêm attendance_records / attendance_shift_codes / work_logs, version ảnh,
+`jobs.attendance_required NOT NULL DEFAULT FALSE`; không sinh ngày công cho đơn
+cũ. JobService bật cờ cho công trình tạo mới. CHECK work_days mở rộng 366 ngày,
+không sửa khoản đã thanh toán. SQL: `migrations/016_attendance_work_logs.sql`.

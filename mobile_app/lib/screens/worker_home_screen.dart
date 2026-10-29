@@ -1,3 +1,4 @@
+import 'attendance_screen.dart';
 import '../widgets/design_motion.dart';
 import '../widgets/work_commitment.dart';
 import '../models/scheduling.dart';
@@ -564,6 +565,22 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                                     ),
                                     label: const Text(
                                       'Không tham gia công trình tổ đội',
+                                    ),
+                                  ),
+                                if (application.status == 'ACCEPTED')
+                                  OutlinedButton.icon(
+                                    onPressed: () => Navigator.of(context).push(
+                                      MaterialPageRoute<void>(
+                                        builder: (_) => AttendanceScreen(
+                                          api: widget.api,
+                                          job: application.job,
+                                          applicationId: application.id,
+                                        ),
+                                      ),
+                                    ),
+                                    icon: const Icon(Icons.fact_check_outlined),
+                                    label: const Text(
+                                      'Chấm công & ảnh cuối ngày',
                                     ),
                                   ),
                                 if (application.jobRating != null)

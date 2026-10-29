@@ -21,6 +21,7 @@ public class JobPaymentService {
     private final CurrentUser current;
     private final WalletService wallets;
     private final NotificationService notifications;
+    private final vn.thoxay.attendance.AttendanceService attendance;
     @Transactional public Payment pay(Pay input) {
         User owner=current.require(Role.ROLE_CONTRACTOR);
         Long jobId=applications.findJobIdById(input.applicationId()).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND,"Đơn ứng tuyển không tồn tại"));
@@ -35,6 +36,7 @@ public class JobPaymentService {
             if(p.getWorkDays()!=input.workDays()||p.getTip()!=input.tip()||p.getBonus()!=input.bonus()) throw new ApiException(HttpStatus.CONFLICT,"Khoản thanh toán đã chốt, không thể sửa");
             return Payment.of(p);
         }
+        attendance.requirePayable(a,input.workDays());
         var balances=wallets.lockAccounts(List.of(owner.getId(),a.getWorker().getId()));
         var p=new JobPayment();p.setApplication(a);p.setJob(job);p.setContractor(owner);p.setWorker(a.getWorker());p.setJobTitle(job.getTitle());
         p.setWorkDays(input.workDays());p.setDailyRate(a.getAgreedDailyRate()!=null?a.getAgreedDailyRate():BigDecimal.valueOf(job.getSalaryPerDay()).setScale(0,RoundingMode.HALF_UP).longValueExact());

@@ -36,4 +36,5 @@ public class Job {
     @Column(name = "ends_on") private java.time.LocalDate endsOn;
     @Column(name = "terms_version", nullable = false) @org.hibernate.annotations.ColumnDefault("1")
     private int termsVersion = 1;
+    @Column(nullable=false) @org.hibernate.annotations.ColumnDefault("false") private boolean attendanceRequired;
 }

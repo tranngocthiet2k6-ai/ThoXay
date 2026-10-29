@@ -257,7 +257,7 @@ class _PayDialogState extends State<_PayDialog> {
               Text(
                 'Đơn giá: ${money((widget.application.agreedDailyRate ?? widget.job.salaryPerDay.round()).toDouble())}/ngày. Khả dụng: ${money(widget.available.toDouble())}.',
               ),
-              _number(_days, 'Số ngày công đã xác nhận', 1, 365),
+              _number(_days, 'Số ngày công đã xác nhận', 1, 366),
               _number(_tip, 'Tiền tip (VND)', 0, 100000000),
               _number(_bonus, 'Tiền thưởng (VND)', 0, 100000000),
               const SizedBox(height: 20),

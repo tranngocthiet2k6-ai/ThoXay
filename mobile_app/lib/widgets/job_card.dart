@@ -256,6 +256,13 @@ Future<T?> showJobDetails<T>(
                 ),
                 const SizedBox(height: 16),
                 Text('${job.jobType} · Cần ${job.requiredWorkers} người'),
+                if (job.attendanceRequired)
+                  const Padding(
+                    padding: EdgeInsets.only(top: 12),
+                    child: Text(
+                      'Chấm công GPS/QR và ảnh nghiệm thu là căn cứ thanh toán ngày công.',
+                    ),
+                  ),
                 const SizedBox(height: 16),
                 _JobInfo(icon: Icons.location_on_outlined, label: job.address),
                 const SizedBox(height: 24),

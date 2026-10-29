@@ -14,7 +14,7 @@ public final class WalletDtos {
         @NotNull @Min(1000) @Max(100000000) Long amount,@NotBlank @Pattern(regexp="[A-Za-z0-9_-]{8,80}") String clientRequestId) { }
     public record Review(@NotBlank @Pattern(regexp="APPROVE|REJECT") String decision,
         @Size(max=100) String externalReference,@Size(max=300) String note,Boolean confirmed) { }
-    public record Pay(@NotNull @Positive Long applicationId,@NotNull @Min(1) @Max(365) Integer workDays,
+    public record Pay(@NotNull @Positive Long applicationId,@NotNull @Min(1) @Max(366) Integer workDays,
         @NotNull @Min(0) @Max(100000000) Long tip,@NotNull @Min(0) @Max(100000000) Long bonus) { }
     public record Balance(long mainBalance,long escrowBalance,long heldBalance,long minimumEscrow,boolean lowEscrow,String currency) { }
     public record Request(Long id,Long userId,String fullName,String kind,String status,long amount,

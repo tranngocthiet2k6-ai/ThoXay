@@ -1,3 +1,4 @@
+import 'attendance_screen.dart';
 import '../widgets/design_motion.dart';
 import '../widgets/work_commitment.dart';
 import '../models/scheduling.dart';
@@ -246,6 +247,23 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
                                   spacing: 12,
                                   runSpacing: 8,
                                   children: [
+                                    OutlinedButton.icon(
+                                      onPressed: () => Navigator.of(context)
+                                          .push(
+                                            MaterialPageRoute<void>(
+                                              builder: (_) => AttendanceScreen(
+                                                api: widget.api,
+                                                job: job,
+                                              ),
+                                            ),
+                                          ),
+                                      icon: const Icon(
+                                        Icons.fact_check_outlined,
+                                      ),
+                                      label: const Text(
+                                        'Chấm công & nghiệm thu',
+                                      ),
+                                    ),
                                     if (job.status == 'OPEN')
                                       OutlinedButton.icon(
                                         onPressed: () => _edit(job),

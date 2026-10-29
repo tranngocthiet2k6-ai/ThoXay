@@ -15,6 +15,8 @@ import '../models/wallet.dart';
 import '../models/scheduling.dart';
 import '../models/crew.dart';
 import '../models/portfolio_photo.dart';
+import '../models/attendance.dart';
+import 'location_service.dart';
 import 'chat_connection.dart';
 import 'kyc_camera.dart';
 
@@ -27,6 +29,71 @@ class ApiException implements Exception {
 }
 
 class ApiService extends ChangeNotifier {
+  Future<AttendancePage> attendance(
+    int id, {
+    DateTime? beforeDay,
+  }) async => AttendancePage.fromJson(
+    await _request(
+      'GET',
+      '/api/applications/$id/attendance${beforeDay == null ? '' : '?beforeDay=${isoDay(beforeDay)}'}',
+    ) as Map<String, dynamic>,
+  );
+  Future<AttendancePage> jobAttendance(
+    int id,
+    DateTime day, {
+    int page = 0,
+  }) async => AttendancePage.fromJson(
+    await _request(
+      'GET',
+      '/api/jobs/$id/attendance?day=${isoDay(day)}&page=$page',
+    ) as Map<String, dynamic>,
+  );
+  Future<ShiftCode> shiftCode(int jobId) async => ShiftCode.fromJson(
+    await _request('POST', '/api/jobs/$jobId/attendance/shift-code')
+        as Map<String, dynamic>,
+  );
+  Future<AttendancePage> markAttendance(
+    int id,
+    bool checkout, {
+    GeoPoint? position,
+    String? qrToken,
+  }) async => AttendancePage.fromJson(
+    await _request(
+      'POST',
+      '/api/applications/$id/attendance/${checkout ? 'check-out' : 'check-in'}',
+      body: {
+        if (position != null) 'latitude': position.latitude,
+        if (position != null) 'longitude': position.longitude,
+        if (position != null) 'accuracyMeters': position.accuracyMeters,
+        'qrToken': ?qrToken,
+      },
+    ) as Map<String, dynamic>,
+  );
+  Future<AttendancePage> uploadWorkLog(
+    int id,
+    DateTime day,
+    Uint8List bytes,
+    String caption,
+  ) async => AttendancePage.fromJson(
+    await uploadPhoto(
+      '/api/applications/$id/work-logs',
+      bytes,
+      fields: {'day': isoDay(day), 'caption': caption},
+    ),
+  );
+  Future<void> reviewWorkLog(
+    int id,
+    int version,
+    bool approved,
+    String feedback,
+  ) async {
+    await _request(
+      'PUT',
+      '/api/work-logs/$id/review',
+      body: {'approved': approved, 'feedback': feedback, 'version': version},
+    );
+  }
+
   Future<List<PortfolioPhoto>> portfolio(int userId) async =>
       (await _request('GET', '/api/users/$userId/portfolio') as List)
           .map((e) => PortfolioPhoto.fromJson(e as Map<String, dynamic>))

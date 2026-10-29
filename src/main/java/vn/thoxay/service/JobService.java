@@ -22,7 +22,7 @@ public class JobService {
     public JobResponse create(JobRequest request) {
         User contractor = current.require(Role.ROLE_CONTRACTOR);
         validateDates(request);
-        Job job = new Job(); job.setContractor(contractor); job.setTitle(request.title().trim());
+        Job job = new Job(); job.setAttendanceRequired(true); job.setContractor(contractor); job.setTitle(request.title().trim());
         job.setDescription(request.description()); job.setJobType(request.jobType());
         job.setSalaryPerDay(request.salaryPerDay()); job.setAddress(request.address().trim());
         job.setLatitude(request.latitude()); job.setLongitude(request.longitude());

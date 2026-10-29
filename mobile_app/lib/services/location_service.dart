@@ -4,8 +4,9 @@ import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 
 class GeoPoint {
-  const GeoPoint(this.latitude, this.longitude);
+  const GeoPoint(this.latitude, this.longitude, {this.accuracyMeters});
   final double latitude, longitude;
+  final double? accuracyMeters;
 }
 
 class LocationFailure implements Exception {
@@ -35,7 +36,11 @@ class LocationService {
           timeLimit: Duration(seconds: 20),
         ),
       );
-      return GeoPoint(position.latitude, position.longitude);
+      return GeoPoint(
+        position.latitude,
+        position.longitude,
+        accuracyMeters: position.accuracy,
+      );
     } on TimeoutException {
       throw const LocationFailure(
         'Chưa lấy được GPS. Hãy thử lại hoặc chọn vị trí tìm việc.',
