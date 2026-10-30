@@ -38,8 +38,11 @@ if($extension -eq '.docx') {
 } elseif($extension -eq '.pptx') {
     $powerpoint=$null; $presentation=$null
     try {
+        Write-Output 'Creating dedicated PowerPoint automation instance.'
         $powerpoint=New-Object -ComObject PowerPoint.Application
+        Write-Output 'Opening generated PPTX.'
         $presentation=$powerpoint.Presentations.Open($inputPath,$true,$false,$false)
+        Write-Output 'PPTX opened successfully.'
         $presentation.Export($outPath,'PNG',1600,900)
         Write-Output "PowerPoint rendered $($presentation.Slides.Count) slides to $outPath"
     } finally {

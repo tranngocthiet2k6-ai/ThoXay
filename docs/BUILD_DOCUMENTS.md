@@ -42,3 +42,24 @@ Không tuyên bố PDF đã được kiểm tra nếu chỉ chạy XML validator
 gồm mở PNG của các trang để rà ngắt trang, viền bảng, cột dài, sơ đồ và chú thích,
 sau đó sửa nguồn và render lại nếu cần. Không chỉnh migration hoặc logic nghiệp vụ
 chỉ để khớp số liệu trình bày.
+
+## Tái tạo 15 slide và Speaker Notes
+
+```powershell
+node scripts/render-report-diagrams.mjs docs/diagrams/slide-diagrams.md docs/diagrams/slide-manifest.json
+& '.tools/postgres/pgsql/pgAdmin 4/python/python.exe' scripts/build-defense-slides.py
+.\scripts\finalize-defense-slides.ps1
+& '.tools/postgres/pgsql/pgAdmin 4/python/python.exe' scripts/validate-defense-slides.py
+```
+
+Trình tạo ghi bản nháp OOXML vào `.local/final-delivery/slides-draft.pptx`;
+PowerPoint trên Windows mở bản nháp, thêm lời dẫn vào NotesPage gốc của Office,
+lưu `SLIDE_BAO_VE_DO_AN.pptx` và xuất đủ 15 ảnh ở `.local/final-delivery/slides-render`.
+Chỉ đóng presentation và instance automation vừa tạo. Không ghi đè các deck đang
+mở của người dùng. Cần kiểm tra ảnh render sau mỗi lần sửa bố cục; validator chỉ
+kiểm tra cấu trúc, nội dung notes và biên hình học, không thay thế kiểm tra thị giác.
+
+Slide dùng chữ Arial có thể sửa, màu Navy/Cam/Xanh lục bảo, sơ đồ Mermaid PNG và
+ảnh giao diện DEMO có nguồn tại `presentation-assets/README.md`. Toàn bộ 15 slide
+đã được mở và render bằng Microsoft PowerPoint. Script hỏi đáp gồm 8 bước demo
+và đúng 20 câu hỏi, đối chiếu với nghiệp vụ và các giới hạn nêu trong báo cáo.

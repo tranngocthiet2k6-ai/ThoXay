@@ -1,5 +1,5 @@
 import fs from 'node:fs';import path from 'node:path';import http from 'node:http';import {createRequire} from 'node:module';import {createHash} from 'node:crypto';
-const root=process.cwd(),modules=process.env.THoxay_MERMAID_MODULES??path.join(root,'.tools/report-validation/node_modules');
+const root=process.cwd(),modules=process.env.THOXAY_MERMAID_MODULES??path.join(root,'.tools/report-validation/node_modules');
 let require=createRequire(import.meta.url),chromium;
 try{({chromium}=require('playwright'));}catch{
  const runtimeRoot='C:/Users/thiet/AppData/Local/OpenAI/Codex/runtimes/cua_node';
@@ -7,7 +7,7 @@ try{({chromium}=require('playwright'));}catch{
  if(!runtime)throw new Error('Playwright is required for local Mermaid rendering');
  ({chromium}=createRequire(runtime)('playwright'));
 }
-const text=fs.readFileSync('docs/BAO_CAO_DO_AN.md','utf8').replace(/\r\n/g,'\n');
+const text=fs.readFileSync(process.argv[2]??'docs/BAO_CAO_DO_AN.md','utf8').replace(/\r\n/g,'\n');
 const blocks=[...text.matchAll(/<!-- diagram:([\w-]+) -->\s*```mermaid\s*\n([\s\S]*?)```/g)];
 if(blocks.length!==[...text.matchAll(/```mermaid/g)].length)throw new Error('Every Mermaid block needs a unique diagram marker');
 const names=new Set();for(const b of blocks){if(names.has(b[1]))throw new Error('Duplicate diagram name');names.add(b[1]);}
@@ -32,5 +32,5 @@ try{
   manifest.push({name:b[1],file,width:dims.width*2,height:dims.height*2,sourceSha256:createHash('sha256').update(b[2]).digest('hex'),pngSha256:createHash('sha256').update(fs.readFileSync(file)).digest('hex')});
   console.log('Rendered '+b[1]+' '+dims.width+'x'+dims.height+' @2x');
  }
- fs.writeFileSync('docs/diagrams/manifest.json',JSON.stringify(manifest,null,2)+'\n');
+ fs.writeFileSync(process.argv[3]??'docs/diagrams/manifest.json',JSON.stringify(manifest,null,2)+'\n');
 }finally{await browser?.close();await new Promise(r=>server.close(r));}

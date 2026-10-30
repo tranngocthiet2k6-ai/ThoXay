@@ -95,7 +95,7 @@ def seed(conn, output):
     def application(j,w,status='ACCEPTED',rate=650000,when=None,stars=None):
         when=when or now
         snapshot=f'[DEMO] Cam kết mô phỏng. Lương {rate} VND/ngày. Hủy việc trừ 15 điểm uy tín. Chỉ sử dụng trong buổi bảo vệ.'
-        return insert('job_applications',job_id=j,worker_id=w,status=status,agreed_daily_rate=rate if status=='ACCEPTED' else None,consent_version=1,accepted_terms_at=when,contractor_confirmed_at=when if status=='ACCEPTED' else None,contract_snapshot=snapshot if status=='ACCEPTED' else None,contract_hash=hashlib.sha256(snapshot.encode()).hexdigest() if status=='ACCEPTED' else None,worker_rating=stars,reviewed_at=when if stars else None)
+        return insert('job_applications',job_id=j,worker_id=w,status=status,agreed_daily_rate=rate if status=='ACCEPTED' else None,consent_version=1,accepted_terms_at=when,contractor_confirmed_at=when if status=='ACCEPTED' else None,contract_snapshot=snapshot if status=='ACCEPTED' else None,contract_hash=hashlib.sha256(snapshot.encode()).hexdigest() if status=='ACCEPTED' else None,worker_rating=stars,reviewed_at=when if stars else None,applied_at=(when-timedelta(hours=1)).astimezone(timezone(timedelta(hours=7))).replace(tzinfo=None))
     for wi,count in enumerate([20,10,6,3,0]):
         w=workers[wi];ratings=[]
         for n in range(count):
