@@ -6,7 +6,7 @@ import 'package:tho_xay_mobile/services/api_service.dart';
 import 'package:tho_xay_mobile/widgets/deposit_dialog.dart';
 
 class DepositApi extends ApiService {
-  bool failFirst = false, approved = false;
+  bool failFirst = false, approved = false, demo = false;
   int calls = 0;
   final ids = <String>[];
   Deposit data() => Deposit.fromJson({
@@ -15,6 +15,7 @@ class DepositApi extends ApiService {
     'status': approved ? 'APPROVED' : 'PENDING',
     'reference': 'TXQA1',
     'bankName': 'Ngân hàng QA',
+    'bankBin': demo ? '000000' : '970000',
     'accountNo': '000001234567',
     'accountName': 'QA RECEIVER',
     'payload': 'qa-fixture-only',
@@ -34,6 +35,25 @@ class DepositApi extends ApiService {
 }
 
 void main() {
+  testWidgets('demo QR clearly warns against sending real money', (
+    tester,
+  ) async {
+    final api = DepositApi()..demo = true;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(body: DepositDialog(api: api, requestId: 1)),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('CHẾ ĐỘ DEMO · KHÔNG CHUYỂN TIỀN'), findsOneWidget);
+    expect(
+      find.textContaining('Kiểm tra người nhận trong ứng dụng ngân hàng'),
+      findsNothing,
+    );
+    expect(find.byType(QrImageView), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+    api.dispose();
+  });
   testWidgets(
     'amount validation precedes QR creation and shows receiving snapshot',
     (tester) async {

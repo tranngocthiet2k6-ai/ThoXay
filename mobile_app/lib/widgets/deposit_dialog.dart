@@ -143,6 +143,18 @@ class _DepositDialogState extends State<DepositDialog> {
                 ),
               ),
             if (_deposit case final d?) ...[
+              if (d.isDemo)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: Text(
+                    'CHẾ ĐỘ DEMO · KHÔNG CHUYỂN TIỀN',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                      fontWeight: FontWeight.w800,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
               Text(
                 money(d.amount.toDouble()),
                 style: Theme.of(context).textTheme.headlineMedium,
@@ -168,7 +180,9 @@ class _DepositDialogState extends State<DepositDialog> {
               _copy('Tên người nhận', d.accountName),
               _copy('Nội dung chuyển khoản', d.reference),
               Text(
-                d.status == 'PENDING'
+                d.isDemo
+                    ? 'QR minh họa dùng ngân hàng mô phỏng. Không mở ứng dụng ngân hàng để chuyển tiền theo mã này. Mọi số dư và đối soát trong demo đều là dữ liệu thử nghiệm.'
+                    : d.status == 'PENDING'
                     ? 'Kiểm tra người nhận trong ứng dụng ngân hàng, chuyển đúng số tiền và giữ nguyên nội dung. Sau chuyển tiền, theo dõi trạng thái chờ đối soát trong lịch sử yêu cầu.'
                     : 'Yêu cầu này đã được xử lý. Xem kết quả đối soát trong lịch sử ví.',
               ),
