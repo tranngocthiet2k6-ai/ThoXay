@@ -495,9 +495,8 @@ Xem [phạm vi, API và bằng chứng kiểm thử](docs/ADVANCED_UPGRADE.md),
 trước khi gửi yêu cầu nghiệp vụ. Chờ tối đa 4 phút; không tự gửi lại thao tác ghi.
 `GET /api/auth/health` hỗ trợ kiểm tra từ Web với CORS đã cấu hình, không cần JWT.
 VietQR chỉ bật sau khi Admin cấu hình/xác nhận tài khoản nhận tiền thật ở trang Ví.
-# Môi trường bảo vệ đồ án
+## Môi trường bảo vệ đồ án
 
 Demo cục bộ tự build/khởi động bằng `./scripts/start-demo.ps1 -OpenBrowser`.
 Tài khoản, số dư và KYC đều có nhãn DEMO, tách khỏi dữ liệu production.
 Hướng dẫn và đối soát mẫu ở [docs/DEMO.md](docs/DEMO.md).
-
