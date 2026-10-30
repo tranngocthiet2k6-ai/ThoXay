@@ -1,0 +1,98 @@
+[
+  {
+    "name": "use-case",
+    "file": "docs/diagrams/use-case.png",
+    "width": 1000,
+    "height": 1872,
+    "sourceSha256": "5a0b5fcb53662adead469fde4f724862e344ece7ac550a6c2bbd3c7795a41c3e",
+    "pngSha256": "191357024c0683d113b8ee19732ca40b351f1804f95527eeedb810a354ed0ac6"
+  },
+  {
+    "name": "use-case-tho",
+    "file": "docs/diagrams/use-case-tho.png",
+    "width": 840,
+    "height": 2016,
+    "sourceSha256": "a0bbbd85c6a418682366eb19a77691938dbbdca845c19388dfce2b94134a8fbb",
+    "pngSha256": "555c862c28d9dd70586a644158e92864dc96c77ca951356ba3f3fca6d922e6af"
+  },
+  {
+    "name": "use-case-chu-thau",
+    "file": "docs/diagrams/use-case-chu-thau.png",
+    "width": 840,
+    "height": 2064,
+    "sourceSha256": "a9c711b516cc6c3fd2fd5fb0f3c67cb07f55f5de0a51390908a0adb60738627f",
+    "pngSha256": "ce7daa166ee9c32d30e1cdc16a5a0bfe67137fe6dcf1549b58a47eefe313e9ef"
+  },
+  {
+    "name": "use-case-admin",
+    "file": "docs/diagrams/use-case-admin.png",
+    "width": 840,
+    "height": 1696,
+    "sourceSha256": "c67b496d4b3d8a1f2f8f0f5a02cb6bb285245945100e2cbd383432131fedc4ab",
+    "pngSha256": "7145ae0a30b182f4db9d9bf3a8b1391fdc80e8264fdb29a4f389a49da0ca2e6c"
+  },
+  {
+    "name": "erd",
+    "file": "docs/diagrams/erd.png",
+    "width": 3600,
+    "height": 1380,
+    "sourceSha256": "dfe78df80fd44925e944ae2840dd7148ea6aec21ccc883bf1a97384d3a87cee4",
+    "pngSha256": "60c63aba985793283d244e408eea554a638c7e838d90936b6cebddb27a382ced"
+  },
+  {
+    "name": "erd-ho-so",
+    "file": "docs/diagrams/erd-ho-so.png",
+    "width": 1560,
+    "height": 958,
+    "sourceSha256": "10b0b77b6f783f3b6a903dc8f9dfd16fff3a0bb9549aa18a9716bf3044bd6135",
+    "pngSha256": "18e001de9607c5dc9634082b81927db447e212bd0718bc22e626ae596352d78e"
+  },
+  {
+    "name": "erd-tuyen-dung",
+    "file": "docs/diagrams/erd-tuyen-dung.png",
+    "width": 2352,
+    "height": 2468,
+    "sourceSha256": "8010aeb8f7ce23f95ea966445354f4021ddf1a6fb8dc856f80e7f06ae3d8efe7",
+    "pngSha256": "661b38533cbd8a1e2ba9dfb56197e47987b0e7d0178f322ae2baab03950e8e4f"
+  },
+  {
+    "name": "erd-tai-chinh",
+    "file": "docs/diagrams/erd-tai-chinh.png",
+    "width": 3262,
+    "height": 2266,
+    "sourceSha256": "8737862bdd8d93cb79c09471c4639136a273f3759a8ae06ed478b934617bd72b",
+    "pngSha256": "27eb671e7769a0c4b7600784f1fdac5d69b9bec98679bb940f299a68ab1b615b"
+  },
+  {
+    "name": "erd-van-hanh",
+    "file": "docs/diagrams/erd-van-hanh.png",
+    "width": 948,
+    "height": 1634,
+    "sourceSha256": "14574f9e321f1d5e0f462a8d37a034008f84a24ec5d537a5a6a7ff07e572998f",
+    "pngSha256": "c14a0b4a83f9f3bc0e40872800dbfab6ced8d3636f273603837b9af06be4c2df"
+  },
+  {
+    "name": "erd-thong-bao",
+    "file": "docs/diagrams/erd-thong-bao.png",
+    "width": 1894,
+    "height": 1794,
+    "sourceSha256": "f0e5c93224144a438a69adfd55baa90d594a4eec8a119821638ebdf47ae80659",
+    "pngSha256": "ea0acf758a656f277e9fddfead7a99198961322c480aa4c5904d8fb3cd0fa607"
+  },
+  {
+    "name": "erd-uy-tin",
+    "file": "docs/diagrams/erd-uy-tin.png",
+    "width": 1450,
+    "height": 2096,
+    "sourceSha256": "de0f8366728cdfa0cb1d63005481712691ae2361ab8064e7b6f48a0f492c3683",
+    "pngSha256": "216daeb73edfd4602696b1c7f00292fc07abc32f04fab62858655abb2346bd62"
+  },
+  {
+    "name": "kien-truc",
+    "file": "docs/diagrams/kien-truc.png",
+    "width": 1110,
+    "height": 1810,
+    "sourceSha256": "e8033c520e018661bc2e8273739d341fa660a037f75d4eef13af33a9ee916d5d",
+    "pngSha256": "20e94b7cef3dc2b195b022a73e15c5decf218b69ce0b8f10de309185a0d5531b"
+  }
+]

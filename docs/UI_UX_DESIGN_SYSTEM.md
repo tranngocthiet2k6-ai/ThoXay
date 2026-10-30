@@ -134,7 +134,7 @@ LayoutBuilder và constraints trong Flutter, bằng flex/grid trong CSS Admin.
 | Admin gồm 9 template | Navy, card 16px, padding 16/24px, input 48px, nút ít nhất 44px, bảng cuộn ngang có focus |
 
 Các kiểm thử giao diện bao phủ role, theme, tương phản, text scale, reduced motion,
-viewport 320/390/768/1440px, OTP không được sử dụng trong demo. Camera vật lý và
+viewport 320/390/768/1440px. Camera vật lý và
 ứng dụng ngân hàng cần nghiệm thu thiết bị riêng; test mô phỏng không thay thế việc đó.
-Sau tinh chỉnh: 109 test Flutter (108 trước đợt này và một regression test khung Tổ đội),
+Sau tinh chỉnh: 110 test Flutter (108 trước đợt này, thêm test khung Tổ đội và cảnh báo QR demo),
 125 test Backend và 12 test JS pass. Flutter analyze sạch và Web release build thành công.
