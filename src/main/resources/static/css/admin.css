@@ -131,6 +131,17 @@ body.bg-light { background: #0f172a !important; }
 
 /* Shared 8pt rhythm, bounded controls and accessible review tools. */
 .stat-card, .card, .modal-content { border-radius: 16px; }
+/* Match the final Flutter spacing scale across the secondary Admin routes. */
+.container.py-4 { padding-block: 24px !important; }
+.admin-main { padding-top: 32px; }
+.page-heading { gap: 16px; margin-bottom: 32px; }
+.panel-heading { gap: 16px; }
+.table-responsive { scrollbar-color: #64748b #172033; }
+.form-text { color: #b5c2d6; }
+.form-control::placeholder { color: #94a3b8; opacity: 1; }
+.form-control, .form-select { min-height: 48px; }
+.btn { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; }
+.table .btn { white-space: nowrap; }
 .stat-card { padding: 24px; display: flex; flex-direction: column; min-height: 232px; box-shadow: 0 8px 24px #02061726; }
 .stat-card p { min-height: 28px; }
 .kpi-meter { margin-top: auto; padding-top: 12px; }

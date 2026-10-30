@@ -13,7 +13,7 @@
 | Flutter Web | Navigator căn giữa, tối đa 1120px; MediaQuery khớp khung thực tế |
 
 Trang chủ có lời chào, avatar chữ cái từ tên thật, bậc thợ lấy từ hồ sơ,
-công tắc nhận việc và thanh điều hướng 5 mục. Tìm kiếm tên/địa điểm xử lý
+công tắc nhận việc và thanh điều hướng 6 mục. Tìm kiếm tên/địa điểm xử lý
 trên kết quả hiện có; loại việc, lương và bán kính tiếp tục dùng API cũ.
 Bộ lọc ghim khi cuộn, cuộn ngang trên màn hình nhỏ. Chi tiết công trình
 giữ vùng hành động ở đáy; quyền liên lạc vẫn theo đơn ACCEPTED.
@@ -25,9 +25,7 @@ chuyển động và dừng ở route không hoạt động.
 
 Ví hỗ trợ ẩn cả ba số dư, thao tác nạp/rút cân đối và cảnh báo ký quỹ theo
 minimumEscrow/lowEscrow từ server. Biểu đồ thể hiện cơ cấu tiền công, tip,
-thưởng trong kỳ Ngày/Tuần/Tháng được chọn; API hiện trả tổng kỳ, không có
-chuỗi thu nhập từng ngày. Không suy diễn hoặc chia đều tổng tiền thành số
-liệu ngày giả. Màu giao dịch phân biệt tiền cộng, tiền ra và chuyển ký quỹ.
+thưởng trong kỳ Ngày/Tuần/Tháng được chọn; API trả tổng kỳ và chuỗi thu nhập từng ngày theo giờ Việt Nam từ sổ giao dịch. Không suy diễn hoặc chia đều tổng tiền thành số liệu ngày giả. Màu giao dịch phân biệt tiền cộng, tiền ra và chuyển ký quỹ.
 
 CCCD có khung hướng dẫn tỷ lệ 85.6:53.98 trước khi chụp/chọn ảnh, ảnh xem
 trước và cửa sổ phóng to 1–5 lần. Camera vẫn sử dụng image_picker của nền
@@ -38,9 +36,8 @@ tệp và duyệt danh tính của Admin giữ nguyên.
 
 - Badge điều hướng dùng unreadCount thật của lịch sử thông báo, cập nhật
   khi quay lại, khi ứng dụng hoạt động lại và định kỳ khi trang chủ hiện.
-  API chưa có số tin nhắn chưa đọc theo cuộc hội thoại; không gắn số giả.
-- JobResponse chưa trả trạng thái KYC của chủ thầu. Thẻ việc không tự gắn
-  tích xanh. Hồ sơ và danh sách thợ vẫn hiển thị xác thực từ dữ liệu thật.
+  API hộp thư và read cursor trả số tin chưa đọc thật theo từng cuộc hội thoại; không gắn số giả.
+- JobResponse trả contractorVerified; thẻ việc chỉ gắn tích xanh theo cờ thật của Backend. Hồ sơ và danh sách thợ cũng hiển thị xác thực từ dữ liệu thật.
 - Admin lọc dữ liệu đã render, có tìm kiếm không phân biệt dấu tiếng Việt.
   Hàng chờ ví chỉ chứa yêu cầu PENDING và phân trang theo API cũ; bộ lọc
   áp dụng trên trang hiện tại, không giả lập lịch sử đã duyệt/từ chối.
@@ -118,3 +115,26 @@ Checkpoint mới: 95 test Flutter, analyze và Web release pass. Kiểm tra Chro
 390/1440px cho hai vai trò và ba mode ở trang chủ/ví/hồ sơ/hộp thư/thông báo.
 Ảnh QA ở .local/appearance-browser/ không commit; dữ liệu mock chỉ trong trình duyệt.
 Admin tiếp tục dùng Navy, không phụ thuộc lựa chọn mode Flutter.
+
+
+## Nghiệm thu bố cục cuối ngày 30 tháng 10 năm 2026
+
+Quy ước mô tả tương đương Auto Layout được thực thi bằng Row, Column, Wrap,
+LayoutBuilder và constraints trong Flutter, bằng flex/grid trong CSS Admin.
+Đây là hệ thiết kế triển khai trong mã nguồn; không khẳng định có file Figma được đồng bộ.
+
+| Nhóm màn hình | Khung và kiểm tra |
+| --- | --- |
+| Đăng nhập, đăng ký | AuthShell hai cột desktop, form ưu tiên mobile, giữ Sáng/Tối/Outdoor khi đổi vai trò |
+| Trang chủ, tìm việc, công trình chủ thầu | Navigator tối đa 1120px, lưới một/hai cột, sticky chips, ghim lương và attribution OSM |
+| Chi tiết/chia sẻ công trình, bản đồ chọn vị trí, quét QR | Khung nghiệp vụ theo nội dung; bản đồ/camera được giữ vùng hiển thị rộng, CTA rõ |
+| Tổ đội, chấm công, sự cố và chi tiết sự cố, mục đã lưu | ContentFrame tối đa 840px, pull to refresh, nội dung vẫn cuộn ở mobile |
+| Ví, thu nhập, hồ sơ, KYC, bảng xếp hạng, uy tín, lịch, thông báo | Khung đọc 840px, palette ngữ nghĩa, skeleton/empty/error, xem ảnh phóng to |
+| Chat, hộp thư, hồ sơ thợ | Khung riêng đã giới hạn theo module; quyền truy cập và dữ liệu badge giữ từ API |
+| Admin gồm 9 template | Navy, card 16px, padding 16/24px, input 48px, nút ít nhất 44px, bảng cuộn ngang có focus |
+
+Các kiểm thử giao diện bao phủ role, theme, tương phản, text scale, reduced motion,
+viewport 320/390/768/1440px, OTP không được sử dụng trong demo. Camera vật lý và
+ứng dụng ngân hàng cần nghiệm thu thiết bị riêng; test mô phỏng không thay thế việc đó.
+Sau tinh chỉnh: 109 test Flutter (108 trước đợt này và một regression test khung Tổ đội),
+125 test Backend và 12 test JS pass. Flutter analyze sạch và Web release build thành công.

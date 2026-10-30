@@ -56,6 +56,29 @@ class CrewApi extends ApiService {
 }
 
 void main() {
+  testWidgets('crew content stays bounded on desktop and usable on mobile', (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    for (final width in [320.0, 1440.0]) {
+      tester.view.physicalSize = Size(width, 1000);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: CrewScreen(key: ValueKey(width), api: CrewApi()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        tester.getSize(find.byType(ListView)).width,
+        width > 840 ? 840 : width,
+      );
+      await tester.ensureVisible(find.text('Tham gia tổ'));
+      expect(find.text('Tham gia tổ'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    }
+  });
   testWidgets('invited worker must explicitly join team', (tester) async {
     final api = CrewApi();
     await tester.pumpWidget(MaterialApp(home: CrewScreen(api: api)));

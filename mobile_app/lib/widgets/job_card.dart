@@ -26,7 +26,7 @@ class JobCard extends StatelessWidget {
     padding: const EdgeInsets.only(bottom: 16),
     child: DesignReveal(
       child: DesignSurface(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -58,11 +58,7 @@ class JobCard extends StatelessWidget {
                 if (job.contractorVerified)
                   const Tooltip(
                     message: 'Đã xác thực CCCD',
-                    child: Icon(
-                      Icons.verified,
-                      color: Colors.blue,
-                      size: 20,
-                    ),
+                    child: Icon(Icons.verified, color: Colors.blue, size: 20),
                   ),
               ],
             ),

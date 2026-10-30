@@ -1,3 +1,5 @@
+import '../widgets/design_motion.dart';
+
 import 'package:flutter/material.dart';
 
 import '../models/models.dart';
@@ -60,71 +62,76 @@ class _SavedScreenState extends State<SavedScreen> {
     appBar: AppBar(
       title: Text(widget.worker ? 'Công trình yêu thích' : 'Thợ quen'),
     ),
-    body: RefreshIndicator(
-      onRefresh: _load,
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(24),
-        children: [
-          if (_loading) const ContentSkeleton(),
-          if (_error != null) ...[
-            Text(_error!),
-            TextButton(onPressed: _load, child: const Text('Thử lại')),
-          ],
-          if (!_loading && _error == null && _jobs.isEmpty && _workers.isEmpty)
-            EmptyState(
-              title: widget.worker
-                  ? 'Lưu cơ hội phù hợp với bạn'
-                  : 'Xây dựng đội ngũ thợ tin cậy',
-              message: widget.worker
-                  ? 'Bấm Lưu công trình trong phần chi tiết để xem lại tại đây.'
-                  : 'Bấm Lưu thợ quen trong hồ sơ để kết nối ở công trình tiếp theo.',
-              action: FilledButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Khám phá ngay'),
+    body: ContentFrame(
+      child: RefreshIndicator(
+        onRefresh: _load,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(24),
+          children: [
+            if (_loading) const ContentSkeleton(),
+            if (_error != null) ...[
+              Text(_error!),
+              TextButton(onPressed: _load, child: const Text('Thử lại')),
+            ],
+            if (!_loading &&
+                _error == null &&
+                _jobs.isEmpty &&
+                _workers.isEmpty)
+              EmptyState(
+                title: widget.worker
+                    ? 'Lưu cơ hội phù hợp với bạn'
+                    : 'Xây dựng đội ngũ thợ tin cậy',
+                message: widget.worker
+                    ? 'Bấm Lưu công trình trong phần chi tiết để xem lại tại đây.'
+                    : 'Bấm Lưu thợ quen trong hồ sơ để kết nối ở công trình tiếp theo.',
+                action: FilledButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Khám phá ngay'),
+                ),
               ),
-            ),
-          if (!_loading)
-            for (final j in _jobs)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: JobCard(
-                  api: widget.api,
-                  job: j,
-                  action: FilledButton.tonal(
-                    onPressed: () =>
-                        _open(SharedJobScreen(api: widget.api, jobId: j.id)),
-                    child: const Text('Mở công trình'),
+            if (!_loading)
+              for (final j in _jobs)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: JobCard(
+                    api: widget.api,
+                    job: j,
+                    action: FilledButton.tonal(
+                      onPressed: () =>
+                          _open(SharedJobScreen(api: widget.api, jobId: j.id)),
+                      child: const Text('Mở công trình'),
+                    ),
                   ),
                 ),
-              ),
-          if (!_loading)
-            for (final w in _workers)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    ProfileSummary(
-                      name: w.fullName,
-                      worker: true,
-                      rating: w.rating,
-                      score: w.reputationScore,
-                      completed: w.completedJobs,
-                      tier: w.workerTier,
-                      verified: w.verified,
-                    ),
-                    TextButton.icon(
-                      onPressed: () => _open(
-                        WorkerProfileScreen(api: widget.api, workerId: w.id),
+            if (!_loading)
+              for (final w in _workers)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      ProfileSummary(
+                        name: w.fullName,
+                        worker: true,
+                        rating: w.rating,
+                        score: w.reputationScore,
+                        completed: w.completedJobs,
+                        tier: w.workerTier,
+                        verified: w.verified,
                       ),
-                      icon: const Icon(Icons.badge_outlined),
-                      label: const Text('Xem hồ sơ thợ'),
-                    ),
-                  ],
+                      TextButton.icon(
+                        onPressed: () => _open(
+                          WorkerProfileScreen(api: widget.api, workerId: w.id),
+                        ),
+                        icon: const Icon(Icons.badge_outlined),
+                        label: const Text('Xem hồ sơ thợ'),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-        ],
+          ],
+        ),
       ),
     ),
   );

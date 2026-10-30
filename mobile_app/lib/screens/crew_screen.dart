@@ -1,3 +1,5 @@
+import '../widgets/design_motion.dart';
+
 import 'package:flutter/material.dart';
 
 import '../models/crew.dart';
@@ -161,134 +163,138 @@ class _CrewScreenState extends State<CrewScreen> {
         ),
       ],
     ),
-    body: RefreshIndicator(
-      onRefresh: _load,
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(24),
-        children: [
-          if (widget.job != null)
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Text(
-                  'Công trình: ${widget.job!.title}\nTổ trưởng chọn tổ; mỗi thợ tự đọc cam kết trước khi chủ thầu duyệt nguyên nhóm.',
-                ),
-              ),
-            ),
-          if (_loading) const ContentSkeleton(),
-          if (_busy) const LinearProgressIndicator(),
-          if (_error != null) ...[
-            Text(
-              _error!,
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
-            ),
-            TextButton(
-              onPressed: _busy ? null : _load,
-              child: const Text('Thử lại'),
-            ),
-          ],
-          if (!_loading && _crews.isEmpty && _error == null)
-            EmptyState(
-              title: 'Cùng đồng đội nhận công trình',
-              message: 'Tạo tổ, mời tài khoản thợ và chờ họ xác nhận. Mỗi người vẫn có chấm công và đánh giá riêng.',
-              action: FilledButton.icon(
-                onPressed: _busy ? null : _create,
-                icon: const Icon(Icons.group_add_outlined),
-                label: const Text('Tạo tổ đầu tiên'),
-              ),
-            ),
-          if (!_loading)
-            for (final c in _crews)
+    body: ContentFrame(
+      child: RefreshIndicator(
+        onRefresh: _load,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(24),
+          children: [
+            if (widget.job != null)
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        c.name,
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                      const SizedBox(height: 8),
-                      for (final m in c.members)
-                        ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          leading: Icon(
-                            m.status == 'CONFIRMED'
-                                ? Icons.verified_user_outlined
-                                : Icons.person_add_alt,
-                          ),
-                          title: Text(m.name),
-                          subtitle: Text(
-                            m.status == 'CONFIRMED'
-                                ? 'Đã tham gia'
-                                : m.status == 'INVITED'
-                                ? 'Đang chờ xác nhận'
-                                : 'Đã từ chối',
-                          ),
-                          trailing: m.id == c.leaderId
-                              ? const Chip(label: Text('Tổ trưởng'))
-                              : null,
-                        ),
-                      if (c.leaderId == widget.api.session?.userId) ...[
-                        OutlinedButton.icon(
-                          onPressed: _busy ? null : () => _invite(c),
-                          icon: const Icon(Icons.person_add_outlined),
-                          label: const Text('Mời thợ bằng số điện thoại'),
-                        ),
-                        if (widget.job != null)
-                          FilledButton.icon(
-                            onPressed:
-                                _busy ||
-                                    c.members
-                                            .where(
-                                              (m) => m.status == 'CONFIRMED',
-                                            )
-                                            .length <
-                                        2
-                                ? null
-                                : () => _apply(c),
-                            icon: const Icon(Icons.groups_outlined),
-                            label: Text(
-                              'Ứng tuyển ${c.members.where((m) => m.status == 'CONFIRMED').length} người',
-                            ),
-                          ),
-                      ] else if (c.members.any(
-                        (m) =>
-                            m.id == widget.api.session?.userId &&
-                            m.status == 'INVITED',
-                      ))
-                        Wrap(
-                          spacing: 8,
-                          children: [
-                            FilledButton(
-                              onPressed: _busy
-                                  ? null
-                                  : () => _run(
-                                      () =>
-                                          widget.api.crewMembership(c.id, true),
-                                    ),
-                              child: const Text('Tham gia tổ'),
-                            ),
-                            OutlinedButton(
-                              onPressed: _busy
-                                  ? null
-                                  : () => _run(
-                                      () => widget.api.crewMembership(
-                                        c.id,
-                                        false,
-                                      ),
-                                    ),
-                              child: const Text('Từ chối'),
-                            ),
-                          ],
-                        ),
-                    ],
+                  child: Text(
+                    'Công trình: ${widget.job!.title}\nTổ trưởng chọn tổ; mỗi thợ tự đọc cam kết trước khi chủ thầu duyệt nguyên nhóm.',
                   ),
                 ),
               ),
-        ],
+            if (_loading) const ContentSkeleton(),
+            if (_busy) const LinearProgressIndicator(),
+            if (_error != null) ...[
+              Text(
+                _error!,
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
+              TextButton(
+                onPressed: _busy ? null : _load,
+                child: const Text('Thử lại'),
+              ),
+            ],
+            if (!_loading && _crews.isEmpty && _error == null)
+              EmptyState(
+                title: 'Cùng đồng đội nhận công trình',
+                message: 'Tạo tổ, mời tài khoản thợ và chờ họ xác nhận. Mỗi người vẫn có chấm công và đánh giá riêng.',
+                action: FilledButton.icon(
+                  onPressed: _busy ? null : _create,
+                  icon: const Icon(Icons.group_add_outlined),
+                  label: const Text('Tạo tổ đầu tiên'),
+                ),
+              ),
+            if (!_loading)
+              for (final c in _crews)
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          c.name,
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        const SizedBox(height: 8),
+                        for (final m in c.members)
+                          ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            leading: Icon(
+                              m.status == 'CONFIRMED'
+                                  ? Icons.verified_user_outlined
+                                  : Icons.person_add_alt,
+                            ),
+                            title: Text(m.name),
+                            subtitle: Text(
+                              m.status == 'CONFIRMED'
+                                  ? 'Đã tham gia'
+                                  : m.status == 'INVITED'
+                                  ? 'Đang chờ xác nhận'
+                                  : 'Đã từ chối',
+                            ),
+                            trailing: m.id == c.leaderId
+                                ? const Chip(label: Text('Tổ trưởng'))
+                                : null,
+                          ),
+                        if (c.leaderId == widget.api.session?.userId) ...[
+                          OutlinedButton.icon(
+                            onPressed: _busy ? null : () => _invite(c),
+                            icon: const Icon(Icons.person_add_outlined),
+                            label: const Text('Mời thợ bằng số điện thoại'),
+                          ),
+                          if (widget.job != null)
+                            FilledButton.icon(
+                              onPressed:
+                                  _busy ||
+                                      c.members
+                                              .where(
+                                                (m) => m.status == 'CONFIRMED',
+                                              )
+                                              .length <
+                                          2
+                                  ? null
+                                  : () => _apply(c),
+                              icon: const Icon(Icons.groups_outlined),
+                              label: Text(
+                                'Ứng tuyển ${c.members.where((m) => m.status == 'CONFIRMED').length} người',
+                              ),
+                            ),
+                        ] else if (c.members.any(
+                          (m) =>
+                              m.id == widget.api.session?.userId &&
+                              m.status == 'INVITED',
+                        ))
+                          Wrap(
+                            spacing: 8,
+                            children: [
+                              FilledButton(
+                                onPressed: _busy
+                                    ? null
+                                    : () => _run(
+                                        () => widget.api.crewMembership(
+                                          c.id,
+                                          true,
+                                        ),
+                                      ),
+                                child: const Text('Tham gia tổ'),
+                              ),
+                              OutlinedButton(
+                                onPressed: _busy
+                                    ? null
+                                    : () => _run(
+                                        () => widget.api.crewMembership(
+                                          c.id,
+                                          false,
+                                        ),
+                                      ),
+                                child: const Text('Từ chối'),
+                              ),
+                            ],
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+          ],
+        ),
       ),
     ),
   );
