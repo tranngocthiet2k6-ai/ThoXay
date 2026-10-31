@@ -1,5 +1,6 @@
 target/
-.vscode/
+.vscode/*
+!.vscode/settings.json
 .idea/
 *.iml
 mobile_app/build/
@@ -19,6 +20,9 @@ mobile_app/ios/.symlinks/
 .vercel/
 __pycache__/
 *.py[cod]
+# Local directory junctions used only by the six-section defense Explorer.
+/kiem_thu/Backend/
+/kiem_thu/Flutter/
 mobile_app/android/app/google-services.json
 mobile_app/ios/Runner/GoogleService-Info.plist
 **/*service-account*.json

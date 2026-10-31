@@ -1,0 +1,60 @@
+{
+    "description":  "Byte-identical presentation references. Edit original source files, then run this script again.",
+    "copies":  [
+                   {
+                       "source":  "docs/BAO_CAO_DO_AN.docx",
+                       "destination":  "00_BAO_VE_DO_AN/BAO_CAO_DO_AN.docx",
+                       "sha256":  "f10c6806fba868a5d2aa63fdb3dd7c29a6bf734799105c91fc1b55e4db5f722c"
+                   },
+                   {
+                       "source":  "docs/SLIDE_BAO_VE_DO_AN.pptx",
+                       "destination":  "00_BAO_VE_DO_AN/SLIDE_BAO_VE_DO_AN.pptx",
+                       "sha256":  "bddd34a4bb05ceb5da098991385dbd27660e6cc89cf9df3067c2476f5d3e3d1a"
+                   },
+                   {
+                       "source":  "docs/KICH_BAN_DEMO_VA_HOI_DAP.md",
+                       "destination":  "00_BAO_VE_DO_AN/KICH_BAN_DEMO_VA_HOI_DAP.md",
+                       "sha256":  "671492f09bccef89b3b025dc905a35a8dc480d3bd5030c8836a139462acf9d60"
+                   },
+                   {
+                       "source":  "schema.sql",
+                       "destination":  "migrations/tham_chieu/schema.sql",
+                       "sha256":  "b28d88859af7cd074d6ac0cc7564d93c44d9240a4b6026cc1898f7873e74c905"
+                   },
+                   {
+                       "source":  "render.yaml",
+                       "destination":  "cloud_deploy/render.yaml",
+                       "sha256":  "8dc9eabb48e62814107f89b311e2e16e7bc638249ee2b27293ab4938e19a435c"
+                   },
+                   {
+                       "source":  "Dockerfile",
+                       "destination":  "cloud_deploy/Dockerfile",
+                       "sha256":  "75e6a46c25d2f2287f0fa884aacce20efbe3984ebdbf6a9edf1d5e9c4acf5dcb"
+                   },
+                   {
+                       "source":  "vercel.json",
+                       "destination":  "cloud_deploy/vercel.json",
+                       "sha256":  "2a4b6e4f1bfd9621cba7b93862b898f6a22dbf17321927fe6079be04f2f8f1bf"
+                   },
+                   {
+                       "source":  ".github/workflows/build-apk.yml",
+                       "destination":  "cloud_deploy/.github/workflows/build-apk.yml",
+                       "sha256":  "54398599b4a4c9c5dc8a99bd243f3a681c776c4be50896285a29f4f1d8cbe876"
+                   },
+                   {
+                       "source":  ".github/workflows/deployment-checks.yml",
+                       "destination":  "cloud_deploy/.github/workflows/deployment-checks.yml",
+                       "sha256":  "728be12bcb9eb6d4c4d6b600cdaf300929b6185c8b6c1387534aa9eacd2062fa"
+                   }
+               ],
+    "testLinks":  [
+                      {
+                          "link":  "kiem_thu/Backend",
+                          "target":  "src/test"
+                      },
+                      {
+                          "link":  "kiem_thu/Flutter",
+                          "target":  "mobile_app/test"
+                      }
+                  ]
+}

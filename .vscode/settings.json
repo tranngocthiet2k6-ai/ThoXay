@@ -1,0 +1,25 @@
+{
+  "explorer.compactFolders": false,
+  "explorer.excludeGitIgnore": false,
+  "files.exclude": {
+    "**/.agents": true,
+    "**/.aider-desk": true,
+    "**/.local": true,
+    "**/.mvn": true,
+    "**/.tools": true,
+    "**/.vercel": true,
+    "**/target": true,
+    "**/.dockerignore": true,
+    "**/.flutter-version": true,
+    "**/.gitattributes": true,
+    "**/.vercelignore": true,
+    "**/skills-lock.json": true,
+    "**/mvnw": true,
+    "**/mvnw.cmd": true,
+    "**/.vscode": true,
+    "**/.dart_tool": true,
+    "**/build": true,
+    "**/node_modules": true,
+    "**/__pycache__": true
+  }
+}
