@@ -8,6 +8,10 @@
 | API Spring Boot | https://thoxay-api.onrender.com |
 | Web Admin | https://thoxay-api.onrender.com/admin/login |
 | Readiness và kết nối database | https://thoxay-api.onrender.com/health |
+| APK release mới nhất | [GitHub Actions Build APK](https://github.com/tranngocthiet2k6-ai/ThoXay/actions/workflows/build-apk.yml) → run `main` thành công → Artifacts |
+
+APK tải tự động trên máy được lưu tại `.local/releases/` sau khi xác minh artifact;
+không commit file APK/build output. APK release mặc định gọi HTTPS Render.
 
 Production dùng tài khoản thật đã được cấp quyền. Các tài khoản trong bảng dưới
 chỉ có ở database demo riêng; APK release mặc định kết nối production Render.
@@ -42,3 +46,12 @@ Khởi động bằng task **Bảo vệ: khởi động demo đã build** hoặc
 `./scripts/start-demo.ps1 -SkipBuild` từ thư mục gốc. Nếu chưa build lần đầu,
 chạy không có `-SkipBuild`. Hướng dẫn đầy đủ tại [DEMO.md](../docs/DEMO.md).
 VietQR mẫu chỉ dựng payload để minh họa, **không chuyển tiền thật**.
+
+## Bộ hồ sơ đã đánh số
+
+Mở [workspace bảo vệ](../ThoXay-BaoVe.code-workspace). Ngăn đầu chứa báo cáo
+`01_BAO_CAO_DO_AN.docx` 99 trang sau khi chèn thiết kế, slide
+`02_SLIDE_BAO_VE_DO_AN.pptx` 15 trang có Speaker Notes, kịch bản 20 câu hỏi,
+bản đồ mở code nhanh và `06_ANH_THIET_KE_FIGMA/` với đủ 16 PNG nguyên gốc.
+Số liệu kiểm thử: 128 Backend, 114 Flutter, 12 JS và 6 Python pass.
+Danh sách 8 tài khoản phía trên **đã gồm một Admin**; không có tài khoản thứ chín.

@@ -115,3 +115,12 @@ cặp chat, chỉ tiến con trỏ dưới khóa job. Migration thủ công 020 
 `V21__earnings_timeline.sql` thêm index wallet_entries(user_id,created_at) phục vụ
 truy vấn thu nhập theo khoảng thời gian. Không sửa bảng, ledger, số dư hoặc dữ liệu
 cũ; IF NOT EXISTS cho phép chạy lại script thủ công 021 an toàn.
+
+### V22 — ảnh chi tiết báo cáo cuối ca
+
+`V22__work_log_detail_photo.sql` bổ sung `work_logs.detail_photo BYTEA NULL`,
+CHECK tối đa 2MB sau khi chuẩn hóa. Dữ liệu và ảnh tổng quan cũ giữ nguyên;
+báo cáo cũ một ảnh vẫn đọc được. Flutter mới gửi chung `photo` và `detailPhoto`
+trong một multipart. Cả hai ảnh dùng cùng quyền truy cập, ngày công và version
+nghiệm thu; thay ảnh làm mất hiệu lực thao tác duyệt dựa trên version cũ.
+Script thủ công `migrations/022_work_log_detail_photo.sql` chạy lặp an toàn.

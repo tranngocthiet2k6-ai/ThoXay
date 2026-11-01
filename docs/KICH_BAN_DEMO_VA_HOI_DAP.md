@@ -1,9 +1,9 @@
 # Kịch bản trình diễn và hỏi đáp bảo vệ ThoXay
 
-Tài liệu dành cho người trình bày đồ án. Số liệu chốt ngày 30/10/2026:
-30 bảng nghiệp vụ, 256 cột, 28 Controller, 90 endpoint `/api/` và 21 route khác.
-Bộ test đã chạy: 125 Backend, 110 Flutter, 12 JS và 6 test bảo vệ seed Python.
-Mốc 108 Flutter trước đợt hoàn thiện tăng thêm hai regression test.
+Tài liệu dành cho người trình bày đồ án. Số liệu chốt ngày 02/11/2026:
+30 bảng nghiệp vụ, 257 cột, 28 Controller, 90 endpoint `/api/` và 21 route khác.
+Bộ test đã chạy: 128 Backend, 114 Flutter, 12 JS và 6 test bảo vệ seed Python.
+So với mốc trước Figma 125/110, bổ sung 3 Backend và 4 Flutter regression test.
 
 ## Môi trường đã chuẩn bị
 
@@ -31,12 +31,14 @@ nhập production. Web responsive là phương án trình diễn mobile ngay tr�
 | --- | --- | --- |
 | 1–3 | Đề tài, bài toán và vai trò | 1 phút 20 giây |
 | 4–6 | Kiến trúc, công nghệ, mô hình dữ liệu | 2 phút |
-| 7–9 | Bản đồ, tuyển dụng, tổ đội, ca làm | 2 phút |
-| 10–13 | Ví, uy tín, chat/SOS, KYC và Admin | 2 phút |
+| 7–9 | Thiết kế trang chủ, tuyển dụng và ca làm hai ảnh | 2 phút |
+| 10–13 | Thiết kế ví, hồ sơ, chat, đăng nhập và Admin triển khai | 2 phút |
 | 14–15 | Kiểm thử, triển khai, giới hạn và hướng phát triển | 1 phút 20 giây |
 
 Speaker Notes có lời dẫn cụ thể ở từng slide. Có thể rút gọn phần nói để dành
 7–8 phút thao tác demo; thời lượng là gợi ý luyện tập, không phải số liệu thực nghiệm.
+Slide 7–13 dùng đủ 16 PNG Figma nguyên gốc và ghi rõ là thiết kế; các số dư/điểm
+trong hình không phải số liệu production. Khi chuyển sang demo, số liệu lấy từ API.
 
 ## Kịch bản demo chính khoảng 8 phút
 
@@ -50,7 +52,8 @@ không cấp thêm quyền nghiệp vụ.” Không nhập mật khẩu khi màn
 
 ### Bước 2 Tìm việc trên bản đồ
 
-Ở trang Thợ, chọn “Chọn vị trí tìm việc” và nhập **10.8015, 106.7140** nếu GPS
+Ở trang Thợ, mở biểu tượng bộ lọc cạnh ô tìm kiếm, chọn “Chọn vị trí tìm việc”
+và nhập **10.8015, 106.7140** nếu GPS
 thực của thiết bị ở ngoài khu vực TP.HCM hoặc không được cấp quyền. Đây là chọn
 tâm tìm kiếm, không phải giả mạo vị trí chấm công. Thử bán kính 5/10/20km, loại
 Thợ chính/Phụ hồ và sắp xếp lương. Bật bản đồ, chọn ghim lương để xem tóm tắt.
@@ -68,7 +71,7 @@ Không sửa trực tiếp database để bỏ qua cảnh báo lịch hoặc đi
 
 ### Bước 4 Tổ đội và lịch làm việc
 
-Trong Hồ sơ Thợ, mở “Tổ đội của tôi” để xem tổ mẫu với ba tài khoản đã xác nhận.
+Trong Hồ sơ Thợ, mở “Thông tin và tiện ích hồ sơ”, rồi “Tổ đội của tôi” để xem tổ mẫu với ba tài khoản đã xác nhận.
 Nêu rằng số thành viên được server lấy từ roster thật. Mở “Lịch làm việc”, chỉ
 ngày bận và lịch đã được nhận. Nếu demo nhận tổ, các thành viên cần tự đồng ý
 phiên bản cam kết trước khi Chủ thầu duyệt nguyên nhóm. Với thời gian ngắn, chỉ
@@ -76,9 +79,12 @@ trình bày tổ có sẵn và quy tắc atomic, không mất thời gian đăng
 
 ### Bước 5 Chấm công và nghiệm thu ảnh
 
-Ở lịch sử ứng tuyển, mở công trình **[DEMO] Nhà phố ven sông - ca trình diễn**.
-Thợ chính có ca đã check-in/out và ảnh chờ nghiệm thu; mở ảnh để phóng to.
-Ở Chủ thầu, mở chấm công công trình, chọn đúng ngày Việt Nam rồi duyệt ảnh hoặc
+Chọn tab **Việc của tôi**, mở công trình **[DEMO] Ca bảo vệ 2026-11-02**.
+Script `scripts/refresh-demo-presentation.py` đã chuẩn bị kịch bản theo ngày chạy;
+nếu trình bày ngày khác, chạy lại trong database demo sau V22 để có ca tương ứng.
+Thợ chính có ca ngày trước đó đã check-in/out, ảnh tổng quan và chi tiết chờ nghiệm thu.
+Mở ảnh để phóng to; chỉ gửi báo cáo mới khi đã chọn đủ cả hai ảnh.
+Ở Chủ thầu, mở “Quản lý công trình”, “Chấm công & nghiệm thu”, chọn ngày ca rồi duyệt ảnh hoặc
 yêu cầu bổ sung. Thợ thứ hai chưa chấm công có thể dùng QR ca làm do Chủ thầu cấp
 để minh họa check-in/out mà không cần đứng ở tọa độ mẫu. QR hết hạn sau 5 phút.
 Nếu thiết bị không có camera, chỉ ra chức năng và dùng ca mẫu đã chuẩn bị; không
@@ -87,9 +93,11 @@ khẳng định đã quét bằng camera vật lý khi chỉ trình diễn trên
 ### Bước 6 Ví và thu nhập
 
 Mở Ví của Thợ để thấy số dư, ký quỹ 100.000đ và cảnh báo dưới 200.000đ. Thử ẩn/hiện
-số dư. Mở Thu nhập và đổi Ngày/Tuần/Tháng; giải thích các cột lấy từ ledger đã
+số dư. Biểu đồ tuần ở Ví có nút lịch; chọn tuần chứa **30/10/2026** để xem khoản
+thu nhập seed đã thanh toán. Tuần hiện tại không có giao dịch thì số 0 là đúng.
+Mở Thu nhập và đổi Ngày/Tuần/Tháng; giải thích các cột lấy từ ledger đã
 thanh toán, không chia đều tổng tiền thành ngày giả. Trong “Nạp tiền bằng VietQR”,
-tạo yêu cầu 250.000đ, chỉ ra người nhận **DEMO ONLY** và cảnh báo **KHÔNG CHUYỂN TIỀN**.
+chọn nhanh 200.000đ hoặc nhập 250.000đ, chỉ ra người nhận **DEMO ONLY** và cảnh báo **KHÔNG CHUYỂN TIỀN**.
 BIN 000000 chỉ phục vụ dựng payload; không dùng ứng dụng ngân hàng để chuyển tiền.
 Admin xem hàng chờ và chứng minh yêu cầu PENDING chưa làm tăng số dư.
 

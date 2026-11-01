@@ -3,23 +3,33 @@
     "copies":  [
                    {
                        "source":  "docs/BAO_CAO_DO_AN.docx",
-                       "destination":  "00_BAO_VE_DO_AN/BAO_CAO_DO_AN.docx",
-                       "sha256":  "f10c6806fba868a5d2aa63fdb3dd7c29a6bf734799105c91fc1b55e4db5f722c"
+                       "destination":  "00_BAO_VE_DO_AN/01_BAO_CAO_DO_AN.docx",
+                       "sha256":  "f0774d04d08c69ca1329f3b403b30d2d7137186e4515b8fc215680b5412f69cb"
                    },
                    {
                        "source":  "docs/SLIDE_BAO_VE_DO_AN.pptx",
-                       "destination":  "00_BAO_VE_DO_AN/SLIDE_BAO_VE_DO_AN.pptx",
-                       "sha256":  "bddd34a4bb05ceb5da098991385dbd27660e6cc89cf9df3067c2476f5d3e3d1a"
+                       "destination":  "00_BAO_VE_DO_AN/02_SLIDE_BAO_VE_DO_AN.pptx",
+                       "sha256":  "55f55939e5f11d28cb743145985f42a0c4d4759e365c87e56e7b2536923f9e40"
+                   },
+                   {
+                       "source":  "docs/TAI_KHOAN_VA_LINK_DEMO.md",
+                       "destination":  "00_BAO_VE_DO_AN/03_TAI_KHOAN_VA_LINK_DEMO.md",
+                       "sha256":  "b48ed673de6987f86fe258fa4ed9e34b318515126d906c3208660bd28d678c96"
                    },
                    {
                        "source":  "docs/KICH_BAN_DEMO_VA_HOI_DAP.md",
-                       "destination":  "00_BAO_VE_DO_AN/KICH_BAN_DEMO_VA_HOI_DAP.md",
-                       "sha256":  "671492f09bccef89b3b025dc905a35a8dc480d3bd5030c8836a139462acf9d60"
+                       "destination":  "00_BAO_VE_DO_AN/04_KICH_BAN_VA_20_CAU_HOI_DAP.md",
+                       "sha256":  "0d75b5dc9a7138b53a50c661be745595b6f681ae2a53a2317a034eef834e59cd"
+                   },
+                   {
+                       "source":  "docs/BAN_DO_MO_CODE_NHANH.md",
+                       "destination":  "00_BAO_VE_DO_AN/05_BAN_DO_MO_CODE_NHANH.md",
+                       "sha256":  "16904f3b12df90a0a31eec71217f05deb67c98e49294fabff1575e348a2fa66e"
                    },
                    {
                        "source":  "schema.sql",
                        "destination":  "migrations/tham_chieu/schema.sql",
-                       "sha256":  "b28d88859af7cd074d6ac0cc7564d93c44d9240a4b6026cc1898f7873e74c905"
+                       "sha256":  "47a6e577dd0fcb9983a11324eeb6f9d732bfddd4041647f038701e84a7eab179"
                    },
                    {
                        "source":  "render.yaml",
@@ -35,6 +45,86 @@
                        "source":  "vercel.json",
                        "destination":  "cloud_deploy/vercel.json",
                        "sha256":  "2a4b6e4f1bfd9621cba7b93862b898f6a22dbf17321927fe6079be04f2f8f1bf"
+                   },
+                   {
+                       "source":  "docs/figma_screens/Chủ thầu - Đăng việc.png",
+                       "destination":  "00_BAO_VE_DO_AN/06_ANH_THIET_KE_FIGMA/Chủ thầu - Đăng việc.png",
+                       "sha256":  "2ad4783a93f72b9b8e7cfb3177743b2f0588ca82e6a2e3e6974614797819ff83"
+                   },
+                   {
+                       "source":  "docs/figma_screens/Chủ thầu - Duyệt thợ.png",
+                       "destination":  "00_BAO_VE_DO_AN/06_ANH_THIET_KE_FIGMA/Chủ thầu - Duyệt thợ.png",
+                       "sha256":  "350b4148ce0f77f581842da3201483187af06313905d538dfb016bb81f63b2d4"
+                   },
+                   {
+                       "source":  "docs/figma_screens/Chủ thầu - Hồ sơ \u0026 Thợ ruột.png",
+                       "destination":  "00_BAO_VE_DO_AN/06_ANH_THIET_KE_FIGMA/Chủ thầu - Hồ sơ \u0026 Thợ ruột.png",
+                       "sha256":  "c4838a223b268ab746e73fdeef1c9b3f68e4f0fe7b838e5b5d79ce6eabfbc986"
+                   },
+                   {
+                       "source":  "docs/figma_screens/Chủ thầu - Nghiệm thu.png",
+                       "destination":  "00_BAO_VE_DO_AN/06_ANH_THIET_KE_FIGMA/Chủ thầu - Nghiệm thu.png",
+                       "sha256":  "92d6673687e014504189f29cb41d1af5f1d7b430bf872d6dff33b28361d9e1c7"
+                   },
+                   {
+                       "source":  "docs/figma_screens/Chủ thầu - Tạo công trình mới.png",
+                       "destination":  "00_BAO_VE_DO_AN/06_ANH_THIET_KE_FIGMA/Chủ thầu - Tạo công trình mới.png",
+                       "sha256":  "67cd21bfb132a41e77e7f90a585b715432520f12f592fd19228cff56d97aa8ac"
+                   },
+                   {
+                       "source":  "docs/figma_screens/Chủ thầu - Trò chuyện \u0026 Cam kết.png",
+                       "destination":  "00_BAO_VE_DO_AN/06_ANH_THIET_KE_FIGMA/Chủ thầu - Trò chuyện \u0026 Cam kết.png",
+                       "sha256":  "25214141350b4358e20d3fa0553f57691bbd67d4bdcaf1059d05fe732233817a"
+                   },
+                   {
+                       "source":  "docs/figma_screens/Chủ thầu - Ví \u0026 Quỹ lương.png",
+                       "destination":  "00_BAO_VE_DO_AN/06_ANH_THIET_KE_FIGMA/Chủ thầu - Ví \u0026 Quỹ lương.png",
+                       "sha256":  "3f0869969c738edf089e3cabc60f0432a544d4acfbf2eac352f88287ce2a6721"
+                   },
+                   {
+                       "source":  "docs/figma_screens/Thợ Xây - Bảng xếp hạng.png",
+                       "destination":  "00_BAO_VE_DO_AN/06_ANH_THIET_KE_FIGMA/Thợ Xây - Bảng xếp hạng.png",
+                       "sha256":  "4b0d09941c30035a2a75b62c47ab57a9a64312a4b19a4a178cc65869c433df0a"
+                   },
+                   {
+                       "source":  "docs/figma_screens/Thợ Xây - Chi tiết việc.png",
+                       "destination":  "00_BAO_VE_DO_AN/06_ANH_THIET_KE_FIGMA/Thợ Xây - Chi tiết việc.png",
+                       "sha256":  "3ea8dad14b4f3f68b46b7375867c4979dbdc10ffa5c339c6262a1a6d3022c47a"
+                   },
+                   {
+                       "source":  "docs/figma_screens/Thợ Xây - Đăng nhập \u0026 Vai trò.png",
+                       "destination":  "00_BAO_VE_DO_AN/06_ANH_THIET_KE_FIGMA/Thợ Xây - Đăng nhập \u0026 Vai trò.png",
+                       "sha256":  "05f402ca7b550e8e4bc3ae761f7bebd5b313a74d3b33a524cdca5c27f8e9acfb"
+                   },
+                   {
+                       "source":  "docs/figma_screens/Thợ Xây - Nạp ví VietQR.png",
+                       "destination":  "00_BAO_VE_DO_AN/06_ANH_THIET_KE_FIGMA/Thợ Xây - Nạp ví VietQR.png",
+                       "sha256":  "8bcbe5175b9fd9544261ac199c82a9e13118402ac3d81028330e94c71aeec627"
+                   },
+                   {
+                       "source":  "docs/figma_screens/Thợ Xây - Trò chuyện.png",
+                       "destination":  "00_BAO_VE_DO_AN/06_ANH_THIET_KE_FIGMA/Thợ Xây - Trò chuyện.png",
+                       "sha256":  "bdb729d0c125baf3ea793d59b2ea6bdea39c0a136217314bc3618154123e2871"
+                   },
+                   {
+                       "source":  "docs/figma_screens/Thợ Xây - Việc của tôi \u0026 Chấm công.png",
+                       "destination":  "00_BAO_VE_DO_AN/06_ANH_THIET_KE_FIGMA/Thợ Xây - Việc của tôi \u0026 Chấm công.png",
+                       "sha256":  "1add7841f59f011333b87bcd3a76c7f48383de21321d6091a9b568840d60baa7"
+                   },
+                   {
+                       "source":  "docs/figma_screens/Thợ Xây · Hồ sơ.png",
+                       "destination":  "00_BAO_VE_DO_AN/06_ANH_THIET_KE_FIGMA/Thợ Xây · Hồ sơ.png",
+                       "sha256":  "053d0a7f79166905f236b0f1337929f1a4cc565d06db3ef488e710cd05a0e1bb"
+                   },
+                   {
+                       "source":  "docs/figma_screens/Thợ Xây · Tìm việc.png",
+                       "destination":  "00_BAO_VE_DO_AN/06_ANH_THIET_KE_FIGMA/Thợ Xây · Tìm việc.png",
+                       "sha256":  "4a2d7f8b44cd2463e20bfa50b4798b7268e453b213077630a4d85dc85e62c46c"
+                   },
+                   {
+                       "source":  "docs/figma_screens/Thợ Xây · Ví tiền.png",
+                       "destination":  "00_BAO_VE_DO_AN/06_ANH_THIET_KE_FIGMA/Thợ Xây · Ví tiền.png",
+                       "sha256":  "f9edb92e6fe2a021fa5c086ab90b5321d752d19f83357737d068616aa0032cc4"
                    },
                    {
                        "source":  ".github/workflows/build-apk.yml",

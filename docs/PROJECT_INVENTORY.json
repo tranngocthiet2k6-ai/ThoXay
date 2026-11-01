@@ -2618,9 +2618,21 @@
           "required": true,
           "default": "0",
           "comment": null
+        },
+        {
+          "name": "detail_photo",
+          "type": "bytea",
+          "required": false,
+          "default": null,
+          "comment": null
         }
       ],
       "constraints": [
+        {
+          "name": "work_logs_detail_photo_size",
+          "kind": "c",
+          "definition": "CHECK (((detail_photo IS NULL) OR (octet_length(detail_photo) <= 2097152)))"
+        },
         {
           "name": "work_logs_photo_check",
           "kind": "c",
@@ -3481,17 +3493,17 @@
     "tables": 30,
     "rest": 90,
     "mvc": 21,
-    "columns": 256,
+    "columns": 257,
     "controllers": 28
   },
-  "schema_sha256": "b28d88859af7cd074d6ac0cc7564d93c44d9240a4b6026cc1898f7873e74c905",
+  "schema_sha256": "47a6e577dd0fcb9983a11324eeb6f9d732bfddd4041647f038701e84a7eab179",
   "controller_sha256": {
     "src/main/java/vn/thoxay/admin/AdminController.java": "5fe7bd79c8ef0365b59b40a31877edc00fab0027e209c00c422d654e5c6dd231",
-    "src/main/java/vn/thoxay/admin/AttendanceAdminController.java": "43a44c017fde61fbec2d6c5db8b1055b38825cac05034ac7016734c5a71ec40a",
+    "src/main/java/vn/thoxay/admin/AttendanceAdminController.java": "a2b03960a4571c338abc9e87806427aa1261ded162815b401b4a961c067bd094",
     "src/main/java/vn/thoxay/admin/CommitmentAdminController.java": "317692e16fac06fd93e14d38cccb94a56549dad86992547b6525b7e96244302e",
     "src/main/java/vn/thoxay/admin/IncidentAdminController.java": "af0db2790f566d73380feb07b111721bb95c23663705974d20051413918125d1",
     "src/main/java/vn/thoxay/admin/PortfolioAdminController.java": "d93d2fcfc8b9bf38da37612d4ac76a506ec98cc732e5bd6f91fdc3c66a98172d",
-    "src/main/java/vn/thoxay/attendance/AttendanceController.java": "73511155b0a902925971ced849a2e4db51735a1e834c10ea6a86ea46bab11b0e",
+    "src/main/java/vn/thoxay/attendance/AttendanceController.java": "a9ca32a3b2b155cb1d0e7b206bb321cb2fe57b97624a1ff8cb974bba1bbe5d16",
     "src/main/java/vn/thoxay/chat/ChatInboxController.java": "e8d254b131e56804519e843db79741ff9dea1a5eb95ea545ffe70b5a864c9b44",
     "src/main/java/vn/thoxay/controller/ApplicationController.java": "797dc316f00a76d67238d87bc073a318bd52e4573bb6df509e67c5c3b2812867",
     "src/main/java/vn/thoxay/controller/AuthController.java": "04324a1eb416b53ee34e75d5caa62e66380136449fb05e4a07c2087e0469ee8c",

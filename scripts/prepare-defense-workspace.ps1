@@ -6,15 +6,29 @@ if (Test-Path -LiteralPath $manifestPath) {
     $old = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
     foreach ($copy in $old.copies) { $previous[$copy.destination] = $copy.sha256 }
 }
+# Recognize the existing, verified defense copies when upgrading their numbering.
+$renamed = @{
+    '00_BAO_VE_DO_AN/BAO_CAO_DO_AN.docx'='00_BAO_VE_DO_AN/01_BAO_CAO_DO_AN.docx'
+    '00_BAO_VE_DO_AN/SLIDE_BAO_VE_DO_AN.pptx'='00_BAO_VE_DO_AN/02_SLIDE_BAO_VE_DO_AN.pptx'
+    '00_BAO_VE_DO_AN/KICH_BAN_DEMO_VA_HOI_DAP.md'='00_BAO_VE_DO_AN/04_KICH_BAN_VA_20_CAU_HOI_DAP.md'
+}
+foreach ($oldPath in $renamed.Keys) {
+    if ($previous.ContainsKey($oldPath)) { $previous[$renamed[$oldPath]]=$previous[$oldPath] }
+}
 $copies = @(
-    @{ source='docs/BAO_CAO_DO_AN.docx'; destination='00_BAO_VE_DO_AN/BAO_CAO_DO_AN.docx' },
-    @{ source='docs/SLIDE_BAO_VE_DO_AN.pptx'; destination='00_BAO_VE_DO_AN/SLIDE_BAO_VE_DO_AN.pptx' },
-    @{ source='docs/KICH_BAN_DEMO_VA_HOI_DAP.md'; destination='00_BAO_VE_DO_AN/KICH_BAN_DEMO_VA_HOI_DAP.md' },
+    @{ source='docs/BAO_CAO_DO_AN.docx'; destination='00_BAO_VE_DO_AN/01_BAO_CAO_DO_AN.docx' },
+    @{ source='docs/SLIDE_BAO_VE_DO_AN.pptx'; destination='00_BAO_VE_DO_AN/02_SLIDE_BAO_VE_DO_AN.pptx' },
+    @{ source='docs/TAI_KHOAN_VA_LINK_DEMO.md'; destination='00_BAO_VE_DO_AN/03_TAI_KHOAN_VA_LINK_DEMO.md' },
+    @{ source='docs/KICH_BAN_DEMO_VA_HOI_DAP.md'; destination='00_BAO_VE_DO_AN/04_KICH_BAN_VA_20_CAU_HOI_DAP.md' },
+    @{ source='docs/BAN_DO_MO_CODE_NHANH.md'; destination='00_BAO_VE_DO_AN/05_BAN_DO_MO_CODE_NHANH.md' },
     @{ source='schema.sql'; destination='migrations/tham_chieu/schema.sql' },
     @{ source='render.yaml'; destination='cloud_deploy/render.yaml' },
     @{ source='Dockerfile'; destination='cloud_deploy/Dockerfile' },
     @{ source='vercel.json'; destination='cloud_deploy/vercel.json' }
 )
+Get-ChildItem -LiteralPath (Join-Path $projectRoot 'docs/figma_screens') -Filter '*.png' -File | Sort-Object Name | ForEach-Object {
+    $copies += @{ source=('docs/figma_screens/'+$_.Name); destination=('00_BAO_VE_DO_AN/06_ANH_THIET_KE_FIGMA/'+$_.Name) }
+}
 Get-ChildItem -LiteralPath (Join-Path $projectRoot '.github/workflows') -File | Sort-Object Name | ForEach-Object {
     $copies += @{ source=('.github/workflows/'+$_.Name); destination=('cloud_deploy/.github/workflows/'+$_.Name) }
 }

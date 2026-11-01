@@ -2,7 +2,7 @@
 
 ## Ứng dụng di động kết nối lao động phổ thông và chủ thầu ThoXay
 
-Ngày chốt số liệu: **30/10/2026**, múi giờ Việt Nam. Nhánh **main**, checkpoint mã nguồn **94e3c693f17a603d56c11f77070e03e8fb6fc679**. Báo cáo mô tả phiên bản đã thực thi và bằng chứng kiểm thử, không sử dụng số liệu người dùng hoặc giao dịch thật để minh họa.
+Ngày chốt số liệu: **02/11/2026**, múi giờ Việt Nam. Nhánh **main**, checkpoint mã nguồn **727adc904da5a2c63e773a5317b82abdd72b5aa3**. Báo cáo mô tả phiên bản đã thực thi và bằng chứng kiểm thử, không sử dụng số liệu người dùng hoặc giao dịch thật để minh họa.
 
 ## Tóm tắt
 
@@ -10,18 +10,18 @@ ThoXay kết nối Thợ, Chủ thầu và Admin trong quy trình tìm việc th
 
 | Chỉ tiêu kiểm kê | Giá trị |
 | --- | --- |
-| Bảng nghiệp vụ / cột | 30 / 256 |
+| Bảng nghiệp vụ / cột | 30 / 257 |
 | Bảng kỹ thuật Flyway | 1, không tính trong 30 bảng nghiệp vụ |
 | Controller / ánh xạ HTTP | 28 / 111 |
 | REST dưới /api/ / route khác | 90 / 21 |
-| Tệp Java sản xuất / Dart lib / màn hình Flutter | 162 / 92 / 22 |
+| Tệp Java sản xuất / Dart lib / màn hình Flutter | 162 / 100 / 22 |
 | Template Thymeleaf | 9 |
-| Kiểm thử thành công | 125 Backend + 110 Flutter + 12 JS; thêm 6 test bảo vệ seed Python |
-| Mốc trước đợt hoàn thiện | 125 Backend + 108 Flutter + 12 JS; tăng 2 regression test Flutter |
+| Kiểm thử thành công | 128 Backend + 114 Flutter + 12 JS; thêm 6 test bảo vệ seed Python |
+| Mốc trước đợt Figma | 125 Backend + 110 Flutter + 12 JS; thêm 3 Backend và 4 Flutter |
 
 ## Phương pháp và giới hạn số liệu
 
-PROJECT_INVENTORY.json được tạo bằng truy vấn chỉ đọc catalog PostgreSQL sau Flyway V21 và quét annotation controller trong Java. Một cặp HTTP method và đường dẫn cụ thể được tính là một endpoint. Alias health được tính riêng. Bộ đếm không tính handler mặc định của Spring, WebSocket hoặc filter đăng nhập form. Bảng user_skills và user_project_images là collection table JPA. Các kiểm thử báo cáo là số test thực chạy, không phải tỷ lệ bao phủ mã nguồn. Các ảnh DEMO và số dư minh họa không chứng minh danh tính hoặc doanh thu thực tế.
+PROJECT_INVENTORY.json được tạo bằng truy vấn chỉ đọc catalog PostgreSQL sau Flyway V22 và quét annotation controller trong Java. Một cặp HTTP method và đường dẫn cụ thể được tính là một endpoint. Alias health được tính riêng. Bộ đếm không tính handler mặc định của Spring, WebSocket hoặc filter đăng nhập form. Bảng user_skills và user_project_images là collection table JPA. Các kiểm thử báo cáo là số test thực chạy, không phải tỷ lệ bao phủ mã nguồn. Các ảnh DEMO và số dư minh họa không chứng minh danh tính hoặc doanh thu thực tế.
 
 ## Mục lục
 
@@ -1369,15 +1369,17 @@ Ràng buộc tham chiếu và kiểm tra:
 | id | bigint | NOT NULL; PK; default tự tăng (sequence) | Khóa định danh bản ghi. |
 | attendance_id | bigint | NOT NULL; FK; UNIQUE | Thuộc tính attendance_id của work_logs. |
 | caption | character varying(1000) | NOT NULL; default '' | Chú thích ảnh. |
-| photo | bytea | NOT NULL | Byte ảnh công việc chuẩn hóa JPEG. |
+| photo | bytea | NOT NULL | Byte ảnh tổng quan công việc chuẩn hóa JPEG. |
 | status | character varying(30) | NOT NULL; default 'PENDING' | Trạng thái nghiệp vụ theo CHECK ở dưới bảng. |
 | feedback | character varying(500) | NOT NULL; default '' | Phản hồi nghiệm thu. |
 | created_at | timestamp with time zone | NOT NULL; default CURRENT_TIMESTAMP | Thời điểm tạo. |
 | reviewed_at | timestamp with time zone | NULL | Thời điểm đánh giá hoặc nghiệm thu. |
 | version | bigint | NOT NULL; default 0 | Phiên bản optimistic locking. |
+| detail_photo | bytea | NULL | Ảnh chi tiết JPEG, tối đa 2MB; NULL cho báo cáo cũ. |
 
 Ràng buộc tham chiếu và kiểm tra:
 
+- `CHECK (((detail_photo IS NULL) OR (octet_length(detail_photo) <= 2097152)))`
 - `CHECK ((octet_length(photo) <= 2097152))`
 - `CHECK (((status)::text = ANY ((ARRAY['PENDING'::character varying, 'APPROVED'::character varying, 'CHANGES_REQUESTED'::character varying])::text[])))`
 - `FOREIGN KEY (attendance_id) REFERENCES attendance_records(id) ON DELETE CASCADE`
@@ -1662,6 +1664,142 @@ Backend là modular monolith: controller nhận DTO và Jakarta Validation, serv
 
 Duyệt đơn khóa công trình và các worker theo thứ tự ID, ngăn vượt số lượng và nhận trùng lịch. Duyệt tổ đội xử lý nguyên nhóm trong một transaction. Chốt sao khóa các worker trước khi tính trung bình. Thanh toán khóa ví, ghi payment/ledger/số dư cùng transaction và tham chiếu duy nhất. Retry idempotent không tự đổi số tiền, ảnh hoặc nội dung; payload khác với cùng khóa bị từ chối 409. QR ca làm chỉ lưu hash và hết hạn sau 5 phút. Snapshot ngân hàng/cam kết không đổi khi thông tin nguồn thay đổi về sau.
 
+## 3.7. Thiết kế giao diện theo bộ Figma
+
+Bộ tham chiếu gồm 16 PNG nguyên gốc do tác giả cung cấp, được lưu tại docs/figma_screens và sao chép trong hồ sơ bảo vệ. Các hình sau là bản thiết kế Figma, không phải ảnh chụp dữ liệu production. Flutter triển khai giao diện phẳng với nền #F8FAFC, thẻ trắng, viền #E2E8F0, bo góc 12–16px; Cam #EA580C cho Thợ và Xanh lục bảo #059669 cho Chủ thầu. Admin giữ Xanh Navy #0F172A. Bố cục desktop căn giữa, danh sách chia cột khi đủ rộng; mobile ưu tiên bốn mục điều hướng và thao tác bằng ngón tay. Màu nút có chữ trắng được làm đậm khi cần bảo đảm tương phản.
+
+### Đối chiếu thiết kế và triển khai
+
+Các số dư, điểm số và tên trong Figma chỉ minh họa bố cục. Ứng dụng dùng dữ liệu API và các bất biến server hiện có. Một số chi tiết được điều chỉnh để bảo đảm tương phản, khả năng cuộn, điều hướng desktop và quyền riêng tư. Hai ảnh công việc được bổ sung bằng migration V22 nullable, tương thích báo cáo một ảnh cũ. Chi tiết từng màn hình và các giới hạn chức năng nằm tại FIGMA_IMPLEMENTATION.md; bộ PNG không thay thế nghiệm thu camera, GPS hoặc ngân hàng trên thiết bị thật.
+
+### 3.7.1. Đăng nhập và vai trò
+
+Hai thẻ chọn vai trò nằm ngang, form gọn và icon trường nhập. Lựa chọn này chỉ thay giao diện, quyền thực tế do JWT và server xác định.
+
+![Thiết kế Figma Đăng nhập và vai trò](<figma_screens/Thợ Xây - Đăng nhập & Vai trò.png>)
+
+*Hình 3.7.1. Đăng nhập và vai trò trong bộ thiết kế Figma nguyên gốc.*
+
+### 3.7.2. Tìm việc của Thợ
+
+Lời chào, bộ lọc ngang, bản đồ có ghim lương và thẻ công trình. Lương, khoảng cách, chủ thầu và huy hiệu KYC lấy từ API; không ghi cứng số liệu trong bản thiết kế.
+
+![Thiết kế Figma Tìm việc của Thợ](<figma_screens/Thợ Xây · Tìm việc.png>)
+
+*Hình 3.7.2. Tìm việc của Thợ trong bộ thiết kế Figma nguyên gốc.*
+
+### 3.7.3. Chi tiết công trình
+
+Khung chi tiết có vị trí, chỉ đường, mức lương và thương lượng. Thanh ứng tuyển cố định ở đáy; cam kết và quyết định giá vẫn qua kiểm tra server.
+
+![Thiết kế Figma Chi tiết công trình](<figma_screens/Thợ Xây - Chi tiết việc.png>)
+
+*Hình 3.7.3. Chi tiết công trình trong bộ thiết kế Figma nguyên gốc.*
+
+### 3.7.4. Việc và chấm công
+
+Lịch tuần, GPS hoặc QR, hai ảnh tổng quan và chi tiết cuối ca, SOS. Quy tắc triển khai giữ GPS 200m, accuracy tối đa 100m và QR hết hạn sau 5 phút.
+
+![Thiết kế Figma Việc và chấm công](<figma_screens/Thợ Xây - Việc của tôi & Chấm công.png>)
+
+*Hình 3.7.4. Việc và chấm công trong bộ thiết kế Figma nguyên gốc.*
+
+### 3.7.5. Ví của Thợ
+
+Số dư khả dụng, ẩn hiện tiền, ký quỹ, cảnh báo dưới 200.000đ, biểu đồ tuần chọn được ngày và lịch sử có dấu cộng trừ. Thu nhập chỉ tính các khoản đã thanh toán.
+
+![Thiết kế Figma Ví của Thợ](<figma_screens/Thợ Xây · Ví tiền.png>)
+
+*Hình 3.7.5. Ví của Thợ trong bộ thiết kế Figma nguyên gốc.*
+
+### 3.7.6. Nạp ví VietQR
+
+Chọn nhanh mệnh giá và xem QR do server sinh. Nội dung đối soát phải duy nhất theo yêu cầu, không thay bằng chuỗi tĩnh của bản vẽ; chế độ demo ghi rõ không chuyển tiền thật.
+
+![Thiết kế Figma Nạp ví VietQR](<figma_screens/Thợ Xây - Nạp ví VietQR.png>)
+
+*Hình 3.7.6. Nạp ví VietQR trong bộ thiết kế Figma nguyên gốc.*
+
+### 3.7.7. Hồ sơ của Thợ
+
+Ba cột thống kê, uy tín, tiến trình bậc, ảnh tay nghề và chụp CCCD hai mặt. Điểm trong bản vẽ không thay thế điểm thực trong database.
+
+![Thiết kế Figma Hồ sơ của Thợ](<figma_screens/Thợ Xây · Hồ sơ.png>)
+
+*Hình 3.7.7. Hồ sơ của Thợ trong bộ thiết kế Figma nguyên gốc.*
+
+### 3.7.8. Trò chuyện của Thợ
+
+Bong bóng phân biệt hai phía và thẻ cam kết ghim đầu cuộc trò chuyện. Chỉ cặp đã ACCEPTED có quyền trao đổi; không giả lập trạng thái đã xem từng tin.
+
+![Thiết kế Figma Trò chuyện của Thợ](<figma_screens/Thợ Xây - Trò chuyện.png>)
+
+*Hình 3.7.8. Trò chuyện của Thợ trong bộ thiết kế Figma nguyên gốc.*
+
+### 3.7.9. Bảng xếp hạng
+
+Podium vị trí 1 ở giữa, 2 và 3 hai bên. Màu huy chương vị trí độc lập với bậc nghề Bạc, Vàng hoặc Kim Cương của từng tài khoản.
+
+![Thiết kế Figma Bảng xếp hạng](<figma_screens/Thợ Xây - Bảng xếp hạng.png>)
+
+*Hình 3.7.9. Bảng xếp hạng trong bộ thiết kế Figma nguyên gốc.*
+
+### 3.7.10. Trang chủ Chủ thầu
+
+Ba chỉ số công trình thực tế, nút đăng việc, bản đồ xem trước, tìm kiếm và thẻ công trình có quản lý mở rộng.
+
+![Thiết kế Figma Trang chủ Chủ thầu](<figma_screens/Chủ thầu - Đăng việc.png>)
+
+*Hình 3.7.10. Trang chủ Chủ thầu trong bộ thiết kế Figma nguyên gốc.*
+
+### 3.7.11. Tạo công trình
+
+Nhập loại thợ, lương, số lượng, lịch và chọn ghim. Hiển thị dự toán quỹ lương; thao tác đăng việc hiện chưa tự khóa ngân sách theo công trình.
+
+![Thiết kế Figma Tạo công trình](<figma_screens/Chủ thầu - Tạo công trình mới.png>)
+
+*Hình 3.7.11. Tạo công trình trong bộ thiết kế Figma nguyên gốc.*
+
+### 3.7.12. Duyệt ứng viên
+
+Lọc trạng thái, xem kinh nghiệm, uy tín, ảnh tay nghề và lương đề xuất. Duyệt nhận vẫn khóa giao dịch để kiểm tra số lượng, lịch và cam kết.
+
+![Thiết kế Figma Duyệt ứng viên](<figma_screens/Chủ thầu - Duyệt thợ.png>)
+
+*Hình 3.7.12. Duyệt ứng viên trong bộ thiết kế Figma nguyên gốc.*
+
+### 3.7.13. Nghiệm thu công việc
+
+Đối chiếu GPS và hai ảnh riêng tư. Chốt sao và hoàn thành trước khi mở thanh toán; công trình có yêu cầu ca và ảnh phải được nghiệm thu theo quy tắc server.
+
+![Thiết kế Figma Nghiệm thu công việc](<figma_screens/Chủ thầu - Nghiệm thu.png>)
+
+*Hình 3.7.13. Nghiệm thu công việc trong bộ thiết kế Figma nguyên gốc.*
+
+### 3.7.14. Ví và chi trả của Chủ thầu
+
+Số dư, tài khoản ký quỹ và chi trả tuần từ ledger đang tải. Ký quỹ tài khoản không được trình bày như ngân sách đã khóa cho một công trình riêng.
+
+![Thiết kế Figma Ví và chi trả của Chủ thầu](<figma_screens/Chủ thầu - Ví & Quỹ lương.png>)
+
+*Hình 3.7.14. Ví và chi trả của Chủ thầu trong bộ thiết kế Figma nguyên gốc.*
+
+### 3.7.15. Hồ sơ và thợ quen
+
+Thông tin doanh nghiệp, KYC và danh sách thợ đã lưu. Nút mời chuẩn bị liên kết công trình để chia sẻ, không tự gửi thông báo hay nhận việc thay Thợ.
+
+![Thiết kế Figma Hồ sơ và thợ quen](<figma_screens/Chủ thầu - Hồ sơ & Thợ ruột.png>)
+
+*Hình 3.7.15. Hồ sơ và thợ quen trong bộ thiết kế Figma nguyên gốc.*
+
+### 3.7.16. Trò chuyện của Chủ thầu
+
+Bong bóng Xanh lục bảo và cam kết ghim. Lịch sử, gửi lại, tin chưa đọc và kiểm soát người tham gia dùng các API và WebSocket hiện có.
+
+![Thiết kế Figma Trò chuyện của Chủ thầu](<figma_screens/Chủ thầu - Trò chuyện & Cam kết.png>)
+
+*Hình 3.7.16. Trò chuyện của Chủ thầu trong bộ thiết kế Figma nguyên gốc.*
+
 # Chương 4. Triển khai và kiểm thử
 
 ## 4.1. Kiến trúc triển khai thực tế
@@ -1691,7 +1829,7 @@ flowchart TB
 
 Web production: https://thoxay.vercel.app. Backend/Admin: https://thoxay-api.onrender.com. APK release mặc định dùng HTTPS Backend, không hard-code địa chỉ LAN. Vercel build script tự chuẩn bị Flutter theo version ghim. Render Docker multi-stage chạy kiểm thử trước khi đóng gói, ứng dụng dùng user không phải root, datasource/khóa JWT nhận qua môi trường hoặc secret files. Không đưa mật khẩu, token, service account hay ảnh người dùng thật vào Git.
 
-Flyway dùng baseline 11 khi nhận database legacy đã có bảng và chạy V12–V21 theo thứ tự. Database mới chạy V1 rồi các migration tiếp theo. V1 được giữ bất biến; clean bị vô hiệu hóa. Production tắt SQL init và JPA dùng validate. Script migrations/ phục vụ đối chiếu/chạy thủ công an toàn lặp; không chạy lại seed như migration. Các chỉ mục mới hỗ trợ lịch, hàng chờ, unread và tổng hợp thu nhập.
+Flyway dùng baseline 11 khi nhận database legacy đã có bảng và chạy V12–V22 theo thứ tự. Database mới chạy V1 rồi các migration tiếp theo. V1 được giữ bất biến; clean bị vô hiệu hóa. Production tắt SQL init và JPA dùng validate. Script migrations/ phục vụ đối chiếu/chạy thủ công an toàn lặp; không chạy lại seed như migration. Các chỉ mục mới hỗ trợ lịch, hàng chờ, unread và tổng hợp thu nhập.
 
 Render Free có thể cần thời gian khởi động lại. Client kiểm tra GET readiness trước thao tác nghiệp vụ, chia sẻ cùng một lượt chờ và hủy request chờ khi dispose. Chỉ health được retry có giới hạn; các POST/PUT/DELETE không tự gửi lặp. Alias /api/auth/health có CORS cho Web. Không diễn giải cold start thành tỷ lệ sẵn sàng đã được kiểm định.
 
@@ -1758,8 +1896,8 @@ Người dùng gửi SOS hoặc sự cố với mô tả và vị trí tự nguy
 
 | Lớp kiểm chứng | Kết quả chốt | Phạm vi và giới hạn |
 | --- | --- | --- |
-| Backend Maven verify | 125 test pass, 0 lỗi, 0 bỏ qua | H2/MockMvc, PostgreSQL migration riêng, cạnh tranh duyệt đơn, ACL, ví, ảnh và giờ Việt Nam. JVM test mặc định UTC. |
-| Flutter | 110 test pass, analyze sạch | Mốc 108 được tăng bằng test khung Tổ đội 320/1440 và test QR demo không mời chuyển tiền thật. |
+| Backend Maven verify | 128 test pass, 0 lỗi, 0 bỏ qua | H2/MockMvc, PostgreSQL migration riêng, cạnh tranh duyệt đơn, ACL, ví, ảnh và giờ Việt Nam. JVM test mặc định UTC. |
+| Flutter | 114 test pass, analyze sạch | Bốn ca mới kiểm tra chọn vai trò, hai ảnh, multipart cùng phiên và nhập dự toán không hữu hạn; mốc trước Figma là 110. |
 | JavaScript Node | 12 test pass | Schema/build config, bộ lọc Admin, KYC/lightbox và sự cố. |
 | Python demo | 6 test pass | Chặn host/database/sự hiện diện dữ liệu thật, yêu cầu migration, chạy lặp không ghi đè. |
 | JAR / Web release | Build thành công | Maven Spring Boot repackage và Flutter build web --release. |
@@ -1784,7 +1922,7 @@ node --test scripts/deployment.test.mjs scripts/tests/*.test.cjs
 
 ## 4.5. Dữ liệu và quy trình bảo vệ
 
-Demo chạy riêng trên thoxay_defense_demo, Backend loopback:18083 và Web loopback:3008, không dùng dữ liệu thật trên Render. Seed tạo 8 tài khoản có tiền tố DEMO, 8 việc OPEN, 39 việc COMPLETED với payment và sao thực sự được lưu trong database demo, 1 việc đang làm cùng chat/ảnh ca/nhóm/SOS. Số dư được đối soát từ ledger; ngày công quá khứ rải theo ngày để biểu đồ có ý nghĩa. Mật khẩu ngẫu nhiên chỉ lưu trong .local/demo/access.md, không được đưa vào báo cáo hoặc slide. Xem DEMO.md và KICH_BAN_DEMO_VA_HOI_DAP.md để chạy lại.
+Demo chạy riêng trên thoxay_defense_demo, Backend loopback:18083 và Web loopback:3008, không dùng dữ liệu thật trên Render. Seed nền tạo 8 tài khoản có tiền tố DEMO, 8 việc OPEN, 39 việc COMPLETED với payment và sao thực sự được lưu trong database demo, 1 việc đang làm cùng chat/ảnh ca/nhóm/SOS. Script refresh-demo-presentation.py sau V22 bổ sung hai công trình theo ngày chạy: một ca đang làm có báo cáo hai ảnh và một công trình tuyển có ứng viên chờ duyệt. Chạy lại cùng ngày không tạo trùng. Khi chốt báo cáo có 50 công trình, không phải số công trình production. Số dư được đối soát từ ledger; ngày công quá khứ rải theo ngày để biểu đồ có ý nghĩa. Mật khẩu ngẫu nhiên chỉ lưu trong .local/demo/access.md, không được đưa vào báo cáo hoặc slide. Xem DEMO.md và KICH_BAN_DEMO_VA_HOI_DAP.md để chạy lại.
 
 # Chương 5. Kết luận và hướng phát triển
 

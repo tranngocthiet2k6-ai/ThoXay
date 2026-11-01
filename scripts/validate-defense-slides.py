@@ -1,5 +1,6 @@
 """Check the native Office deliverable and its defense script after rendering."""
 import ast
+import hashlib
 import re
 import zipfile
 import xml.etree.ElementTree as E
@@ -47,6 +48,11 @@ with zipfile.ZipFile(ROOT / 'docs/SLIDE_BAO_VE_DO_AN.pptx') as package:
         assert fonts and set(fonts) == {'Arial'}
     images = [n for n in names if n.startswith('ppt/media/')]
     assert len(images) >= 12
+    embedded = {hashlib.sha256(package.read(n)).hexdigest() for n in images}
+    figma = list((ROOT / 'docs/figma_screens').glob('*.png'))
+    assert len(figma) == 16
+    for image in figma:
+        assert hashlib.sha256(image.read_bytes()).hexdigest() in embedded, image.name
 script = (ROOT / 'docs/KICH_BAN_DEMO_VA_HOI_DAP.md').read_text(encoding='utf-8')
 questions = [int(n) for n in re.findall(r'^### Câu (\d+)', script, re.M)]
 assert questions == list(range(1, 21)), questions

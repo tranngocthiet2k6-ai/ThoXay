@@ -59,12 +59,12 @@ def table(rows):
             result+=para(content,'TableText',center=header in ('HTTP','STT') and ci==0,keep=ri==0)+'</w:tc>'
         result+='</w:tr>'
     return result+'</w:tbl>'+para()
-def figure(name):
+def figure(name,source=None):
     global image_index
-    image_index+=1;filename=name+'.png';data=(ROOT/'docs/diagrams'/filename).read_bytes();media[filename]=data
+    image_index+=1;filename=name+'.png';data=(source or ROOT/'docs/diagrams'/filename).read_bytes();media[filename]=data
     rid='rIdImage'+str(image_index);rels.append((rid,'image','media/'+filename))
     with Image.open(io.BytesIO(data)) as img:w,h=img.size
-    scale=min(16.0/w,18.5/h);cx=int(w*scale*360000);cy=int(h*scale*360000)
+    scale=min(16.0/w,(16.0 if source else 18.5)/h);cx=int(w*scale*360000);cy=int(h*scale*360000)
     drawing=f'''<w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="{cx}" cy="{cy}"/><wp:docPr id="{image_index}" name="{name}" descr="Sơ đồ {name}"/><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic><pic:nvPicPr><pic:cNvPr id="{image_index}" name="{filename}"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="{rid}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="{cx}" cy="{cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>'''
     return para(drawing,style='Figure',center=True,keep=True)
 
@@ -86,11 +86,21 @@ while i<len(tokens):
             style='Title' if heading_count==1 else 'Subtitle' if heading_count==2 else 'Heading'+str(min(level,3))
             size=40 if style=='Title' else 32 if level<=2 else 28
             content=run(label,True,size=size)
-            body.append(para(content,style,center=style in ('Title','Subtitle'),keep=True,pagebreak=label.startswith('Chương ')))
+            body.append(para(content,style,center=style in ('Title','Subtitle'),keep=True,pagebreak=label.startswith('Chương ') or bool(re.match(r'3\.7\.\d+\.',label))))
         i+=2
     elif not suppress_toc and t.type=='paragraph_open':
         follows_table=i+3<len(tokens) and tokens[i+3].type=='table_open'
-        body.append(para((run('• ') if list_depth else '')+inline(tokens[i+1].children),'ListText' if list_depth else 'Normal',keep=follows_table));i+=2
+        children=tokens[i+1].children or []
+        images=[c for c in children if c.type=='image']
+        if images:
+            from urllib.parse import unquote
+            for image in images:
+                source=(ROOT/'docs'/unquote(image.attrGet('src'))).resolve()
+                if not source.is_relative_to((ROOT/'docs').resolve()):raise ValueError('Image outside docs')
+                body.append(figure('figma-'+str(image_index+1),source))
+        else:
+            body.append(para((run('• ') if list_depth else '')+inline(children),'ListText' if list_depth else 'Normal',keep=follows_table))
+        i+=2
     elif not suppress_toc and t.type=='table_open':
         rows=[];row=[];i+=1
         while tokens[i].type!='table_close':
@@ -135,4 +145,4 @@ files={'[Content_Types].xml':types,'_rels/.rels':'<Relationships xmlns="http://s
 with zipfile.ZipFile(OUT,'w',zipfile.ZIP_DEFLATED) as z:
     for name,value in files.items():z.writestr(name,'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+value)
     for name,value in media.items():z.writestr('word/media/'+name,value)
-print('DOCX exported:',len(media),'embedded diagrams;',sum(t.type=='table_open' for t in tokens),'tables')
+print('DOCX exported:',len(media),'embedded images (Mermaid and Figma);',sum(t.type=='table_open' for t in tokens),'tables')
