@@ -1,0 +1,82 @@
+[
+    {
+        "file":  "Chủ thầu - Đăng việc.png",
+        "sha256":  "2ad4783a93f72b9b8e7cfb3177743b2f0588ca82e6a2e3e6974614797819ff83",
+        "bytes":  56843
+    },
+    {
+        "file":  "Chủ thầu - Duyệt thợ.png",
+        "sha256":  "350b4148ce0f77f581842da3201483187af06313905d538dfb016bb81f63b2d4",
+        "bytes":  152923
+    },
+    {
+        "file":  "Chủ thầu - Hồ sơ \u0026 Thợ ruột.png",
+        "sha256":  "c4838a223b268ab746e73fdeef1c9b3f68e4f0fe7b838e5b5d79ce6eabfbc986",
+        "bytes":  64060
+    },
+    {
+        "file":  "Chủ thầu - Nghiệm thu.png",
+        "sha256":  "92d6673687e014504189f29cb41d1af5f1d7b430bf872d6dff33b28361d9e1c7",
+        "bytes":  110598
+    },
+    {
+        "file":  "Chủ thầu - Tạo công trình mới.png",
+        "sha256":  "67cd21bfb132a41e77e7f90a585b715432520f12f592fd19228cff56d97aa8ac",
+        "bytes":  54650
+    },
+    {
+        "file":  "Chủ thầu - Trò chuyện \u0026 Cam kết.png",
+        "sha256":  "25214141350b4358e20d3fa0553f57691bbd67d4bdcaf1059d05fe732233817a",
+        "bytes":  106003
+    },
+    {
+        "file":  "Chủ thầu - Ví \u0026 Quỹ lương.png",
+        "sha256":  "3f0869969c738edf089e3cabc60f0432a544d4acfbf2eac352f88287ce2a6721",
+        "bytes":  62155
+    },
+    {
+        "file":  "Thợ Xây - Bảng xếp hạng.png",
+        "sha256":  "4b0d09941c30035a2a75b62c47ab57a9a64312a4b19a4a178cc65869c433df0a",
+        "bytes":  68460
+    },
+    {
+        "file":  "Thợ Xây - Chi tiết việc.png",
+        "sha256":  "3ea8dad14b4f3f68b46b7375867c4979dbdc10ffa5c339c6262a1a6d3022c47a",
+        "bytes":  58506
+    },
+    {
+        "file":  "Thợ Xây - Đăng nhập \u0026 Vai trò.png",
+        "sha256":  "05f402ca7b550e8e4bc3ae761f7bebd5b313a74d3b33a524cdca5c27f8e9acfb",
+        "bytes":  44229
+    },
+    {
+        "file":  "Thợ Xây - Nạp ví VietQR.png",
+        "sha256":  "8bcbe5175b9fd9544261ac199c82a9e13118402ac3d81028330e94c71aeec627",
+        "bytes":  45170
+    },
+    {
+        "file":  "Thợ Xây - Trò chuyện.png",
+        "sha256":  "bdb729d0c125baf3ea793d59b2ea6bdea39c0a136217314bc3618154123e2871",
+        "bytes":  97764
+    },
+    {
+        "file":  "Thợ Xây - Việc của tôi \u0026 Chấm công.png",
+        "sha256":  "1add7841f59f011333b87bcd3a76c7f48383de21321d6091a9b568840d60baa7",
+        "bytes":  56877
+    },
+    {
+        "file":  "Thợ Xây · Hồ sơ.png",
+        "sha256":  "053d0a7f79166905f236b0f1337929f1a4cc565d06db3ef488e710cd05a0e1bb",
+        "bytes":  114537
+    },
+    {
+        "file":  "Thợ Xây · Tìm việc.png",
+        "sha256":  "4a2d7f8b44cd2463e20bfa50b4798b7268e453b213077630a4d85dc85e62c46c",
+        "bytes":  67379
+    },
+    {
+        "file":  "Thợ Xây · Ví tiền.png",
+        "sha256":  "f9edb92e6fe2a021fa5c086ab90b5321d752d19f83357737d068616aa0032cc4",
+        "bytes":  56684
+    }
+]
