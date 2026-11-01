@@ -1,3 +1,5 @@
+import '../models/scheduling.dart';
+import '../widgets/app_snack_bar.dart';
 import '../theme/app_theme.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/content_skeleton.dart';
@@ -196,21 +198,91 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                 Card(
                   margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                   child: ListTile(
-                    leading: const Icon(Icons.apartment_outlined),
+                    leading: Icon(
+                      Icons.push_pin_outlined,
+                      color: theme.colorScheme.primary,
+                    ),
                     title: Text(
                       widget.job.title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     subtitle: Text(
-                      '${money(widget.job.salaryPerDay)} / ngày · ${widget.job.jobType}',
+                      '${money(widget.job.salaryPerDay)} / ngày · Xem phiếu cam kết',
                     ),
                     trailing: const Icon(Icons.chevron_right),
-                    onTap: () => showJobDetails<void>(context, widget.job),
+                    onTap: () async {
+                      try {
+                        final list =
+                            widget.api.session?.role == 'ROLE_CONTRACTOR'
+                            ? await widget.api.jobApplications(widget.job.id)
+                            : await widget.api.workerApplications();
+                        if (!context.mounted) return;
+                        final application = list
+                            .where(
+                              (a) =>
+                                  a.job.id == widget.job.id &&
+                                  a.workerId ==
+                                      (widget.api.session?.role ==
+                                              'ROLE_CONTRACTOR'
+                                          ? widget.peerId
+                                          : widget.api.session!.userId),
+                            )
+                            .firstOrNull;
+                        if (application == null) {
+                          await showJobDetails<void>(context, widget.job);
+                          return;
+                        }
+                        final document = widget.api.commitment(application.id);
+                        await showDialog<void>(
+                          context: context,
+                          builder: (dialogContext) => AlertDialog(
+                            title: const Text('Phiếu cam kết nhận việc'),
+                            content: SizedBox(
+                              width: 560,
+                              child: FutureBuilder<CommitmentDocument>(
+                                future: document,
+                                builder: (context, snapshot) {
+                                  if (snapshot.hasError) {
+                                    return const Text(
+                                      'Chưa tải được cam kết. Đóng và thử lại.',
+                                    );
+                                  }
+                                  if (!snapshot.hasData) {
+                                    return const ContentSkeleton(compact: true);
+                                  }
+                                  return SingleChildScrollView(
+                                    child: SelectableText(snapshot.data!.text),
+                                  );
+                                },
+                              ),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(dialogContext),
+                                child: const Text('Đóng'),
+                              ),
+                            ],
+                          ),
+                        );
+                      } on ApiException catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            AppSnackBar(
+                              content: Text(e.message),
+                              kind: NoticeKind.error,
+                            ),
+                          );
+                        }
+                      }
+                    },
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   child: Row(
                     children: [
                       Icon(
@@ -309,9 +381,19 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                                   vertical: 12,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: mine
+                                  color:
+                                      mine &&
+                                          widget.api.session?.role ==
+                                              'ROLE_CONTRACTOR'
+                                      ? const Color(0xff047857)
+                                      : mine
                                       ? theme.colorScheme.primaryContainer
                                       : AppPalette.of(context).surface,
+                                  border: Border.all(
+                                    color: mine
+                                        ? theme.colorScheme.primaryContainer
+                                        : AppPalette.of(context).border,
+                                  ),
                                   borderRadius: BorderRadius.only(
                                     topLeft: const Radius.circular(20),
                                     topRight: const Radius.circular(20),
@@ -360,10 +442,24 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                                           message.latitude!,
                                           message.longitude!,
                                         ),
-                                        icon: const Icon(Icons.location_on_outlined),
-                                        label: const Text('Mở vị trí trên bản đồ'),
+                                        icon: const Icon(
+                                          Icons.location_on_outlined,
+                                        ),
+                                        label: const Text(
+                                          'Mở vị trí trên bản đồ',
+                                        ),
                                       ),
-                                    Text(message.content),
+                                    Text(
+                                      message.content,
+                                      style: TextStyle(
+                                        color:
+                                            mine &&
+                                                widget.api.session?.role ==
+                                                    'ROLE_CONTRACTOR'
+                                            ? Colors.white
+                                            : AppPalette.of(context).ink,
+                                      ),
+                                    ),
                                     if (message.kind == 'LOCATION' &&
                                         message.latitude != null &&
                                         message.longitude != null)
@@ -374,7 +470,15 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                                     const SizedBox(height: 4),
                                     Text(
                                       _time(message.createdAt),
-                                      style: theme.textTheme.labelSmall,
+                                      style: theme.textTheme.labelSmall
+                                          ?.copyWith(
+                                            color:
+                                                mine &&
+                                                    widget.api.session?.role ==
+                                                        'ROLE_CONTRACTOR'
+                                                ? Colors.white70
+                                                : AppPalette.of(context).muted,
+                                          ),
                                     ),
                                   ],
                                 ),

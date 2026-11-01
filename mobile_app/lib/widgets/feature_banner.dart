@@ -16,19 +16,9 @@ class FeatureBanner extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.all(24),
     decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(24),
-      gradient: LinearGradient(
-        colors: AppTheme.brandGradient(context),
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-      boxShadow: [
-        BoxShadow(
-          color: Theme.of(context).colorScheme.primary.withValues(alpha: .13),
-          blurRadius: 24,
-          offset: const Offset(0, 8),
-        ),
-      ],
+      borderRadius: BorderRadius.circular(16),
+      color: AppPalette.of(context).surface,
+      border: Border.all(color: AppPalette.of(context).border),
     ),
     child: Row(
       children: [
@@ -38,13 +28,16 @@ class FeatureBanner extends StatelessWidget {
             children: [
               Text(
                 greeting,
-                style: const TextStyle(color: Colors.white70, fontSize: 13),
+                style: TextStyle(
+                  color: AppPalette.of(context).muted,
+                  fontSize: 13,
+                ),
               ),
               const SizedBox(height: 10),
               Text(
                 title,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: AppPalette.of(context).ink,
                   fontSize: 24,
                   fontWeight: FontWeight.w800,
                   height: 1.2,
@@ -53,8 +46,8 @@ class FeatureBanner extends StatelessWidget {
               const SizedBox(height: 10),
               Text(
                 subtitle,
-                style: const TextStyle(
-                  color: Colors.white70,
+                style: TextStyle(
+                  color: AppPalette.of(context).muted,
                   fontSize: 13,
                   height: 1.5,
                 ),
@@ -67,10 +60,10 @@ class FeatureBanner extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: .1),
-              borderRadius: BorderRadius.circular(24),
+              color: AppPalette.of(context).ink.withValues(alpha: .1),
+              borderRadius: BorderRadius.circular(16),
             ),
-            child: Icon(icon, color: Colors.white, size: 42),
+            child: Icon(icon, color: AppPalette.of(context).ink, size: 42),
           ),
         ],
       ],

@@ -1,10 +1,9 @@
-import 'design_motion.dart';
-
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
+import 'figma_components.dart';
 import 'tier_badge.dart';
 
 class ProfileSummary extends StatelessWidget {
@@ -24,11 +23,11 @@ class ProfileSummary extends StatelessWidget {
   final int score, completed;
   @override
   Widget build(BuildContext context) {
-    final diamond = tier == 'DIAMOND';
-    final gold = tier == 'GOLD';
+    final palette = AppPalette.of(context),
+        color = Theme.of(context).colorScheme.primary;
+    final diamond = tier == 'DIAMOND', gold = tier == 'GOLD';
     final targetScore = gold ? 95 : 80, targetJobs = gold ? 20 : 5;
     final targetStars = gold ? 4.7 : 4.0;
-    // Display progress only; the server's tier remains authoritative.
     final criteria = [
       math.min(score / targetScore, 1.0),
       math.min(rating / targetStars, 1.0),
@@ -38,64 +37,114 @@ class ProfileSummary extends StatelessWidget {
     final progress = diamond
         ? 1.0
         : criteria.reduce((a, b) => a + b) / criteria.length;
-    return DesignReveal(
-      child: DesignSurface(
-        dark: true,
-        child: DefaultTextStyle(
-          style: const TextStyle(
-            fontFamily: 'PlusJakartaSans',
-            color: Colors.white,
-            height: 1.5,
-          ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        FigmaCard(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  const CircleAvatar(
-                    backgroundColor: Colors.white24,
-                    child: Icon(Icons.person, color: Colors.white),
+                  CircleAvatar(
+                    radius: 28,
+                    backgroundColor: Theme.of(context)
+                        .colorScheme
+                        .primaryContainer,
+                    child: Icon(
+                      worker ? Icons.person_outline : Icons.apartment_outlined,
+                      color: color,
+                      size: 30,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Text(
-                      name,
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w800,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          name,
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          worker
+                              ? 'Thợ xây · Hồ sơ nghề nghiệp'
+                              : 'Chủ thầu · Quản lý công trình',
+                          style: TextStyle(fontSize: 12, color: palette.muted),
+                        ),
+                        if (verified)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 6),
+                            child: KycBadge(),
+                          ),
+                      ],
                     ),
                   ),
-                  if (verified)
-                    const Tooltip(
-                      message: 'Đã xác thực CCCD',
-                      child: Icon(Icons.verified, color: AppColors.skySoft),
-                    ),
                 ],
               ),
-              const SizedBox(height: 16),
               if (worker) ...[
-                TierBadge(tier: tier),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 16,
-                  runSpacing: 8,
-                  children: [
-                    Text(
-                      completed == 0
-                          ? 'Chưa có đánh giá'
-                          : '★ ${rating.toStringAsFixed(1)}/5 sao',
+                const Divider(height: 28),
+                FigmaMetrics(
+                  values: [
+                    (value: '$completed', label: 'Việc hoàn thành'),
+                    (
+                      value: completed == 0
+                          ? '—'
+                          : '${rating.toStringAsFixed(1)}/5',
+                      label: 'Đánh giá',
                     ),
-                    Text('$score/100 uy tín'),
-                    Text('$completed công trình'),
+                    (value: '$score/100', label: 'Uy tín'),
                   ],
                 ),
-                const SizedBox(height: 16),
+                if (completed == 0)
+                  Text(
+                    'Chưa có đánh giá công trình',
+                    style: TextStyle(fontSize: 11, color: palette.muted),
+                  ),
+              ],
+            ],
+          ),
+        ),
+        if (worker) ...[
+          const SizedBox(height: 16),
+          FigmaCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.verified_user_outlined, size: 20, color: color),
+                    const SizedBox(width: 8),
+                    const Expanded(
+                      child: Text(
+                        'Điểm uy tín',
+                        style: TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                    Text(
+                      '$score/100',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        color: color,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                LinearProgressIndicator(
+                  value: (score / 100).clamp(0.0, 1.0),
+                  minHeight: 6,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                const SizedBox(height: 12),
+                TierBadge(tier: tier),
+                const SizedBox(height: 8),
                 Text(
                   diamond
                       ? 'Bạn đã đạt bậc Kim Cương'
-                      : 'Hành trình đến bậc ${gold ? 'Kim Cương' : 'Vàng'}',
-                  style: const TextStyle(fontWeight: FontWeight.w700),
+                      : 'Hành trình đến bậc ${gold ? "Kim Cương" : "Vàng"}',
+                  style: TextStyle(fontSize: 12, color: palette.muted),
                 ),
                 const SizedBox(height: 8),
                 Semantics(
@@ -103,26 +152,25 @@ class ProfileSummary extends StatelessWidget {
                   value: '${(progress * 100).round()}%',
                   child: LinearProgressIndicator(
                     value: progress,
-                    minHeight: 8,
-                    borderRadius: BorderRadius.circular(8),
-                    color: Colors.white,
-                    backgroundColor: Colors.white24,
+                    minHeight: 4,
+                    borderRadius: BorderRadius.circular(4),
+                    color: palette.successStrong,
+                    backgroundColor: palette.border,
                   ),
                 ),
-                const SizedBox(height: 8),
                 if (!diamond)
-                  Text(
-                    'Mục tiêu: $targetScore điểm · $targetStars sao · $targetJobs công trình${gold ? ' · đã xác thực CCCD' : ''}',
-                    style: const TextStyle(color: Colors.white70),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      'Mục tiêu: $targetScore điểm · $targetStars sao · $targetJobs công trình${gold ? " · đã xác thực CCCD" : ""}',
+                      style: TextStyle(fontSize: 11, color: palette.muted),
+                    ),
                   ),
-              ] else
-                const Text(
-                  'Chủ thầu · Kết nối nhân lực cho công trình của bạn',
-                ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ),
+        ],
+      ],
     );
   }
 }

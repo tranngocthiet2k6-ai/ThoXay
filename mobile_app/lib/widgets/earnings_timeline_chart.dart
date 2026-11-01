@@ -52,7 +52,7 @@ class _EarningsTimelineChartState extends State<EarningsTimelineChart> {
               LayoutBuilder(
                 builder: (context, bounds) {
                   final width = math.max(
-                    56.0,
+                    days.length <= 7 ? 32.0 : 56.0,
                     bounds.maxWidth / math.max(1, days.length),
                   );
                   return Scrollbar(

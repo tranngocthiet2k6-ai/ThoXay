@@ -3,9 +3,8 @@ import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
-import 'tier_badge.dart';
-import 'design_motion.dart';
 import 'server_connection_notice.dart';
+import 'tier_badge.dart';
 
 class HeroGreeting extends StatefulWidget {
   const HeroGreeting({
@@ -35,163 +34,81 @@ class _HeroGreetingState extends State<HeroGreeting> {
   Future<void> _load() async {
     if (widget.api.session == null) return;
     try {
-      final profile = await widget.api.profile();
-      if (mounted) setState(() => _profile = profile);
+      final person = await widget.api.profile();
+      if (mounted) setState(() => _profile = person);
     } on ApiException {
-      /* A failed greeting must not block job discovery. */
+      /* Greeting must never block job discovery. */
     }
   }
 
   @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      ServerConnectionNotice(api: widget.api),
-      _greeting(context),
-    ],
-  );
-
-  Widget _greeting(BuildContext context) {
-    final name = _profile?.fullName ?? widget.api.session?.fullName ?? 'bạn';
+  Widget build(BuildContext context) {
+    final palette = AppPalette.of(context);
     final worker =
         widget.api.session?.role == 'ROLE_WORKER' ||
         widget.availability != null;
-    return DesignReveal(
-      child: DesignSurface(
-        dark: true,
-        child: LayoutBuilder(
-          builder: (context, bounds) {
-            final heading = Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+    final name = _profile?.fullName ?? widget.api.session?.fullName ?? 'bạn';
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ServerConnectionNotice(api: widget.api),
+        Text(
+          worker ? 'THỢ XÂY / DÀNH CHO THỢ' : 'CHỦ THẦU / QUẢN LÝ CÔNG TRÌNH',
+          style: TextStyle(fontSize: 11, color: palette.muted),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          worker
+              ? (widget.title.contains('ứng tuyển')
+                    ? 'Việc của tôi'
+                    : 'Chào ${name.trim().split(" ").last}!')
+              : widget.title,
+          style: Theme.of(context).textTheme.headlineSmall
+              ?.copyWith(fontSize: 26),
+        ),
+        if (worker) ...[
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 12,
+            runSpacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              if (_profile?.workerTier != null)
+                TierBadge(tier: _profile!.workerTier!),
+              Container(
+                decoration: BoxDecoration(
+                  color: palette.surface,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: palette.border),
+                ),
+                padding: const EdgeInsets.only(left: 12, right: 4),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    CircleAvatar(
-                      radius: 21,
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      child: Text(
-                        name.isEmpty
-                            ? 'TX'
-                            : name.characters.first.toUpperCase(),
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onPrimary,
-                          fontWeight: FontWeight.w800,
-                        ),
+                    Text(
+                      widget.availability == true
+                          ? 'Đang nhận việc'
+                          : widget.availability == false
+                          ? 'Tạm ngưng nhận việc'
+                          : 'Đang đồng bộ trạng thái',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Chào $name,',
-                            style: const TextStyle(
-                              color: AppColors.surface,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 16,
-                            ),
-                          ),
-                          const SizedBox(height: 3),
-                          Text(
-                            worker
-                                ? 'KHÔNG GIAN NGƯỜI THỢ'
-                                : 'KHÔNG GIAN CHỦ THẦU',
-                            style: const TextStyle(
-                              color: Colors.white60,
-                              fontSize: 10,
-                              letterSpacing: 1.4,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                DesignReveal(
-                  child: Text(
-                    widget.title,
-                    style: const TextStyle(
-                      color: AppColors.surface,
-                      fontSize: 30,
-                      height: 1.2,
-                      letterSpacing: -.8,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                DesignReveal(
-                  child: Text(
-                    widget.subtitle,
-                    style: const TextStyle(color: Colors.white70, height: 1.6),
-                  ),
-                ),
-                if (_profile?.role == 'ROLE_WORKER') ...[
-                  const SizedBox(height: 16),
-                  TierBadge(tier: _profile!.workerTier ?? 'SILVER'),
-                ],
-              ],
-            );
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (bounds.maxWidth >= 700)
-                  Row(
-                    children: [
-                      Expanded(child: heading),
-                      const SizedBox(width: 24),
-                      const SizedBox(
-                        width: 240,
-                        child: ConstructionArtwork(height: 180),
-                      ),
-                    ],
-                  )
-                else
-                  heading,
-                if (worker) ...[
-                  const SizedBox(height: 24),
-                  Material(
-                    color: AppPalette.of(context).surface,
-                    borderRadius: BorderRadius.circular(16),
-                    child: SwitchListTile(
+                    const SizedBox(width: 4),
+                    Switch(
                       key: const ValueKey('availability-switch'),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      secondary: Icon(
-                        widget.availability == true
-                            ? Icons.wifi_rounded
-                            : Icons.pause_circle_outline,
-                        color: widget.availability == true
-                            ? AppPalette.of(context).success
-                            : AppPalette.of(context).muted,
-                      ),
-                      title: AnimatedSwitcher(
-                        duration: MediaQuery.disableAnimationsOf(context)
-                            ? Duration.zero
-                            : const Duration(milliseconds: 180),
-                        child: Text(
-                          widget.availability == true
-                              ? 'Đang nhận việc'
-                              : widget.availability == false
-                              ? 'Tạm ngưng nhận việc'
-                              : 'Đang đồng bộ trạng thái',
-                          key: ValueKey(widget.availability),
-                          style: const TextStyle(fontWeight: FontWeight.w700),
-                        ),
-                      ),
                       value: widget.availability == true,
                       onChanged: widget.onAvailabilityChanged,
                     ),
-                  ),
-                ],
-              ],
-            );
-          },
-        ),
-      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ],
     );
   }
 }

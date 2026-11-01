@@ -9,6 +9,8 @@ import '../services/location_service.dart';
 import 'loading_jobs.dart';
 
 class OsmMapView extends StatefulWidget {
+  @visibleForTesting
+  static TileProvider Function()? testTileProviderFactory;
   const OsmMapView({
     super.key,
     required this.center,
@@ -17,6 +19,7 @@ class OsmMapView extends StatefulWidget {
     this.onTap,
     this.tileProvider,
     this.recenterOnUpdate = true,
+    this.interactive = true,
   });
   final GeoPoint center;
   final List<Marker> markers;
@@ -24,6 +27,7 @@ class OsmMapView extends StatefulWidget {
   final ValueChanged<GeoPoint>? onTap;
   final TileProvider? tileProvider;
   final bool recenterOnUpdate;
+  final bool interactive;
   @override
   State<OsmMapView> createState() => _OsmMapViewState();
 }
@@ -35,7 +39,9 @@ class _OsmMapViewState extends State<OsmMapView> {
   );
   final _controller = MapController();
   late final TileProvider _provider =
-      widget.tileProvider ?? NetworkTileProvider();
+      widget.tileProvider ??
+      OsmMapView.testTileProviderFactory?.call() ??
+      NetworkTileProvider();
   bool _ready = false, _tileError = false;
   LatLng _latLng(GeoPoint point) => LatLng(
     point.latitude.clamp(-85.05112878, 85.05112878).toDouble(),
@@ -105,7 +111,7 @@ class _OsmMapViewState extends State<OsmMapView> {
 
   @override
   Widget build(BuildContext context) => ClipRRect(
-    borderRadius: BorderRadius.circular(20),
+    borderRadius: BorderRadius.circular(16),
     child: Stack(
       children: [
         FlutterMap(
@@ -116,8 +122,10 @@ class _OsmMapViewState extends State<OsmMapView> {
             minZoom: 2,
             maxZoom: 19,
             backgroundColor: AppPalette.of(context).soft,
-            interactionOptions: const InteractionOptions(
-              flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+            interactionOptions: InteractionOptions(
+              flags: widget.interactive
+                  ? InteractiveFlag.all & ~InteractiveFlag.rotate
+                  : InteractiveFlag.none,
             ),
             onMapReady: () {
               _ready = true;
@@ -139,7 +147,8 @@ class _OsmMapViewState extends State<OsmMapView> {
               panBuffer: 0,
               keepBuffer: 1,
               tileBuilder: (context, image, tile) =>
-                  tile.loadStarted != null &&
+                  _provider is NetworkTileProvider &&
+                      tile.loadStarted != null &&
                       tile.loadFinishedAt == null &&
                       !tile.loadError &&
                       !tile.cancelLoading.isCompleted
@@ -156,46 +165,65 @@ class _OsmMapViewState extends State<OsmMapView> {
               errorTileCallback: (_, error, stackTrace) => _onTileError(),
             ),
             MarkerLayer(markers: widget.markers),
-            SimpleAttributionWidget(
-              source: const Text(
-                'OpenStreetMap contributors',
-                style: TextStyle(color: Colors.black),
-              ),
-              onTap: () => launchUrl(
-                Uri.parse('https://www.openstreetmap.org/copyright'),
+            Align(
+              alignment: Alignment.bottomRight,
+              child: Material(
+                color: Colors.white.withValues(alpha: .94),
+                child: InkWell(
+                  onTap: () => launchUrl(
+                    Uri.parse('https://www.openstreetmap.org/copyright'),
+                  ),
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                    child: Wrap(
+                      alignment: WrapAlignment.end,
+                      children: [
+                        Text(
+                          '© ',
+                          style: TextStyle(color: Colors.black, fontSize: 10),
+                        ),
+                        Text(
+                          'OpenStreetMap contributors',
+                          style: TextStyle(color: Colors.black, fontSize: 10),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ),
           ],
         ),
-        Positioned(
-          top: 8,
-          right: 8,
-          child: Material(
-            color: AppPalette.of(context).surface,
-            borderRadius: BorderRadius.circular(12),
-            elevation: 2,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  tooltip: 'Phóng to bản đồ',
-                  onPressed: () => _zoom(1),
-                  icon: const Icon(Icons.add),
-                ),
-                IconButton(
-                  tooltip: 'Thu nhỏ bản đồ',
-                  onPressed: () => _zoom(-1),
-                  icon: const Icon(Icons.remove),
-                ),
-                IconButton(
-                  tooltip: 'Về vùng đang tìm',
-                  onPressed: _fit,
-                  icon: const Icon(Icons.center_focus_strong),
-                ),
-              ],
+        if (widget.interactive)
+          Positioned(
+            top: 8,
+            right: 8,
+            child: Material(
+              color: AppPalette.of(context).surface,
+              borderRadius: BorderRadius.circular(12),
+              elevation: 2,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    tooltip: 'Phóng to bản đồ',
+                    onPressed: () => _zoom(1),
+                    icon: const Icon(Icons.add),
+                  ),
+                  IconButton(
+                    tooltip: 'Thu nhỏ bản đồ',
+                    onPressed: () => _zoom(-1),
+                    icon: const Icon(Icons.remove),
+                  ),
+                  IconButton(
+                    tooltip: 'Về vùng đang tìm',
+                    onPressed: _fit,
+                    icon: const Icon(Icons.center_focus_strong),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
         if (_tileError)
           Positioned(
             top: 8,

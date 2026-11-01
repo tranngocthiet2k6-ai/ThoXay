@@ -1,3 +1,6 @@
+import '../widgets/applicant_evidence.dart';
+import '../widgets/figma_components.dart';
+import '../widgets/figma_job_map.dart';
 import '../widgets/appearance_button.dart';
 import '../widgets/incident_actions.dart';
 import '../widgets/weather_card.dart';
@@ -47,15 +50,26 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
                 .where((j) => j.status == 'IN_PROGRESS' || j.status == 'OPEN')
                 .firstOrNull ??
             _jobs.first;
-  List<Job> get _visibleJobs => _jobs
-      .where(
-        (j) =>
-            (_status.isEmpty || j.status == _status) &&
-            '${j.title} ${j.address}'.toLowerCase().contains(
-              _query.toLowerCase().trim(),
-            ),
-      )
-      .toList();
+  List<Job> get _visibleJobs =>
+      _jobs
+          .where(
+            (j) =>
+                (_status.isEmpty || j.status == _status) &&
+                '${j.title} ${j.address}'.toLowerCase().contains(
+                  _query.toLowerCase().trim(),
+                ),
+          )
+          .toList()
+        ..sort((a, b) {
+          int priority(String status) => switch (status) {
+            'IN_PROGRESS' => 0,
+            'OPEN' => 1,
+            'COMPLETED' => 2,
+            _ => 3,
+          };
+          final compared = priority(a.status).compareTo(priority(b.status));
+          return compared != 0 ? compared : b.id.compareTo(a.id);
+        });
   @override
   void dispose() {
     _search.dispose();
@@ -125,7 +139,9 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
     if (completed == true && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         AppSnackBar(
-          content: const Text('Đã hoàn thành công trình và lưu đánh giá cho thợ.'),
+          content: const Text(
+            'Đã hoàn thành công trình và lưu đánh giá cho thợ.',
+          ),
         ),
       );
       await _refresh();
@@ -135,19 +151,28 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
-      title: const Text('Công trình của tôi'),
+      title: const Text('Chủ thầu'),
       actions: [
+        HomeInboxActions(api: widget.api),
         const AppearanceButton(),
         FinanceMenu(api: widget.api),
-        IconButton(
-          tooltip: 'Làm mới',
-          onPressed: _loading ? null : _refresh,
-          icon: const Icon(Icons.refresh),
-        ),
-        IconButton(
-          tooltip: 'Đăng xuất',
-          onPressed: widget.api.logout,
-          icon: const Icon(Icons.logout),
+        PopupMenuButton<String>(
+          tooltip: 'Tài khoản và làm mới',
+          onSelected: (value) {
+            if (value == 'logout') {
+              widget.api.logout();
+            } else {
+              _refresh();
+            }
+          },
+          itemBuilder: (_) => [
+            PopupMenuItem(
+              value: 'refresh',
+              enabled: !_loading,
+              child: const Text('Làm mới'),
+            ),
+            const PopupMenuItem(value: 'logout', child: Text('Đăng xuất')),
+          ],
         ),
       ],
     ),
@@ -164,10 +189,73 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
                   sliver: SliverToBoxAdapter(
                     child: HeroGreeting(
                       api: widget.api,
-                      title: 'Tìm thợ cho công trình',
+                      title: 'Công trình của tôi',
                       subtitle: _loading
                           ? 'Đang cập nhật công trình của bạn…'
                           : '${_jobs.length} công trình · ${_jobs.where((j) => j.status == 'OPEN').length} đang tuyển',
+                    ),
+                  ),
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  sliver: SliverToBoxAdapter(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        FigmaCard(
+                          child: FigmaMetrics(
+                            accent: true,
+                            values: [
+                              (
+                                value:
+                                    '${_jobs.where((j) => j.status == "OPEN").length}',
+                                label: 'Đang tuyển',
+                              ),
+                              (
+                                value:
+                                    '${_jobs.where((j) => j.status == "IN_PROGRESS").length}',
+                                label: 'Đang thực hiện',
+                              ),
+                              (
+                                value:
+                                    '${_jobs.where((j) => j.status == "COMPLETED").length}',
+                                label: 'Hoàn thành',
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        FilledButton.icon(
+                          onPressed: _loading ? null : _create,
+                          icon: const Icon(Icons.add),
+                          label: const Text('Đăng công trình'),
+                        ),
+                        if (_weatherJob != null) ...[
+                          const SizedBox(height: 16),
+                          JobMapPreview(
+                            center: GeoPoint(
+                              _weatherJob!.latitude,
+                              _weatherJob!.longitude,
+                            ),
+                            jobs: _jobs
+                                .where(
+                                  (j) =>
+                                      j.status == 'OPEN' ||
+                                      j.status == 'IN_PROGRESS',
+                                )
+                                .toList(),
+                            onJobTap: (j) => showJobDetails<void>(
+                              context,
+                              j,
+                              api: widget.api,
+                              action: FilledButton(
+                                onPressed: () => _applicants(j),
+                                child: const Text('Duyệt thợ'),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ),
                 ),
@@ -175,36 +263,52 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
                   SliverPadding(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                     sliver: SliverToBoxAdapter(
-                      child: Column(
+                      child: ExpansionTile(
+                        title: const Text(
+                          'Thời tiết công trình',
+                          style: TextStyle(fontSize: 12),
+                        ),
                         children: [
-                          if (_jobs.length > 1)
-                            DropdownButtonFormField<int>(
-                              initialValue: _weatherJob!.id,
-                              isExpanded: true,
-                              decoration: const InputDecoration(
-                                labelText: 'Thời tiết công trình',
+                          Column(
+                            children: [
+                              if (_jobs.length > 1)
+                                DropdownButtonFormField<int>(
+                                  initialValue: _weatherJob!.id,
+                                  isExpanded: true,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Thời tiết công trình',
+                                  ),
+                                  items: _jobs
+                                      .map(
+                                        (j) => DropdownMenuItem(
+                                          value: j.id,
+                                          child: Text(
+                                            j.title,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      )
+                                      .toList(),
+                                  onChanged: (id) =>
+                                      setState(() => _weatherJobId = id),
+                                ),
+                              ExpansionTile(
+                                title: const Text(
+                                  'Thời tiết khu vực',
+                                  style: TextStyle(fontSize: 12),
+                                ),
+                                children: [
+                                  WeatherCard(
+                                    api: widget.api,
+                                    latitude: _weatherJob!.latitude,
+                                    longitude: _weatherJob!.longitude,
+                                    areaLabel: _weatherJob!.title,
+                                    refreshToken: _jobs,
+                                  ),
+                                ],
                               ),
-                              items: _jobs
-                                  .map(
-                                    (j) => DropdownMenuItem(
-                                      value: j.id,
-                                      child: Text(
-                                        j.title,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  )
-                                  .toList(),
-                              onChanged: (id) =>
-                                  setState(() => _weatherJobId = id),
-                            ),
-                          WeatherCard(
-                            api: widget.api,
-                            latitude: _weatherJob!.latitude,
-                            longitude: _weatherJob!.longitude,
-                            areaLabel: _weatherJob!.title,
-                            refreshToken: _jobs,
+                            ],
                           ),
                         ],
                       ),
@@ -214,7 +318,7 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
                   pinned: true,
                   delegate: JobSearchHeader(
                     height:
-                        144 * MediaQuery.textScalerOf(context).scale(14) / 14,
+                        128 * MediaQuery.textScalerOf(context).scale(14) / 14,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16,
@@ -294,6 +398,10 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
                               JobCard(
                                 api: widget.api,
                                 job: job,
+                                primaryAction: FilledButton(
+                                  onPressed: () => _applicants(job),
+                                  child: const Text('Duyệt thợ'),
+                                ),
                                 action: Wrap(
                                   spacing: 12,
                                   runSpacing: 8,
@@ -600,6 +708,14 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
                   },
                 ),
                 const SizedBox(height: 16),
+                JobLocationPin(
+                  center: _position ?? const GeoPoint(10.7769, 106.7009),
+                  selected: _position,
+                  onPicked: _busy
+                      ? null
+                      : (point) => setState(() => _position = point),
+                ),
+                const SizedBox(height: 12),
                 Text(
                   _position == null
                       ? 'Chưa chọn vị trí công trình'
@@ -646,6 +762,55 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 16),
+                ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: _salary,
+                  builder: (context, _, child) =>
+                      ValueListenableBuilder<TextEditingValue>(
+                        valueListenable: _workers,
+                        builder: (context, _, child) {
+                          final parsedRate = double.tryParse(_salary.text);
+                          final rate =
+                              parsedRate != null &&
+                                  parsedRate.isFinite &&
+                                  parsedRate >= 0 &&
+                                  parsedRate <= 1000000000
+                              ? parsedRate
+                              : 0.0;
+                          final count = (int.tryParse(_workers.text) ?? 0)
+                              .clamp(0, 10000);
+                          final days =
+                              _schedule.end.difference(_schedule.start).inDays +
+                              1;
+                          return FigmaCard(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                const Text(
+                                  'Dự toán quỹ lương',
+                                  style: TextStyle(fontWeight: FontWeight.w700),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  money(rate * count * days),
+                                  style: TextStyle(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .primary,
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                                Text(
+                                  '$count thợ × $days ngày. Đây là dự toán; đăng việc chưa tự khóa tiền. Thanh toán cần chấm công/nghiệm thu theo quy định.',
+                                  style: const TextStyle(fontSize: 11),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                ),
                 if (_error != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 12),
@@ -690,6 +855,7 @@ class _ApplicantsSheet extends StatefulWidget {
 }
 
 class _ApplicantsSheetState extends State<_ApplicantsSheet> {
+  String _filter = '';
   List<JobApplication> _applications = [];
   bool _loading = false;
   int? _updating;
@@ -824,6 +990,29 @@ class _ApplicantsSheetState extends State<_ApplicantsSheet> {
               ],
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  for (final status in ['', 'PENDING', 'ACCEPTED'])
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: ChoiceChip(
+                        label: Text(
+                          status.isEmpty
+                              ? 'Tất cả'
+                              : '${status == 'PENDING' ? "Chờ duyệt" : "Đã duyệt"} (${_applications.where((a) => a.status == status).length})',
+                        ),
+                        selected: _filter == status,
+                        onSelected: (_) => setState(() => _filter = status),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
           if (_loading) const ContentSkeleton(compact: true),
           Expanded(
             child: ListView(
@@ -845,7 +1034,9 @@ class _ApplicantsSheetState extends State<_ApplicantsSheet> {
                       textAlign: TextAlign.center,
                     ),
                   ),
-                for (final application in _applications)
+                for (final application in _applications.where(
+                  (a) => _filter.isEmpty || a.status == _filter,
+                ))
                   Card(
                     child: Padding(
                       padding: const EdgeInsets.all(16),
@@ -857,6 +1048,25 @@ class _ApplicantsSheetState extends State<_ApplicantsSheet> {
                             style: Theme.of(context).textTheme.titleMedium,
                           ),
                           const SizedBox(height: 8),
+                          if (application.workerVerified) const KycBadge(),
+                          const SizedBox(height: 8),
+                          if (application.workerActive)
+                            ApplicantEvidence(
+                              key: ValueKey('evidence-${application.workerId}'),
+                              api: widget.api,
+                              workerId: application.workerId,
+                            ),
+                          if (application.proposedDailyRate != null)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              child: Text(
+                                'Đề xuất ngày công: ${money(application.proposedDailyRate!.toDouble())}/ngày',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                              ),
+                            ),
                           if (application.status == 'ACCEPTED' &&
                               application.workerPhone != null)
                             CallButton(
@@ -948,7 +1158,7 @@ class _ApplicantsSheetState extends State<_ApplicantsSheet> {
                                     _updating == application.id
                                         ? 'Đang xử lý…'
                                         : application.crewBatchId != null
-                                        ? 'Nhận toàn tổ'
+                                        ? 'Duyệt nhận cả tổ'
                                         : 'Nhận thợ',
                                   ),
                                 ),

@@ -101,6 +101,8 @@ void main() {
       final api = WalletApi();
       await tester.pumpWidget(MaterialApp(home: WalletScreen(api: api)));
       await tester.pumpAndSettle();
+      await tester.tap(find.text('Thao tác ký quỹ & đối soát'));
+      await tester.pumpAndSettle();
       await tester.tap(find.byTooltip('Ẩn số dư'));
       await tester.pumpAndSettle();
       expect(find.text('500.000 đ'), findsNothing);
@@ -139,12 +141,19 @@ void main() {
       await tester.pumpWidget(MaterialApp(home: WalletScreen(api: api)));
       await tester.pumpAndSettle();
       await tester.scrollUntilVisible(
-        find.text('Nạp tiền'),
+        find.text('Thao tác ký quỹ & đối soát'),
+        160,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(find.text('Thao tác ký quỹ & đối soát'));
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text('Nạp tiền chờ đối soát'),
         180,
         scrollable: find.byType(Scrollable).first,
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Nạp tiền').first);
+      await tester.tap(find.text('Nạp tiền chờ đối soát'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Gửi yêu cầu'));
       await tester.pumpAndSettle();

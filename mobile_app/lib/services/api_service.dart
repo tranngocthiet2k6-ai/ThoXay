@@ -143,6 +143,21 @@ class ApiService extends ChangeNotifier {
     );
   }
 
+  Future<AttendancePage> uploadWorkPhotos(
+    int id,
+    DateTime day,
+    Uint8List photo,
+    Uint8List detailPhoto,
+    String caption,
+  ) async => AttendancePage.fromJson(
+    await uploadPhoto(
+      '/api/applications/$id/work-logs',
+      photo,
+      fields: {'day': isoDay(day), 'caption': caption},
+      extraPhotos: {'detailPhoto': detailPhoto},
+    ),
+  );
+
   Future<List<PortfolioPhoto>> portfolio(int userId) async =>
       (await _request('GET', '/api/users/$userId/portfolio') as List)
           .map((e) => PortfolioPhoto.fromJson(e as Map<String, dynamic>))
@@ -165,6 +180,7 @@ class ApiService extends ChangeNotifier {
     String path,
     Uint8List bytes, {
     Map<String, String> fields = const {},
+    Map<String, Uint8List> extraPhotos = const {},
   }) async {
     if (!path.startsWith('/api/') || path.contains('://')) {
       throw const ApiException('Đường dẫn tải ảnh không hợp lệ');
@@ -185,6 +201,15 @@ class ApiService extends ChangeNotifier {
       ..files.add(
         http.MultipartFile.fromBytes('photo', bytes, filename: 'photo.jpg'),
       );
+    for (final entry in extraPhotos.entries) {
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          entry.key,
+          entry.value,
+          filename: '${entry.key}.jpg',
+        ),
+      );
+    }
     try {
       final response = await _client
           .send(request)

@@ -9,6 +9,7 @@ import '../screens/notifications_screen.dart';
 import '../screens/profile_screen.dart';
 import '../screens/wallet_screen.dart';
 import '../screens/chat_inbox_screen.dart';
+import '../screens/saved_screen.dart';
 
 class HomeNavigation extends StatefulWidget {
   const HomeNavigation({
@@ -120,55 +121,76 @@ class _HomeNavigationState extends State<HomeNavigation>
 
   @override
   Widget build(BuildContext context) {
+    final wide = MediaQuery.sizeOf(context).width >= 600;
     final bar = NavigationBar(
-      selectedIndex: widget.selectedIndex,
-      onDestinationSelected: _select,
-      labelBehavior: MediaQuery.sizeOf(context).width < 520
-          ? NavigationDestinationLabelBehavior.onlyShowSelected
-          : NavigationDestinationLabelBehavior.alwaysShow,
+      selectedIndex: wide
+          ? widget.selectedIndex
+          : widget.selectedIndex > 2
+          ? 3
+          : widget.selectedIndex,
+      onDestinationSelected: (index) {
+        if (!wide && index == 3) {
+          _select(4);
+          return;
+        }
+        if (!widget.worker && index == 1) {
+          Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => SavedScreen(api: widget.api, worker: false),
+            ),
+          );
+          return;
+        }
+        _select(index);
+      },
+      labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
       destinations: [
         NavigationDestination(
           icon: Icon(
             widget.worker ? Icons.near_me_outlined : Icons.apartment_outlined,
           ),
           selectedIcon: Icon(widget.worker ? Icons.near_me : Icons.apartment),
-          label: widget.worker ? 'Gần bạn' : 'Công trình',
+          label: widget.worker ? 'Tìm việc' : 'Công trình',
         ),
         NavigationDestination(
           icon: Icon(
-            widget.worker
-                ? Icons.work_history_outlined
-                : Icons.add_circle_outline,
+            widget.worker ? Icons.work_history_outlined : Icons.groups_outlined,
           ),
-          selectedIcon: Icon(
-            widget.worker ? Icons.work_history : Icons.add_circle,
-          ),
-          label: widget.worker ? 'Đã ứng tuyển' : 'Tạo mới',
+          selectedIcon: Icon(widget.worker ? Icons.work_history : Icons.groups),
+          label: widget.worker ? 'Việc của tôi' : 'Đội thợ',
         ),
         const NavigationDestination(
           icon: Icon(Icons.account_balance_wallet_outlined),
-          label: 'Ví',
+          label: 'Ví tiền',
         ),
+        if (wide)
+          NavigationDestination(
+            icon: Badge(
+              isLabelVisible: _unread > 0,
+              label: Text(_unread > 99 ? '99+' : '$_unread'),
+              child: const Icon(Icons.notifications_none),
+            ),
+            label: 'Thông báo',
+          ),
         NavigationDestination(
           icon: Badge(
-            isLabelVisible: _unread > 0,
-            label: Text(_unread > 99 ? '99+' : '$_unread'),
-            child: const Icon(Icons.notifications_none),
+            isLabelVisible: !wide && _unread + _unreadChat > 0,
+            label: Text(
+              _unread + _unreadChat > 99 ? '99+' : '${_unread + _unreadChat}',
+            ),
+            child: const Icon(Icons.person_outline),
           ),
-          label: 'Thông báo',
-        ),
-        const NavigationDestination(
-          icon: Icon(Icons.person_outline),
           label: 'Hồ sơ',
         ),
-        NavigationDestination(
-          icon: Badge(
-            isLabelVisible: _unreadChat > 0,
-            label: Text(_unreadChat > 99 ? '99+' : '$_unreadChat'),
-            child: const Icon(Icons.forum_outlined),
+        if (wide)
+          NavigationDestination(
+            icon: Badge(
+              isLabelVisible: _unreadChat > 0,
+              label: Text(_unreadChat > 99 ? '99+' : '$_unreadChat'),
+              child: const Icon(Icons.forum_outlined),
+            ),
+            label: 'Tin nhắn',
           ),
-          label: 'Tin nhắn',
-        ),
       ],
     );
     return DecoratedBox(
@@ -208,4 +230,31 @@ class _HomeNavigationState extends State<HomeNavigation>
       ),
     );
   }
+}
+
+class HomeInboxActions extends StatelessWidget {
+  const HomeInboxActions({super.key, required this.api});
+  final ApiService api;
+  @override
+  Widget build(BuildContext context) => Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      IconButton(
+        tooltip: 'Tin nhắn',
+        icon: const Icon(Icons.forum_outlined),
+        onPressed: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(builder: (_) => ChatInboxScreen(api: api)),
+        ),
+      ),
+      IconButton(
+        tooltip: 'Thông báo',
+        icon: const Icon(Icons.notifications_none),
+        onPressed: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => NotificationsScreen(api: api),
+          ),
+        ),
+      ),
+    ],
+  );
 }

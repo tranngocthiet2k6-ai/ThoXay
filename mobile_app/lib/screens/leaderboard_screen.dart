@@ -1,3 +1,4 @@
+import '../theme/app_theme.dart';
 import '../widgets/design_motion.dart';
 import '../widgets/content_skeleton.dart';
 
@@ -52,16 +53,27 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.all(16),
           children: [
-            const SectionIntro(
-              title: 'Uy tín được xây từ công việc thật',
-              subtitle: 'Vinh danh những người thợ được tin tưởng.',
-              eyebrow: 'BẢNG XẾP HẠNG',
+            Text(
+              'Xếp hạng theo bậc, uy tín, sao và công trình đã hoàn thành.',
+              style: TextStyle(
+                fontSize: 11,
+                color: AppPalette.of(context).muted,
+              ),
             ),
-            const SizedBox(height: 12),
-            const Text(
-              'Chỉ xếp hạng thợ đang hoạt động và đã có đánh giá công trình. Ưu tiên bậc thợ, điểm uy tín, sao và số công trình hoàn thành.',
+            const Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                Chip(label: Text('Toàn hệ thống')),
+                Chip(label: Text('Bậc thợ và uy tín')),
+              ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
+            Text(
+              'Thợ giỏi tiêu biểu',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 8),
             const Card(
               child: ExpansionTile(
                 title: Text('Cách tính bậc thợ'),
@@ -101,6 +113,26 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                   ),
                 ),
               ),
+            if (_rows
+                    .where((w) => w.workerId == widget.api.session?.userId)
+                    .firstOrNull
+                case final mine?)
+              Card(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                child: ListTile(
+                  title: Text(mine.fullName),
+                  subtitle: Text(
+                    'Hạng #${mine.rank} · ${mine.reputationScore}/100 uy tín',
+                  ),
+                  trailing: const Icon(Icons.trending_up),
+                ),
+              ),
+            const SizedBox(height: 16),
+            Text(
+              'Thợ uy tín trong hệ thống',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 12),
             for (final worker in _rows.skip(3))
               Card(
                 child: InkWell(

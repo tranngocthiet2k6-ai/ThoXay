@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
 abstract final class AppColors {
-  static const canvas = Color(0xfff7f8fa);
+  static const canvas = Color(0xfff8fafc);
   static const surface = Color(0xffffffff);
-  static const ink = Color(0xff182230);
+  static const ink = Color(0xff0f172a);
   static const muted = Color(0xff64748b);
-  static const border = Color(0xffe4e7ec);
-  static const soft = Color(0xfff2f4f7);
+  static const border = Color(0xffe2e8f0);
+  static const soft = Color(0xfff8fafc);
   static const success = Color(0xff15803d);
   static const warning = Color(0xffb45309);
   static const error = Color(0xffb42318);
@@ -134,9 +134,9 @@ abstract final class AppTheme {
               ? const Color(0xff064e3b)
               : const Color(0xff1e3a5f))
         : worker
-        ? const Color(0xffffedd5)
+        ? const Color(0xfffff7ed)
         : contractor
-        ? const Color(0xffd1fae5)
+        ? const Color(0xffecfdf5)
         : const Color(0xffdbeafe);
     final colors =
         ColorScheme.fromSeed(
@@ -188,9 +188,8 @@ abstract final class AppTheme {
         backgroundColor: palette.surface,
         foregroundColor: palette.ink,
         centerTitle: false,
-        toolbarHeight: 72,
-        titleSpacing: 24,
-        shape: Border(bottom: BorderSide(color: palette.border)),
+        toolbarHeight: 64,
+        titleSpacing: 20,
         elevation: 0,
         scrolledUnderElevation: 0,
         titleTextStyle: TextStyle(
@@ -248,8 +247,18 @@ abstract final class AppTheme {
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           minimumSize: const Size(48, 48),
-          backgroundColor: outdoor ? Colors.black : null,
-          foregroundColor: outdoor ? Colors.white : null,
+          backgroundColor: outdoor
+              ? Colors.black
+              : brightness == Brightness.dark
+              ? null
+              : worker || role == null
+              ? const Color(0xffc2410c)
+              : contractor
+              ? const Color(0xff047857)
+              : accent,
+          foregroundColor: outdoor || brightness == Brightness.light
+              ? Colors.white
+              : null,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -283,9 +292,9 @@ abstract final class AppTheme {
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: palette.surface,
-        indicatorColor: container,
+        indicatorColor: Colors.transparent,
         elevation: 0,
-        height: 80,
+        height: 72,
         labelTextStyle: WidgetStatePropertyAll(
           TextStyle(
             fontSize: 12,
@@ -299,10 +308,10 @@ abstract final class AppTheme {
         iconColor: palette.muted,
       ),
       chipTheme: ChipThemeData(
-        backgroundColor: palette.soft,
+        backgroundColor: palette.surface,
         selectedColor: container,
         side: BorderSide(color: palette.border, width: outdoor ? 2 : 1),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         checkmarkColor: palette.ink,
         secondaryLabelStyle: TextStyle(
           color: palette.ink,

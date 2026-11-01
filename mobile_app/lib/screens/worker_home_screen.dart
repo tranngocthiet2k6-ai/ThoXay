@@ -1,3 +1,6 @@
+import '../widgets/figma_job_map.dart';
+import '../widgets/week_schedule.dart';
+import 'calendar_screen.dart';
 import '../widgets/appearance_button.dart';
 import '../widgets/incident_actions.dart';
 import '../widgets/weather_card.dart';
@@ -60,7 +63,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
   bool? _available;
   bool _availabilityBusy = false;
   bool _loading = false;
-  bool _showMap = false;
+  bool _showMap = false, _advancedFilters = false;
   bool _proposalOpen = false;
   String? _error;
   @override
@@ -184,7 +187,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
         onPressed: alreadyApplied || _applying != null
             ? null
             : () => Navigator.pop(context, true),
-        child: Text(alreadyApplied ? 'Đã ứng tuyển' : 'Nhận việc'),
+        child: Text(alreadyApplied ? 'Đã ứng tuyển' : 'Ứng tuyển'),
       ),
     );
     if (apply == true && mounted) await _apply(job);
@@ -207,7 +210,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
           ? 'Đang gửi…'
           : _applications.any((a) => a.job.id == job.id)
           ? 'Đã ứng tuyển'
-          : 'Nhận việc',
+          : 'Ứng tuyển',
     ),
   );
 
@@ -299,17 +302,26 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
     appBar: AppBar(
       title: const Text('Thợ Xây'),
       actions: [
+        HomeInboxActions(api: widget.api),
         const AppearanceButton(),
         FinanceMenu(api: widget.api, worker: true),
-        IconButton(
-          tooltip: 'Làm mới',
-          onPressed: _loading || _cancelling ? null : () => _refresh(),
-          icon: const Icon(Icons.refresh),
-        ),
-        IconButton(
-          tooltip: 'Đăng xuất',
-          onPressed: widget.api.logout,
-          icon: const Icon(Icons.logout),
+        PopupMenuButton<String>(
+          tooltip: 'Tài khoản và làm mới',
+          onSelected: (value) {
+            if (value == 'logout') {
+              widget.api.logout();
+            } else {
+              _refresh();
+            }
+          },
+          itemBuilder: (_) => [
+            PopupMenuItem(
+              value: 'refresh',
+              enabled: !_loading,
+              child: const Text('Làm mới'),
+            ),
+            const PopupMenuItem(value: 'logout', child: Text('Đăng xuất')),
+          ],
         ),
       ],
     ),
@@ -346,17 +358,43 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                               : 'Theo dõi đơn và kết nối với chủ thầu của bạn.',
                         ),
                         if (_availabilityBusy) const LinearProgressIndicator(),
-                        if (_tab == 0 && _position != null) ...[
+                        if (_tab == 1) ...[
                           const SizedBox(height: 16),
-                          WeatherCard(
-                            api: widget.api,
-                            latitude: _position!.latitude,
-                            longitude: _position!.longitude,
-                            areaLabel: 'Khu vực đang tìm việc',
-                            refreshToken: _jobs,
+                          WeekSchedule(
+                            jobs: _applications
+                                .where((a) => a.status == 'ACCEPTED')
+                                .map((a) => a.job)
+                                .toList(),
+                            onOpenCalendar: () => Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (_) => CalendarScreen(api: widget.api),
+                              ),
+                            ),
                           ),
                         ],
-                        if (_tab == 0 && _available == true) ...[
+                        if (_tab == 0 &&
+                            _position != null &&
+                            _advancedFilters) ...[
+                          const SizedBox(height: 16),
+                          ExpansionTile(
+                            title: const Text(
+                              'Thời tiết khu vực',
+                              style: TextStyle(fontSize: 12),
+                            ),
+                            children: [
+                              WeatherCard(
+                                api: widget.api,
+                                latitude: _position!.latitude,
+                                longitude: _position!.longitude,
+                                areaLabel: 'Khu vực đang tìm việc',
+                                refreshToken: _jobs,
+                              ),
+                            ],
+                          ),
+                        ],
+                        if (_tab == 0 &&
+                            _available == true &&
+                            _advancedFilters) ...[
                           const SizedBox(height: 16),
                           Row(
                             children: [
@@ -421,7 +459,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                     pinned: true,
                     delegate: JobSearchHeader(
                       height:
-                          144 * MediaQuery.textScalerOf(context).scale(14) / 14,
+                          128 * MediaQuery.textScalerOf(context).scale(14) / 14,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 16,
@@ -429,6 +467,9 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                         ),
                         child: JobSearchFilters(
                           controller: _search,
+                          onAdvanced: () => setState(
+                            () => _advancedFilters = !_advancedFilters,
+                          ),
                           jobType: _jobType,
                           salaryFirst: _sort == 'SALARY_DESC',
                           enabled: !_loading,
@@ -462,6 +503,23 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                       if (_loading)
                         LoadingJobs(mapMode: _tab == 0 && _showMap)
                       else if (_tab == 0) ...[
+                        if (!_showMap &&
+                            _position != null &&
+                            _available == true &&
+                            _visibleJobs.isNotEmpty) ...[
+                          JobMapPreview(
+                            center: _position!,
+                            jobs: _visibleJobs,
+                            onJobTap: _showMapJob,
+                            onExpand: () => setState(() => _showMap = true),
+                          ),
+                          const SizedBox(height: 20),
+                          Text(
+                            'Việc gần anh',
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                          const SizedBox(height: 12),
+                        ],
                         if (_available == false)
                           const EmptyState(
                             title: 'Bạn đang tạm ngưng nhận việc',

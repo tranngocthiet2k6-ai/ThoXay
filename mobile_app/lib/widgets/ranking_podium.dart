@@ -90,13 +90,15 @@ class RankingPodium extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color: index == 0
                                     ? AppPalette.of(context).goldSoft
-                                    : AppPalette.of(context).border,
+                                    : index == 1
+                                    ? AppPalette.of(context).slateLight
+                                    : AppPalette.of(context).warningSoft,
                                 borderRadius: const BorderRadius.vertical(
                                   top: Radius.circular(16),
                                 ),
                               ),
                               child: Text(
-                                '#${workers[index].rank}',
+                                '${workers[index].rank}',
                                 style: const TextStyle(
                                   fontSize: 22,
                                   fontWeight: FontWeight.w800,

@@ -138,3 +138,15 @@ viewport 320/390/768/1440px. Camera vật lý và
 ứng dụng ngân hàng cần nghiệm thu thiết bị riêng; test mô phỏng không thay thế việc đó.
 Sau tinh chỉnh: 110 test Flutter (108 trước đợt này, thêm test khung Tổ đội và cảnh báo QR demo),
 125 test Backend và 12 test JS pass. Flutter analyze sạch và Web release build thành công.
+## Bản cập nhật theo PNG ngày 02 tháng 11 năm 2026
+
+Thiết kế hiện hành dùng 16 ảnh ở `docs/figma_screens/` và ánh xạ thực thi tại
+[FIGMA_IMPLEMENTATION.md](FIGMA_IMPLEMENTATION.md). Nền #F8FAFC, card trắng/viền
+#E2E8F0, radius 12–16px; hero, ví và hồ sơ phẳng, bỏ gradient/hover spotlight.
+Cam/Xanh theo vai trò, Sáng/Tối/Outdoor và reduced motion được giữ. Mobile có bốn
+mục điều hướng chính; toolbar giữ liên lạc/thông báo. Bản đồ preview không chiếm
+cử chỉ cuộn trang; bản đồ đầy đủ vẫn tương tác và có attribution luôn hiện.
+
+Thống kê nghiệm thu mới: 128 Backend, 114 Flutter, 12 JS và 6 Python. Các mốc và
+mô tả gradient ở những phần cũ dưới đây thuộc lịch sử thiết kế, không phải kiểu
+surface hiện hành. Số liệu, ảnh cá nhân, KYC, tài chính và phân hạng lấy từ API.

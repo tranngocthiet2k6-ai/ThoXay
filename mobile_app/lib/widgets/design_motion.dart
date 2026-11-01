@@ -133,12 +133,12 @@ class SectionIntro extends StatelessWidget {
   );
 }
 
-/// A pointer-following accent, kept to a small painted layer; no blur or ticker.
+/// Flat bordered card. Hover changes its border without painting a gradient.
 class DesignSurface extends StatefulWidget {
   const DesignSurface({
     super.key,
     required this.child,
-    this.padding = const EdgeInsets.all(24),
+    this.padding = const EdgeInsets.all(16),
     this.dark = false,
   });
   final Widget child;
@@ -150,85 +150,29 @@ class DesignSurface extends StatefulWidget {
 
 class _DesignSurfaceState extends State<DesignSurface> {
   bool _hover = false;
-  Alignment _light = Alignment.topRight;
   @override
-  Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    final reduced = MediaQuery.disableAnimationsOf(context);
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hover = true),
-      onExit: (_) => setState(() {
-        _hover = false;
-        _light = Alignment.topRight;
-      }),
-      onHover: reduced
-          ? null
-          : (event) {
-              final box = context.findRenderObject();
-              if (box is RenderBox &&
-                  box.hasSize &&
-                  box.size.width > 0 &&
-                  box.size.height > 0) {
-                final next = Alignment(
-                  2 * event.localPosition.dx / box.size.width - 1,
-                  2 * event.localPosition.dy / box.size.height - 1,
-                );
-                if ((_light.x - next.x).abs() + (_light.y - next.y).abs() >
-                    .15) {
-                  setState(() => _light = next);
-                }
-              }
-            },
-      child: AnimatedContainer(
-        duration: reduced ? Duration.zero : const Duration(milliseconds: 180),
-        clipBehavior: Clip.antiAlias,
-        padding: widget.padding,
-        decoration: BoxDecoration(
-          color: widget.dark ? AppColors.ink : AppPalette.of(context).surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            width: AppPalette.of(context).outdoor ? 2 : 1,
-            color: _hover
-                ? primary.withValues(alpha: .4)
-                : widget.dark
-                ? AppColors.ink
-                : AppPalette.of(context).border,
-          ),
-          gradient: AppPalette.of(context).outdoor && !widget.dark
-              ? null
-              : RadialGradient(
-                  center: _light,
-                  radius: 1.6,
-                  colors: widget.dark
-                      ? [
-                          Color.alphaBlend(
-                            primary.withValues(alpha: .22),
-                            AppColors.ink,
-                          ),
-                          AppColors.ink,
-                        ]
-                      : [
-                          Color.alphaBlend(
-                            primary.withValues(alpha: _hover ? .06 : .015),
-                            AppPalette.of(context).surface,
-                          ),
-                          AppPalette.of(context).surface,
-                        ],
-                ),
-          boxShadow: AppPalette.of(context).outdoor
-              ? []
-              : [
-                  BoxShadow(
-                    color: AppColors.ink.withValues(alpha: _hover ? .07 : .025),
-                    blurRadius: _hover ? 28 : 16,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
+  Widget build(BuildContext context) => MouseRegion(
+    onEnter: (_) => setState(() => _hover = true),
+    onExit: (_) => setState(() => _hover = false),
+    child: AnimatedContainer(
+      duration: MediaQuery.disableAnimationsOf(context)
+          ? Duration.zero
+          : const Duration(milliseconds: 160),
+      clipBehavior: Clip.antiAlias,
+      padding: widget.padding,
+      decoration: BoxDecoration(
+        color: AppPalette.of(context).surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          width: AppPalette.of(context).outdoor ? 2 : 1,
+          color: _hover
+              ? Theme.of(context).colorScheme.primary
+              : AppPalette.of(context).border,
         ),
-        child: widget.child,
       ),
-    );
-  }
+      child: Material(type: MaterialType.transparency, child: widget.child),
+    ),
+  );
 }
 
 /// Scroll-linked background detail. Static on compact/reduced-motion layouts.

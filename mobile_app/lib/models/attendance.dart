@@ -14,13 +14,21 @@ class AttendanceEntry {
       caption = j['caption'] as String? ?? '',
       reviewStatus = j['reviewStatus'] as String?,
       feedback = j['feedback'] as String? ?? '',
-      logVersion = (j['logVersion'] as num?)?.toInt();
+      logVersion = (j['logVersion'] as num?)?.toInt(),
+      hasDetailPhoto = j['hasDetailPhoto'] as bool? ?? false,
+      checkinMethod = j['checkinMethod'] as String? ?? '',
+      checkoutMethod = j['checkoutMethod'] as String? ?? '';
   final int id, applicationId;
   final String workerName, caption, feedback;
   final DateTime day, checkedInAt;
   final DateTime? checkedOutAt;
   final int? logId, logVersion;
   final String? reviewStatus;
+  final bool hasDetailPhoto;
+  final String checkinMethod, checkoutMethod;
+  String? get detailPhotoPath => logId == null || !hasDetailPhoto
+      ? null
+      : '/api/work-logs/$logId/photo?detail=true';
   String? get photoPath => logId == null ? null : '/api/work-logs/$logId/photo';
 }
 

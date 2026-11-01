@@ -78,6 +78,34 @@ class AttendanceTest {
   assertThat(wallets.findById(worker.getId()).orElseThrow().getMainBalance()).isEqualTo(350000);
   mvc.perform(uploadRequest()).andExpect(status().isConflict());
  }
+ @Test void twoPhotosAreNormalizedAndBothKeepParticipantOnlyAccess()throws Exception{
+  mark("check-in",gps(),200);mark("check-out",gps(),200);
+  var result=mvc.perform(twoPhotosRequest(png(0x336699))).andExpect(status().isOk()).andExpect(jsonPath("$.items[0].hasDetailPhoto").value(true)).andReturn();
+  long id=json.readTree(result.getResponse().getContentAsString()).get("items").get(0).get("logId").asLong();
+  var stored=logs.findById(id).orElseThrow();assertThat(stored.getDetailPhoto()).isNotEmpty();
+  mvc.perform(get("/api/work-logs/"+id+"/photo").param("detail","true").header("Authorization",token(owner))).andExpect(status().isOk()).andExpect(content().bytes(stored.getDetailPhoto())).andExpect(header().string("Cache-Control","no-store"));
+  mvc.perform(get("/api/work-logs/"+id+"/photo").param("detail","true").header("Authorization",token(outsider))).andExpect(status().isNotFound());
+  var admin=user("0983333314",Role.ROLE_ADMIN);
+  mvc.perform(get("/admin/work-logs/"+id+"/photo").param("detail","true").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user(admin.getPhoneNumber()).roles("ADMIN"))).andExpect(status().isOk()).andExpect(content().bytes(stored.getDetailPhoto()));
+ }
+ @Test void invalidDetailDoesNotReplaceEitherPreviouslyStoredPhoto()throws Exception{
+  mark("check-in",gps(),200);mark("check-out",gps(),200);
+  mvc.perform(twoPhotosRequest(png(0x336699))).andExpect(status().isOk());
+  var record=records.findByApplicationIdAndWorkDay(app.getId(),LocalDate.now(clock)).orElseThrow();
+  var stored=logs.findByAttendanceId(record.getId()).orElseThrow();var photo=stored.getPhoto().clone();var detail=stored.getDetailPhoto().clone();var version=stored.getVersion();
+  mvc.perform(twoPhotosRequest("invalid photo".getBytes(java.nio.charset.StandardCharsets.UTF_8))).andExpect(status().isBadRequest());
+  assertThat(stored.getPhoto()).isEqualTo(photo);assertThat(stored.getDetailPhoto()).isEqualTo(detail);assertThat(stored.getVersion()).isEqualTo(version);
+ }
+ @Test void replacingOnlyDetailInvalidatesOldReviewAndLegacyLogsStillWork()throws Exception{
+  mark("check-in",gps(),200);mark("check-out",gps(),200);long id=upload();
+  mvc.perform(get("/api/work-logs/"+id+"/photo").param("detail","true").header("Authorization",token(owner))).andExpect(status().isNotFound());
+  mvc.perform(twoPhotosRequest(png(0x336699))).andExpect(status().isOk());long oldVersion=logs.findById(id).orElseThrow().getVersion();
+  mvc.perform(twoPhotosRequest(png(0x993366))).andExpect(status().isOk());
+  mvc.perform(put("/api/work-logs/"+id+"/review").header("Authorization",token(owner)).contentType("application/json").content(json.writeValueAsString(Map.of("approved",true,"feedback","","version",oldVersion)))).andExpect(status().isConflict());
+  review(id,true,"");mvc.perform(twoPhotosRequest(png(0x336699))).andExpect(status().isConflict());
+ }
+ byte[] png(int color)throws Exception{var image=new BufferedImage(320,240,BufferedImage.TYPE_INT_RGB);for(int x=0;x<320;x++)for(int y=0;y<240;y++)image.setRGB(x,y,color);var out=new ByteArrayOutputStream();javax.imageio.ImageIO.write(image,"png",out);return out.toByteArray();}
+ org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder twoPhotosRequest(byte[] detail)throws Exception{return multipart("/api/applications/"+app.getId()+"/work-logs").file(new MockMultipartFile("photo","overview.png","image/png",png(0x666666))).file(new MockMultipartFile("detailPhoto","detail.png","image/png",detail)).param("day",LocalDate.now(clock).toString()).param("caption","Toàn cảnh và chi tiết").header("Authorization",token(worker));}
  void pay(int days,int status)throws Exception{mvc.perform(post("/api/wallet/job-payments").header("Authorization",token(owner)).contentType("application/json").content(json.writeValueAsString(Map.of("applicationId",app.getId(),"workDays",days,"tip",0,"bonus",0)))).andExpect(status().is(status));}
  void mark(String action,Map<String,Object> body,int status)throws Exception{mvc.perform(post("/api/applications/"+app.getId()+"/attendance/"+action).header("Authorization",token(worker)).contentType("application/json").content(json.writeValueAsString(body))).andExpect(status().is(status));}
  String code()throws Exception{var r=mvc.perform(post("/api/jobs/"+job.getId()+"/attendance/shift-code").header("Authorization",token(owner))).andExpect(status().isOk()).andReturn();return json.readTree(r.getResponse().getContentAsString()).get("token").asText();}

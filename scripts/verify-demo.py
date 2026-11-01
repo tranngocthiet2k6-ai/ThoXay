@@ -21,6 +21,10 @@ def main():
         assert q.fetchone()[0]==0
         q.execute("SELECT count(*) FROM users WHERE full_name LIKE '[DEMO] %'");assert q.fetchone()[0]==8
         q.execute("SELECT count(*) FROM jobs WHERE status='OPEN'");assert q.fetchone()[0]>=8
+        # Demo records can be from an earlier month. Verify the actual earning month,
+        # rather than assuming the clock has not advanced since the initial seed.
+        q.execute("SELECT (max(e.created_at) AT TIME ZONE 'Asia/Ho_Chi_Minh')::date FROM wallet_entries e JOIN users u ON u.id=e.user_id WHERE u.phone_number='000106000003' AND e.kind IN ('WORK_EARNING','TIP','BONUS')")
+        earning_day=q.fetchone()[0];assert earning_day is not None
     password=re.search(r'`([^`]+)`',Path('.local/demo/access.md').read_text(encoding='utf-8')).group(1)
     base='http://127.0.0.1:18083'
     def call(path,body=None,token=None):
@@ -30,7 +34,7 @@ def main():
     token=session['token']
     jobs=call('/api/jobs/nearby?lat=10.8015&lng=106.714&radius=20&sort=SALARY_DESC',token=token);assert len(jobs)>=6
     ranks=call('/api/workers/leaderboard?limit=3',token=token);assert len(ranks)==3 and ranks[0]['workerTier']=='DIAMOND'
-    earnings=call('/api/wallet/earnings?period=MONTH',token=token);assert earnings['total']>0 and any(d['total']>0 for d in earnings['days'])
+    earnings=call('/api/wallet/earnings?period=MONTH&date='+earning_day.isoformat(),token=token);assert earnings['total']>0 and any(d['total']>0 for d in earnings['days'])
     body={'amount':250000,'clientRequestId':'demo-defense-qr-v1'}
     qr=call('/api/wallet/deposits',body,token);repeat=call('/api/wallet/deposits',body,token)
     assert qr['requestId']==repeat['requestId'] and qr['bankBin']=='000000' and qr['status']=='PENDING'

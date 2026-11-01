@@ -164,6 +164,18 @@ void main() {
     await tester.pumpWidget(MaterialApp(home: ContractorHomeScreen(api: api)));
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(
+      find.text('Quản lý công trình'),
+      160,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await Scrollable.ensureVisible(
+      tester.element(find.text('Quản lý công trình')),
+      alignment: .5,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Quản lý công trình'));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
       find.text('Sửa công trình'),
       160,
       scrollable: find.byType(Scrollable).first,

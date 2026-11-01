@@ -90,6 +90,9 @@ class NotificationApiTest {
     @Test void outboxRetriesTransientErrorsPrunesInvalidDevicesAndKeepsHistory() throws Exception {
         device(worker, "good-fid"); device(worker, "stale-fid");
         Long id = create(worker, "outbox");
+        // Exercise a due item independently of clock/DB timestamp rounding.
+        var due = notifications.findById(id).orElseThrow();
+        due.setNextAttemptAt(Instant.now().minusSeconds(1)); notifications.saveAndFlush(due);
         when(push.send(eq("good-fid"), anyString(), anyString(), anyMap())).thenReturn(PushGateway.Result.RETRY);
         when(push.send(eq("stale-fid"), anyString(), anyString(), anyMap())).thenReturn(PushGateway.Result.INVALID_TOKEN);
         dispatcher.deliver(id);

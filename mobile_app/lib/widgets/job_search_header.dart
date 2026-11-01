@@ -41,12 +41,14 @@ class JobSearchFilters extends StatelessWidget {
     required this.onSearch,
     required this.onType,
     required this.onSalary,
+    this.onAdvanced,
   });
   final TextEditingController controller;
   final String jobType;
   final bool salaryFirst, enabled;
   final ValueChanged<String> onSearch, onType;
   final ValueChanged<bool> onSalary;
+  final VoidCallback? onAdvanced;
   @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -57,13 +59,25 @@ class JobSearchFilters extends StatelessWidget {
         decoration: InputDecoration(
           hintText: 'Tìm tên công trình, địa điểm…',
           prefixIcon: const Icon(Icons.search),
-          suffixIcon: IconButton(
-            tooltip: 'Xóa tìm kiếm',
-            icon: const Icon(Icons.close),
-            onPressed: () {
-              controller.clear();
-              onSearch('');
-            },
+          suffixIcon: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (onAdvanced != null)
+                IconButton(
+                  tooltip: 'Bộ lọc vị trí',
+                  onPressed: onAdvanced,
+                  icon: const Icon(Icons.tune),
+                ),
+              if (controller.text.isNotEmpty)
+                IconButton(
+                  tooltip: 'Xóa tìm kiếm',
+                  icon: const Icon(Icons.close),
+                  onPressed: () {
+                    controller.clear();
+                    onSearch('');
+                  },
+                ),
+            ],
           ),
         ),
       ),

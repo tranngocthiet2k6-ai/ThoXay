@@ -1,7 +1,9 @@
+import '../widgets/week_schedule.dart';
+import '../widgets/attendance_settlement_actions.dart';
+import '../widgets/incident_actions.dart';
 import '../widgets/design_motion.dart';
 
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 
 import '../models/models.dart';
 import '../models/attendance.dart';
@@ -12,7 +14,7 @@ import '../services/device_photo_picker.dart';
 import '../widgets/content_skeleton.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/private_image.dart';
-import '../widgets/photo_preview_dialog.dart';
+import '../widgets/work_photo_report_dialog.dart';
 import '../widgets/shift_code_dialog.dart';
 import 'shift_scanner_screen.dart';
 
@@ -138,27 +140,24 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     if (token != null && mounted) await _mark(checkout, qr: token);
   }
 
-  Future<void> _upload(AttendanceEntry row, ImageSource source) async {
+  Future<void> _upload(AttendanceEntry row) async {
     if (_busy || _choosing) return;
     _choosing = true;
     try {
-      final bytes = await (widget.picker ?? DevicePhotoPicker()).pick(source);
-      if (bytes == null || !mounted) return;
-      final caption = await showDialog<String>(
+      final draft = await showDialog<WorkPhotoDraft>(
         context: context,
-        builder: (_) => PhotoPreviewDialog(
-          bytes: bytes,
-          title: 'Ảnh công việc cuối ngày',
-          maxCaption: 1000,
-        ),
+        barrierDismissible: false,
+        builder: (_) =>
+            WorkPhotoReportDialog(picker: widget.picker ?? DevicePhotoPicker()),
       );
-      if (caption == null || !mounted) return;
+      if (draft == null || !mounted) return;
       setState(() => _busy = true);
-      final data = await widget.api.uploadWorkLog(
+      final data = await widget.api.uploadWorkPhotos(
         widget.applicationId!,
         row.day,
-        bytes,
-        caption,
+        draft.overview,
+        draft.detail,
+        draft.caption,
       );
       if (mounted) {
         setState(() {
@@ -221,6 +220,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     final checkout = today != null && today.checkedOutAt == null;
     final done = today?.checkedOutAt != null;
     return Scaffold(
+      bottomNavigationBar: _worker
+          ? null
+          : AttendanceSettlementActions(api: widget.api, job: widget.job),
       appBar: AppBar(
         title: Text(_worker ? 'Chấm công của tôi' : 'Chấm công & nghiệm thu'),
         actions: [
@@ -238,6 +240,10 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(24),
             children: [
+              if (_worker) ...[
+                WeekSchedule(jobs: [widget.job], today: _data?.today),
+                const SizedBox(height: 16),
+              ],
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(20),
@@ -344,6 +350,18 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 ),
               ),
               const SizedBox(height: 16),
+              if (_worker)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: IncidentActions(api: widget.api, job: widget.job),
+                ),
+              Text(
+                _worker
+                    ? 'Báo cáo tiến độ cuối ngày'
+                    : 'Ảnh công việc và nghiệm thu',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 12),
               if (_loading && _items.isEmpty) const ContentSkeleton(),
               if (_busy) const LinearProgressIndicator(),
               if (_error != null)
@@ -378,7 +396,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Vào: ${_time(row.checkedInAt)} · Ra: ${_time(row.checkedOutAt)}',
+                          'Vào: ${_time(row.checkedInAt)} ${row.checkinMethod} · Ra: ${_time(row.checkedOutAt)} ${row.checkoutMethod}',
                         ),
                         const SizedBox(height: 12),
                         if (row.photoPath != null) ...[
@@ -397,7 +415,31 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                               ),
                             ),
                           ),
+                          if (row.detailPhotoPath != null) ...[
+                            const SizedBox(height: 12),
+                            InkWell(
+                              onTap: () => showPrivatePhoto(
+                                context,
+                                widget.api,
+                                row.detailPhotoPath!,
+                                row.caption,
+                              ),
+                              child: SizedBox(
+                                height: 180,
+                                child: PrivateImage(
+                                  api: widget.api,
+                                  path: row.detailPhotoPath!,
+                                ),
+                              ),
+                            ),
+                          ],
                           const SizedBox(height: 8),
+                          Text(
+                            row.hasDetailPhoto
+                                ? 'Đã gửi 2/2 ảnh · Toàn cảnh và chi tiết'
+                                : 'Ảnh báo cáo (phiên bản cũ có 1 ảnh)',
+                            style: const TextStyle(fontSize: 11),
+                          ),
                           Text(row.caption),
                           Chip(
                             label: Text(
@@ -414,30 +456,10 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                         if (_worker &&
                             row.checkedOutAt != null &&
                             row.reviewStatus != 'APPROVED')
-                          PopupMenuButton<ImageSource>(
-                            enabled: !_busy && !_loading,
-                            onSelected: (source) => _upload(row, source),
-                            itemBuilder: (_) => const [
-                              PopupMenuItem(
-                                value: ImageSource.camera,
-                                child: Text('Chụp kết quả công việc'),
-                              ),
-                              PopupMenuItem(
-                                value: ImageSource.gallery,
-                                child: Text('Chọn ảnh kết quả'),
-                              ),
-                            ],
-                            child: const Padding(
-                              padding: EdgeInsets.all(12),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(Icons.add_a_photo_outlined),
-                                  SizedBox(width: 8),
-                                  Text('Gửi ảnh cuối ngày'),
-                                ],
-                              ),
-                            ),
+                          OutlinedButton.icon(
+                            onPressed: _busy ? null : () => _upload(row),
+                            icon: const Icon(Icons.add_a_photo_outlined),
+                            label: const Text('Gửi ảnh cuối ngày'),
                           ),
                         if (!_worker &&
                             row.logId != null &&

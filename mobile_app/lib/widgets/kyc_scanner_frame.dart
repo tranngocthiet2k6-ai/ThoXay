@@ -90,9 +90,7 @@ class KycScannerFrame extends StatelessWidget {
                             photo!.bytes,
                             fit: BoxFit.contain,
                             errorBuilder: (_, _, _) => const Center(
-                              child: Text(
-                                'Không xem được ảnh, hãy chụp lại.',
-                              ),
+                              child: Text('Không xem được ảnh, hãy chụp lại.'),
                             ),
                           ),
                   ),

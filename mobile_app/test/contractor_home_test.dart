@@ -46,6 +46,31 @@ class ContractorApi extends ApiService {
 }
 
 void main() {
+  testWidgets(
+    'payroll preview stays finite while invalid salary input is being edited',
+    (tester) async {
+      final api = ContractorApi();
+      await tester.pumpWidget(
+        MaterialApp(home: ContractorHomeScreen(api: api)),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.widgetWithText(FloatingActionButton, 'Đăng công trình'),
+      );
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Lương mỗi ngày (đồng)'),
+        'Infinity',
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      await tester.tap(find.text('Đăng việc'));
+      await tester.pumpAndSettle();
+      expect(find.text('Lương từ 1 đến 1.000.000.000 đồng'), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+      api.dispose();
+    },
+  );
   testWidgets('contractor reviews worker and sees approval count', (
     tester,
   ) async {
@@ -53,12 +78,12 @@ void main() {
     await tester.pumpWidget(MaterialApp(home: ContractorHomeScreen(api: api)));
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(
-      find.text('Xem & duyệt thợ'),
+      find.text('Duyệt thợ'),
       180,
       scrollable: find.byType(Scrollable).first,
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Xem & duyệt thợ'));
+    await tester.tap(find.text('Duyệt thợ'));
     await tester.pumpAndSettle();
     expect(find.text('Nguyễn Văn Thợ'), findsOneWidget);
     await tester.ensureVisible(find.text('Nhận thợ'));
@@ -74,7 +99,9 @@ void main() {
     final api = ContractorApi();
     await tester.pumpWidget(MaterialApp(home: ContractorHomeScreen(api: api)));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Đăng công trình'));
+    await tester.tap(
+      find.widgetWithText(FloatingActionButton, 'Đăng công trình'),
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.text('Đăng việc'));
     await tester.pump();

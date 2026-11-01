@@ -140,6 +140,11 @@ void main() {
     await tester.tap(find.text('Check-out GPS'));
     await tester.pumpAndSettle();
     expect(api.checkedOut, isTrue);
+    await tester.scrollUntilVisible(
+      find.text('Gửi ảnh cuối ngày'),
+      160,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('Gửi ảnh cuối ngày'), findsOneWidget);
     await tester.pumpWidget(const SizedBox());
     api.dispose();

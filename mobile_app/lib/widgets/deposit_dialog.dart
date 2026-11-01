@@ -121,6 +121,22 @@ class _DepositDialogState extends State<DepositDialog> {
                       'Tạo QR chứa sẵn số tiền và nội dung đối soát. Số dư được cộng sau khi Admin xác nhận đã nhận tiền.',
                     ),
                     const SizedBox(height: 16),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        for (final value in [200000, 500000, 1000000])
+                          ChoiceChip(
+                            label: Text(money(value.toDouble())),
+                            selected: _amount.text == '$value',
+                            onSelected: _busy
+                                ? null
+                                : (_) =>
+                                      setState(() => _amount.text = '$value'),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
                     TextFormField(
                       key: const ValueKey('deposit-amount'),
                       controller: _amount,

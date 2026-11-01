@@ -130,10 +130,7 @@ class LoadingJobs extends StatelessWidget {
                 SizedBox(height: 18),
                 SkeletonLine(),
                 SizedBox(height: 10),
-                FractionallySizedBox(
-                  widthFactor: .6,
-                  child: SkeletonLine(),
-                ),
+                FractionallySizedBox(widthFactor: .6, child: SkeletonLine()),
                 SizedBox(height: 22),
                 SkeletonLine(width: 120, height: 40),
               ],

@@ -176,7 +176,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Đã ứng tuyển').last);
+      await tester.tap(find.text('Việc của tôi').last);
       await tester.pumpAndSettle();
       await tester.ensureVisible(find.text('Hủy việc đang làm'));
       await tester.pumpAndSettle();
@@ -223,12 +223,12 @@ void main() {
         scrollable: find.byType(Scrollable).first,
       );
       expect(find.text('Xây nhà phố'), findsOneWidget);
-      await tester.ensureVisible(find.text('Nhận việc'));
+      await tester.ensureVisible(find.text('Ứng tuyển'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Nhận việc'));
+      await tester.tap(find.text('Ứng tuyển'));
       await tester.pumpAndSettle();
       expect(api.applied, isTrue);
-      await tester.tap(find.text('Đã ứng tuyển').last);
+      await tester.tap(find.text('Việc của tôi').last);
       await tester.pumpAndSettle();
       expect(find.text('Chờ duyệt'), findsOneWidget);
       expect(find.text('Nhắn tin'), findsNothing);
@@ -275,7 +275,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Đã ứng tuyển').last);
+    await tester.tap(find.text('Việc của tôi').last);
     await tester.pumpAndSettle();
     expect(find.text('Gọi chủ thầu: 0900000002'), findsOneWidget);
     expect(find.text('Nhắn tin'), findsOneWidget);

@@ -119,7 +119,7 @@ class _PortfolioUploadsState extends State<PortfolioUploads> {
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           Text(
-            'Ảnh tay nghề thực tế',
+            'Tay nghề & công trình',
             style: Theme.of(context).textTheme.titleLarge,
           ),
           if (widget.editable)
@@ -180,8 +180,8 @@ class _PortfolioUploadsState extends State<PortfolioUploads> {
                 SizedBox(
                   width:
                       (bounds.maxWidth -
-                          12 * ((bounds.maxWidth >= 640 ? 3 : 2) - 1)) /
-                      (bounds.maxWidth >= 640 ? 3 : 2),
+                          12 * ((bounds.maxWidth >= 300 ? 3 : 2) - 1)) /
+                      (bounds.maxWidth >= 300 ? 3 : 2),
                   child: Card(
                     clipBehavior: Clip.antiAlias,
                     child: Column(
@@ -195,7 +195,7 @@ class _PortfolioUploadsState extends State<PortfolioUploads> {
                             photo.caption,
                           ),
                           child: SizedBox(
-                            height: 150,
+                            height: bounds.maxWidth >= 640 ? 150 : 96,
                             child: PrivateImage(
                               api: widget.api,
                               path: photo.path,
@@ -204,9 +204,10 @@ class _PortfolioUploadsState extends State<PortfolioUploads> {
                         ),
                         if (photo.caption.isNotEmpty)
                           Padding(
-                            padding: const EdgeInsets.all(12),
+                            padding: const EdgeInsets.all(8),
                             child: Text(
                               photo.caption,
+                              style: const TextStyle(fontSize: 11),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),

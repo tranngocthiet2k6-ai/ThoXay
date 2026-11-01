@@ -13,15 +13,18 @@ class JobsMap extends StatelessWidget {
     required this.jobs,
     required this.onJobTap,
     this.tileProvider,
+    this.interactive = true,
   });
   final GeoPoint center;
   final List<Job> jobs;
   final ValueChanged<Job> onJobTap;
   final TileProvider? tileProvider;
+  final bool interactive;
   @override
   Widget build(BuildContext context) => OsmMapView(
     center: center,
     tileProvider: tileProvider,
+    interactive: interactive,
     fitPoints: jobs.map((j) => GeoPoint(j.latitude, j.longitude)).toList(),
     markers: [
       Marker(
