@@ -77,17 +77,22 @@ class FigmaMetrics extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
             child: Column(
               children: [
-                Text(
-                  metric.value,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w800,
-                    color: inverse
-                        ? Colors.white
-                        : accent
-                        ? Theme.of(context).colorScheme.primary
-                        : AppPalette.of(context).ink,
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    metric.value,
+                    maxLines: 1,
+                    softWrap: false,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: inverse
+                          ? Colors.white
+                          : accent
+                          ? Theme.of(context).colorScheme.primary
+                          : AppPalette.of(context).ink,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 4),
