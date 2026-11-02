@@ -58,9 +58,15 @@ class KycBadge extends StatelessWidget {
 }
 
 class FigmaMetrics extends StatelessWidget {
-  const FigmaMetrics({super.key, required this.values, this.accent = false});
+  const FigmaMetrics({
+    super.key,
+    required this.values,
+    this.accent = false,
+    this.inverse = false,
+  });
   final List<({String value, String label})> values;
   final bool accent;
+  final bool inverse;
   @override
   Widget build(BuildContext context) => Row(
     crossAxisAlignment: CrossAxisAlignment.start,
@@ -77,7 +83,9 @@ class FigmaMetrics extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
-                    color: accent
+                    color: inverse
+                        ? Colors.white
+                        : accent
                         ? Theme.of(context).colorScheme.primary
                         : AppPalette.of(context).ink,
                   ),
@@ -88,7 +96,9 @@ class FigmaMetrics extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 11,
-                    color: AppPalette.of(context).muted,
+                    color: inverse
+                        ? const Color(0xffcbd5e1)
+                        : AppPalette.of(context).muted,
                   ),
                 ),
               ],

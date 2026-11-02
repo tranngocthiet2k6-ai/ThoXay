@@ -1,3 +1,4 @@
+import '../widgets/commercial_hero.dart';
 import '../widgets/figma_components.dart';
 import '../widgets/wallet_weekly_summary.dart';
 import '../widgets/design_motion.dart';
@@ -170,13 +171,7 @@ class _WalletScreenState extends State<WalletScreen> {
               ),
             ],
             if (_balance case final balance?) ...[
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  color: AppPalette.of(context).surface,
-                  border: Border.all(color: AppPalette.of(context).border),
-                ),
+              CommercialHero(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -186,7 +181,7 @@ class _WalletScreenState extends State<WalletScreen> {
                           child: Text(
                             'Số dư khả dụng',
                             style: TextStyle(
-                              color: AppPalette.of(context).ink,
+                              color: Colors.white,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 1,
                             ),
@@ -200,7 +195,7 @@ class _WalletScreenState extends State<WalletScreen> {
                             _hideBalance
                                 ? Icons.visibility_outlined
                                 : Icons.visibility_off_outlined,
-                            color: AppPalette.of(context).ink,
+                            color: Colors.white,
                           ),
                         ),
                       ],
@@ -215,7 +210,7 @@ class _WalletScreenState extends State<WalletScreen> {
                             ? '••••••'
                             : money(balance.main.toDouble()),
                         style: TextStyle(
-                          color: AppPalette.of(context).ink,
+                          color: Colors.white,
                           fontSize: 34,
                           fontWeight: FontWeight.w800,
                         ),
@@ -236,6 +231,10 @@ class _WalletScreenState extends State<WalletScreen> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              side: const BorderSide(color: Color(0xff64748b)),
+                            ),
                             onPressed: _busy ? null : () => _deposit(),
                             icon: const Icon(Icons.qr_code_2, size: 18),
                             label: const Text('Nạp VietQR'),

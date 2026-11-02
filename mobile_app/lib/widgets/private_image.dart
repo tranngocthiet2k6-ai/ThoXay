@@ -39,12 +39,15 @@ class _PrivateImageState extends State<PrivateImage> {
     future: _image,
     builder: (context, snapshot) {
       if (snapshot.hasError) {
-        return Center(
-          child: IconButton(
-            onPressed: () =>
-                setState(() => _image = widget.api.privateImage(widget.path)),
-            tooltip: 'Tải lại ảnh',
-            icon: const Icon(Icons.broken_image_outlined),
+        return ColoredBox(
+          color: const Color(0xffe2e8f0),
+          child: Center(
+            child: TextButton.icon(
+              onPressed: () =>
+                  setState(() => _image = widget.api.privateImage(widget.path)),
+              icon: const Icon(Icons.broken_image_outlined),
+              label: const Text('Tải lại ảnh', style: TextStyle(fontSize: 10)),
+            ),
           ),
         );
       }

@@ -246,6 +246,8 @@ abstract final class AppTheme {
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
+          elevation: 2,
+          shadowColor: Colors.black26,
           minimumSize: const Size(48, 48),
           backgroundColor: outdoor
               ? Colors.black

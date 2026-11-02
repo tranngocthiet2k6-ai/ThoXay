@@ -26,7 +26,7 @@ class PortfolioUploads extends StatefulWidget {
 
 class _PortfolioUploadsState extends State<PortfolioUploads> {
   List<PortfolioPhoto> _photos = [];
-  bool _loading = true, _busy = false, _choosing = false;
+  bool _loading = true, _busy = false, _choosing = false, _showAll = false;
   String? _error;
   @override
   void initState() {
@@ -176,12 +176,15 @@ class _PortfolioUploadsState extends State<PortfolioUploads> {
             spacing: 12,
             runSpacing: 16,
             children: [
-              for (final photo in _photos)
+              for (final photo
+                  in (_showAll
+                      ? _photos
+                      : _photos.take(bounds.maxWidth >= 640 ? 4 : 3)))
                 SizedBox(
                   width:
                       (bounds.maxWidth -
-                          12 * ((bounds.maxWidth >= 300 ? 3 : 2) - 1)) /
-                      (bounds.maxWidth >= 300 ? 3 : 2),
+                          12 * ((bounds.maxWidth >= 640 ? 4 : 3) - 1)) /
+                      (bounds.maxWidth >= 640 ? 4 : 3),
                   child: Card(
                     clipBehavior: Clip.antiAlias,
                     child: Column(
@@ -195,23 +198,37 @@ class _PortfolioUploadsState extends State<PortfolioUploads> {
                             photo.caption,
                           ),
                           child: SizedBox(
-                            height: bounds.maxWidth >= 640 ? 150 : 96,
-                            child: PrivateImage(
-                              api: widget.api,
-                              path: photo.path,
+                            height: bounds.maxWidth >= 640 ? 176 : 124,
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                PrivateImage(api: widget.api, path: photo.path),
+                                if (photo.caption.isNotEmpty)
+                                  Positioned(
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    child: ColoredBox(
+                                      color: const Color(0xdd0f172a),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8),
+                                        child: Text(
+                                          photo.caption,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            fontSize: 10,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
                             ),
                           ),
                         ),
-                        if (photo.caption.isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.all(8),
-                            child: Text(
-                              photo.caption,
-                              style: const TextStyle(fontSize: 11),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
                         if (widget.editable)
                           TextButton.icon(
                             onPressed: _busy ? null : () => _delete(photo),
@@ -224,6 +241,11 @@ class _PortfolioUploadsState extends State<PortfolioUploads> {
                 ),
             ],
           ),
+        ),
+      if (!_showAll && _photos.length > 3)
+        TextButton(
+          onPressed: () => setState(() => _showAll = true),
+          child: Text('Xem tất cả ${_photos.length} ảnh công trình'),
         ),
     ],
   );

@@ -25,6 +25,18 @@ class JobsMap extends StatelessWidget {
     center: center,
     tileProvider: tileProvider,
     interactive: interactive,
+    circles: [
+      for (final job in jobs)
+        CircleMarker(
+          point: LatLng(job.latitude, job.longitude),
+          radius: 200,
+          useRadiusInMeter: true,
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: .10),
+          borderColor: Theme.of(context).colorScheme.primary
+              .withValues(alpha: .40),
+          borderStrokeWidth: 1.5,
+        ),
+    ],
     fitPoints: jobs.map((j) => GeoPoint(j.latitude, j.longitude)).toList(),
     markers: [
       Marker(
@@ -77,7 +89,7 @@ class JobsMap extends StatelessWidget {
                         ],
                       ),
                       child: Text(
-                        money(job.salaryPerDay),
+                        '${(job.salaryPerDay / 1000).toStringAsFixed(job.salaryPerDay % 1000 == 0 ? 0 : 1)}k',
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onPrimary,
                           fontWeight: FontWeight.w800,

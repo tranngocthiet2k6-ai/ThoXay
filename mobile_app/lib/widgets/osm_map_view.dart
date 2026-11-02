@@ -20,6 +20,8 @@ class OsmMapView extends StatefulWidget {
     this.tileProvider,
     this.recenterOnUpdate = true,
     this.interactive = true,
+    this.circles = const [],
+    this.initialZoom = 13,
   });
   final GeoPoint center;
   final List<Marker> markers;
@@ -28,6 +30,8 @@ class OsmMapView extends StatefulWidget {
   final TileProvider? tileProvider;
   final bool recenterOnUpdate;
   final bool interactive;
+  final List<CircleMarker> circles;
+  final double initialZoom;
   @override
   State<OsmMapView> createState() => _OsmMapViewState();
 }
@@ -118,7 +122,7 @@ class _OsmMapViewState extends State<OsmMapView> {
           mapController: _controller,
           options: MapOptions(
             initialCenter: _latLng(widget.center),
-            initialZoom: 13,
+            initialZoom: widget.initialZoom,
             minZoom: 2,
             maxZoom: 19,
             backgroundColor: AppPalette.of(context).soft,
@@ -164,6 +168,7 @@ class _OsmMapViewState extends State<OsmMapView> {
                   : image,
               errorTileCallback: (_, error, stackTrace) => _onTileError(),
             ),
+            if (widget.circles.isNotEmpty) CircleLayer(circles: widget.circles),
             MarkerLayer(markers: widget.markers),
             Align(
               alignment: Alignment.bottomRight,

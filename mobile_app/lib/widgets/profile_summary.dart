@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import 'figma_components.dart';
 import 'tier_badge.dart';
+import 'commercial_hero.dart';
 
 class ProfileSummary extends StatelessWidget {
   const ProfileSummary({
@@ -40,22 +41,12 @@ class ProfileSummary extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        FigmaCard(
+        CommercialHero(
           child: Column(
             children: [
               Row(
                 children: [
-                  CircleAvatar(
-                    radius: 28,
-                    backgroundColor: Theme.of(context)
-                        .colorScheme
-                        .primaryContainer,
-                    child: Icon(
-                      worker ? Icons.person_outline : Icons.apartment_outlined,
-                      color: color,
-                      size: 30,
-                    ),
-                  ),
+                  PresenceAvatar(name: name, size: 56),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -63,14 +54,18 @@ class ProfileSummary extends StatelessWidget {
                       children: [
                         Text(
                           name,
-                          style: Theme.of(context).textTheme.titleLarge,
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(color: Colors.white),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           worker
                               ? 'Thợ xây · Hồ sơ nghề nghiệp'
                               : 'Chủ thầu · Quản lý công trình',
-                          style: TextStyle(fontSize: 12, color: palette.muted),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Color(0xffcbd5e1),
+                          ),
                         ),
                         if (verified)
                           const Padding(
@@ -85,6 +80,7 @@ class ProfileSummary extends StatelessWidget {
               if (worker) ...[
                 const Divider(height: 28),
                 FigmaMetrics(
+                  inverse: true,
                   values: [
                     (value: '$completed', label: 'Việc hoàn thành'),
                     (
@@ -99,7 +95,10 @@ class ProfileSummary extends StatelessWidget {
                 if (completed == 0)
                   Text(
                     'Chưa có đánh giá công trình',
-                    style: TextStyle(fontSize: 11, color: palette.muted),
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: Color(0xffcbd5e1),
+                    ),
                   ),
               ],
             ],
