@@ -423,39 +423,57 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                         ),
                         const SizedBox(height: 12),
                         if (row.photoPath != null) ...[
-                          InkWell(
-                            onTap: () => showPrivatePhoto(
-                              context,
-                              widget.api,
-                              row.photoPath!,
-                              row.caption,
-                            ),
-                            child: SizedBox(
-                              height: 220,
-                              child: PrivateImage(
-                                api: widget.api,
-                                path: row.photoPath!,
-                              ),
-                            ),
-                          ),
-                          if (row.detailPhotoPath != null) ...[
-                            const SizedBox(height: 12),
-                            InkWell(
-                              onTap: () => showPrivatePhoto(
-                                context,
-                                widget.api,
-                                row.detailPhotoPath!,
-                                row.caption,
-                              ),
-                              child: SizedBox(
-                                height: 180,
-                                child: PrivateImage(
-                                  api: widget.api,
-                                  path: row.detailPhotoPath!,
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              for (final entry in [
+                                (row.photoPath!, 'Toàn cảnh'),
+                                if (row.detailPhotoPath != null)
+                                  (row.detailPhotoPath!, 'Chi tiết'),
+                              ])
+                                Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 3,
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        InkWell(
+                                          onTap: () => showPrivatePhoto(
+                                            context,
+                                            widget.api,
+                                            entry.$1,
+                                            row.caption,
+                                          ),
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                            child: SizedBox(
+                                              height: 176,
+                                              child: PrivateImage(
+                                                api: widget.api,
+                                                path: entry.$1,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Text(
+                                          entry.$2,
+                                          style: const TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                          ],
+                            ],
+                          ),
                           const SizedBox(height: 8),
                           Text(
                             row.hasDetailPhoto
