@@ -535,6 +535,48 @@
         }
       ]
     },
+    "incident_evidence": {
+      "columns": [
+        {
+          "name": "incident_id",
+          "type": "bigint",
+          "required": true,
+          "default": null,
+          "comment": null
+        },
+        {
+          "name": "content",
+          "type": "bytea",
+          "required": true,
+          "default": null,
+          "comment": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "required": true,
+          "default": "CURRENT_TIMESTAMP",
+          "comment": null
+        }
+      ],
+      "constraints": [
+        {
+          "name": "incident_evidence_content_check",
+          "kind": "c",
+          "definition": "CHECK ((octet_length(content) <= 2097152))"
+        },
+        {
+          "name": "incident_evidence_incident_id_fkey",
+          "kind": "f",
+          "definition": "FOREIGN KEY (incident_id) REFERENCES incidents(id) ON DELETE CASCADE"
+        },
+        {
+          "name": "incident_evidence_pkey",
+          "kind": "p",
+          "definition": "PRIMARY KEY (incident_id)"
+        }
+      ]
+    },
     "incidents": {
       "columns": [
         {
@@ -3238,6 +3280,27 @@
     },
     {
       "controller": "IncidentController",
+      "method": "POST",
+      "path": "/api/jobs/{id}/incidents/with-photo",
+      "handler": "createWithPhoto",
+      "source": "src/main/java/vn/thoxay/incident/IncidentController.java"
+    },
+    {
+      "controller": "IncidentController",
+      "method": "GET",
+      "path": "/api/incidents/{id}/evidence",
+      "handler": "evidence",
+      "source": "src/main/java/vn/thoxay/incident/IncidentController.java"
+    },
+    {
+      "controller": "IncidentController",
+      "method": "GET",
+      "path": "/admin/incidents/{id}/evidence",
+      "handler": "evidence",
+      "source": "src/main/java/vn/thoxay/incident/IncidentController.java"
+    },
+    {
+      "controller": "IncidentController",
       "method": "GET",
       "path": "/api/incidents/{id}",
       "handler": "get",
@@ -3490,15 +3553,15 @@
     }
   ],
   "counts": {
-    "tables": 30,
-    "rest": 90,
-    "mvc": 21,
-    "columns": 257,
+    "tables": 31,
+    "rest": 92,
+    "mvc": 22,
+    "columns": 260,
     "controllers": 28
   },
-  "schema_sha256": "47a6e577dd0fcb9983a11324eeb6f9d732bfddd4041647f038701e84a7eab179",
+  "schema_sha256": "07ae588b521a5c5cc6e428dbe802cc130e89a0fb3878c58ab6dfe01c7fe13e61",
   "controller_sha256": {
-    "src/main/java/vn/thoxay/admin/AdminController.java": "5fe7bd79c8ef0365b59b40a31877edc00fab0027e209c00c422d654e5c6dd231",
+    "src/main/java/vn/thoxay/admin/AdminController.java": "f6864d73dde1a0a06c14a12370342c111233bc379a4b70636b4f19c4307f29c8",
     "src/main/java/vn/thoxay/admin/AttendanceAdminController.java": "a2b03960a4571c338abc9e87806427aa1261ded162815b401b4a961c067bd094",
     "src/main/java/vn/thoxay/admin/CommitmentAdminController.java": "317692e16fac06fd93e14d38cccb94a56549dad86992547b6525b7e96244302e",
     "src/main/java/vn/thoxay/admin/IncidentAdminController.java": "af0db2790f566d73380feb07b111721bb95c23663705974d20051413918125d1",
@@ -3515,7 +3578,7 @@
     "src/main/java/vn/thoxay/controller/WorkerController.java": "49eb6d4e5d95a57956ee1ccd138895ec310d8d59ef83114e6b9e5272e089fe50",
     "src/main/java/vn/thoxay/crew/CrewController.java": "7f45717f9438e7e12cebbbf03f698aa2f03a1c2cbfa69d5615e4297d493796a3",
     "src/main/java/vn/thoxay/favorites/FavoriteController.java": "264385ef7878df029c7bcdf7f5b7cbee9ac296763450924ce03274c81d76fce7",
-    "src/main/java/vn/thoxay/incident/IncidentController.java": "783003f10b5f6a44341cc3349ec5fa872eacbb5af0dee414c9ee4a9c73d23052",
+    "src/main/java/vn/thoxay/incident/IncidentController.java": "5445009d72e7f15b0b12105b69c386c255744cfe640dfe850e970706a15c703a",
     "src/main/java/vn/thoxay/kyc/KycController.java": "cd14bd819292676e069573ad9743b63c57d31cd292824c6945c1dfff2e7e6ca7",
     "src/main/java/vn/thoxay/media/PortfolioController.java": "8eb55d04cb1356cac39720eaef6e7423aea58cfc53e5c6c870405f62f3e3adea",
     "src/main/java/vn/thoxay/scheduling/CalendarController.java": "a29652068bc9dc86f8690a684c20548259cc5abbff13de0f177588c26de98d5a",

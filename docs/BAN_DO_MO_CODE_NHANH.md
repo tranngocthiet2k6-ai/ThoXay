@@ -44,11 +44,11 @@ giải thích nghiệp vụ và mở test để chứng minh ca được kiểm 
 
 | Câu hỏi | File cần mở |
 | --- | --- |
-| 16 thiết kế Figma và những điều chỉnh có chủ đích | [FIGMA_IMPLEMENTATION.md](../docs/FIGMA_IMPLEMENTATION.md), [PNG gốc](../docs/figma_screens/README.md), [figma_components.dart](../mobile_app/lib/widgets/figma_components.dart) |
+| 20 màn hình thực thi Commercial UI | [FIGMA_IMPLEMENTATION.md](../docs/FIGMA_IMPLEMENTATION.md), [Ảnh DEMO](../docs/figma_screens/README.md), [figma_components.dart](../mobile_app/lib/widgets/figma_components.dart) |
 | Hai ảnh cuối ca gửi chung và đọc ảnh riêng tư | [work_photo_report_dialog.dart](../mobile_app/lib/widgets/work_photo_report_dialog.dart), [AttendanceService.java](../src/main/java/vn/thoxay/attendance/AttendanceService.java), [V22 migration](../src/main/resources/db/migration/V22__work_log_detail_photo.sql), [figma_work_photos_test.dart](../mobile_app/test/figma_work_photos_test.dart) |
 | Màu Cam/Xanh, Sáng/Tối/Outdoor và responsive | [app_theme.dart](../mobile_app/lib/theme/app_theme.dart), [adaptive_viewport.dart](../mobile_app/lib/widgets/adaptive_viewport.dart), [home_navigation.dart](../mobile_app/lib/widgets/home_navigation.dart), [UI_UX_DESIGN_SYSTEM.md](../docs/UI_UX_DESIGN_SYSTEM.md) |
 | API Base URL và chờ Render khởi động | [api_service.dart](../mobile_app/lib/services/api_service.dart), [server_warmup.dart](../mobile_app/lib/services/server_warmup.dart) |
-| Schema 30 bảng và toàn bộ endpoints | [schema.sql](../schema.sql), [PROJECT_INVENTORY.json](../docs/PROJECT_INVENTORY.json), [BAO_CAO_DO_AN.md](../docs/BAO_CAO_DO_AN.md) |
+| Schema 31 bảng và toàn bộ endpoints | [schema.sql](../schema.sql), [PROJECT_INVENTORY.json](../docs/PROJECT_INVENTORY.json), [BAO_CAO_DO_AN.md](../docs/BAO_CAO_DO_AN.md) |
 | Nâng cấp database cũ không mất dữ liệu | [DatabaseMigrationConfig.java](../src/main/java/vn/thoxay/config/DatabaseMigrationConfig.java), [MigrationCompatibilityTest.java](../src/test/java/vn/thoxay/MigrationCompatibilityTest.java), [DATABASE_MIGRATIONS.md](../docs/DATABASE_MIGRATIONS.md) |
 | CI build/test và APK artifact | [deployment-checks.yml gốc](../.github/workflows/deployment-checks.yml), [build-apk.yml gốc](../.github/workflows/build-apk.yml) |
 | Vercel, Render, Java container và readiness | [vercel.json gốc](../vercel.json), [render.yaml gốc](../render.yaml), [Dockerfile gốc](../Dockerfile), [DeploymentHealthController.java](../src/main/java/vn/thoxay/controller/DeploymentHealthController.java) |
@@ -56,3 +56,11 @@ giải thích nghiệp vụ và mở test để chứng minh ca được kiểm 
 
 Nêu rõ phạm vi: KYC do Admin duyệt danh tính; VietQR demo không nhận tiền thật;
 FCM cần Firebase; test mô phỏng camera/GPS không thay thế nghiệm thu thiết bị thật.
+
+## Màn hình 17–20 và ảnh bằng chứng
+
+- [Phiếu cam kết](../mobile_app/lib/screens/commitment_screen.dart), [CommitmentService](../src/main/java/vn/thoxay/scheduling/CommitmentService.java).
+- [Radar GPS/QR](../mobile_app/lib/screens/attendance_radar_screen.dart).
+- [Trung tâm hỗ trợ](../mobile_app/lib/screens/support_center_screen.dart), [IncidentService](../src/main/java/vn/thoxay/incident/IncidentService.java).
+- [Control Center CSS](../src/main/resources/static/css/admin-commercial.css), [hàng đợi](../src/main/resources/templates/fragments/control-queues.html).
+- [Chụp 20 màn hình tự động](../scripts/capture-commercial-ui.mjs), [nguồn ảnh](../docs/demo_photos/CREDITS.md).

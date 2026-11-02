@@ -292,6 +292,12 @@ CREATE INDEX IF NOT EXISTS idx_messages_recipient_unread ON messages(recipient_i
 
 CREATE INDEX IF NOT EXISTS idx_wallet_entries_user_time ON wallet_entries(user_id,created_at);
 
+CREATE TABLE IF NOT EXISTS incident_evidence (
+ incident_id BIGINT PRIMARY KEY REFERENCES incidents(id) ON DELETE CASCADE,
+ content BYTEA NOT NULL CHECK(octet_length(content) <= 2097152),
+ created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Demo-only password for all three accounts: password
 INSERT INTO users (phone_number,password,full_name,role,is_verified)
 VALUES

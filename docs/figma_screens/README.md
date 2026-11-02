@@ -1,39 +1,36 @@
-# Bộ tham chiếu 16 màn hình ThoXay
+# Bộ 20 màn hình thực thi ThoXay
 
-Nguồn: 16 PNG người dùng cung cấp tại Downloads ngày 02/11/2026. Ảnh được sao chép
-nguyên byte, giữ nguyên tên; ba màn hình Hồ sơ, Tìm việc và Ví tiền của Thợ dùng
-dấu `·` trong tên. `Untitled.zip` được giữ nguyên ở Downloads, không đưa vào repo.
-Hash SHA256, kích thước byte và tên gốc có trong [manifest.json](manifest.json).
-Bản trình chiếu đồng nhất ở `00_BAO_VE_DO_AN/06_ANH_THIET_KE_FIGMA/`.
+Ngày 03/11/2026, bộ 16 PNG thiết kế cũ được thay bằng **20 ảnh chụp ứng dụng
+đang chạy** với database DEMO riêng. Tên thư mục lịch sử được giữ để các liên kết
+báo cáo và hồ sơ bảo vệ tiếp tục hoạt động. Bản thiết kế cũ khôi phục từ Git trước
+checkpoint Commercial UI; các ảnh mới không phải PNG Figma nguyên gốc.
 
-Tất cả 16 ảnh đã được mở trực tiếp để đối chiếu. PNG là tài liệu thiết kế, không
-phải ảnh chụp ứng dụng đang chạy và không được dùng làm nền giả giao diện tương tác.
-Giá trị số, tên, hình ảnh hồ sơ/công trường và trạng thái trong app lấy từ API.
+Chạy lại sau `scripts/start-demo.ps1`:
 
-| Nhóm | Màn hình tham chiếu | Điểm bố cục |
-| --- | --- | --- |
-| Thợ | Đăng nhập & Vai trò | Logo nhỏ, hai thẻ vai trò ngang, form đăng nhập |
-| Thợ | Tìm việc | Lời chào, tìm kiếm/chips, bản đồ preview, job card lương nổi bật |
-| Thợ | Chi tiết việc | Thông tin, vị trí, thương lượng, thanh hành động cuối |
-| Thợ | Việc của tôi & Chấm công | Lịch tuần, ca làm, GPS/QR, ảnh cuối ngày, SOS |
-| Thợ | Ví tiền | Số dư, ký quỹ, biểu đồ tuần, lịch sử giao dịch |
-| Thợ | Nạp ví VietQR | Mệnh giá nhanh, QR thật từ yêu cầu, nội dung đối soát |
-| Thợ | Hồ sơ | Thông tin, ba thống kê, uy tín, tay nghề, KYC hai mặt |
-| Thợ | Trò chuyện | Đối tác, công trình/cam kết ghim, bong bóng, input cố định |
-| Thợ | Bảng xếp hạng | Podium thứ tự 2–1–3, hạng hiện tại và danh sách |
-| Chủ thầu | Đăng việc | Ba thống kê thực, CTA đăng, bản đồ, công trình |
-| Chủ thầu | Tạo công trình mới | Form nhóm trường, lịch, vị trí, dự toán và CTA |
-| Chủ thầu | Duyệt thợ | Công trình, lọc đơn, hồ sơ/uy tín/portfolio, duyệt |
-| Chủ thầu | Nghiệm thu | Ca/ảnh, trạng thái duyệt, đánh giá và thanh toán |
-| Chủ thầu | Ví & Quỹ lương | Số dư, ký quỹ, chi trả có dữ liệu và lịch sử |
-| Chủ thầu | Hồ sơ & Thợ ruột | Thông tin/KYC, danh sách thợ đã lưu, liên hệ theo quyền |
-| Chủ thầu | Trò chuyện & Cam kết | Cam kết ghim, bong bóng xanh, ảnh và vị trí |
+```powershell
+node scripts/capture-commercial-ui.mjs --publish
+```
 
-Thiết kế sáng dùng nền #F8FAFC, surface #FFFFFF, viền #E2E8F0, bán kính 12–16px;
-Thợ #EA580C/#FFF7ED, Chủ thầu #059669/#ECFDF5. Chế độ Tối/Outdoor, giảm chuyển
-động, responsive và các tính năng bổ sung hiện có tiếp tục được hỗ trợ.
+Script chỉ truy cập localhost, lấy thông tin đăng nhập từ tệp riêng trong `.local`,
+không ghi token/mật khẩu vào ảnh hoặc manifest. Chỉ công bố khi đủ 20 ảnh và không
+có lỗi JavaScript chưa xử lý. Nạp ví chỉ tạo yêu cầu DEMO chờ duyệt, không chuyển
+tiền. GPS trình duyệt được mô phỏng để kiểm thử Haversine, cách tâm khoảng 35m;
+không thay thế kiểm thử GPS điện thoại thật. Đồng hồ chỉ chạy sau check-in server.
 
-Quy tắc dữ liệu được giữ: GPS 200m/accuracy 100m; QR 5 phút; KYC do Admin duyệt;
-VietQR không tự cộng tiền; job posting không tự khóa quỹ lương; escrow đang có là
-số dư ký quỹ tài khoản. Không hiển thị phần trăm đúng hẹn, số tin đã xem hoặc vị
-trí chấm công giả. Điểm uy tín và bậc nghề không thay bằng số/hạng mẫu trong ảnh.
+[manifest.json](manifest.json) lưu SHA256, kích thước, viewport và thời gian chụp.
+19 view Flutter chụp ở viewport mobile; Admin ở viewport desktop. Bản sao nguyên
+byte nằm trong `00_BAO_VE_DO_AN/06_ANH_THIET_KE_FIGMA/`.
+
+16 luồng ban đầu: Đăng nhập; Tìm việc; Chi tiết; Chấm công; Ví; Nạp VietQR;
+Hồ sơ Thợ; Chat Thợ; Xếp hạng; Trang chủ Chủ thầu; Tạo công trình; Duyệt ứng viên;
+Nghiệm thu; Ví Chủ thầu; Hồ sơ và Thợ quen; Chat Chủ thầu.
+
+Bốn view bổ sung: **17 Phiếu cam kết**, **18 Radar GPS/QR toàn màn hình**,
+**19 Trung tâm Thông báo/SOS**, **20 Web Admin Control Center**.
+
+Hero Navy #0F172A, điểm nhấn Cam #EA580C/Xanh #059669, lưới mờ, portfolio đầy ảnh,
+OSM có attribution, ghim lương và vòng 200m. Nguồn ảnh công trình thật có nhãn
+DEMO tại [CREDITS.md](../demo_photos/CREDITS.md); không chứng minh danh tính hay
+tay nghề người dùng thực. Số dư, lương, điểm và KYC lấy từ API demo. Khuyến nghị
+ký quỹ 200.000đ không bảo đảm cọc riêng công trình; SOS không tự gọi cứu hộ;
+VietQR không tự cộng tiền.

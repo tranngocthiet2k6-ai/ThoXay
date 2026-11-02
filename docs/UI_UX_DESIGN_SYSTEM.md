@@ -140,7 +140,7 @@ Sau tinh chỉnh: 110 test Flutter (108 trước đợt này, thêm test khung T
 125 test Backend và 12 test JS pass. Flutter analyze sạch và Web release build thành công.
 ## Bản cập nhật theo PNG ngày 02 tháng 11 năm 2026
 
-Thiết kế hiện hành dùng 16 ảnh ở `docs/figma_screens/` và ánh xạ thực thi tại
+Mốc thiết kế ngày 02/11 dùng 16 ảnh ở `docs/figma_screens/` và ánh xạ thực thi tại
 [FIGMA_IMPLEMENTATION.md](FIGMA_IMPLEMENTATION.md). Nền #F8FAFC, card trắng/viền
 #E2E8F0, radius 12–16px; hero, ví và hồ sơ phẳng, bỏ gradient/hover spotlight.
 Cam/Xanh theo vai trò, Sáng/Tối/Outdoor và reduced motion được giữ. Mobile có bốn
@@ -150,3 +150,26 @@ cử chỉ cuộn trang; bản đồ đầy đủ vẫn tương tác và có att
 Thống kê nghiệm thu mới: 128 Backend, 114 Flutter, 12 JS và 6 Python. Các mốc và
 mô tả gradient ở những phần cũ dưới đây thuộc lịch sử thiết kế, không phải kiểu
 surface hiện hành. Số liệu, ảnh cá nhân, KYC, tài chính và phân hạng lấy từ API.
+
+## Thiết kế hiện hành — Commercial UI, ngày 03/11/2026
+
+Mốc này thay thế lựa chọn hero phẳng của ngày 02/11: Trang chủ, Ví và Hồ sơ dùng
+`CommercialHero` Navy #0F172A, lưới mờ vẽ trực tiếp và chữ trắng tương phản. Điểm
+nhấn Cam #EA580C/Xanh #059669, avatar có viền và dấu trạng thái theo API; CTA có
+bóng nhẹ. Các surface phụ vẫn sáng để phân cấp, giữ Sáng/Tối/Outdoor và giảm
+chuyển động. Portfolio xếp 3 cột mobile/4 cột desktop, có nhãn và mở album đầy đủ.
+
+OSM dùng tile thật, attribution luôn hiện, bong bóng lương, geofence chấm công
+200m và thẻ công trình chọn từ ghim. Khung bản đồ preview không chiếm cuộn trang.
+Ảnh lỗi có trạng thái tải lại rõ ràng; dữ liệu demo bổ sung bốn ảnh thực tế có
+nguồn, không dùng ô trắng hoặc ảnh thiết kế làm nền giao diện.
+
+Bộ nghiệm thu hiện hành có **20 ảnh chụp ứng dụng thật trên localhost DEMO**,
+thay 16 ảnh thiết kế cũ tại cùng thư mục lịch sử. Bốn view bổ sung là Phiếu cam
+kết, Radar GPS/QR, Trung tâm Thông báo/SOS và Admin Control Center. Chi tiết và
+giới hạn tại [COMMERCIAL_UI.md](COMMERCIAL_UI.md); provenance tại
+[figma_screens/README.md](figma_screens/README.md).
+
+Kết quả mới: **131 Backend, 119 Flutter, 12 JS, 8 Python pass**. GPS trình duyệt
+mô phỏng cho QA; camera, GPS vật lý và giao dịch ngân hàng vẫn cần nghiệm thu
+thiết bị/dịch vụ thật. Không diễn giải pass test thành coverage 100%.

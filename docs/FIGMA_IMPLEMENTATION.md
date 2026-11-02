@@ -1,5 +1,9 @@
 # Đồng bộ giao diện theo 16 ảnh thiết kế
 
+> Mốc Commercial UI ngày 03/11/2026 thay bộ 16 PNG thiết kế bằng 20 ảnh chụp
+> ứng dụng DEMO. Mục đối chiếu dưới đây giữ lịch sử thiết kế; hướng hiện hành tại
+> [COMMERCIAL_UI.md](COMMERCIAL_UI.md) và [nguồn ảnh](figma_screens/README.md).
+
 Ngày cập nhật: 02/11/2026. Bộ PNG gốc được giữ nguyên trong `figma_screens/`,
 có hash và bản sao trình chiếu. Đây là tham chiếu thị giác; ứng dụng dựng bằng
 widget Flutter thực, không chèn ảnh màn hình làm giao diện tương tác.

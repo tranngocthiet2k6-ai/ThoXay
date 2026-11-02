@@ -447,14 +447,10 @@ ngân hàng tự động; nạp/rút là yêu cầu chờ đối soát thực t�
 
 ## Giao diện trình bày đồ án
 
-Flutter dùng giao diện phẳng theo bộ 16 PNG Figma: nền `#F8FAFC`, thẻ trắng,
-viền `#E2E8F0`, bo góc 12–16px. Thợ dùng Cam `#EA580C`, Chủ thầu dùng Xanh
-lục bảo `#059669`; màu vai trò áp dụng cho form, nút, điều hướng và chat.
-Card công trình phân biệt Thợ chính/Phụ hồ bằng icon, nhãn và màu, nhấn rõ mức
-lương, khoảng cách và trạng thái. Danh sách và tile bản đồ có shimmer trong
-lúc tải; animation dừng khi route không hoạt động hoặc bật giảm chuyển động.
-Kết quả trống có minh họa vector được vẽ tại ứng dụng và nút đổi vị trí/khám phá
-việc/đăng công trình. Lỗi kết nối được hiển thị riêng để không nhầm với hết việc.
+Flutter dùng Commercial UI: hero Navy `#0F172A` có lưới mờ, điểm nhấn Cam
+`#EA580C`/Xanh `#059669` theo vai trò, thẻ sáng bo 16px và bóng dịu. Bộ 20 ảnh
+chụp ứng dụng DEMO, portfolio đầy ảnh và bốn màn hình lõi mới được mô tả tại
+[COMMERCIAL_UI.md](docs/COMMERCIAL_UI.md).
 
 Admin có thanh điều hướng, bảng cuộn ngang khi màn hình hẹp, avatar, icon SVG
 local và badge xanh/đỏ/vàng kèm chữ. Bốn thẻ thống kê lấy dữ liệu thật: tổng tài
@@ -504,8 +500,8 @@ Tài khoản, số dư và KYC đều có nhãn DEMO, tách khỏi dữ liệu p
 Hướng dẫn và đối soát mẫu ở [docs/DEMO.md](docs/DEMO.md).
 
 Mở [workspace sáu phân khu](ThoXay-BaoVe.code-workspace) để trình bày mã.
-[Hồ sơ bảo vệ](00_BAO_VE_DO_AN/README.md) gồm báo cáo Word 99 trang, slide
+[Hồ sơ bảo vệ](00_BAO_VE_DO_AN/README.md) gồm báo cáo Word 103 trang, slide
 15 trang có Speaker Notes, 8 tài khoản demo (đã gồm Admin), kịch bản 20 câu hỏi
-và đủ 16 PNG Figma. Xem [đối chiếu thiết kế với triển khai](docs/FIGMA_IMPLEMENTATION.md).
-Kiểm thử đợt Figma: 128 Backend, 114 Flutter, 12 JS và 6 Python pass.
+và đủ 20 PNG giao diện thực thi DEMO. Xem [hướng thiết kế mới](docs/COMMERCIAL_UI.md).
+Kiểm thử hiện hành: 131 Backend, 119 Flutter, 12 JS và 8 Python pass.
 Migration V22 bổ sung ảnh chi tiết cuối ca, tương thích báo cáo một ảnh cũ.

@@ -10,7 +10,8 @@ target=root/'docs/BAO_CAO_DO_AN.md'
 old=target.read_text(encoding='utf-8')
 intro=old[old.index('# Chương 1.'):old.index('<a id="chuong-3">')]
 intro=intro.split('### Công nghệ bổ sung trong đợt nâng cấp')[0].rstrip()+'\n'
-intro=intro.replace('Lưu 14 bảng','Lưu 30 bảng').replace('ba template dashboard, login và wallet','9 template quản trị và đăng nhập')
+intro=intro.replace('Lưu 14 bảng','Lưu 31 bảng').replace('ba template dashboard, login và wallet','9 template quản trị và đăng nhập')
+intro=intro.replace('Lưu 30 bảng','Lưu 31 bảng')
 intro=intro.replace('GPS dùng làm tâm truy vấn tìm việc; chưa có theo dõi vị trí thợ liên tục hoặc điều phối cuốc việc tự động.','GPS dùng làm tâm tìm việc và kiểm tra chấm công trong bán kính 200m; chưa theo dõi vị trí thợ liên tục hoặc tự điều phối cuốc việc.')
 intro=intro.replace('FCM có mã tích hợp nhưng cần Firebase riêng; cấu hình triển khai hiện ghi nhận FCM tắt.','FCM có mã tích hợp nhưng cần Firebase riêng; bản demo tắt FCM.')
 intro=intro.replace('Quản lý hồ sơ mở rộng, CCCD hai mặt, điểm uy tín, bậc thợ và lịch sử thông báo.','Quản lý hồ sơ mở rộng, CCCCD hai mặt, điểm uy tín, bậc thợ và lịch sử thông báo.\n- Hỗ trợ tổ đội thực, cam kết điện tử, thương lượng lương, lịch chống trùng, chấm công và nghiệm thu ảnh.\n- Tiếp nhận sự cố/SOS ưu tiên, quản lý bộ sưu tập tay nghề, mục yêu thích, chia sẻ công trình và thời tiết.').replace('CCCCD','CCCD')
@@ -26,18 +27,18 @@ def table(headers,rows):
 def diagram(name,code,caption):add(f'<!-- diagram:{name} -->\n```mermaid\n{code.strip()}\n```\n\n*{caption}*')
 
 add('# BÁO CÁO ĐỒ ÁN TỐT NGHIỆP\n\n## Ứng dụng di động kết nối lao động phổ thông và chủ thầu ThoXay')
-add(f'Ngày chốt số liệu: **02/11/2026**, múi giờ Việt Nam. Nhánh **main**, checkpoint mã nguồn **{commit}**. Báo cáo mô tả phiên bản đã thực thi và bằng chứng kiểm thử, không sử dụng số liệu người dùng hoặc giao dịch thật để minh họa.')
+add(f'Ngày chốt số liệu: **03/11/2026**, múi giờ Việt Nam. Nhánh **main**, checkpoint mã nguồn **{commit}**. Báo cáo mô tả phiên bản đã thực thi và bằng chứng kiểm thử, không sử dụng số liệu người dùng hoặc giao dịch thật để minh họa.')
 add('## Tóm tắt\n\nThoXay kết nối Thợ, Chủ thầu và Admin trong quy trình tìm việc theo vị trí, tuyển dụng có cam kết, quản lý ca làm, nghiệm thu ảnh, đánh giá và thanh toán nội bộ. Flutter chia sẻ mã nguồn Android/Web. Spring Boot cung cấp REST/WebSocket và Thymeleaf Admin. PostgreSQL lưu dữ liệu, Flyway quản lý nâng cấp. Vercel phục vụ Web, Render chạy Backend/Admin và database, GitHub Actions kiểm thử và tạo APK.')
 table(['Chỉ tiêu kiểm kê','Giá trị'],[
 ('Bảng nghiệp vụ / cột',f"{len(tables)} / {sum(len(t['columns']) for t in tables.values())}"),
-('Bảng kỹ thuật Flyway','1, không tính trong 30 bảng nghiệp vụ'),
+('Bảng kỹ thuật Flyway','1, không tính trong 31 bảng nghiệp vụ'),
 ('Controller / ánh xạ HTTP',f"{catalog['counts']['controllers']} / {len(routes)}"),
 ('REST dưới /api/ / route khác',f"{catalog['counts']['rest']} / {catalog['counts']['mvc']}"),
 ('Tệp Java sản xuất / Dart lib / màn hình Flutter',f"{count('src/main/java','*.java')} / {count('mobile_app/lib','*.dart')} / {count('mobile_app/lib/screens','*.dart')}"),
 ('Template Thymeleaf',count('src/main/resources/templates','*.html')),
-('Kiểm thử thành công','128 Backend + 114 Flutter + 12 JS; thêm 6 test bảo vệ seed Python'),
+('Kiểm thử thành công','131 Backend + 119 Flutter + 12 JS; thêm 8 test bảo vệ seed Python'),
 ('Mốc trước đợt Figma','125 Backend + 110 Flutter + 12 JS; thêm 3 Backend và 4 Flutter')])
-add('## Phương pháp và giới hạn số liệu\n\nPROJECT_INVENTORY.json được tạo bằng truy vấn chỉ đọc catalog PostgreSQL sau Flyway V22 và quét annotation controller trong Java. Một cặp HTTP method và đường dẫn cụ thể được tính là một endpoint. Alias health được tính riêng. Bộ đếm không tính handler mặc định của Spring, WebSocket hoặc filter đăng nhập form. Bảng user_skills và user_project_images là collection table JPA. Các kiểm thử báo cáo là số test thực chạy, không phải tỷ lệ bao phủ mã nguồn. Các ảnh DEMO và số dư minh họa không chứng minh danh tính hoặc doanh thu thực tế.')
+add('## Phương pháp và giới hạn số liệu\n\nPROJECT_INVENTORY.json được tạo bằng truy vấn chỉ đọc catalog PostgreSQL sau Flyway V23 và quét annotation controller trong Java. Một cặp HTTP method và đường dẫn cụ thể được tính là một endpoint. Alias health được tính riêng. Bộ đếm không tính handler mặc định của Spring, WebSocket hoặc filter đăng nhập form. Bảng user_skills và user_project_images là collection table JPA. Các kiểm thử báo cáo là số test thực chạy, không phải tỷ lệ bao phủ mã nguồn. Các ảnh DEMO và số dư minh họa không chứng minh danh tính hoặc doanh thu thực tế.')
 add('## Mục lục\n\n1. Tổng quan đề tài\n2. Công nghệ sử dụng\n3. Phân tích và thiết kế hệ thống\n4. Triển khai và kiểm thử\n5. Kết luận và hướng phát triển\n6. Tài liệu đối chiếu')
 add(intro)
 add('### Công nghệ bổ sung trong đợt nâng cấp\n\nFlyway Core và Flyway PostgreSQL dùng version do Spring Boot parent quản lý; script đóng gói thực tế kiểm chứng thư viện trong JAR. mobile_scanner hỗ trợ quét mã ca làm, qr_flutter tạo QR phía client từ payload server. Ảnh được chuẩn hóa bằng Java ImageIO, lưu BYTEA và chỉ trả qua endpoint có kiểm tra quyền. Open-Meteo cung cấp thời tiết tham khảo; cache và timeout nằm trong Backend. Plus Jakarta Sans được đóng gói cùng Flutter theo giấy phép OFL.')
@@ -84,14 +85,14 @@ for slug,role in [('tho','Thợ'),('chu-thau','Chủ thầu'),('admin','Admin')]
     code='flowchart LR\n actor["'+role+'"]\n'+'\n'.join(f' actor --> case{i}["{v}"]' for i,v in enumerate(labels[slug]))
     diagram('use-case-'+slug,code,'Sơ đồ chức năng của '+role)
 
-add('## 3.3. Mô hình dữ liệu và ERD\n\nDatabase có 30 bảng nghiệp vụ. Flyway tạo thêm flyway_schema_history để theo dõi migration, không phải entity nghiệp vụ. Sơ đồ tổng quan giữ toàn bộ bảng và khóa ngoại. Các sơ đồ theo phân hệ trình bày cột khóa/chính yếu để dễ đọc; từ điển ở mục 3.4 liệt kê đầy đủ cột, kiểu và ràng buộc. Ký hiệu FK rỗng thể hiện quan hệ có thể không tồn tại sau xóa theo SET NULL.')
+add('## 3.3. Mô hình dữ liệu và ERD\n\nDatabase có 31 bảng nghiệp vụ. Flyway tạo thêm flyway_schema_history để theo dõi migration, không phải entity nghiệp vụ. Sơ đồ tổng quan giữ toàn bộ bảng và khóa ngoại. Các sơ đồ theo phân hệ trình bày cột khóa/chính yếu để dễ đọc; từ điển ở mục 3.4 liệt kê đầy đủ cột, kiểu và ràng buộc. Ký hiệu FK rỗng thể hiện quan hệ có thể không tồn tại sau xóa theo SET NULL.')
 groups={
 'ho-so':['users','kyc_images','user_skills','user_project_images','portfolio_photos'],
 'tuyen-dung':['jobs','job_applications','worker_calendar_blocks','crews','crew_members','crew_batches','saved_jobs','saved_workers'],
 'tai-chinh':['wallet_accounts','wallet_requests','job_payments','wallet_entries','receiving_bank_settings','receiving_bank_audit'],
 'van-hanh':['attendance_records','attendance_shift_codes','work_logs'],
 'thong-bao':['messages','message_attachments','chat_read_states','notifications','device_tokens'],
-'uy-tin':['reputation_events','incidents','incident_audit']}
+'uy-tin':['reputation_events','incidents','incident_audit','incident_evidence']}
 def relationships(selected):
     lines=[]
     for name in selected:
@@ -115,7 +116,7 @@ for name,t in tables.items():
     primary=next(c['definition'] for c in t['constraints'] if c['kind']=='p')
     fields=re.search(r'\(([^)]+)\)',primary).group(1).split(', ')
     overview.append(' '+name+' {\n'+'\n'.join('  '+er_type(next(c for c in t['columns'] if c['name']==f))+' '+f+' PK' for f in fields)+'\n }')
-diagram('erd','erDiagram\n'+'\n'.join(overview)+'\n'+'\n'.join(relationships(list(tables))),'ERD tổng quan 30 bảng. Ảnh PNG gốc trong docs/diagrams/erd.png có thể phóng to khi tra cứu.')
+diagram('erd','erDiagram\n'+'\n'.join(overview)+'\n'+'\n'.join(relationships(list(tables))),'ERD tổng quan 31 bảng. Ảnh PNG gốc trong docs/diagrams/erd.png có thể phóng to khi tra cứu.')
 for group,names in groups.items():
     refs=set(names)
     for name in names:
@@ -164,8 +165,10 @@ descriptions={
 'device_tokens':'FCM token thiết bị, hash để định danh và last-seen.',
 'reputation_events':'Sự kiện hoàn thành/hủy việc và điểm uy tín sau thay đổi.',
 'incidents':'Báo cáo riêng tư với snapshot công trình/người báo và độ ưu tiên.',
-'incident_audit':'Lịch sử trạng thái xử lý sự cố và ghi chú của Admin.'}
+'incident_audit':'Lịch sử trạng thái xử lý sự cố và ghi chú của Admin.',
+'incident_evidence':'Một ảnh JPEG bằng chứng đã chuẩn hóa trên mỗi sự cố; chỉ người báo hoặc Admin đọc.'}
 column_desc={
+'incident_id':'Khóa chính đồng thời khóa ngoại tới incidents; xóa cùng sự cố.',
 'id':'Khóa định danh bản ghi.','user_id':'Tài khoản sở hữu hoặc nhận dữ liệu.','owner_id':'Chủ sở hữu dữ liệu.','worker_id':'Tài khoản thợ liên quan.','contractor_id':'Chủ thầu liên quan.','job_id':'Công trình liên quan.','application_id':'Đơn ứng tuyển liên quan.','recipient_id':'Người nhận.','sender_id':'Người gửi.',
 'full_name':'Họ tên hiển thị.','phone_number':'Số điện thoại dùng đăng nhập, duy nhất.','password':'Mật khẩu băm BCrypt, không trả cho client.','role':'ROLE_WORKER, ROLE_CONTRACTOR hoặc ROLE_ADMIN.','is_active':'Cờ hoạt động; false chặn cả JWT cũ.','is_available':'Cờ thợ sẵn sàng nhận việc.','is_verified':'KYC được Admin duyệt, yêu cầu đủ hai ảnh.','cccd_image':'Liên kết ảnh CCCD legacy.','cccd_front_image':'Tham chiếu ảnh CCCD mặt trước.','cccd_back_image':'Tham chiếu ảnh CCCD mặt sau.',
 'rating':'Trung bình sao từ công trình COMPLETED; mặc định 5.0 nếu chưa có sao.','reputation_score':'Điểm uy tín từ 0 đến 100.','worker_tier':'Bậc SILVER, GOLD hoặc DIAMOND.','completed_jobs':'Số công trình hoàn thành được ghi nhận.','cancelled_jobs':'Số lần hủy việc đã nhận.','date_of_birth':'Ngày sinh.','experience_years':'Số năm kinh nghiệm.','experience_summary':'Mô tả kinh nghiệm.','sort_order':'Thứ tự trong collection.','skill':'Tên kỹ năng.','image_url':'URL ảnh dự án legacy.',
@@ -189,6 +192,8 @@ for n,(name,t) in enumerate(tables.items(),1):
             default='tự tăng (sequence)' if c['default'].startswith('nextval(') else re.sub(r'::[a-z ]+(?:\[\])?$','',c['default'])
             rules.append('default '+default)
         desc=column_desc.get(c['name'])
+        if name=='incident_evidence' and c['name']=='content':
+            desc='Ảnh JPEG bằng chứng đã chuẩn hóa, tối đa 2MB; đọc theo quyền người báo/Admin.'
         if desc is None:
             if c['name'].startswith('checkin_') or c['name'].startswith('checkout_'):
                 desc=('Chứng cứ lúc vào ca: ' if c['name'].startswith('checkin_') else 'Chứng cứ lúc ra ca: ')+{'method':'GPS hoặc QR.','latitude':'vĩ độ.','longitude':'kinh độ.','accuracy':'độ chính xác GPS, mét.'}.get(c['name'].split('_',1)[1],c['name'])
@@ -202,7 +207,7 @@ for n,(name,t) in enumerate(tables.items(),1):
     constraints=[c['definition'] for c in t['constraints'] if c['kind'] in ('f','c','u')]
     if constraints:add('Ràng buộc tham chiếu và kiểm tra:\n\n'+'\n'.join('- `'+v+'`' for v in constraints))
 
-add('## 3.5. Danh mục endpoint theo Controller\n\nDanh mục có 111 cặp method/path: 90 dưới /api/ và 21 route khác, gồm giao diện Admin, tài nguyên ảnh riêng tư, trang gốc và readiness /health. Phân quyền tiếp tục được service kiểm tra quyền sở hữu, trạng thái ACCEPTED và trạng thái tài khoản; biết URL không cấp quyền đọc dữ liệu. Các mutation Admin sử dụng phiên/form cần CSRF. Annotation dưới đây được đối chiếu từ Controller.java; hash tệp nguồn nằm trong PROJECT_INVENTORY.json.')
+add('## 3.5. Danh mục endpoint theo Controller\n\nDanh mục có 114 cặp method/path: 92 dưới /api/ và 22 route khác, gồm giao diện Admin, tài nguyên ảnh riêng tư, trang gốc và readiness /health. Phân quyền tiếp tục được service kiểm tra quyền sở hữu, trạng thái ACCEPTED và trạng thái tài khoản; biết URL không cấp quyền đọc dữ liệu. Các mutation Admin sử dụng phiên/form cần CSRF. Annotation dưới đây được đối chiếu từ Controller.java; hash tệp nguồn nằm trong PROJECT_INVENTORY.json.')
 by_controller=defaultdict(list)
 for r in routes:by_controller[r['controller']].append(r)
 for controller,items in by_controller.items():
@@ -212,8 +217,8 @@ add('Các endpoint do Spring Security xử lý ngoài Controller: POST /admin/lo
 add('## 3.6. Kiến trúc module và giao dịch\n\nBackend là modular monolith: controller nhận DTO và Jakarta Validation, service kiểm tra actor/quyền và transaction, repository truy cập PostgreSQL. Các package scheduling, crew, attendance, wallet, media, incident, chat và weather tạo các ranh giới nghiệp vụ. Flutter tách model/service/screen/widget/theme; ApiService tập trung xác thực, lỗi, multipart và URL. Thymeleaf render Admin, JavaScript quản lý bộ lọc và modal nhưng quyền cuối cùng nằm trên server.')
 add('Duyệt đơn khóa công trình và các worker theo thứ tự ID, ngăn vượt số lượng và nhận trùng lịch. Duyệt tổ đội xử lý nguyên nhóm trong một transaction. Chốt sao khóa các worker trước khi tính trung bình. Thanh toán khóa ví, ghi payment/ledger/số dư cùng transaction và tham chiếu duy nhất. Retry idempotent không tự đổi số tiền, ảnh hoặc nội dung; payload khác với cùng khóa bị từ chối 409. QR ca làm chỉ lưu hash và hết hạn sau 5 phút. Snapshot ngân hàng/cam kết không đổi khi thông tin nguồn thay đổi về sau.')
 
-add('## 3.7. Thiết kế giao diện theo bộ Figma\n\nBộ tham chiếu gồm 16 PNG nguyên gốc do tác giả cung cấp, được lưu tại docs/figma_screens và sao chép trong hồ sơ bảo vệ. Các hình sau là bản thiết kế Figma, không phải ảnh chụp dữ liệu production. Flutter triển khai giao diện phẳng với nền #F8FAFC, thẻ trắng, viền #E2E8F0, bo góc 12–16px; Cam #EA580C cho Thợ và Xanh lục bảo #059669 cho Chủ thầu. Admin giữ Xanh Navy #0F172A. Bố cục desktop căn giữa, danh sách chia cột khi đủ rộng; mobile ưu tiên bốn mục điều hướng và thao tác bằng ngón tay. Màu nút có chữ trắng được làm đậm khi cần bảo đảm tương phản.')
-add('### Đối chiếu thiết kế và triển khai\n\nCác số dư, điểm số và tên trong Figma chỉ minh họa bố cục. Ứng dụng dùng dữ liệu API và các bất biến server hiện có. Một số chi tiết được điều chỉnh để bảo đảm tương phản, khả năng cuộn, điều hướng desktop và quyền riêng tư. Hai ảnh công việc được bổ sung bằng migration V22 nullable, tương thích báo cáo một ảnh cũ. Chi tiết từng màn hình và các giới hạn chức năng nằm tại FIGMA_IMPLEMENTATION.md; bộ PNG không thay thế nghiệm thu camera, GPS hoặc ngân hàng trên thiết bị thật.')
+add('## 3.7. Giao diện thương mại và bộ 20 màn hình thực thi\n\nBộ 20 PNG được chụp tự động từ ứng dụng localhost với dữ liệu DEMO, lưu tại docs/figma_screens (giữ tên thư mục lịch sử). Đây là ảnh giao diện thực thi, không còn là 16 PNG Figma nguyên gốc. Hero Trang chủ, Ví và Hồ sơ dùng Navy #0F172A với lưới mờ, chữ trắng và điểm nhấn Cam #EA580C cho Thợ hoặc Xanh #059669 cho Chủ thầu. Portfolio hiển thị ảnh thực tế có chú thích DEMO, Admin dùng Sidebar Navy và vùng làm việc sáng. Bố cục giữ lưới 8pt, thẻ bo 16px, bóng dịu và khung nội dung desktop cân đối.')
+add('### Nguồn ảnh và giới hạn kiểm chứng\n\nCác giá trị hiển thị lấy từ API của database demo riêng, không đại diện giao dịch hay danh tính thực. Bản đồ dùng tile OpenStreetMap có attribution, ghim lương và vùng chấm công 200m. GPS 35m trong ảnh Radar được mô phỏng bằng trình duyệt để kiểm thử phép tính; chưa thay thế nghiệm thu GPS/camera trên thiết bị. Hai ảnh cuối ca V22 giữ tương thích dữ liệu cũ. V23 bổ sung bảng bằng chứng sự cố riêng tư, không làm thay đổi bảng hiện có. Chi tiết nằm tại COMMERCIAL_UI.md và demo_photos/CREDITS.md.')
 screens=[
 ('Thợ Xây - Đăng nhập & Vai trò.png','Đăng nhập và vai trò','Hai thẻ chọn vai trò nằm ngang, form gọn và icon trường nhập. Lựa chọn này chỉ thay giao diện, quyền thực tế do JWT và server xác định.'),
 ('Thợ Xây · Tìm việc.png','Tìm việc của Thợ','Lời chào, bộ lọc ngang, bản đồ có ghim lương và thẻ công trình. Lương, khoảng cách, chủ thầu và huy hiệu KYC lấy từ API; không ghi cứng số liệu trong bản thiết kế.'),
@@ -231,9 +236,15 @@ screens=[
 ('Chủ thầu - Ví & Quỹ lương.png','Ví và chi trả của Chủ thầu','Số dư, tài khoản ký quỹ và chi trả tuần từ ledger đang tải. Ký quỹ tài khoản không được trình bày như ngân sách đã khóa cho một công trình riêng.'),
 ('Chủ thầu - Hồ sơ & Thợ ruột.png','Hồ sơ và thợ quen','Thông tin doanh nghiệp, KYC và danh sách thợ đã lưu. Nút mời chuẩn bị liên kết công trình để chia sẻ, không tự gửi thông báo hay nhận việc thay Thợ.'),
 ('Chủ thầu - Trò chuyện & Cam kết.png','Trò chuyện của Chủ thầu','Bong bóng Xanh lục bảo và cam kết ghim. Lịch sử, gửi lại, tin chưa đọc và kiểm soát người tham gia dùng các API và WebSocket hiện có.')]
+screens += [
+('17 - Phiếu cam kết nhận việc.png','Phiếu cam kết điện tử','Hiển thị mã, mức lương chốt, hai bên và KYC thật, timestamp đồng thuận và snapshot SHA256. Chỉ hiện hai bên xác nhận khi đủ trạng thái FINAL và cả hai timestamp; 200.000đ là khuyến nghị ký quỹ tài khoản, không bảo đảm tiền cọc riêng công trình.'),
+('18 - Radar GPS & QR chấm công.png','Radar và QR toàn màn hình','Bản đồ OSM, geofence 200m, khoảng cách Haversine, độ chính xác GPS, mở camera QR ca làm 5 phút và đồng hồ theo ca thực; chưa chấm công thì thời gian bằng không.'),
+('19 - Trung tâm thông báo & SOS.png','Thông báo và xử lý sự cố','Hiển thị biến động ví và thông báo thật, chọn công trình, gửi SOS hoặc khiếu nại kèm một ảnh bằng chứng riêng tư. SOS ưu tiên cho Admin, không tự gọi cứu hộ.'),
+('20 - Web Admin Control Center.png','Control Center quản trị','Sidebar Navy, bốn KPI thực với vòng tỷ lệ, hàng đợi KYC hai mặt, đối soát ví và sự cố ưu tiên. Giữ CSRF, ACL ảnh và chống duyệt nhầm snapshot.')
+]
 for index,(file,title,description) in enumerate(screens,1):
     assert (root/'docs/figma_screens'/file).is_file(),file
-    add(f'### 3.7.{index}. {title}\n\n{description}\n\n![Thiết kế Figma {title}](<figma_screens/{file}>)\n\n*Hình 3.7.{index}. {title} trong bộ thiết kế Figma nguyên gốc.*')
+    add(f'### 3.7.{index}. {title}\n\n{description}\n\n![Giao diện DEMO {title}](<figma_screens/{file}>)\n\n*Hình 3.7.{index}. {title}, ảnh chụp giao diện thực thi với dữ liệu DEMO.*')
 
 add('# Chương 4. Triển khai và kiểm thử\n\n## 4.1. Kiến trúc triển khai thực tế')
 diagram('kien-truc','''flowchart TB
@@ -272,10 +283,10 @@ features=[('Bản đồ công trình','Ghim có lương, chọn ghim mở tóm t
 table(['STT','Tính năng','Hành vi đã thực thi','Điểm đối chiếu'],[(i,*v) for i,v in enumerate(features,1)])
 add('## 4.4. Kết quả kiểm thử và build')
 table(['Lớp kiểm chứng','Kết quả chốt','Phạm vi và giới hạn'],[
-('Backend Maven verify','128 test pass, 0 lỗi, 0 bỏ qua','H2/MockMvc, PostgreSQL migration riêng, cạnh tranh duyệt đơn, ACL, ví, ảnh và giờ Việt Nam. JVM test mặc định UTC.'),
-('Flutter','114 test pass, analyze sạch','Bốn ca mới kiểm tra chọn vai trò, hai ảnh, multipart cùng phiên và nhập dự toán không hữu hạn; mốc trước Figma là 110.'),
+('Backend Maven verify','131 test pass, 0 lỗi, 0 bỏ qua','H2/MockMvc, PostgreSQL migration riêng, cạnh tranh duyệt đơn, ACL, ví, ảnh và giờ Việt Nam. JVM test mặc định UTC.'),
+('Flutter','119 test pass, analyze sạch','Bao gồm hero tương phản, GPS Haversine, cam kết hai bên, multipart bằng chứng, ảnh cuối ca và dự toán không hữu hạn.'),
 ('JavaScript Node','12 test pass','Schema/build config, bộ lọc Admin, KYC/lightbox và sự cố.'),
-('Python demo','6 test pass','Chặn host/database/sự hiện diện dữ liệu thật, yêu cầu migration, chạy lặp không ghi đè.'),
+('Python demo','8 test pass','Chặn host/database/sự hiện diện dữ liệu thật, yêu cầu migration, chạy lặp không ghi đè.'),
 ('JAR / Web release','Build thành công','Maven Spring Boot repackage và Flutter build web --release.'),
 ('APK / CI','Workflow tự build khi push main','Chỉ tuyên bố run thành công sau khi đối chiếu trạng thái Actions; không có Android SDK local.'),
 ('Chrome demo thật','390/1440px, hai vai trò, Admin','Dùng API localhost và dữ liệu tổng hợp, đã kiểm tra ví/Top 3/chat/công trình và bốn template Admin.'),
@@ -287,6 +298,6 @@ add('# Chương 5. Kết luận và hướng phát triển\n\n## 5.1. Kết qu�
 add('## 5.2. Hạn chế\n\nĐây là sản phẩm đồ án, chưa được nghiệm thu khai thác thương mại hoặc kiểm thử tải quy mô lớn. KYC là kiểm tra ảnh và duyệt thủ công, không chứng minh danh tính bằng cơ sở dữ liệu dân cư. Ví không tự chuyển tiền ngân hàng, chưa là dịch vụ trung gian thanh toán. VietQR demo không có ngân hàng nhận thật. FCM cần tài khoản Firebase riêng. Cam kết là chứng cứ đồng thuận trong ứng dụng, chưa có chữ ký số của nhà cung cấp chứng thực. Check-in GPS có thể chịu sai số/giả vị trí, QR có thể bị chia sẻ; chưa coi đây là chống gian lận tuyệt đối. Ca qua đêm, thiết bị camera thực, QR ngân hàng thực, đánh giá pháp lý và kiểm thử khả năng tiếp cận với người dùng thực cần giai đoạn nghiệm thu tiếp theo.')
 add('## 5.3. Hướng phát triển\n\nBước tiếp theo ưu tiên quan trắc lỗi/hiệu năng và backup phục hồi database, kiểm thử thiết bị Android đa cấu hình, hoàn thiện xử lý ca qua đêm và quy trình điều chỉnh công có audit. Khi có hợp đồng dịch vụ phù hợp, có thể tích hợp eKYC, thông báo FCM production và đối soát ngân hàng tự động bằng webhook có chữ ký/idempotency. Khi lưu lượng tăng, cần đánh giá PostGIS/chỉ mục địa lý, object storage ảnh riêng tư có URL ngắn hạn và phát sự kiện nhiều instance qua broker. Mọi mở rộng phải giữ phân quyền, bảo vệ dữ liệu cá nhân và các bất biến ledger.')
 add('## 5.4. Đóng góp kỹ thuật của đồ án\n\nĐiểm thực hiện có thể bảo vệ bằng mã gồm khóa giao dịch theo thứ tự để chống nhận vượt/trùng lịch; chốt cam kết theo version và hash; xử lý ảnh riêng tư và bỏ metadata; sổ ví có ba ngăn cùng khóa idempotency; snapshot dữ liệu quan trọng trước thay đổi/xóa; và kiểm thử calendar/timezone dưới cả môi trường local và CI. Chưa thực hiện nghiên cứu so sánh định lượng, do đó không gán tỷ lệ cải thiện hiệu quả tuyển dụng hoặc năng suất lao động.')
-add('# Tài liệu và mã nguồn đối chiếu\n\n- pom.xml, .flutter-version, mobile_app/pubspec.yaml và pubspec.lock: công nghệ/phiên bản.\n- schema.sql, src/main/java, src/main/resources/db/migration: mô hình và nghiệp vụ.\n- docs/PROJECT_INVENTORY.json: 30 bảng, toàn bộ cột/ràng buộc và ánh xạ controller.\n- docs/ADVANCED_UPGRADE.md, DATABASE_MIGRATIONS.md, UI_UX_DESIGN_SYSTEM.md: đặc tả đã thực thi.\n- docs/DEMO.md, FIREBASE.md, WALLET.md, KYC_CAMERA.md: cấu hình và giới hạn.\n- .github/workflows, Dockerfile, render.yaml, vercel.json, scripts/build-vercel.mjs: CI và triển khai.\n- src/test/java, mobile_app/test, scripts/tests: ca kiểm thử.\n- docs/diagrams: ảnh sơ đồ render từ mọi khối Mermaid trong báo cáo.\n- docs/KICH_BAN_DEMO_VA_HOI_DAP.md: trình diễn và câu hỏi bảo vệ.\n\nCác tệp .local chứa log, ảnh QA và thông tin truy cập demo không được commit. Không trích dữ liệu cá nhân, khóa hoặc mật khẩu thật vào tài liệu bảo vệ.')
+add('# Tài liệu và mã nguồn đối chiếu\n\n- pom.xml, .flutter-version, mobile_app/pubspec.yaml và pubspec.lock: công nghệ/phiên bản.\n- schema.sql, src/main/java, src/main/resources/db/migration: mô hình và nghiệp vụ.\n- docs/PROJECT_INVENTORY.json: 31 bảng, toàn bộ cột/ràng buộc và ánh xạ controller.\n- docs/ADVANCED_UPGRADE.md, DATABASE_MIGRATIONS.md, UI_UX_DESIGN_SYSTEM.md: đặc tả đã thực thi.\n- docs/DEMO.md, FIREBASE.md, WALLET.md, KYC_CAMERA.md: cấu hình và giới hạn.\n- .github/workflows, Dockerfile, render.yaml, vercel.json, scripts/build-vercel.mjs: CI và triển khai.\n- src/test/java, mobile_app/test, scripts/tests: ca kiểm thử.\n- docs/diagrams: ảnh sơ đồ render từ mọi khối Mermaid trong báo cáo.\n- docs/KICH_BAN_DEMO_VA_HOI_DAP.md: trình diễn và câu hỏi bảo vệ.\n\nCác tệp .local chứa log, ảnh QA và thông tin truy cập demo không được commit. Không trích dữ liệu cá nhân, khóa hoặc mật khẩu thật vào tài liệu bảo vệ.')
 target.write_text('\n'.join(out).rstrip()+'\n',encoding='utf-8')
 print('Report generated:',catalog['counts'])

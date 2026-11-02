@@ -1,8 +1,8 @@
 # Kịch bản trình diễn và hỏi đáp bảo vệ ThoXay
 
-Tài liệu dành cho người trình bày đồ án. Số liệu chốt ngày 02/11/2026:
-30 bảng nghiệp vụ, 257 cột, 28 Controller, 90 endpoint `/api/` và 21 route khác.
-Bộ test đã chạy: 128 Backend, 114 Flutter, 12 JS và 6 test bảo vệ seed Python.
+Tài liệu dành cho người trình bày đồ án. Số liệu chốt ngày 03/11/2026:
+31 bảng nghiệp vụ, 260 cột, 28 Controller, 92 endpoint `/api/` và 22 route khác.
+Bộ test đã chạy: 131 Backend, 119 Flutter, 12 JS và 8 test bảo vệ seed Python.
 So với mốc trước Figma 125/110, bổ sung 3 Backend và 4 Flutter regression test.
 
 ## Môi trường đã chuẩn bị
@@ -37,8 +37,7 @@ nhập production. Web responsive là phương án trình diễn mobile ngay tr�
 
 Speaker Notes có lời dẫn cụ thể ở từng slide. Có thể rút gọn phần nói để dành
 7–8 phút thao tác demo; thời lượng là gợi ý luyện tập, không phải số liệu thực nghiệm.
-Slide 7–13 dùng đủ 16 PNG Figma nguyên gốc và ghi rõ là thiết kế; các số dư/điểm
-trong hình không phải số liệu production. Khi chuyển sang demo, số liệu lấy từ API.
+Slide dùng đủ 20 ảnh giao diện thực thi, chụp từ database DEMO. Số dư và trạng thái lấy từ API; không dùng dữ liệu production. GPS trình duyệt là mô phỏng QA.
 
 ## Kịch bản demo chính khoảng 8 phút
 
@@ -69,6 +68,11 @@ duyệt đơn và chọn giá đề xuất hoặc giá gốc. Kiểm tra lại m
 Nếu chọn một công trình khác trùng ngày, hệ thống phải từ chối khi duyệt.
 Không sửa trực tiếp database để bỏ qua cảnh báo lịch hoặc điều kiện đồng thuận.
 
+Trong Chat công trình đã chốt, bấm **Xem phiếu cam kết** (màn hình 17).
+Đối chiếu mã CK, lương thực, KYC và thời điểm đồng thuận. Chỉ FINAL cùng đủ hai
+timestamp mới hiện “Đã xác nhận bởi 2 bên”. 200.000đ là khuyến nghị ký quỹ tài
+khoản, không phải bảo đảm giữ cọc riêng từng công trình.
+
 ### Bước 4 Tổ đội và lịch làm việc
 
 Trong Hồ sơ Thợ, mở “Thông tin và tiện ích hồ sơ”, rồi “Tổ đội của tôi” để xem tổ mẫu với ba tài khoản đã xác nhận.
@@ -89,6 +93,10 @@ yêu cầu bổ sung. Thợ thứ hai chưa chấm công có thể dùng QR ca l
 để minh họa check-in/out mà không cần đứng ở tọa độ mẫu. QR hết hạn sau 5 phút.
 Nếu thiết bị không có camera, chỉ ra chức năng và dùng ca mẫu đã chuẩn bị; không
 khẳng định đã quét bằng camera vật lý khi chỉ trình diễn trên trình duyệt.
+
+Bấm **Radar GPS & QR toàn màn hình** (màn hình 18), xem vòng 200m, sai số và
+khoảng cách Haversine trên OSM. Bản chụp QA mô phỏng GPS cách 35m; đồng hồ chỉ
+chạy sau check-in server demo. Camera/GPS vật lý cần nghiệm thu riêng.
 
 ### Bước 6 Ví và thu nhập
 
@@ -132,6 +140,11 @@ chứng người dùng thật hay doanh thu thật.
 | Số liệu/phiên bị thay đổi | Dùng “Làm mới”, kiểm tra đúng vai trò và môi trường. Seed lặp không ghi đè tương tác cũ |
 | Hội đồng hỏi về thanh toán tự động | Mở trạng thái PENDING/đối soát Admin, phân biệt tạo mã QR và xác nhận giao dịch ngân hàng |
 
+Trung tâm thông báo → **Trung tâm hỗ trợ & SOS** (màn hình 19): chọn đúng công
+trình, gửi khiếu nại thử có tiền tố DEMO, chọn ảnh công trường và xem trước.
+Admin mở hàng đợi ưu tiên tại **Control Center** (màn hình 20) để đọc bằng chứng
+và phản hồi. Ảnh chỉ người báo/Admin được xem; SOS không tự gọi cứu hộ.
+
 ## Hai mươi câu hỏi và gợi ý trả lời
 
 ### Câu 1 Vì sao chọn đề tài và sản phẩm giải quyết vấn đề nào
@@ -156,10 +169,10 @@ nếu mở rộng, đo tải và xác định ranh giới sự kiện trước k
 
 ### Câu 3 Số bảng và API được tính thế nào
 
-Catalog sau Flyway V21 có 30 bảng nghiệp vụ với 256 cột. Hai collection table
+Catalog sau Flyway V23 có 31 bảng nghiệp vụ với 260 cột. Hai collection table
 user_skills/user_project_images vẫn được tính vì thực sự tồn tại trong PostgreSQL.
-flyway_schema_history là bảng kỹ thuật nên ghi riêng. Quét 28 Controller cho 111
-cặp method/path, trong đó 90 dưới `/api/`, 21 route khác gồm Admin, ảnh và health.
+flyway_schema_history là bảng kỹ thuật nên ghi riêng. Quét 28 Controller cho 114
+cặp method/path, trong đó 92 dưới `/api/`, 22 route khác gồm Admin, ảnh và health.
 Alias health tính riêng vì là đường dẫn riêng. POST form login/logout do filter
 Spring Security xử lý và `/ws/chat` được ghi ngoài bộ đếm REST. Không cộng handler
 mặc định `/error` như tính năng do nhóm tự xây. Nguồn kiểm toán: PROJECT_INVENTORY.json.
@@ -306,7 +319,7 @@ thật cần backup, thử restore và đánh giá tương thích schema trướ
 
 ### Câu 18 Tại sao 100 phần trăm test pass chưa chứng minh ứng dụng không còn lỗi
 
-125 Backend, 110 Flutter, 12 JS và 6 Python đều pass ở lần kiểm chứng được ghi nhận,
+131 Backend, 119 Flutter, 12 JS và 8 Python đều pass ở lần kiểm chứng được ghi nhận,
 nhưng đó là tập ca đã viết, không phải mọi đầu vào hoặc độ bao phủ 100%. Backend
 có test ACL, giao dịch, ảnh, concurrent acceptance và migration PostgreSQL riêng.
 Flutter kiểm tra API/widget/theme, map dùng fake tile, camera/QR dùng mô phỏng khi

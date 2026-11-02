@@ -2,7 +2,7 @@
 
 ## Ứng dụng di động kết nối lao động phổ thông và chủ thầu ThoXay
 
-Ngày chốt số liệu: **02/11/2026**, múi giờ Việt Nam. Nhánh **main**, checkpoint mã nguồn **727adc904da5a2c63e773a5317b82abdd72b5aa3**. Báo cáo mô tả phiên bản đã thực thi và bằng chứng kiểm thử, không sử dụng số liệu người dùng hoặc giao dịch thật để minh họa.
+Ngày chốt số liệu: **03/11/2026**, múi giờ Việt Nam. Nhánh **main**, checkpoint mã nguồn **2e291c221f79ecb37832186941bca3c52ebcfd7b**. Báo cáo mô tả phiên bản đã thực thi và bằng chứng kiểm thử, không sử dụng số liệu người dùng hoặc giao dịch thật để minh họa.
 
 ## Tóm tắt
 
@@ -10,18 +10,18 @@ ThoXay kết nối Thợ, Chủ thầu và Admin trong quy trình tìm việc th
 
 | Chỉ tiêu kiểm kê | Giá trị |
 | --- | --- |
-| Bảng nghiệp vụ / cột | 30 / 257 |
-| Bảng kỹ thuật Flyway | 1, không tính trong 30 bảng nghiệp vụ |
-| Controller / ánh xạ HTTP | 28 / 111 |
-| REST dưới /api/ / route khác | 90 / 21 |
-| Tệp Java sản xuất / Dart lib / màn hình Flutter | 162 / 100 / 22 |
-| Template Thymeleaf | 9 |
-| Kiểm thử thành công | 128 Backend + 114 Flutter + 12 JS; thêm 6 test bảo vệ seed Python |
+| Bảng nghiệp vụ / cột | 31 / 260 |
+| Bảng kỹ thuật Flyway | 1, không tính trong 31 bảng nghiệp vụ |
+| Controller / ánh xạ HTTP | 28 / 114 |
+| REST dưới /api/ / route khác | 92 / 22 |
+| Tệp Java sản xuất / Dart lib / màn hình Flutter | 164 / 104 / 25 |
+| Template Thymeleaf | 10 |
+| Kiểm thử thành công | 131 Backend + 119 Flutter + 12 JS; thêm 8 test bảo vệ seed Python |
 | Mốc trước đợt Figma | 125 Backend + 110 Flutter + 12 JS; thêm 3 Backend và 4 Flutter |
 
 ## Phương pháp và giới hạn số liệu
 
-PROJECT_INVENTORY.json được tạo bằng truy vấn chỉ đọc catalog PostgreSQL sau Flyway V22 và quét annotation controller trong Java. Một cặp HTTP method và đường dẫn cụ thể được tính là một endpoint. Alias health được tính riêng. Bộ đếm không tính handler mặc định của Spring, WebSocket hoặc filter đăng nhập form. Bảng user_skills và user_project_images là collection table JPA. Các kiểm thử báo cáo là số test thực chạy, không phải tỷ lệ bao phủ mã nguồn. Các ảnh DEMO và số dư minh họa không chứng minh danh tính hoặc doanh thu thực tế.
+PROJECT_INVENTORY.json được tạo bằng truy vấn chỉ đọc catalog PostgreSQL sau Flyway V23 và quét annotation controller trong Java. Một cặp HTTP method và đường dẫn cụ thể được tính là một endpoint. Alias health được tính riêng. Bộ đếm không tính handler mặc định của Spring, WebSocket hoặc filter đăng nhập form. Bảng user_skills và user_project_images là collection table JPA. Các kiểm thử báo cáo là số test thực chạy, không phải tỷ lệ bao phủ mã nguồn. Các ảnh DEMO và số dư minh họa không chứng minh danh tính hoặc doanh thu thực tế.
 
 ## Mục lục
 
@@ -94,7 +94,7 @@ Phiên bản khai báo trực tiếp được đọc từ `pom.xml`; phiên bả
 | Spring Security | **6.5.11**, dependency đã resolve | REST stateless JWT, form login Admin, CSRF, BCrypt, phân quyền; `SecurityConfig` |
 | JWT / JJWT | **0.12.6** cho `jjwt-api`, `jjwt-impl`, `jjwt-jackson` | Ký/kiểm tra JWT bằng khóa HMAC; `JwtUtil`. Không khai báo cứng một thuật toán HS cụ thể trong code |
 | Spring Data JPA / Hibernate | Starter JPA thuộc Boot **3.5.16**; Hibernate **6.6.53.Final** đã resolve | Ánh xạ entity, truy vấn và khóa `PESSIMISTIC_WRITE` |
-| PostgreSQL | Cloud cấu hình major **17** | Lưu 30 bảng và ảnh CCCD `BYTEA`; `render.yaml`. Không ghim bản patch server trong repository |
+| PostgreSQL | Cloud cấu hình major **17** | Lưu 31 bảng và ảnh CCCD `BYTEA`; `render.yaml`. Không ghim bản patch server trong repository |
 | PostgreSQL JDBC | **42.7.11**, dependency đã resolve | Kết nối Java–PostgreSQL; thư viện runtime trong JAR |
 | Thymeleaf | **3.1.5.RELEASE**, gồm `thymeleaf-spring6` | Render Admin tại server; 9 template quản trị và đăng nhập |
 | Bootstrap | **5.3.8**, CSS/JS lưu trong `static/vendor/bootstrap` | Layout, bảng, badge và modal CCCD; đọc version từ header file |
@@ -259,7 +259,7 @@ flowchart LR
 
 ## 3.3. Mô hình dữ liệu và ERD
 
-Database có 30 bảng nghiệp vụ. Flyway tạo thêm flyway_schema_history để theo dõi migration, không phải entity nghiệp vụ. Sơ đồ tổng quan giữ toàn bộ bảng và khóa ngoại. Các sơ đồ theo phân hệ trình bày cột khóa/chính yếu để dễ đọc; từ điển ở mục 3.4 liệt kê đầy đủ cột, kiểu và ràng buộc. Ký hiệu FK rỗng thể hiện quan hệ có thể không tồn tại sau xóa theo SET NULL.
+Database có 31 bảng nghiệp vụ. Flyway tạo thêm flyway_schema_history để theo dõi migration, không phải entity nghiệp vụ. Sơ đồ tổng quan giữ toàn bộ bảng và khóa ngoại. Các sơ đồ theo phân hệ trình bày cột khóa/chính yếu để dễ đọc; từ điển ở mục 3.4 liệt kê đầy đủ cột, kiểu và ràng buộc. Ký hiệu FK rỗng thể hiện quan hệ có thể không tồn tại sau xóa theo SET NULL.
 
 <!-- diagram:erd -->
 ```mermaid
@@ -287,6 +287,9 @@ erDiagram
  }
  incident_audit {
   bigint id PK
+ }
+ incident_evidence {
+  bigint incident_id PK
  }
  incidents {
   bigint id PK
@@ -369,6 +372,7 @@ erDiagram
  users ||--o{ device_tokens : "user_id"
  users |o--o{ incident_audit : "actor_id"
  incidents ||--o{ incident_audit : "incident_id"
+ incidents ||--o| incident_evidence : "incident_id"
  jobs |o--o{ incidents : "job_id"
  users |o--o{ incidents : "reporter_id"
  crew_batches |o--o{ job_applications : "crew_batch_id"
@@ -407,7 +411,7 @@ erDiagram
  users ||--o{ worker_calendar_blocks : "worker_id"
 ```
 
-*ERD tổng quan 30 bảng. Ảnh PNG gốc trong docs/diagrams/erd.png có thể phóng to khi tra cứu.*
+*ERD tổng quan 31 bảng. Ảnh PNG gốc trong docs/diagrams/erd.png có thể phóng to khi tra cứu.*
 
 <!-- diagram:erd-ho-so -->
 ```mermaid
@@ -681,6 +685,9 @@ erDiagram
   bigint actor_id
   varchar status
  }
+ incident_evidence {
+  bigint incident_id
+ }
  incidents {
   bigint id
   bigint job_id
@@ -720,6 +727,7 @@ erDiagram
  users |o--o{ incidents : "reporter_id"
  users |o--o{ incident_audit : "actor_id"
  incidents ||--o{ incident_audit : "incident_id"
+ incidents ||--o| incident_evidence : "incident_id"
 ```
 
 *ERD phân hệ uy tin*
@@ -879,7 +887,22 @@ Ràng buộc tham chiếu và kiểm tra:
 - `FOREIGN KEY (actor_id) REFERENCES users(id) ON DELETE SET NULL`
 - `FOREIGN KEY (incident_id) REFERENCES incidents(id) ON DELETE CASCADE`
 
-### 3.4.9. Bảng incidents
+### 3.4.9. Bảng incident_evidence
+
+Một ảnh JPEG bằng chứng đã chuẩn hóa trên mỗi sự cố; chỉ người báo hoặc Admin đọc.
+
+| Cột | Kiểu PostgreSQL | Khóa và quy tắc | Ý nghĩa |
+| --- | --- | --- | --- |
+| incident_id | bigint | NOT NULL; FK; PK | Báo cáo sự cố liên quan. |
+| content | bytea | NOT NULL | Ảnh JPEG bằng chứng đã chuẩn hóa, tối đa 2MB; đọc theo quyền người báo/Admin. |
+| created_at | timestamp with time zone | NOT NULL; default CURRENT_TIMESTAMP | Thời điểm tạo. |
+
+Ràng buộc tham chiếu và kiểm tra:
+
+- `CHECK ((octet_length(content) <= 2097152))`
+- `FOREIGN KEY (incident_id) REFERENCES incidents(id) ON DELETE CASCADE`
+
+### 3.4.10. Bảng incidents
 
 Báo cáo riêng tư với snapshot công trình/người báo và độ ưu tiên.
 
@@ -915,7 +938,7 @@ Ràng buộc tham chiếu và kiểm tra:
 - `FOREIGN KEY (reporter_id) REFERENCES users(id) ON DELETE SET NULL`
 - `UNIQUE (reporter_id, client_request_id)`
 
-### 3.4.10. Bảng job_applications
+### 3.4.11. Bảng job_applications
 
 Đơn ứng tuyển cá nhân, thương lượng, đồng thuận, cam kết chốt, sao và hủy việc.
 
@@ -951,7 +974,7 @@ Ràng buộc tham chiếu và kiểm tra:
 - `FOREIGN KEY (worker_id) REFERENCES users(id)`
 - `UNIQUE (job_id, worker_id)`
 
-### 3.4.11. Bảng job_payments
+### 3.4.12. Bảng job_payments
 
 Thanh toán công trình một lần cho mỗi đơn, công/tip/thưởng đã chốt.
 
@@ -984,7 +1007,7 @@ Ràng buộc tham chiếu và kiểm tra:
 - `FOREIGN KEY (worker_id) REFERENCES users(id) ON DELETE CASCADE`
 - `UNIQUE (application_id)`
 
-### 3.4.12. Bảng jobs
+### 3.4.13. Bảng jobs
 
 Công trình, chủ thầu, mức lương, tọa độ, lịch và yêu cầu chấm công.
 
@@ -1018,7 +1041,7 @@ Ràng buộc tham chiếu và kiểm tra:
 - `CHECK (((status)::text = ANY ((ARRAY['OPEN'::character varying, 'IN_PROGRESS'::character varying, 'COMPLETED'::character varying, 'CANCELLED'::character varying])::text[])))`
 - `FOREIGN KEY (contractor_id) REFERENCES users(id)`
 
-### 3.4.13. Bảng kyc_images
+### 3.4.14. Bảng kyc_images
 
 Ảnh CCCD riêng tư đã được chuẩn hóa, truy cập có kiểm tra quyền.
 
@@ -1032,7 +1055,7 @@ Ràng buộc tham chiếu và kiểm tra:
 
 - `FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE`
 
-### 3.4.14. Bảng message_attachments
+### 3.4.15. Bảng message_attachments
 
 Nội dung ảnh tin nhắn, cùng giao dịch với message và xóa cascade.
 
@@ -1046,7 +1069,7 @@ Ràng buộc tham chiếu và kiểm tra:
 - `CHECK ((octet_length(content) <= 2097152))`
 - `FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE`
 
-### 3.4.15. Bảng messages
+### 3.4.16. Bảng messages
 
 Tin chữ/ảnh/GPS giữa hai người gắn với công trình.
 
@@ -1074,7 +1097,7 @@ Ràng buộc tham chiếu và kiểm tra:
 - `FOREIGN KEY (sender_id) REFERENCES users(id)`
 - `UNIQUE (sender_id, client_message_id)`
 
-### 3.4.16. Bảng notifications
+### 3.4.17. Bảng notifications
 
 Lịch sử thông báo và outbox thử gửi FCM.
 
@@ -1099,7 +1122,7 @@ Ràng buộc tham chiếu và kiểm tra:
 - `FOREIGN KEY (recipient_id) REFERENCES users(id) ON DELETE CASCADE`
 - `UNIQUE (event_key)`
 
-### 3.4.17. Bảng portfolio_photos
+### 3.4.18. Bảng portfolio_photos
 
 Ảnh tay nghề upload riêng tư, tối đa 12 ảnh mỗi chủ hồ sơ.
 
@@ -1116,7 +1139,7 @@ Ràng buộc tham chiếu và kiểm tra:
 - `CHECK ((octet_length(content) <= 2097152))`
 - `FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE`
 
-### 3.4.18. Bảng receiving_bank_audit
+### 3.4.19. Bảng receiving_bank_audit
 
 Lịch sử cấu hình nhận tiền và người thực hiện.
 
@@ -1136,7 +1159,7 @@ Ràng buộc tham chiếu và kiểm tra:
 
 - `FOREIGN KEY (actor_id) REFERENCES users(id) ON DELETE SET NULL`
 
-### 3.4.19. Bảng receiving_bank_settings
+### 3.4.20. Bảng receiving_bank_settings
 
 Cấu hình ngân hàng nhận tiền duy nhất, mặc định không bật QR.
 
@@ -1155,7 +1178,7 @@ Ràng buộc tham chiếu và kiểm tra:
 - `CHECK (((NOT enabled) OR ((bank_bin IS NOT NULL) AND (bank_name IS NOT NULL) AND (account_no IS NOT NULL) AND (account_name IS NOT NULL))))`
 - `CHECK ((id = 1))`
 
-### 3.4.20. Bảng reputation_events
+### 3.4.21. Bảng reputation_events
 
 Sự kiện hoàn thành/hủy việc và điểm uy tín sau thay đổi.
 
@@ -1178,7 +1201,7 @@ Ràng buộc tham chiếu và kiểm tra:
 - `FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE`
 - `UNIQUE (application_id, type)`
 
-### 3.4.21. Bảng saved_jobs
+### 3.4.22. Bảng saved_jobs
 
 Công trình yêu thích riêng của thợ.
 
@@ -1195,7 +1218,7 @@ Ràng buộc tham chiếu và kiểm tra:
 - `FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE`
 - `UNIQUE (owner_id, job_id)`
 
-### 3.4.22. Bảng saved_workers
+### 3.4.23. Bảng saved_workers
 
 Thợ quen riêng của chủ thầu.
 
@@ -1213,7 +1236,7 @@ Ràng buộc tham chiếu và kiểm tra:
 - `FOREIGN KEY (worker_id) REFERENCES users(id) ON DELETE CASCADE`
 - `UNIQUE (owner_id, worker_id)`
 
-### 3.4.23. Bảng user_project_images
+### 3.4.24. Bảng user_project_images
 
 URL ảnh dự án legacy có thứ tự, giữ tương thích dữ liệu cũ.
 
@@ -1227,7 +1250,7 @@ Ràng buộc tham chiếu và kiểm tra:
 
 - `FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE`
 
-### 3.4.24. Bảng user_skills
+### 3.4.25. Bảng user_skills
 
 Danh sách kỹ năng có thứ tự của tài khoản.
 
@@ -1241,7 +1264,7 @@ Ràng buộc tham chiếu và kiểm tra:
 
 - `FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE`
 
-### 3.4.25. Bảng users
+### 3.4.26. Bảng users
 
 Tài khoản, vai trò, trạng thái, hồ sơ, KYC và thông số uy tín.
 
@@ -1276,7 +1299,7 @@ Ràng buộc tham chiếu và kiểm tra:
 - `CHECK (((role)::text = ANY ((ARRAY['ROLE_WORKER'::character varying, 'ROLE_CONTRACTOR'::character varying, 'ROLE_ADMIN'::character varying])::text[])))`
 - `UNIQUE (phone_number)`
 
-### 3.4.26. Bảng wallet_accounts
+### 3.4.27. Bảng wallet_accounts
 
 Số dư chính, ký quỹ và tiền giữ chỗ rút của từng tài khoản.
 
@@ -1292,7 +1315,7 @@ Ràng buộc tham chiếu và kiểm tra:
 - `CHECK (((main_balance >= 0) AND (escrow_balance >= 0) AND (held_balance >= 0) AND (((main_balance + escrow_balance) + held_balance) <= '1000000000000'::bigint)))`
 - `FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE`
 
-### 3.4.27. Bảng wallet_entries
+### 3.4.28. Bảng wallet_entries
 
 Sổ giao dịch với delta từng ngăn tiền, số dư sau và khóa tham chiếu chống lặp.
 
@@ -1325,7 +1348,7 @@ Ràng buộc tham chiếu và kiểm tra:
 - `FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE`
 - `UNIQUE (reference)`
 
-### 3.4.28. Bảng wallet_requests
+### 3.4.29. Bảng wallet_requests
 
 Yêu cầu nạp/rút, trạng thái Admin và snapshot VietQR.
 
@@ -1360,7 +1383,7 @@ Ràng buộc tham chiếu và kiểm tra:
 - `UNIQUE (external_reference)`
 - `UNIQUE (user_id, client_request_id)`
 
-### 3.4.29. Bảng work_logs
+### 3.4.30. Bảng work_logs
 
 Ảnh báo cáo cuối ca, phản hồi nghiệm thu và version chống ghi đè.
 
@@ -1385,7 +1408,7 @@ Ràng buộc tham chiếu và kiểm tra:
 - `FOREIGN KEY (attendance_id) REFERENCES attendance_records(id) ON DELETE CASCADE`
 - `UNIQUE (attendance_id)`
 
-### 3.4.30. Bảng worker_calendar_blocks
+### 3.4.31. Bảng worker_calendar_blocks
 
 Ngày bận do thợ tự khai, khóa duy nhất theo thợ/ngày.
 
@@ -1403,7 +1426,7 @@ Ràng buộc tham chiếu và kiểm tra:
 
 ## 3.5. Danh mục endpoint theo Controller
 
-Danh mục có 111 cặp method/path: 90 dưới /api/ và 21 route khác, gồm giao diện Admin, tài nguyên ảnh riêng tư, trang gốc và readiness /health. Phân quyền tiếp tục được service kiểm tra quyền sở hữu, trạng thái ACCEPTED và trạng thái tài khoản; biết URL không cấp quyền đọc dữ liệu. Các mutation Admin sử dụng phiên/form cần CSRF. Annotation dưới đây được đối chiếu từ Controller.java; hash tệp nguồn nằm trong PROJECT_INVENTORY.json.
+Danh mục có 114 cặp method/path: 92 dưới /api/ và 22 route khác, gồm giao diện Admin, tài nguyên ảnh riêng tư, trang gốc và readiness /health. Phân quyền tiếp tục được service kiểm tra quyền sở hữu, trạng thái ACCEPTED và trạng thái tài khoản; biết URL không cấp quyền đọc dữ liệu. Các mutation Admin sử dụng phiên/form cần CSRF. Annotation dưới đây được đối chiếu từ Controller.java; hash tệp nguồn nằm trong PROJECT_INVENTORY.json.
 
 ### AdminController
 
@@ -1569,6 +1592,9 @@ Danh mục có 111 cặp method/path: 90 dưới /api/ và 21 route khác, gồm
 | HTTP | Đường dẫn | Handler và quyền truy cập |
 | --- | --- | --- |
 | POST | /api/jobs/{id}/incidents | create; JWT, kiểm tra vai trò/chủ sở hữu tại service |
+| POST | /api/jobs/{id}/incidents/with-photo | createWithPhoto; JWT, kiểm tra vai trò/chủ sở hữu tại service |
+| GET | /api/incidents/{id}/evidence | evidence; JWT, kiểm tra vai trò/chủ sở hữu tại service |
+| GET | /admin/incidents/{id}/evidence | evidence; Admin, phiên/CSRF |
 | GET | /api/incidents/{id} | get; JWT, kiểm tra vai trò/chủ sở hữu tại service |
 | GET | /api/incidents/me | mine; JWT, kiểm tra vai trò/chủ sở hữu tại service |
 | GET | /api/admin/incidents | queue; JWT Admin |
@@ -1664,141 +1690,173 @@ Backend là modular monolith: controller nhận DTO và Jakarta Validation, serv
 
 Duyệt đơn khóa công trình và các worker theo thứ tự ID, ngăn vượt số lượng và nhận trùng lịch. Duyệt tổ đội xử lý nguyên nhóm trong một transaction. Chốt sao khóa các worker trước khi tính trung bình. Thanh toán khóa ví, ghi payment/ledger/số dư cùng transaction và tham chiếu duy nhất. Retry idempotent không tự đổi số tiền, ảnh hoặc nội dung; payload khác với cùng khóa bị từ chối 409. QR ca làm chỉ lưu hash và hết hạn sau 5 phút. Snapshot ngân hàng/cam kết không đổi khi thông tin nguồn thay đổi về sau.
 
-## 3.7. Thiết kế giao diện theo bộ Figma
+## 3.7. Giao diện thương mại và bộ 20 màn hình thực thi
 
-Bộ tham chiếu gồm 16 PNG nguyên gốc do tác giả cung cấp, được lưu tại docs/figma_screens và sao chép trong hồ sơ bảo vệ. Các hình sau là bản thiết kế Figma, không phải ảnh chụp dữ liệu production. Flutter triển khai giao diện phẳng với nền #F8FAFC, thẻ trắng, viền #E2E8F0, bo góc 12–16px; Cam #EA580C cho Thợ và Xanh lục bảo #059669 cho Chủ thầu. Admin giữ Xanh Navy #0F172A. Bố cục desktop căn giữa, danh sách chia cột khi đủ rộng; mobile ưu tiên bốn mục điều hướng và thao tác bằng ngón tay. Màu nút có chữ trắng được làm đậm khi cần bảo đảm tương phản.
+Bộ 20 PNG được chụp tự động từ ứng dụng localhost với dữ liệu DEMO, lưu tại docs/figma_screens (giữ tên thư mục lịch sử). Đây là ảnh giao diện thực thi, không còn là 16 PNG Figma nguyên gốc. Hero Trang chủ, Ví và Hồ sơ dùng Navy #0F172A với lưới mờ, chữ trắng và điểm nhấn Cam #EA580C cho Thợ hoặc Xanh #059669 cho Chủ thầu. Portfolio hiển thị ảnh thực tế có chú thích DEMO, Admin dùng Sidebar Navy và vùng làm việc sáng. Bố cục giữ lưới 8pt, thẻ bo 16px, bóng dịu và khung nội dung desktop cân đối.
 
-### Đối chiếu thiết kế và triển khai
+### Nguồn ảnh và giới hạn kiểm chứng
 
-Các số dư, điểm số và tên trong Figma chỉ minh họa bố cục. Ứng dụng dùng dữ liệu API và các bất biến server hiện có. Một số chi tiết được điều chỉnh để bảo đảm tương phản, khả năng cuộn, điều hướng desktop và quyền riêng tư. Hai ảnh công việc được bổ sung bằng migration V22 nullable, tương thích báo cáo một ảnh cũ. Chi tiết từng màn hình và các giới hạn chức năng nằm tại FIGMA_IMPLEMENTATION.md; bộ PNG không thay thế nghiệm thu camera, GPS hoặc ngân hàng trên thiết bị thật.
+Các giá trị hiển thị lấy từ API của database demo riêng, không đại diện giao dịch hay danh tính thực. Bản đồ dùng tile OpenStreetMap có attribution, ghim lương và vùng chấm công 200m. GPS 35m trong ảnh Radar được mô phỏng bằng trình duyệt để kiểm thử phép tính; chưa thay thế nghiệm thu GPS/camera trên thiết bị. Hai ảnh cuối ca V22 giữ tương thích dữ liệu cũ. V23 bổ sung bảng bằng chứng sự cố riêng tư, không làm thay đổi bảng hiện có. Chi tiết nằm tại COMMERCIAL_UI.md và demo_photos/CREDITS.md.
 
 ### 3.7.1. Đăng nhập và vai trò
 
 Hai thẻ chọn vai trò nằm ngang, form gọn và icon trường nhập. Lựa chọn này chỉ thay giao diện, quyền thực tế do JWT và server xác định.
 
-![Thiết kế Figma Đăng nhập và vai trò](<figma_screens/Thợ Xây - Đăng nhập & Vai trò.png>)
+![Giao diện DEMO Đăng nhập và vai trò](<figma_screens/Thợ Xây - Đăng nhập & Vai trò.png>)
 
-*Hình 3.7.1. Đăng nhập và vai trò trong bộ thiết kế Figma nguyên gốc.*
+*Hình 3.7.1. Đăng nhập và vai trò, ảnh chụp giao diện thực thi với dữ liệu DEMO.*
 
 ### 3.7.2. Tìm việc của Thợ
 
 Lời chào, bộ lọc ngang, bản đồ có ghim lương và thẻ công trình. Lương, khoảng cách, chủ thầu và huy hiệu KYC lấy từ API; không ghi cứng số liệu trong bản thiết kế.
 
-![Thiết kế Figma Tìm việc của Thợ](<figma_screens/Thợ Xây · Tìm việc.png>)
+![Giao diện DEMO Tìm việc của Thợ](<figma_screens/Thợ Xây · Tìm việc.png>)
 
-*Hình 3.7.2. Tìm việc của Thợ trong bộ thiết kế Figma nguyên gốc.*
+*Hình 3.7.2. Tìm việc của Thợ, ảnh chụp giao diện thực thi với dữ liệu DEMO.*
 
 ### 3.7.3. Chi tiết công trình
 
 Khung chi tiết có vị trí, chỉ đường, mức lương và thương lượng. Thanh ứng tuyển cố định ở đáy; cam kết và quyết định giá vẫn qua kiểm tra server.
 
-![Thiết kế Figma Chi tiết công trình](<figma_screens/Thợ Xây - Chi tiết việc.png>)
+![Giao diện DEMO Chi tiết công trình](<figma_screens/Thợ Xây - Chi tiết việc.png>)
 
-*Hình 3.7.3. Chi tiết công trình trong bộ thiết kế Figma nguyên gốc.*
+*Hình 3.7.3. Chi tiết công trình, ảnh chụp giao diện thực thi với dữ liệu DEMO.*
 
 ### 3.7.4. Việc và chấm công
 
 Lịch tuần, GPS hoặc QR, hai ảnh tổng quan và chi tiết cuối ca, SOS. Quy tắc triển khai giữ GPS 200m, accuracy tối đa 100m và QR hết hạn sau 5 phút.
 
-![Thiết kế Figma Việc và chấm công](<figma_screens/Thợ Xây - Việc của tôi & Chấm công.png>)
+![Giao diện DEMO Việc và chấm công](<figma_screens/Thợ Xây - Việc của tôi & Chấm công.png>)
 
-*Hình 3.7.4. Việc và chấm công trong bộ thiết kế Figma nguyên gốc.*
+*Hình 3.7.4. Việc và chấm công, ảnh chụp giao diện thực thi với dữ liệu DEMO.*
 
 ### 3.7.5. Ví của Thợ
 
 Số dư khả dụng, ẩn hiện tiền, ký quỹ, cảnh báo dưới 200.000đ, biểu đồ tuần chọn được ngày và lịch sử có dấu cộng trừ. Thu nhập chỉ tính các khoản đã thanh toán.
 
-![Thiết kế Figma Ví của Thợ](<figma_screens/Thợ Xây · Ví tiền.png>)
+![Giao diện DEMO Ví của Thợ](<figma_screens/Thợ Xây · Ví tiền.png>)
 
-*Hình 3.7.5. Ví của Thợ trong bộ thiết kế Figma nguyên gốc.*
+*Hình 3.7.5. Ví của Thợ, ảnh chụp giao diện thực thi với dữ liệu DEMO.*
 
 ### 3.7.6. Nạp ví VietQR
 
 Chọn nhanh mệnh giá và xem QR do server sinh. Nội dung đối soát phải duy nhất theo yêu cầu, không thay bằng chuỗi tĩnh của bản vẽ; chế độ demo ghi rõ không chuyển tiền thật.
 
-![Thiết kế Figma Nạp ví VietQR](<figma_screens/Thợ Xây - Nạp ví VietQR.png>)
+![Giao diện DEMO Nạp ví VietQR](<figma_screens/Thợ Xây - Nạp ví VietQR.png>)
 
-*Hình 3.7.6. Nạp ví VietQR trong bộ thiết kế Figma nguyên gốc.*
+*Hình 3.7.6. Nạp ví VietQR, ảnh chụp giao diện thực thi với dữ liệu DEMO.*
 
 ### 3.7.7. Hồ sơ của Thợ
 
 Ba cột thống kê, uy tín, tiến trình bậc, ảnh tay nghề và chụp CCCD hai mặt. Điểm trong bản vẽ không thay thế điểm thực trong database.
 
-![Thiết kế Figma Hồ sơ của Thợ](<figma_screens/Thợ Xây · Hồ sơ.png>)
+![Giao diện DEMO Hồ sơ của Thợ](<figma_screens/Thợ Xây · Hồ sơ.png>)
 
-*Hình 3.7.7. Hồ sơ của Thợ trong bộ thiết kế Figma nguyên gốc.*
+*Hình 3.7.7. Hồ sơ của Thợ, ảnh chụp giao diện thực thi với dữ liệu DEMO.*
 
 ### 3.7.8. Trò chuyện của Thợ
 
 Bong bóng phân biệt hai phía và thẻ cam kết ghim đầu cuộc trò chuyện. Chỉ cặp đã ACCEPTED có quyền trao đổi; không giả lập trạng thái đã xem từng tin.
 
-![Thiết kế Figma Trò chuyện của Thợ](<figma_screens/Thợ Xây - Trò chuyện.png>)
+![Giao diện DEMO Trò chuyện của Thợ](<figma_screens/Thợ Xây - Trò chuyện.png>)
 
-*Hình 3.7.8. Trò chuyện của Thợ trong bộ thiết kế Figma nguyên gốc.*
+*Hình 3.7.8. Trò chuyện của Thợ, ảnh chụp giao diện thực thi với dữ liệu DEMO.*
 
 ### 3.7.9. Bảng xếp hạng
 
 Podium vị trí 1 ở giữa, 2 và 3 hai bên. Màu huy chương vị trí độc lập với bậc nghề Bạc, Vàng hoặc Kim Cương của từng tài khoản.
 
-![Thiết kế Figma Bảng xếp hạng](<figma_screens/Thợ Xây - Bảng xếp hạng.png>)
+![Giao diện DEMO Bảng xếp hạng](<figma_screens/Thợ Xây - Bảng xếp hạng.png>)
 
-*Hình 3.7.9. Bảng xếp hạng trong bộ thiết kế Figma nguyên gốc.*
+*Hình 3.7.9. Bảng xếp hạng, ảnh chụp giao diện thực thi với dữ liệu DEMO.*
 
 ### 3.7.10. Trang chủ Chủ thầu
 
 Ba chỉ số công trình thực tế, nút đăng việc, bản đồ xem trước, tìm kiếm và thẻ công trình có quản lý mở rộng.
 
-![Thiết kế Figma Trang chủ Chủ thầu](<figma_screens/Chủ thầu - Đăng việc.png>)
+![Giao diện DEMO Trang chủ Chủ thầu](<figma_screens/Chủ thầu - Đăng việc.png>)
 
-*Hình 3.7.10. Trang chủ Chủ thầu trong bộ thiết kế Figma nguyên gốc.*
+*Hình 3.7.10. Trang chủ Chủ thầu, ảnh chụp giao diện thực thi với dữ liệu DEMO.*
 
 ### 3.7.11. Tạo công trình
 
 Nhập loại thợ, lương, số lượng, lịch và chọn ghim. Hiển thị dự toán quỹ lương; thao tác đăng việc hiện chưa tự khóa ngân sách theo công trình.
 
-![Thiết kế Figma Tạo công trình](<figma_screens/Chủ thầu - Tạo công trình mới.png>)
+![Giao diện DEMO Tạo công trình](<figma_screens/Chủ thầu - Tạo công trình mới.png>)
 
-*Hình 3.7.11. Tạo công trình trong bộ thiết kế Figma nguyên gốc.*
+*Hình 3.7.11. Tạo công trình, ảnh chụp giao diện thực thi với dữ liệu DEMO.*
 
 ### 3.7.12. Duyệt ứng viên
 
 Lọc trạng thái, xem kinh nghiệm, uy tín, ảnh tay nghề và lương đề xuất. Duyệt nhận vẫn khóa giao dịch để kiểm tra số lượng, lịch và cam kết.
 
-![Thiết kế Figma Duyệt ứng viên](<figma_screens/Chủ thầu - Duyệt thợ.png>)
+![Giao diện DEMO Duyệt ứng viên](<figma_screens/Chủ thầu - Duyệt thợ.png>)
 
-*Hình 3.7.12. Duyệt ứng viên trong bộ thiết kế Figma nguyên gốc.*
+*Hình 3.7.12. Duyệt ứng viên, ảnh chụp giao diện thực thi với dữ liệu DEMO.*
 
 ### 3.7.13. Nghiệm thu công việc
 
 Đối chiếu GPS và hai ảnh riêng tư. Chốt sao và hoàn thành trước khi mở thanh toán; công trình có yêu cầu ca và ảnh phải được nghiệm thu theo quy tắc server.
 
-![Thiết kế Figma Nghiệm thu công việc](<figma_screens/Chủ thầu - Nghiệm thu.png>)
+![Giao diện DEMO Nghiệm thu công việc](<figma_screens/Chủ thầu - Nghiệm thu.png>)
 
-*Hình 3.7.13. Nghiệm thu công việc trong bộ thiết kế Figma nguyên gốc.*
+*Hình 3.7.13. Nghiệm thu công việc, ảnh chụp giao diện thực thi với dữ liệu DEMO.*
 
 ### 3.7.14. Ví và chi trả của Chủ thầu
 
 Số dư, tài khoản ký quỹ và chi trả tuần từ ledger đang tải. Ký quỹ tài khoản không được trình bày như ngân sách đã khóa cho một công trình riêng.
 
-![Thiết kế Figma Ví và chi trả của Chủ thầu](<figma_screens/Chủ thầu - Ví & Quỹ lương.png>)
+![Giao diện DEMO Ví và chi trả của Chủ thầu](<figma_screens/Chủ thầu - Ví & Quỹ lương.png>)
 
-*Hình 3.7.14. Ví và chi trả của Chủ thầu trong bộ thiết kế Figma nguyên gốc.*
+*Hình 3.7.14. Ví và chi trả của Chủ thầu, ảnh chụp giao diện thực thi với dữ liệu DEMO.*
 
 ### 3.7.15. Hồ sơ và thợ quen
 
 Thông tin doanh nghiệp, KYC và danh sách thợ đã lưu. Nút mời chuẩn bị liên kết công trình để chia sẻ, không tự gửi thông báo hay nhận việc thay Thợ.
 
-![Thiết kế Figma Hồ sơ và thợ quen](<figma_screens/Chủ thầu - Hồ sơ & Thợ ruột.png>)
+![Giao diện DEMO Hồ sơ và thợ quen](<figma_screens/Chủ thầu - Hồ sơ & Thợ ruột.png>)
 
-*Hình 3.7.15. Hồ sơ và thợ quen trong bộ thiết kế Figma nguyên gốc.*
+*Hình 3.7.15. Hồ sơ và thợ quen, ảnh chụp giao diện thực thi với dữ liệu DEMO.*
 
 ### 3.7.16. Trò chuyện của Chủ thầu
 
 Bong bóng Xanh lục bảo và cam kết ghim. Lịch sử, gửi lại, tin chưa đọc và kiểm soát người tham gia dùng các API và WebSocket hiện có.
 
-![Thiết kế Figma Trò chuyện của Chủ thầu](<figma_screens/Chủ thầu - Trò chuyện & Cam kết.png>)
+![Giao diện DEMO Trò chuyện của Chủ thầu](<figma_screens/Chủ thầu - Trò chuyện & Cam kết.png>)
 
-*Hình 3.7.16. Trò chuyện của Chủ thầu trong bộ thiết kế Figma nguyên gốc.*
+*Hình 3.7.16. Trò chuyện của Chủ thầu, ảnh chụp giao diện thực thi với dữ liệu DEMO.*
+
+### 3.7.17. Phiếu cam kết điện tử
+
+Hiển thị mã, mức lương chốt, hai bên và KYC thật, timestamp đồng thuận và snapshot SHA256. Chỉ hiện hai bên xác nhận khi đủ trạng thái FINAL và cả hai timestamp; 200.000đ là khuyến nghị ký quỹ tài khoản, không bảo đảm tiền cọc riêng công trình.
+
+![Giao diện DEMO Phiếu cam kết điện tử](<figma_screens/17 - Phiếu cam kết nhận việc.png>)
+
+*Hình 3.7.17. Phiếu cam kết điện tử, ảnh chụp giao diện thực thi với dữ liệu DEMO.*
+
+### 3.7.18. Radar và QR toàn màn hình
+
+Bản đồ OSM, geofence 200m, khoảng cách Haversine, độ chính xác GPS, mở camera QR ca làm 5 phút và đồng hồ theo ca thực; chưa chấm công thì thời gian bằng không.
+
+![Giao diện DEMO Radar và QR toàn màn hình](<figma_screens/18 - Radar GPS & QR chấm công.png>)
+
+*Hình 3.7.18. Radar và QR toàn màn hình, ảnh chụp giao diện thực thi với dữ liệu DEMO.*
+
+### 3.7.19. Thông báo và xử lý sự cố
+
+Hiển thị biến động ví và thông báo thật, chọn công trình, gửi SOS hoặc khiếu nại kèm một ảnh bằng chứng riêng tư. SOS ưu tiên cho Admin, không tự gọi cứu hộ.
+
+![Giao diện DEMO Thông báo và xử lý sự cố](<figma_screens/19 - Trung tâm thông báo & SOS.png>)
+
+*Hình 3.7.19. Thông báo và xử lý sự cố, ảnh chụp giao diện thực thi với dữ liệu DEMO.*
+
+### 3.7.20. Control Center quản trị
+
+Sidebar Navy, bốn KPI thực với vòng tỷ lệ, hàng đợi KYC hai mặt, đối soát ví và sự cố ưu tiên. Giữ CSRF, ACL ảnh và chống duyệt nhầm snapshot.
+
+![Giao diện DEMO Control Center quản trị](<figma_screens/20 - Web Admin Control Center.png>)
+
+*Hình 3.7.20. Control Center quản trị, ảnh chụp giao diện thực thi với dữ liệu DEMO.*
 
 # Chương 4. Triển khai và kiểm thử
 
@@ -1896,10 +1954,10 @@ Người dùng gửi SOS hoặc sự cố với mô tả và vị trí tự nguy
 
 | Lớp kiểm chứng | Kết quả chốt | Phạm vi và giới hạn |
 | --- | --- | --- |
-| Backend Maven verify | 128 test pass, 0 lỗi, 0 bỏ qua | H2/MockMvc, PostgreSQL migration riêng, cạnh tranh duyệt đơn, ACL, ví, ảnh và giờ Việt Nam. JVM test mặc định UTC. |
-| Flutter | 114 test pass, analyze sạch | Bốn ca mới kiểm tra chọn vai trò, hai ảnh, multipart cùng phiên và nhập dự toán không hữu hạn; mốc trước Figma là 110. |
+| Backend Maven verify | 131 test pass, 0 lỗi, 0 bỏ qua | H2/MockMvc, PostgreSQL migration riêng, cạnh tranh duyệt đơn, ACL, ví, ảnh và giờ Việt Nam. JVM test mặc định UTC. |
+| Flutter | 119 test pass, analyze sạch | Bao gồm hero tương phản, GPS Haversine, cam kết hai bên, multipart bằng chứng, ảnh cuối ca và dự toán không hữu hạn. |
 | JavaScript Node | 12 test pass | Schema/build config, bộ lọc Admin, KYC/lightbox và sự cố. |
-| Python demo | 6 test pass | Chặn host/database/sự hiện diện dữ liệu thật, yêu cầu migration, chạy lặp không ghi đè. |
+| Python demo | 8 test pass | Chặn host/database/sự hiện diện dữ liệu thật, yêu cầu migration, chạy lặp không ghi đè. |
 | JAR / Web release | Build thành công | Maven Spring Boot repackage và Flutter build web --release. |
 | APK / CI | Workflow tự build khi push main | Chỉ tuyên bố run thành công sau khi đối chiếu trạng thái Actions; không có Android SDK local. |
 | Chrome demo thật | 390/1440px, hai vai trò, Admin | Dùng API localhost và dữ liệu tổng hợp, đã kiểm tra ví/Top 3/chat/công trình và bốn template Admin. |
@@ -1946,7 +2004,7 @@ Bước tiếp theo ưu tiên quan trắc lỗi/hiệu năng và backup phục h
 
 - pom.xml, .flutter-version, mobile_app/pubspec.yaml và pubspec.lock: công nghệ/phiên bản.
 - schema.sql, src/main/java, src/main/resources/db/migration: mô hình và nghiệp vụ.
-- docs/PROJECT_INVENTORY.json: 30 bảng, toàn bộ cột/ràng buộc và ánh xạ controller.
+- docs/PROJECT_INVENTORY.json: 31 bảng, toàn bộ cột/ràng buộc và ánh xạ controller.
 - docs/ADVANCED_UPGRADE.md, DATABASE_MIGRATIONS.md, UI_UX_DESIGN_SYSTEM.md: đặc tả đã thực thi.
 - docs/DEMO.md, FIREBASE.md, WALLET.md, KYC_CAMERA.md: cấu hình và giới hạn.
 - .github/workflows, Dockerfile, render.yaml, vercel.json, scripts/build-vercel.mjs: CI và triển khai.

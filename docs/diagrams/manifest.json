@@ -35,9 +35,9 @@
     "name": "erd",
     "file": "docs/diagrams/erd.png",
     "width": 3600,
-    "height": 1380,
-    "sourceSha256": "dfe78df80fd44925e944ae2840dd7148ea6aec21ccc883bf1a97384d3a87cee4",
-    "pngSha256": "2e4dbf482cff9d50dde01bc26c7dae21c4d6c1a968312fc6bb7c0960fb12f004"
+    "height": 1308,
+    "sourceSha256": "d690b51491662c482ca3ec24859755d1462608a77a3f1bbb69c61052c9d7459d",
+    "pngSha256": "18077500034e7c155b2164ebd0c8203cafe842d0625d25310a6abd137181c3a1"
   },
   {
     "name": "erd-ho-so",
@@ -82,10 +82,10 @@
   {
     "name": "erd-uy-tin",
     "file": "docs/diagrams/erd-uy-tin.png",
-    "width": 1450,
-    "height": 2096,
-    "sourceSha256": "de0f8366728cdfa0cb1d63005481712691ae2361ab8064e7b6f48a0f492c3683",
-    "pngSha256": "216daeb73edfd4602696b1c7f00292fc07abc32f04fab62858655abb2346bd62"
+    "width": 1492,
+    "height": 2056,
+    "sourceSha256": "8d8c150201dcafcd0aac017b0723481c933a631247d4d9c029b2d9ac51458a9a",
+    "pngSha256": "f273c09adbb739be67947f650260a7edc2a4330e78061a2efc67e00079882c12"
   },
   {
     "name": "kien-truc",

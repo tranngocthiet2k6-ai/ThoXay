@@ -50,8 +50,8 @@ VietQR mẫu chỉ dựng payload để minh họa, **không chuyển tiền th�
 ## Bộ hồ sơ đã đánh số
 
 Mở [workspace bảo vệ](../ThoXay-BaoVe.code-workspace). Ngăn đầu chứa báo cáo
-`01_BAO_CAO_DO_AN.docx` 99 trang sau khi chèn thiết kế, slide
+`01_BAO_CAO_DO_AN.docx` 103 trang sau đợt Commercial UI, slide
 `02_SLIDE_BAO_VE_DO_AN.pptx` 15 trang có Speaker Notes, kịch bản 20 câu hỏi,
-bản đồ mở code nhanh và `06_ANH_THIET_KE_FIGMA/` với đủ 16 PNG nguyên gốc.
-Số liệu kiểm thử: 128 Backend, 114 Flutter, 12 JS và 6 Python pass.
+bản đồ mở code nhanh và `06_ANH_THIET_KE_FIGMA/` với đủ 20 PNG chụp giao diện DEMO.
+Số liệu kiểm thử: 131 Backend, 119 Flutter, 12 JS và 8 Python pass.
 Danh sách 8 tài khoản phía trên **đã gồm một Admin**; không có tài khoản thứ chín.
