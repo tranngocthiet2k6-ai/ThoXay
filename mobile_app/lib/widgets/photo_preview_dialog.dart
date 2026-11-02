@@ -7,10 +7,14 @@ class PhotoPreviewDialog extends StatefulWidget {
     required this.bytes,
     this.title = 'Xem trước ảnh dự án',
     this.maxCaption = 160,
+    this.showCaption = true,
+    this.confirmLabel = 'Tải ảnh lên',
   });
   final Uint8List bytes;
   final String title;
   final int maxCaption;
+  final bool showCaption;
+  final String confirmLabel;
   @override
   State<PhotoPreviewDialog> createState() => _PhotoPreviewDialogState();
 }
@@ -40,14 +44,15 @@ class _PhotoPreviewDialogState extends State<PhotoPreviewDialog> {
             ),
           ),
           const SizedBox(height: 16),
-          TextField(
-            controller: _caption,
-            maxLength: widget.maxCaption,
-            maxLines: 2,
-            decoration: const InputDecoration(
-              labelText: 'Chú thích ảnh (không bắt buộc)',
+          if (widget.showCaption)
+            TextField(
+              controller: _caption,
+              maxLength: widget.maxCaption,
+              maxLines: 2,
+              decoration: const InputDecoration(
+                labelText: 'Chú thích ảnh (không bắt buộc)',
+              ),
             ),
-          ),
         ],
       ),
     ),
@@ -59,7 +64,7 @@ class _PhotoPreviewDialogState extends State<PhotoPreviewDialog> {
       FilledButton.icon(
         onPressed: () => Navigator.pop(context, _caption.text.trim()),
         icon: const Icon(Icons.cloud_upload_outlined),
-        label: const Text('Tải ảnh lên'),
+        label: Text(widget.confirmLabel),
       ),
     ],
   );

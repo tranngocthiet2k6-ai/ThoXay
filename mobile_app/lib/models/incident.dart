@@ -27,9 +27,11 @@ class IncidentDetail {
     : incident = IncidentItem.fromJson(j['incident'] as Map<String, dynamic>),
       history = (j['history'] as List)
           .map((e) => IncidentAudit.fromJson(e as Map<String, dynamic>))
-          .toList();
+          .toList(),
+      evidencePath = j['evidencePath'] as String?;
   final IncidentItem incident;
   final List<IncidentAudit> history;
+  final String? evidencePath;
 }
 
 class IncidentPage {

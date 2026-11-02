@@ -20,6 +20,29 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 class IncidentTest {
  @Autowired MockMvc mvc;@Autowired ObjectMapper json;@Autowired UserRepository users;@Autowired JobRepository jobs;@Autowired JobApplicationRepository apps;@Autowired JwtUtil jwt;@Autowired IncidentRepository incidents;@Autowired IncidentAuditRepository audits;@Autowired NotificationRepository notifications;@Autowired jakarta.persistence.EntityManager em;@Autowired org.springframework.jdbc.core.JdbcTemplate jdbc;
  User worker,owner,other,admin;Job job;
+ @Test void evidenceIsNormalizedPrivateAndIdempotent()throws Exception{
+  var photo=photo(java.awt.Color.ORANGE);
+  var first=mvc.perform(multipart("/api/jobs/"+job.getId()+"/incidents/with-photo").file(photo).param("type","SAFETY").param("description","Bằng chứng QA").param("clientRequestId","photo-case-01").header("Authorization",token(worker))).andExpect(status().isOk()).andExpect(jsonPath("$.evidencePath").isString()).andReturn();
+  long id=json.readTree(first.getResponse().getContentAsString()).get("incident").get("id").asLong();
+  mvc.perform(get("/api/incidents/"+id+"/evidence").header("Authorization",token(worker))).andExpect(status().isOk()).andExpect(content().contentType("image/jpeg")).andExpect(header().string("Cache-Control","no-store"));
+  mvc.perform(get("/api/incidents/"+id+"/evidence").header("Authorization",token(owner))).andExpect(status().isNotFound());
+  mvc.perform(get("/api/incidents/"+id+"/evidence").header("Authorization",token(other))).andExpect(status().isNotFound());
+  mvc.perform(get("/admin/incidents/"+id+"/evidence").with(user(admin.getPhoneNumber()).roles("ADMIN"))).andExpect(status().isOk());
+  mvc.perform(multipart("/api/jobs/"+job.getId()+"/incidents/with-photo").file(photo).param("type","SAFETY").param("description","Bằng chứng QA").param("clientRequestId","photo-case-01").header("Authorization",token(worker))).andExpect(status().isOk()).andExpect(jsonPath("$.incident.id").value(id));
+  assertThat(incidents.count()).isEqualTo(1);assertThat(audits.count()).isEqualTo(1);
+ }
+ @Test void evidenceCannotBeReplacedOnRetry()throws Exception{
+  mvc.perform(multipart("/api/jobs/"+job.getId()+"/incidents/with-photo").file(photo(java.awt.Color.ORANGE)).param("type","SOS").param("description","Bằng chứng QA").param("clientRequestId","photo-case-02").header("Authorization",token(worker))).andExpect(status().isOk());
+  mvc.perform(multipart("/api/jobs/"+job.getId()+"/incidents/with-photo").file(photo(java.awt.Color.BLUE)).param("type","SOS").param("description","Bằng chứng QA").param("clientRequestId","photo-case-02").header("Authorization",token(worker))).andExpect(status().isConflict());
+ }
+ @Test void invalidEvidenceCreatesNoReportOrNotification()throws Exception{
+  long notices=notifications.count();
+  mvc.perform(multipart("/api/jobs/"+job.getId()+"/incidents/with-photo").file(new org.springframework.mock.web.MockMultipartFile("photo","fake.png","image/png","not an image".getBytes())).param("type","SOS").param("description","Bằng chứng QA").param("clientRequestId","photo-case-03").header("Authorization",token(worker))).andExpect(status().isBadRequest());
+  assertThat(incidents.count()).isZero();assertThat(notifications.count()).isEqualTo(notices);
+ }
+ private org.springframework.mock.web.MockMultipartFile photo(java.awt.Color color)throws Exception{
+  var image=new java.awt.image.BufferedImage(400,300,java.awt.image.BufferedImage.TYPE_INT_RGB);var g=image.createGraphics();g.setColor(color);g.fillRect(0,0,400,300);g.dispose();var out=new java.io.ByteArrayOutputStream();javax.imageio.ImageIO.write(image,"png",out);return new org.springframework.mock.web.MockMultipartFile("photo","evidence.png","image/png",out.toByteArray());
+ }
  @BeforeEach void setup(){worker=person("0981111111",Role.ROLE_WORKER);owner=person("0981111112",Role.ROLE_CONTRACTOR);other=person("0981111113",Role.ROLE_WORKER);admin=person("0981111114",Role.ROLE_ADMIN);job=new Job();job.setContractor(owner);job.setTitle("Công trường sự cố QA");job.setJobType("Thợ chính");job.setAddress("Địa chỉ QA");job.setLatitude(10);job.setLongitude(106);job.setRequiredWorkers(2);job.setSalaryPerDay(350000);jobs.saveAndFlush(job);var app=new JobApplication();app.setJob(job);app.setWorker(worker);app.setStatus(ApplicationStatus.ACCEPTED);apps.saveAndFlush(app);}
  @Test void onlyParticipantsCanCreateAndOnlyReporterOrAdminCanRead()throws Exception{
   mvc.perform(post("/api/jobs/"+job.getId()+"/incidents").header("Authorization",token(other)).contentType("application/json").content(body("SOS","private-case-01","Cần hỗ trợ"))).andExpect(status().isNotFound());

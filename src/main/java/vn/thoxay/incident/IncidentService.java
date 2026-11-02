@@ -21,9 +21,27 @@ public class IncidentService {
  private final UserRepository users;
  private final NotificationService notices;
  private final Clock clock;
+ private final IncidentEvidenceRepository evidence;
+ private final vn.thoxay.media.ImageSanitizer sanitizer;
  public record Item(Long id,Long jobId,boolean jobAvailable,String jobTitle,String jobAddress,double jobLatitude,double jobLongitude,String reporterName,String reporterPhone,String type,String status,String description,Double reportedLatitude,Double reportedLongitude,String adminNote,Instant createdAt,Long version){@Override public String toString(){return "Incident[id="+id+",type="+type+",status="+status+"]";}}
  public record Audit(Long id,String status,String note,Instant createdAt){}
- public record Detail(Item incident,List<Audit> history){}
+ public record Detail(Item incident,List<Audit> history,String evidencePath){}
+ @Transactional public Detail createWithPhoto(Long jobId,IncidentController.Report input,org.springframework.web.multipart.MultipartFile photo){
+  var clean=sanitizer.project(photo);
+  var result=create(jobId,input);
+  var saved=evidence.findById(result.incident().id());
+  if(saved.isPresent()){
+   if(!java.util.Arrays.equals(saved.get().getContent(),clean))throw conflict("Báo cáo này đã có bằng chứng khác; ảnh đã gửi không được thay đổi");
+  }else{
+   if(!result.incident().status().equals("NEW"))throw conflict("Báo cáo đã được xử lý; không thể bổ sung bằng chứng");
+   var image=new IncidentEvidence();image.setIncidentId(result.incident().id());image.setContent(clean);image.setCreatedAt(clock.instant());evidence.saveAndFlush(image);
+  }
+  return get(result.incident().id());
+ }
+ @Transactional(readOnly=true) public byte[] evidencePhoto(Long id){
+  var r=incidents.findById(id).orElseThrow(this::missing);authorize(r);
+  return evidence.findById(id).orElseThrow(this::missing).getContent();
+ }
  public record Page(List<Item> items,boolean hasMore){}
  public record Counts(long open,long sos){}
  @Transactional public Detail create(Long jobId,IncidentController.Report input){var user=current.get();if(user.getRole()!=Role.ROLE_WORKER&&user.getRole()!=Role.ROLE_CONTRACTOR)throw new ApiException(HttpStatus.FORBIDDEN,"Chỉ người tham gia công trình được gửi sự cố");var job=jobs.findLockedById(jobId).orElseThrow(this::missing);
@@ -46,7 +64,7 @@ public class IncidentService {
  }
  private void authorize(Incident r){var u=current.get();if(u.getRole()!=Role.ROLE_ADMIN&&(r.getReporter()==null||!r.getReporter().getId().equals(u.getId())))throw missing();}
  private void audit(Incident r,User actor,String note){var a=new IncidentAudit();a.setIncident(r);a.setActor(actor);a.setStatus(r.getStatus());a.setNote(note);a.setCreatedAt(clock.instant());audits.saveAndFlush(a);}
- private Detail detail(Incident r){return new Detail(item(r),audits.findByIncidentIdOrderByIdDesc(r.getId(),PageRequest.of(0,30)).stream().map(a->new Audit(a.getId(),a.getStatus(),a.getNote(),a.getCreatedAt())).toList());}
+ private Detail detail(Incident r){return new Detail(item(r),audits.findByIncidentIdOrderByIdDesc(r.getId(),PageRequest.of(0,30)).stream().map(a->new Audit(a.getId(),a.getStatus(),a.getNote(),a.getCreatedAt())).toList(),evidence.existsById(r.getId())?"/api/incidents/"+r.getId()+"/evidence":null);}
  private Item item(Incident r){return new Item(r.getId(),r.getOriginalJobId(),r.getJob()!=null,r.getJobTitle(),r.getJobAddress(),r.getJobLatitude(),r.getJobLongitude(),r.getReporterName(),r.getReporterPhone(),r.getType(),r.getStatus(),r.getDescription(),r.getReportedLatitude(),r.getReportedLongitude(),r.getAdminNote(),r.getCreatedAt(),r.getVersion());}
  private String safeTitle(String title){return title.length()>200?title.substring(0,200):title;}
  private ApiException missing(){return new ApiException(HttpStatus.NOT_FOUND,"Không tìm thấy báo cáo sự cố");}

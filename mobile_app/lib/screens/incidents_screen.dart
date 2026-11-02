@@ -8,6 +8,7 @@ import '../services/api_service.dart';
 import '../widgets/content_skeleton.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/incident_report_dialog.dart';
+import '../widgets/private_image.dart';
 
 class IncidentsScreen extends StatefulWidget {
   const IncidentsScreen({super.key, required this.api, this.job});
@@ -227,6 +228,25 @@ class _IncidentDetailScreenState extends State<IncidentDetailScreen> {
                       Chip(label: Text(incidentStatus(d.incident.status))),
                       const SizedBox(height: 12),
                       Text(d.incident.description),
+                      if (d.evidencePath != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 16),
+                          child: InkWell(
+                            onTap: () => showPrivatePhoto(
+                              context,
+                              widget.api,
+                              d.evidencePath!,
+                              'Bằng chứng đã gửi',
+                            ),
+                            child: SizedBox(
+                              height: 240,
+                              child: PrivateImage(
+                                api: widget.api,
+                                path: d.evidencePath!,
+                              ),
+                            ),
+                          ),
+                        ),
                       const SizedBox(height: 16),
                       Text(incidentTime(d.incident.createdAt)),
                       if (d.incident.adminNote.isNotEmpty) ...[

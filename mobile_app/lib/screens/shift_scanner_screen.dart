@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../models/attendance.dart';
+import '../widgets/commercial_hero.dart';
 
 class ShiftScannerScreen extends StatefulWidget {
   const ShiftScannerScreen({super.key, required this.jobId});
@@ -34,7 +35,15 @@ class _ShiftScannerScreenState extends State<ShiftScannerScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Quét QR ca làm')),
+    backgroundColor: const Color(0xff0f172a),
+    appBar: AppBar(
+      backgroundColor: const Color(0xff0f172a),
+      foregroundColor: Colors.white,
+      title: const Text(
+        'Quét QR ca làm',
+        style: TextStyle(color: Colors.white),
+      ),
+    ),
     body: Stack(
       fit: StackFit.expand,
       children: [
@@ -65,13 +74,11 @@ class _ShiftScannerScreenState extends State<ShiftScannerScreen> {
           left: 24,
           right: 24,
           bottom: 32,
-          child: Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(
-                _error ?? 'Đưa mã QR chủ thầu cung cấp vào khung. Mã có hiệu lực 5 phút.',
-                textAlign: TextAlign.center,
-              ),
+          child: CommercialHero(
+            child: Text(
+              _error ?? 'Đưa mã QR chủ thầu cung cấp vào khung. Mã có hiệu lực 5 phút.',
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.white, height: 1.6),
             ),
           ),
         ),

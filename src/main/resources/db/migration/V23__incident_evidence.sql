@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS incident_evidence (
+ incident_id BIGINT PRIMARY KEY REFERENCES incidents(id) ON DELETE CASCADE,
+ content BYTEA NOT NULL CHECK(octet_length(content) <= 2097152),
+ created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

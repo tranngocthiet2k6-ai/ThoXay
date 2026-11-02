@@ -53,6 +53,17 @@ class ApiService extends ChangeNotifier {
     await _request('POST', '/api/jobs/$jobId/incidents', body: body)
         as Map<String, dynamic>,
   );
+  Future<IncidentDetail> reportIncidentWithPhoto(
+    int jobId,
+    Map<String, dynamic> body,
+    Uint8List photo,
+  ) async => IncidentDetail.fromJson(
+    await uploadPhoto(
+      '/api/jobs/$jobId/incidents/with-photo',
+      photo,
+      fields: body.map((key, value) => MapEntry(key, value.toString())),
+    ),
+  );
   Future<IncidentDetail> incident(int id) async => IncidentDetail.fromJson(
     await _request('GET', '/api/incidents/$id') as Map<String, dynamic>,
   );

@@ -17,6 +17,7 @@ import '../widgets/private_image.dart';
 import '../widgets/work_photo_report_dialog.dart';
 import '../widgets/shift_code_dialog.dart';
 import 'shift_scanner_screen.dart';
+import 'attendance_radar_screen.dart';
 
 class AttendanceScreen extends StatefulWidget {
   const AttendanceScreen({
@@ -240,6 +241,28 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(24),
             children: [
+              if (_worker)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: FilledButton.icon(
+                    onPressed: () => Navigator.of(context)
+                        .push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => AttendanceRadarScreen(
+                              api: widget.api,
+                              job: widget.job,
+                              applicationId: widget.applicationId!,
+                              location: widget.location,
+                            ),
+                          ),
+                        )
+                        .then((_) {
+                          if (mounted) _load();
+                        }),
+                    icon: const Icon(Icons.radar),
+                    label: const Text('Radar GPS & QR toàn màn hình'),
+                  ),
+                ),
               if (_worker) ...[
                 WeekSchedule(jobs: [widget.job], today: _data?.today),
                 const SizedBox(height: 16),

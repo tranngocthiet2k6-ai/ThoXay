@@ -124,3 +124,12 @@ báo cáo cũ một ảnh vẫn đọc được. Flutter mới gửi chung `phot
 trong một multipart. Cả hai ảnh dùng cùng quyền truy cập, ngày công và version
 nghiệm thu; thay ảnh làm mất hiệu lực thao tác duyệt dựa trên version cũ.
 Script thủ công `migrations/022_work_log_detail_photo.sql` chạy lặp an toàn.
+
+### V23 — bằng chứng sự cố riêng tư
+
+`V23__incident_evidence.sql` tạo bảng `incident_evidence` với PK/FK incident_id,
+BYTEA content giới hạn 2MB và created_at. Không thay hoặc xóa dữ liệu sự cố cũ.
+Ảnh không được tải trong truy vấn hàng chờ; chỉ mở theo quyền người báo cáo/Admin,
+qua response JPEG có Cache-Control no-store. Multipart gửi ảnh được xử lý cùng
+transaction với báo cáo và audit; tệp không hợp lệ không tạo thông báo hay báo cáo.
+Script thủ công `migrations/023_incident_evidence.sql` chạy lặp an toàn.

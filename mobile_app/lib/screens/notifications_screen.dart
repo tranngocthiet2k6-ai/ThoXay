@@ -10,6 +10,7 @@ import '../models/app_notification.dart';
 import '../services/api_service.dart';
 import '../services/push_notifications.dart';
 import '../widgets/empty_state.dart';
+import 'support_center_screen.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key, required this.api, this.push});
@@ -183,6 +184,15 @@ class _NotificationsScreenState extends State<NotificationsScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    OutlinedButton.icon(
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => SupportCenterScreen(api: widget.api),
+                        ),
+                      ),
+                      icon: const Icon(Icons.support_agent),
+                      label: const Text('Trung tâm hỗ trợ & SOS'),
+                    ),
                     const SectionIntro(
                       title: 'Không bỏ lỡ cơ hội',
                       subtitle: 'Mọi kết nối quan trọng, trong một nơi.',

@@ -12,12 +12,13 @@ import vn.thoxay.exception.ApiException;
 public class AdminController {
     private final AdminService admin;
     private final vn.thoxay.incident.IncidentService incidents;
+    private final vn.thoxay.wallet.WalletService wallets;
     @GetMapping("/")
     public String index() { return "redirect:/admin/dashboard"; }
     @GetMapping("/admin/login")
     public String login() { return "admin-login"; }
     @GetMapping("/admin/dashboard") @PreAuthorize("hasRole('ADMIN')")
-    public String dashboard(Model model) { model.addAttribute("dashboard", admin.dashboard()); model.addAttribute("incidentCounts",incidents.counts()); return "admin-dashboard"; }
+    public String dashboard(Model model) { model.addAttribute("dashboard", admin.dashboard()); model.addAttribute("incidentCounts",incidents.counts());model.addAttribute("walletQueue",wallets.pending(null,4));model.addAttribute("incidentQueue",incidents.queue("NEW","","",0));return "admin-dashboard"; }
     @PostMapping("/admin/users/{id}/verify") @PreAuthorize("hasRole('ADMIN')")
     public String verify(@PathVariable Long id,
                          @RequestParam(required = false) String cccdFrontImage,

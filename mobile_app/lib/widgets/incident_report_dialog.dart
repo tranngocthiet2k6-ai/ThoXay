@@ -6,6 +6,13 @@ import '../services/api_service.dart';
 import '../services/location_service.dart';
 import 'wallet_operation_dialog.dart';
 
+import 'dart:typed_data';
+
+import 'package:image_picker/image_picker.dart';
+
+import '../services/device_photo_picker.dart';
+import 'photo_preview_dialog.dart';
+
 class IncidentReportDialog extends StatefulWidget {
   const IncidentReportDialog({
     super.key,
@@ -32,6 +39,36 @@ class _IncidentReportDialogState extends State<IncidentReportDialog> {
   GeoPoint? _position;
   String? _error, _gpsNote;
   Map<String, dynamic>? _attempt;
+  Uint8List? _photo, _attemptPhoto;
+  bool _choosing = false;
+  Future<void> _choosePhoto() async {
+    if (_busy || _choosing || _attempt != null) return;
+    setState(() => _choosing = true);
+    try {
+      final bytes = await DevicePhotoPicker().pick(ImageSource.gallery);
+      if (bytes == null || !mounted) return;
+      final accepted = await showDialog<String>(
+        context: context,
+        builder: (_) => PhotoPreviewDialog(
+          bytes: bytes,
+          title: 'Xem trước ảnh bằng chứng',
+          showCaption: false,
+          confirmLabel: 'Đính kèm bằng chứng',
+        ),
+      );
+      if (accepted != null && mounted) setState(() => _photo = bytes);
+    } catch (_) {
+      if (mounted) {
+        setState(
+          () =>
+              _error = 'Không mở được thư viện. Kiểm tra quyền ảnh và thử lại.',
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _choosing = false);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -74,7 +111,10 @@ class _IncidentReportDialogState extends State<IncidentReportDialog> {
   }
 
   Future<void> _send() async {
-    if (_busy || _locating || !_form.currentState!.validate()) return;
+    if (_busy || _locating || _choosing || !_form.currentState!.validate()) {
+      return;
+    }
+    if (_attempt == null) _attemptPhoto = _photo;
     _attempt ??= {
       'type': _type,
       'description': _description.text.trim(),
@@ -87,7 +127,13 @@ class _IncidentReportDialogState extends State<IncidentReportDialog> {
       _error = null;
     });
     try {
-      final detail = await widget.api.reportIncident(widget.job.id, _attempt!);
+      final detail = _attemptPhoto == null
+          ? await widget.api.reportIncident(widget.job.id, _attempt!)
+          : await widget.api.reportIncidentWithPhoto(
+              widget.job.id,
+              _attempt!,
+              _attemptPhoto!,
+            );
       if (mounted) Navigator.pop(context, detail);
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.message);
@@ -121,6 +167,23 @@ class _IncidentReportDialogState extends State<IncidentReportDialog> {
                 'Báo cáo được gửi riêng tới Admin. Bạn theo dõi phản hồi trong Sự cố đã gửi.',
               ),
               const SizedBox(height: 16),
+              if (_photo != null)
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.memory(_photo!, height: 140, fit: BoxFit.cover),
+                ),
+              OutlinedButton.icon(
+                onPressed: _attempt != null || _busy || _choosing
+                    ? null
+                    : _choosePhoto,
+                icon: const Icon(Icons.add_photo_alternate_outlined),
+                label: Text(
+                  _photo == null
+                      ? 'Đính kèm ảnh bằng chứng'
+                      : 'Chọn lại ảnh bằng chứng',
+                ),
+              ),
+              const SizedBox(height: 12),
               DropdownButtonFormField<String>(
                 initialValue: _type,
                 decoration: const InputDecoration(labelText: 'Loại báo cáo'),

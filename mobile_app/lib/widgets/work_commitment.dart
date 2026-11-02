@@ -1,3 +1,5 @@
+import '../screens/commitment_screen.dart';
+
 import 'package:flutter/material.dart';
 
 import '../models/models.dart';
@@ -202,18 +204,8 @@ class _WorkCommitmentDialogState extends State<WorkCommitmentDialog> {
             TextButton(onPressed: _load, child: const Text('Thử lại')),
           ],
           if (_document != null) ...[
-            SizedBox(
-              height: 240,
-              child: SingleChildScrollView(
-                child: SelectableText(_document!.text),
-              ),
-            ),
+            CommitmentSummary(document: _document!, compact: true),
             const SizedBox(height: 12),
-            if (_document!.hash != null)
-              Text(
-                'SHA-256: ${_document!.hash}',
-                style: Theme.of(context).textTheme.labelSmall,
-              ),
             CheckboxListTile(
               key: const ValueKey('commitment-consent'),
               contentPadding: EdgeInsets.zero,

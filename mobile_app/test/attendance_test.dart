@@ -159,6 +159,11 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    await Scrollable.ensureVisible(
+      tester.element(find.text('Nhập mã ca làm')),
+      alignment: .5,
+    );
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Nhập mã ca làm'));
     await tester.pumpAndSettle();
     expect(api.checkedIn, isFalse);

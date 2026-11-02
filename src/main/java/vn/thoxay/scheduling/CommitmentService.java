@@ -21,7 +21,8 @@ public class CommitmentService {
     private final CurrentUser current;
     private final Clock clock;
     public record Document(Long applicationId,int termsVersion,String state,String text,String hash,
-        long originalDailyRate,Long proposedDailyRate,long selectedDailyRate,Instant workerConfirmedAt,Instant contractorConfirmedAt) { }
+        long originalDailyRate,Long proposedDailyRate,long selectedDailyRate,Instant workerConfirmedAt,Instant contractorConfirmedAt,
+        String workerName,boolean workerVerified,String contractorName,boolean contractorVerified) { }
 
     @Transactional(readOnly=true) public java.util.List<Document> adminByJob(Long jobId) {
         current.require(Role.ROLE_ADMIN);
@@ -35,7 +36,7 @@ public class CommitmentService {
         var job=jobs.findById(jobId).orElseThrow(() -> missing("Công trình"));
         if(!job.getContractor().isActive()) throw missing("Công trình");
         return new Document(null,job.getTermsVersion(),"DRAFT",text(job,proposed,null,null,null)+"\nNgười thợ: "+worker.getFullName(),null,
-            original(job),proposed,original(job),null,null);
+            original(job),proposed,original(job),null,null,worker.getFullName(),worker.isVerified(),job.getContractor().getFullName(),job.getContractor().isVerified());
     }
     @Transactional(readOnly=true) public Document read(Long id,boolean acceptOffer) {
         var a=applications.findById(id).orElseThrow(() -> missing("Đơn ứng tuyển")); authorize(a);
@@ -45,7 +46,7 @@ public class CommitmentService {
         return new Document(a.getId(),a.getContractSnapshot()!=null&&a.getConsentVersion()!=null?a.getConsentVersion():a.getJob().getTermsVersion(),state,
             a.getContractSnapshot()!=null?a.getContractSnapshot():text(a.getJob(),a.getProposedDailyRate(),rate,workerAt,null)+"\nNgười thợ: "+a.getWorker().getFullName()+"\nMã đơn: "+a.getId(),
             a.getContractHash(),original(a.getJob()),a.getProposedDailyRate(),a.getAgreedDailyRate()!=null?a.getAgreedDailyRate():rate,
-            workerAt,a.getContractorConfirmedAt());
+            workerAt,a.getContractorConfirmedAt(),a.getWorker().getFullName(),a.getWorker().isVerified(),a.getJob().getContractor().getFullName(),a.getJob().getContractor().isVerified());
     }
     @Transactional public Document confirm(Long id,int version,boolean accepted) {
         var worker=current.require(Role.ROLE_WORKER);

@@ -33,3 +33,26 @@ Vòng tái hiện đọc API portfolio nhận HTTP 200 nhưng chỉ một ảnh 
 seed cũ. Sau khi bổ sung có bốn ảnh chụp thật dùng minh họa DEMO. Chạy lặp giữ
 nguyên UUID của album, không nhân bản ảnh. Flutter không gọi ảnh riêng tư bằng
 URL công khai hoặc đính JWT vào query string.
+
+## Bốn màn hình lõi
+
+17. Phiếu cam kết: mã từ ID đơn, lương chốt, tên và trạng thái KYC thực của hai
+bên, dấu vết đồng thuận và toàn văn snapshot/hash. Mở từ thẻ ghim trong Chat.
+18. Radar chấm công: OSM, vòng 200m, khoảng cách Haversine và sai số GPS;
+check-in/out dùng lần đọc cảm biến mới, server quyết định. Đồng hồ bắt đầu từ
+giờ check-in server, QR mở camera toàn màn hình và có hạn 5 phút.
+19. Trung tâm hỗ trợ: thông báo công việc, giao dịch ví gần nhất, chọn công trình
+tham gia, gửi khiếu nại/SOS và ảnh bằng chứng, theo dõi phản hồi Admin.
+20. Admin Control Center: sidebar Navy, bốn KPI kèm tỷ lệ thật, xem nhanh lệnh ví
+và tranh chấp; các bảng KYC, công trình và modal đối chiếu giữ kiểm soát quyền.
+Biểu đồ nhỏ thể hiện tỷ trọng hiện tại, không dựng lịch sử tăng trưởng.
+
+V23 thêm `incident_evidence` riêng để hàng chờ không tải BLOB ảnh. Gửi multipart
+`POST /api/jobs/{id}/incidents/with-photo`; đọc ảnh qua
+`GET /api/incidents/{id}/evidence` hoặc `/admin/incidents/{id}/evidence`.
+Ảnh được chuẩn hóa, tối đa 2MB sau xử lý, chỉ người gửi/Admin xem và no-store.
+Retry cùng yêu cầu/ảnh không tạo trùng; ảnh đã gửi không bị thay bằng payload khác.
+
+Kiểm tra: 131 Backend, 119 Flutter, 12 JS và 8 Python pass; analyzer sạch,
+JAR và Flutter Web release thành công. QA dùng dữ liệu DEMO riêng và mô phỏng
+quyền/vị trí GPS trong trình duyệt, không thay thế nghiệm thu thiết bị vật lý.

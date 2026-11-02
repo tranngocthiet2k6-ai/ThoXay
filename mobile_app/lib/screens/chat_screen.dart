@@ -1,4 +1,4 @@
-import '../models/scheduling.dart';
+import 'commitment_screen.dart';
 import '../widgets/app_snack_bar.dart';
 import '../theme/app_theme.dart';
 import '../widgets/empty_state.dart';
@@ -233,36 +233,12 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                           await showJobDetails<void>(context, widget.job);
                           return;
                         }
-                        final document = widget.api.commitment(application.id);
-                        await showDialog<void>(
-                          context: context,
-                          builder: (dialogContext) => AlertDialog(
-                            title: const Text('Phiếu cam kết nhận việc'),
-                            content: SizedBox(
-                              width: 560,
-                              child: FutureBuilder<CommitmentDocument>(
-                                future: document,
-                                builder: (context, snapshot) {
-                                  if (snapshot.hasError) {
-                                    return const Text(
-                                      'Chưa tải được cam kết. Đóng và thử lại.',
-                                    );
-                                  }
-                                  if (!snapshot.hasData) {
-                                    return const ContentSkeleton(compact: true);
-                                  }
-                                  return SingleChildScrollView(
-                                    child: SelectableText(snapshot.data!.text),
-                                  );
-                                },
-                              ),
+                        await Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => CommitmentScreen(
+                              api: widget.api,
+                              applicationId: application.id,
                             ),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(dialogContext),
-                                child: const Text('Đóng'),
-                              ),
-                            ],
                           ),
                         );
                       } on ApiException catch (e) {
