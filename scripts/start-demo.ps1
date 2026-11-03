@@ -62,6 +62,8 @@ try {
     if(-not $ready) { throw 'Demo Backend readiness timeout.' }
     & $python scripts/demo_seed.py
     if($LASTEXITCODE -ne 0) { throw 'Demo seed refused or failed; transaction was rolled back.' }
+    & $python scripts/demo_photos.py
+    if($LASTEXITCODE -ne 0) { throw 'Demo photo enrichment refused or failed; inspect the isolated demo database.' }
     $node=(Get-Command node).Source
     $web=Start-Process -FilePath $node -ArgumentList @('scripts/serve-web.cjs',('"'+(Join-Path $demoDir 'web')+'"'),'3008') -WorkingDirectory $projectRoot -WindowStyle Hidden -RedirectStandardOutput "$demoDir/web.log" -RedirectStandardError "$demoDir/web-error.log" -PassThru
     @{backendPid=$backend.Id;webPid=$web.Id;jar=$jar;webRoot=(Join-Path $demoDir 'web')} | ConvertTo-Json | Set-Content -Encoding UTF8 "$demoDir/processes.json"

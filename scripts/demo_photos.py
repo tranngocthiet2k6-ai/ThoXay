@@ -3,7 +3,7 @@ from pathlib import Path
 import sys,uuid,hashlib
 sys.path.insert(0,str(Path(__file__).resolve().parent))
 import psycopg
-from demo_seed import validate_target
+from demo_seed import validate_target,illustration
 
 PHOTOS=[('masonry','Xây tô tường'),('tiling','Thi công lát gạch'),('bathroom','Hoàn thiện WC'),('inspection','Kiểm tra công trình')]
 def enrich(conn, directory):
@@ -21,8 +21,14 @@ def enrich(conn, directory):
             for name,label,blob in data:
                 ident=uuid.uuid5(uuid.NAMESPACE_URL,f'thoxay-demo-photo/{owner}/{name}')
                 q.execute('INSERT INTO portfolio_photos(id,owner_id,caption,content) VALUES (%s,%s,%s,%s) ON CONFLICT(id) DO NOTHING',(ident,owner,label+' · Ảnh demo',blob))
-        # Explicitly synthetic pending work logs only; never alter approved evidence.
-        q.execute("UPDATE work_logs SET photo=%s, detail_photo=%s WHERE status='PENDING' AND caption LIKE '[DEMO]%%' AND attendance_id IN (SELECT a.id FROM attendance_records a JOIN job_applications ja ON ja.id=a.application_id JOIN jobs j ON j.id=ja.job_id WHERE j.title LIKE '[DEMO]%%')",(data[0][2],data[1][2]))
+        # Replace only exact original synthetic illustrations, never a user's
+        # replacement photograph or approved evidence. Bump the review version.
+        legacy={illustration('NHAT KY THI CONG CUOI NGAY'),illustration('TOAN CANH - DEMO')}
+        legacy_detail=illustration('CHI TIET - DEMO')
+        q.execute("SELECT id,photo,detail_photo,version FROM work_logs WHERE status='PENDING' AND caption LIKE '[DEMO]%%' AND attendance_id IN (SELECT a.id FROM attendance_records a JOIN job_applications ja ON ja.id=a.application_id JOIN jobs j ON j.id=ja.job_id WHERE j.title LIKE '[DEMO]%%') FOR UPDATE")
+        for ident,overview,detail,version in q.fetchall():
+            if bytes(overview) not in legacy or (detail is not None and bytes(detail)!=legacy_detail):continue
+            q.execute("UPDATE work_logs SET photo=%s, detail_photo=%s,version=version+1 WHERE id=%s AND status='PENDING' AND version=%s",(data[0][2],data[1][2],ident,version))
     return len(owners)
 
 if __name__=='__main__':

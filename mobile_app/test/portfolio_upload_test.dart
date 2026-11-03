@@ -44,6 +44,13 @@ class PhotosApi extends ApiService {
   }
 }
 
+class CorruptFirstPhotoApi extends PhotosApi {
+  int reads = 0;
+  @override
+  Future<Uint8List> privateImage(String path) async =>
+      ++reads == 1 ? Uint8List.fromList([1, 2, 3]) : bytes;
+}
+
 class PhotoClient extends http.BaseClient {
   bool locked = false;
   int images = 0, uploads = 0;
@@ -96,6 +103,40 @@ class PhotoClient extends http.BaseClient {
 }
 
 void main() {
+  testWidgets(
+    'corrupt photo bytes offer retry and recover without a blank cell',
+    (tester) async {
+      final api = CorruptFirstPhotoApi();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: 180,
+              height: 140,
+              child: PrivateImage(api: api, path: '/api/portfolio/photos/qa'),
+            ),
+          ),
+        ),
+      );
+      await tester.runAsync(() async {
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+      });
+      await tester.pumpAndSettle();
+      expect(find.text('Tải lại ảnh'), findsOneWidget);
+      await tester.runAsync(
+        () => precacheImage(
+          MemoryImage(bytes),
+          tester.element(find.byType(PrivateImage)),
+        ),
+      );
+      await tester.tap(find.text('Tải lại ảnh'));
+      await tester.pumpAndSettle();
+      expect(api.reads, 2);
+      expect(find.text('Tải lại ảnh'), findsNothing);
+      await tester.pumpWidget(const SizedBox());
+      api.dispose();
+    },
+  );
   setUp(() => SharedPreferences.setMockInitialValues({}));
   test(
     'photo upload and read use bearer header and never put JWT in URL',

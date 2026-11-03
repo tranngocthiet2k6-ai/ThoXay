@@ -20,6 +20,21 @@ class PrivateImage extends StatefulWidget {
 
 class _PrivateImageState extends State<PrivateImage> {
   late Future<Uint8List> _image;
+  Widget _retry() => ColoredBox(
+    color: const Color(0xffe2e8f0),
+    child: Center(
+      child: TextButton.icon(
+        onPressed: () {
+          final next = widget.api.privateImage(widget.path);
+          setState(() {
+            _image = next;
+          });
+        },
+        icon: const Icon(Icons.broken_image_outlined),
+        label: const Text('Tải lại ảnh', style: TextStyle(fontSize: 10)),
+      ),
+    ),
+  );
   @override
   void initState() {
     super.initState();
@@ -39,17 +54,7 @@ class _PrivateImageState extends State<PrivateImage> {
     future: _image,
     builder: (context, snapshot) {
       if (snapshot.hasError) {
-        return ColoredBox(
-          color: const Color(0xffe2e8f0),
-          child: Center(
-            child: TextButton.icon(
-              onPressed: () =>
-                  setState(() => _image = widget.api.privateImage(widget.path)),
-              icon: const Icon(Icons.broken_image_outlined),
-              label: const Text('Tải lại ảnh', style: TextStyle(fontSize: 10)),
-            ),
-          ),
-        );
+        return _retry();
       }
       if (!snapshot.hasData) {
         return const ShimmerSurface(child: SkeletonLine(height: 120));
@@ -57,8 +62,7 @@ class _PrivateImageState extends State<PrivateImage> {
       return Image.memory(
         snapshot.data!,
         fit: widget.fit,
-        errorBuilder: (_, e, s) =>
-            const Center(child: Icon(Icons.broken_image_outlined)),
+        errorBuilder: (_, e, s) => _retry(),
       );
     },
   );
