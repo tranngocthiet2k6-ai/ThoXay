@@ -20,6 +20,7 @@ mobile_app/ios/.symlinks/
 .vercel/
 __pycache__/
 *.py[cod]
+00_BAO_VE_DO_AN/
 # Local directory junctions used only by the six-section defense Explorer.
 /kiem_thu/Backend/
 /kiem_thu/Flutter/

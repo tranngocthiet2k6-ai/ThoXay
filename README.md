@@ -499,15 +499,8 @@ Demo cục bộ tự build/khởi động bằng `./scripts/start-demo.ps1 -Open
 Tài khoản, số dư và KYC đều có nhãn DEMO, tách khỏi dữ liệu production.
 Hướng dẫn và đối soát mẫu ở [docs/DEMO.md](docs/DEMO.md).
 
-Hồ sơ bảo vệ thương hiệu **Xây** đã được khôi phục theo yêu cầu trực tiếp:
-[Word, slide và 16 ảnh chính](00_BAO_VE_DO_AN/README.md),
-[workspace sáu ngăn](ThoXay-BaoVe.code-workspace).
-Các lần cập nhật tài liệu tiếp theo chỉ chạy khi người dùng yêu cầu trực tiếp:
-
-```powershell
-.\scripts\rebuild-defense.ps1 -Rebuild
-```
-
+Hồ sơ Word/PowerPoint và workspace bảo vệ đã được gỡ khỏi dự án.
+Bộ 20 màn hình được giữ tại `docs/figma_screens/`.
 Không sinh tài liệu trong luồng code, test hoặc CI/CD.
 
 Migration V22 bổ sung ảnh chi tiết cuối ca, tương thích báo cáo một ảnh cũ.
