@@ -1,3 +1,9 @@
+TUYỆT ĐỐI KHÔNG tự động tạo, sửa hoặc cập nhật bất kỳ file nào liên quan đến Báo cáo đồ án (.docx) và Bảo vệ đồ án (thư mục 00_BAO_VE_DO_AN, slide .pptx, kịch bản hỏi đáp, bản đồ mở code, ThoXay-BaoVe.code-workspace, docs) khi đang code. Chỉ thực hiện khi người dùng yêu cầu trực tiếp sau khi đã hoàn thiện xong ứng dụng.
+
+Ưu tiên hoàn thiện mã nguồn ứng dụng. Không đưa sinh tài liệu báo cáo/bảo vệ vào
+task code, test suite, build, CI/CD hoặc Git hooks. Các script tài liệu trong
+`scripts/` chỉ chạy thủ công khi có yêu cầu trực tiếp của người dùng.
+
 # Thợ Xây — quy tắc thực thi dự án
 
 ## Mục tiêu và kiến trúc

@@ -493,15 +493,19 @@ Xem [phạm vi, API và bằng chứng kiểm thử](docs/ADVANCED_UPGRADE.md),
 trước khi gửi yêu cầu nghiệp vụ. Chờ tối đa 4 phút; không tự gửi lại thao tác ghi.
 `GET /api/auth/health` hỗ trợ kiểm tra từ Web với CORS đã cấu hình, không cần JWT.
 VietQR chỉ bật sau khi Admin cấu hình/xác nhận tài khoản nhận tiền thật ở trang Ví.
-## Môi trường bảo vệ đồ án
+## Môi trường demo phát triển
 
 Demo cục bộ tự build/khởi động bằng `./scripts/start-demo.ps1 -OpenBrowser`.
 Tài khoản, số dư và KYC đều có nhãn DEMO, tách khỏi dữ liệu production.
 Hướng dẫn và đối soát mẫu ở [docs/DEMO.md](docs/DEMO.md).
 
-Mở [workspace sáu phân khu](ThoXay-BaoVe.code-workspace) để trình bày mã.
-[Hồ sơ bảo vệ](00_BAO_VE_DO_AN/README.md) gồm báo cáo Word 103 trang, slide
-15 trang có Speaker Notes, 8 tài khoản demo (đã gồm Admin), kịch bản 20 câu hỏi
-và đủ 20 PNG giao diện thực thi DEMO. Xem [hướng thiết kế mới](docs/COMMERCIAL_UI.md).
-Kiểm thử hiện hành: 131 Backend, 119 Flutter, 12 JS và 8 Python pass.
+Phần báo cáo và hồ sơ bảo vệ đang tạm dừng để tập trung phát triển ứng dụng.
+Các script gốc vẫn ở `scripts/`. Chỉ khi yêu cầu làm lại tài liệu, chạy thủ công:
+
+```powershell
+.\scripts\rebuild-defense.ps1 -Rebuild
+```
+
+Không sinh tài liệu trong luồng code, test hoặc CI/CD.
+
 Migration V22 bổ sung ảnh chi tiết cuối ca, tương thích báo cáo một ảnh cũ.
