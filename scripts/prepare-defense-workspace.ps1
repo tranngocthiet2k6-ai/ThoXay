@@ -26,7 +26,7 @@ $copies = @(
     @{ source='Dockerfile'; destination='cloud_deploy/Dockerfile' },
     @{ source='vercel.json'; destination='cloud_deploy/vercel.json' }
 )
-Get-ChildItem -LiteralPath (Join-Path $projectRoot 'docs/figma_screens') -Filter '*.png' -File | Sort-Object Name | ForEach-Object {
+Get-ChildItem -LiteralPath (Join-Path $projectRoot 'docs/figma_screens') -Filter '*.png' -File | Where-Object { $_.Name -notmatch '^(17|18|19|20) - ' } | Sort-Object Name | ForEach-Object {
     $copies += @{ source=('docs/figma_screens/'+$_.Name); destination=('00_BAO_VE_DO_AN/06_ANH_THIET_KE_FIGMA/'+$_.Name) }
 }
 Get-ChildItem -LiteralPath (Join-Path $projectRoot '.github/workflows') -File | Sort-Object Name | ForEach-Object {

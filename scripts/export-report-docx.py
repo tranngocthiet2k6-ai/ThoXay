@@ -59,14 +59,20 @@ def table(rows):
             result+=para(content,'TableText',center=header in ('HTTP','STT') and ci==0,keep=ri==0)+'</w:tc>'
         result+='</w:tr>'
     return result+'</w:tbl>'+para()
-def figure(name,source=None):
+def figure(name,source=None,max_height=None):
     global image_index
     image_index+=1;filename=name+'.png';data=(source or ROOT/'docs/diagrams'/filename).read_bytes();media[filename]=data
     rid='rIdImage'+str(image_index);rels.append((rid,'image','media/'+filename))
     with Image.open(io.BytesIO(data)) as img:w,h=img.size
-    scale=min(16.0/w,(16.0 if source else 18.5)/h);cx=int(w*scale*360000);cy=int(h*scale*360000)
+    scale=min(16.0/w,(max_height or (16.0 if source else 18.5))/h);cx=int(w*scale*360000);cy=int(h*scale*360000)
     drawing=f'''<w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="{cx}" cy="{cy}"/><wp:docPr id="{image_index}" name="{name}" descr="Sơ đồ {name}"/><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic><pic:nvPicPr><pic:cNvPr id="{image_index}" name="{filename}"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="{rid}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="{cx}" cy="{cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>'''
     return para(drawing,style='Figure',center=True,keep=True)
+
+cover_logo=figure('xay-logo',ROOT/'branding/logo_xay_transparent.png',max_height=1.8)
+body.append(cover_logo)
+header_figure=figure('xay-header',ROOT/'branding/logo_xay_transparent.png',max_height=.45)
+header_inline=re.search(r'(<w:r><w:drawing>[\s\S]*?</w:drawing></w:r>)',header_figure).group(1)
+header_rid=rels[-1][0]
 
 tokens=MarkdownIt('commonmark').enable('table').parse((ROOT/'docs/BAO_CAO_DO_AN.md').read_text(encoding='utf-8'))
 i=0;pending_diagram=None;heading_count=0;suppress_toc=False;list_depth=0
@@ -140,8 +146,9 @@ for name,kind in [('document','document.main'),('styles','styles'),('settings','
 types+='</Types>'
 files={'[Content_Types].xml':types,'_rels/.rels':'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>',
 'word/document.xml':document,'word/styles.xml':styles,'word/_rels/document.xml.rels':relationship,'word/settings.xml':f'<w:settings xmlns:w="{NS}"><w:updateFields w:val="true"/><w:defaultTabStop w:val="720"/></w:settings>',
-'word/header1.xml':f'<w:hdr xmlns:w="{NS}">'+para(run('ThoXay   Báo cáo đồ án tốt nghiệp',size=20))+'</w:hdr>',
+'word/header1.xml':f'<w:hdr xmlns:w="{NS}" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">'+para(header_inline+run('   Xây   Báo cáo đồ án tốt nghiệp',size=20))+'</w:hdr>',
 'word/footer1.xml':f'<w:ftr xmlns:w="{NS}">'+para('<w:fldSimple w:instr="PAGE"/>',center=True)+'</w:ftr>'}
+files['word/_rels/header1.xml.rels']='<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="'+header_rid+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/xay-header.png"/></Relationships>'
 with zipfile.ZipFile(OUT,'w',zipfile.ZIP_DEFLATED) as z:
     for name,value in files.items():z.writestr(name,'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+value)
     for name,value in media.items():z.writestr('word/media/'+name,value)

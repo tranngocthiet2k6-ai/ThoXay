@@ -28,8 +28,10 @@ with zipfile.ZipFile(root/'docs/BAO_CAO_DO_AN.docx') as z:
         if name.endswith(('.xml','.rels')):E.fromstring(z.read(name))
     doc=E.fromstring(z.read('word/document.xml'));styles=E.fromstring(z.read('word/styles.xml'))
     media=[n for n in z.namelist() if n.startswith('word/media/')]
-    assert len(media)==32
+    # Word can deduplicate the identical cover/header logo during SaveAs.
+    assert 33 <= len(media) <= 34
     embedded={hashlib.sha256(z.read(n)).hexdigest() for n in media}
+    assert hashlib.sha256((root/'branding/logo_xay_transparent.png').read_bytes()).hexdigest() in embedded
     figma=list((root/'docs/figma_screens').glob('*.png'))
     assert len(figma)==20
     for image in figma:

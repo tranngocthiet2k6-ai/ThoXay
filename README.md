@@ -499,8 +499,10 @@ Demo cục bộ tự build/khởi động bằng `./scripts/start-demo.ps1 -Open
 Tài khoản, số dư và KYC đều có nhãn DEMO, tách khỏi dữ liệu production.
 Hướng dẫn và đối soát mẫu ở [docs/DEMO.md](docs/DEMO.md).
 
-Phần báo cáo và hồ sơ bảo vệ đang tạm dừng để tập trung phát triển ứng dụng.
-Các script gốc vẫn ở `scripts/`. Chỉ khi yêu cầu làm lại tài liệu, chạy thủ công:
+Hồ sơ bảo vệ thương hiệu **Xây** đã được khôi phục theo yêu cầu trực tiếp:
+[Word, slide và 16 ảnh chính](00_BAO_VE_DO_AN/README.md),
+[workspace sáu ngăn](ThoXay-BaoVe.code-workspace).
+Các lần cập nhật tài liệu tiếp theo chỉ chạy khi người dùng yêu cầu trực tiếp:
 
 ```powershell
 .\scripts\rebuild-defense.ps1 -Rebuild

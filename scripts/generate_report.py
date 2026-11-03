@@ -26,9 +26,9 @@ def table(headers,rows):
     add('| '+' | '.join(headers)+' |\n| '+' | '.join('---' for _ in headers)+' |\n'+'\n'.join('| '+' | '.join(map(escape,r))+' |' for r in rows))
 def diagram(name,code,caption):add(f'<!-- diagram:{name} -->\n```mermaid\n{code.strip()}\n```\n\n*{caption}*')
 
-add('# BÁO CÁO ĐỒ ÁN TỐT NGHIỆP\n\n## Ứng dụng di động kết nối lao động phổ thông và chủ thầu ThoXay')
+add('# BÁO CÁO ĐỒ ÁN TỐT NGHIỆP\n\n## Ứng dụng di động kết nối lao động phổ thông và chủ thầu Xây')
 add(f'Ngày chốt số liệu: **03/11/2026**, múi giờ Việt Nam. Nhánh **main**, checkpoint mã nguồn **{commit}**. Báo cáo mô tả phiên bản đã thực thi và bằng chứng kiểm thử, không sử dụng số liệu người dùng hoặc giao dịch thật để minh họa.')
-add('## Tóm tắt\n\nThoXay kết nối Thợ, Chủ thầu và Admin trong quy trình tìm việc theo vị trí, tuyển dụng có cam kết, quản lý ca làm, nghiệm thu ảnh, đánh giá và thanh toán nội bộ. Flutter chia sẻ mã nguồn Android/Web. Spring Boot cung cấp REST/WebSocket và Thymeleaf Admin. PostgreSQL lưu dữ liệu, Flyway quản lý nâng cấp. Vercel phục vụ Web, Render chạy Backend/Admin và database, GitHub Actions kiểm thử và tạo APK.')
+add('## Tóm tắt\n\nXây kết nối Thợ, Chủ thầu và Admin trong quy trình tìm việc theo vị trí, tuyển dụng có cam kết, quản lý ca làm, nghiệm thu ảnh, đánh giá và thanh toán nội bộ. Flutter chia sẻ mã nguồn Android/Web. Spring Boot cung cấp REST/WebSocket và Thymeleaf Admin. PostgreSQL lưu dữ liệu, Flyway quản lý nâng cấp. Vercel phục vụ Web, Render chạy Backend/Admin và database, GitHub Actions kiểm thử và tạo APK.')
 table(['Chỉ tiêu kiểm kê','Giá trị'],[
 ('Bảng nghiệp vụ / cột',f"{len(tables)} / {sum(len(t['columns']) for t in tables.values())}"),
 ('Bảng kỹ thuật Flyway','1, không tính trong 31 bảng nghiệp vụ'),
@@ -36,7 +36,7 @@ table(['Chỉ tiêu kiểm kê','Giá trị'],[
 ('REST dưới /api/ / route khác',f"{catalog['counts']['rest']} / {catalog['counts']['mvc']}"),
 ('Tệp Java sản xuất / Dart lib / màn hình Flutter',f"{count('src/main/java','*.java')} / {count('mobile_app/lib','*.dart')} / {count('mobile_app/lib/screens','*.dart')}"),
 ('Template Thymeleaf',count('src/main/resources/templates','*.html')),
-('Kiểm thử thành công','131 Backend + 119 Flutter + 12 JS; thêm 8 test bảo vệ seed Python'),
+('Kiểm thử thành công','134 Backend + 120 Flutter + 12 JS; thêm 9 test bảo vệ seed Python'),
 ('Mốc trước đợt Figma','125 Backend + 110 Flutter + 12 JS; thêm 3 Backend và 4 Flutter')])
 add('## Phương pháp và giới hạn số liệu\n\nPROJECT_INVENTORY.json được tạo bằng truy vấn chỉ đọc catalog PostgreSQL sau Flyway V23 và quét annotation controller trong Java. Một cặp HTTP method và đường dẫn cụ thể được tính là một endpoint. Alias health được tính riêng. Bộ đếm không tính handler mặc định của Spring, WebSocket hoặc filter đăng nhập form. Bảng user_skills và user_project_images là collection table JPA. Các kiểm thử báo cáo là số test thực chạy, không phải tỷ lệ bao phủ mã nguồn. Các ảnh DEMO và số dư minh họa không chứng minh danh tính hoặc doanh thu thực tế.')
 add('## Mục lục\n\n1. Tổng quan đề tài\n2. Công nghệ sử dụng\n3. Phân tích và thiết kế hệ thống\n4. Triển khai và kiểm thử\n5. Kết luận và hướng phát triển\n6. Tài liệu đối chiếu')
@@ -217,7 +217,7 @@ add('Các endpoint do Spring Security xử lý ngoài Controller: POST /admin/lo
 add('## 3.6. Kiến trúc module và giao dịch\n\nBackend là modular monolith: controller nhận DTO và Jakarta Validation, service kiểm tra actor/quyền và transaction, repository truy cập PostgreSQL. Các package scheduling, crew, attendance, wallet, media, incident, chat và weather tạo các ranh giới nghiệp vụ. Flutter tách model/service/screen/widget/theme; ApiService tập trung xác thực, lỗi, multipart và URL. Thymeleaf render Admin, JavaScript quản lý bộ lọc và modal nhưng quyền cuối cùng nằm trên server.')
 add('Duyệt đơn khóa công trình và các worker theo thứ tự ID, ngăn vượt số lượng và nhận trùng lịch. Duyệt tổ đội xử lý nguyên nhóm trong một transaction. Chốt sao khóa các worker trước khi tính trung bình. Thanh toán khóa ví, ghi payment/ledger/số dư cùng transaction và tham chiếu duy nhất. Retry idempotent không tự đổi số tiền, ảnh hoặc nội dung; payload khác với cùng khóa bị từ chối 409. QR ca làm chỉ lưu hash và hết hạn sau 5 phút. Snapshot ngân hàng/cam kết không đổi khi thông tin nguồn thay đổi về sau.')
 
-add('## 3.7. Giao diện thương mại và bộ 20 màn hình thực thi\n\nBộ 20 PNG được chụp tự động từ ứng dụng localhost với dữ liệu DEMO, lưu tại docs/figma_screens (giữ tên thư mục lịch sử). Đây là ảnh giao diện thực thi, không còn là 16 PNG Figma nguyên gốc. Hero Trang chủ, Ví và Hồ sơ dùng Navy #0F172A với lưới mờ, chữ trắng và điểm nhấn Cam #EA580C cho Thợ hoặc Xanh #059669 cho Chủ thầu. Portfolio hiển thị ảnh thực tế có chú thích DEMO, Admin dùng Sidebar Navy và vùng làm việc sáng. Bố cục giữ lưới 8pt, thẻ bo 16px, bóng dịu và khung nội dung desktop cân đối.')
+add('## 3.7. Giao diện Xây và bộ 20 màn hình thực thi\n\nBộ 20 PNG được chụp tự động từ ứng dụng localhost với dữ liệu DEMO, lưu tại docs/figma_screens (giữ tên thư mục lịch sử). Đây là ảnh giao diện thực thi, không còn là 16 PNG Figma nguyên gốc. Hero Trang chủ, Ví và Hồ sơ dùng Navy #0F172A với lưới mờ, chữ trắng và điểm nhấn Cam #EA580C cho Thợ hoặc Xanh #059669 cho Chủ thầu. Portfolio hiển thị ảnh thực tế có chú thích DEMO, Admin dùng Sidebar Navy và vùng làm việc sáng. Bố cục giữ lưới 8pt, thẻ bo 16px, bóng dịu và khung nội dung desktop cân đối.')
 add('### Nguồn ảnh và giới hạn kiểm chứng\n\nCác giá trị hiển thị lấy từ API của database demo riêng, không đại diện giao dịch hay danh tính thực. Bản đồ dùng tile OpenStreetMap có attribution, ghim lương và vùng chấm công 200m. GPS 35m trong ảnh Radar được mô phỏng bằng trình duyệt để kiểm thử phép tính; chưa thay thế nghiệm thu GPS/camera trên thiết bị. Hai ảnh cuối ca V22 giữ tương thích dữ liệu cũ. V23 bổ sung bảng bằng chứng sự cố riêng tư, không làm thay đổi bảng hiện có. Chi tiết nằm tại COMMERCIAL_UI.md và demo_photos/CREDITS.md.')
 screens=[
 ('Thợ Xây - Đăng nhập & Vai trò.png','Đăng nhập và vai trò','Hai thẻ chọn vai trò nằm ngang, form gọn và icon trường nhập. Lựa chọn này chỉ thay giao diện, quyền thực tế do JWT và server xác định.'),
@@ -283,10 +283,10 @@ features=[('Bản đồ công trình','Ghim có lương, chọn ghim mở tóm t
 table(['STT','Tính năng','Hành vi đã thực thi','Điểm đối chiếu'],[(i,*v) for i,v in enumerate(features,1)])
 add('## 4.4. Kết quả kiểm thử và build')
 table(['Lớp kiểm chứng','Kết quả chốt','Phạm vi và giới hạn'],[
-('Backend Maven verify','131 test pass, 0 lỗi, 0 bỏ qua','H2/MockMvc, PostgreSQL migration riêng, cạnh tranh duyệt đơn, ACL, ví, ảnh và giờ Việt Nam. JVM test mặc định UTC.'),
-('Flutter','119 test pass, analyze sạch','Bao gồm hero tương phản, GPS Haversine, cam kết hai bên, multipart bằng chứng, ảnh cuối ca và dự toán không hữu hạn.'),
+('Backend Maven verify','134 test pass, 0 lỗi, 0 bỏ qua','H2/MockMvc, PostgreSQL migration riêng, cạnh tranh duyệt đơn, ACL, ví, ảnh, VietQR XAY NAP/THOXAY NAP và giờ Việt Nam. JVM test mặc định UTC.'),
+('Flutter','120 test pass, analyze sạch','Bao gồm thương hiệu Xây, hero tương phản, GPS, cam kết, multipart, ảnh lỗi có thử lại và dự toán không hữu hạn.'),
 ('JavaScript Node','12 test pass','Schema/build config, bộ lọc Admin, KYC/lightbox và sự cố.'),
-('Python demo','8 test pass','Chặn host/database/sự hiện diện dữ liệu thật, yêu cầu migration, chạy lặp không ghi đè.'),
+('Python demo','9 test pass','Chặn host/database/dữ liệu thật; chỉ thay đúng ảnh seed, giữ ảnh thay thế và tăng version nghiệm thu.'),
 ('JAR / Web release','Build thành công','Maven Spring Boot repackage và Flutter build web --release.'),
 ('APK / CI','Workflow tự build khi push main','Chỉ tuyên bố run thành công sau khi đối chiếu trạng thái Actions; không có Android SDK local.'),
 ('Chrome demo thật','390/1440px, hai vai trò, Admin','Dùng API localhost và dữ liệu tổng hợp, đã kiểm tra ví/Top 3/chat/công trình và bốn template Admin.'),

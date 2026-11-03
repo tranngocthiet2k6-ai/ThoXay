@@ -3,7 +3,7 @@
 #   .\scripts\rebuild-defense.ps1 -Rebuild
 # Requires a migrated local PostgreSQL database, the existing report Python/Node
 # dependencies, and Microsoft Word/PowerPoint. Review report facts after app changes.
-param([switch]$Rebuild)
+param([switch]$Rebuild, [switch]$RestoreOnly, [switch]$UseCapturedScreens)
 $ErrorActionPreference = 'Stop'
 if (-not $Rebuild) {
     Write-Output 'Report generation is paused. Explicit manual command: .\scripts\rebuild-defense.ps1 -Rebuild'
@@ -20,6 +20,7 @@ $inputs = @(
     'docs/diagrams',
     'docs/figma_screens',
     '00_BAO_VE_DO_AN/README.md',
+    '00_BAO_VE_DO_AN/HUONG_DAN_WORKSPACE.md',
     'ThoXay-BaoVe.code-workspace'
 )
 $python = $env:THOXAY_REPORT_PYTHON
@@ -50,6 +51,11 @@ try {
         }
     }
     New-Item -ItemType Directory -Path '.local/final-delivery' -Force | Out-Null
+    if ($RestoreOnly) { Write-Output 'Report source inputs restored; no document was built.'; return }
+    if (-not $UseCapturedScreens) {
+        Invoke-ReportStep 'node' @('scripts/capture-commercial-ui.mjs','--publish')
+    }
+    Invoke-ReportStep $python @('scripts/prepare-defense-branding.py')
     Invoke-ReportStep $python @('scripts/report_inventory.py')
     Invoke-ReportStep $python @('scripts/generate_report.py')
     Invoke-ReportStep 'node' @('scripts/render-report-diagrams.mjs')

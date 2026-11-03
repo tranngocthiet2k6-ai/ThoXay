@@ -1,0 +1,26 @@
+[
+  {
+    "name": "slide-use-case",
+    "file": "docs/diagrams/slide-use-case.png",
+    "width": 720,
+    "height": 576,
+    "sourceSha256": "ebf8672fd5892487d153230f9c60f986fcb9ee052702b835194ba63e478a047b",
+    "pngSha256": "1967722301341f0692376f1b76c20616c78f34255c940ac3fc688481a7a7fdb6"
+  },
+  {
+    "name": "slide-architecture",
+    "file": "docs/diagrams/slide-architecture.png",
+    "width": 1088,
+    "height": 576,
+    "sourceSha256": "1af97a67c00db941605189cdcdca9b24aabc7a4aef61ee5f19f9a81dc6545c36",
+    "pngSha256": "94e4e7690a081b7a01411ce8f76ac37dbdf704699a206faec5d27f50a6630875"
+  },
+  {
+    "name": "slide-erd",
+    "file": "docs/diagrams/slide-erd.png",
+    "width": 1886,
+    "height": 512,
+    "sourceSha256": "be8f8f152de59fffb76a802d402f2a80b91d830902d21db9e6ca1c16f5eb7662",
+    "pngSha256": "b5a4860404d969f7deccb25704901160b8d11a1c321e4c5fed838cec8b8b440e"
+  }
+]
