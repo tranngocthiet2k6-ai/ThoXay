@@ -5,7 +5,7 @@ import java.util.Locale;
 public final class VietQrPayload {
  private VietQrPayload(){}
  public static String build(String bin,String account,long amount,String reference){
-  if(bin==null||!bin.matches("[0-9]{6}")||account==null||!account.matches("[A-Za-z0-9]{1,19}")||amount<1||amount>9999999999999L||reference==null||!reference.matches("[A-Z0-9]{1,25}"))throw new IllegalArgumentException("Invalid VietQR account transfer fields");
+  if(bin==null||!bin.matches("[0-9]{6}")||account==null||!account.matches("[A-Za-z0-9]{1,19}")||amount<1||amount>9999999999999L||reference==null||reference.length()>25||!reference.matches("(?:[A-Z0-9]+|(?:XAY|THOXAY) NAP [A-Z0-9]+)"))throw new IllegalArgumentException("Invalid VietQR account transfer fields");
   String beneficiary=tlv("00",bin)+tlv("01",account);
   String merchant=tlv("00","A000000727")+tlv("01",beneficiary)+tlv("02","QRIBFTTA");
   String payload=tlv("00","01")+tlv("01","12")+tlv("38",merchant)+tlv("53","704")+tlv("54",Long.toString(amount))+tlv("58","VN")+tlv("62",tlv("08",reference))+"6304";

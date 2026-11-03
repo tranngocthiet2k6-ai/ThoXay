@@ -23,3 +23,6 @@ body{background:#f3f6fb;color:#0f172a}
 .modal-content{background:#fff;color:#0f172a;border-color:#e2e8f0}.modal-header,.modal-footer{border-color:#e2e8f0}.kyc-image-frame{background:#f1f5f9;border-color:#e2e8f0}.incident-evidence{display:block;width:min(100%,800px);max-height:440px;object-fit:contain;border-radius:16px;background:#f1f5f9}.incident-evidence:hover{outline:2px solid #3b82f6}
 @media(max-width:991px){.control-priorities{grid-template-columns:1fr}.page-heading h1{font-size:28px}}
 @media(prefers-contrast:more){.card,.stat-card,.priority-link{border-color:#0f172a}.text-secondary{color:#334155!important}}
+
+/* Brand plaque preserves the charcoal wordmark on the Navy sidebar. */
+.xay-brand-logo{width:64px;height:48px;object-fit:contain;background:#fff;border-radius:10px;padding:4px;flex-shrink:0}.xay-login-logo{width:132px;height:auto;object-fit:contain}

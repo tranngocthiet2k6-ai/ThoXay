@@ -1,3 +1,4 @@
+import 'brand_logo.dart';
 import '../theme/app_theme.dart';
 
 import 'dart:async';
@@ -207,13 +208,10 @@ class _HomeNavigationState extends State<HomeNavigation>
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.roofing_rounded,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
+                  const BrandLogo(height: 32),
                   const SizedBox(width: 10),
                   const Text(
-                    'ThoXay',
+                    'Xây',
                     style: TextStyle(
                       fontSize: 19,
                       fontWeight: FontWeight.w800,

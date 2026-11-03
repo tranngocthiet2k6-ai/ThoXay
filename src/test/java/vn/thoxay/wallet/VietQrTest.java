@@ -69,6 +69,31 @@ class VietQrTest {
   assertThat(qr).isEqualTo("00020101021238560010A0000007270126000697043601120000012345670208QRIBFTTA530370454061000005802VN62130809TXQA1234563041385");var fields=parse(qr);assertThat(fields.get("00")).isEqualTo("01");assertThat(fields.get("01")).isEqualTo("12");assertThat(fields.get("53")).isEqualTo("704");assertThat(fields.get("54")).isEqualTo("100000");assertThat(fields.get("58")).isEqualTo("VN");assertThat(parse(fields.get("62")).get("08")).isEqualTo("TXQA12345");var merchant=parse(fields.get("38"));assertThat(merchant.get("00")).isEqualTo("A000000727");assertThat(merchant.get("02")).isEqualTo("QRIBFTTA");assertThat(parse(merchant.get("01"))).containsEntry("00","970436").containsEntry("01","000001234567");
   org.assertj.core.api.Assertions.assertThatThrownBy(()->VietQrPayload.build("970436","A".repeat(20),1000,"TX1")).isInstanceOf(IllegalArgumentException.class);
  }
+ @Test void newDepositsUseXayButHistoricalQrSnapshotsRemainUnchanged()throws Exception{
+  configure(-1,true);
+  long fresh=deposit("xay-brand-request");
+  var created=requests.findById(fresh).orElseThrow();
+  assertThat(created.getDepositReference()).startsWith("XAY NAP ");
+  assertThat(parse(parse(created.getQrPayload()).get("62")).get("08")).isEqualTo(created.getDepositReference());
+  int n=0;
+  for(String reference:List.of("XAY NAP QA1","THOXAY NAP QA2","TXQA3")){
+   var old=new WalletRequest();old.setUser(worker);old.setKind(WalletRequest.Kind.TOP_UP);old.setAmount(100000);
+   old.setClientRequestId("historic-brand-"+(n++));old.setDepositReference(reference);old.setTransferReference(reference);
+   old.setBankName("QA Bank");old.setBankAccount("000001234567");old.setAccountName("QA RECEIVER");old.setReceivingBankBin("970436");
+   old.setQrPayload(VietQrPayload.build("970436","000001234567",100000,reference));requests.saveAndFlush(old);
+   mvc.perform(get("/api/wallet/deposits/"+old.getId()).header("Authorization",token(worker)))
+    .andExpect(status().isOk()).andExpect(jsonPath("$.reference").value(reference)).andExpect(jsonPath("$.payload").value(old.getQrPayload()));
+   assertThat(deposit(old.getClientRequestId())).isEqualTo(old.getId());
+  }
+ }
+ @Test void manualTopUpsAcceptBothBrandPrefixes()throws Exception{
+  int n=0;
+  for(String reference:List.of("XAY NAP QA1","THOXAY NAP QA2")){
+   mvc.perform(post("/api/wallet/requests").header("Authorization",token(worker)).contentType("application/json")
+    .content(json.writeValueAsString(Map.of("kind","TOP_UP","amount",1000,"clientRequestId","brand-compat-"+(n++),"transferReference",reference))))
+    .andExpect(status().isOk()).andExpect(jsonPath("$.transferReference").value(reference));
+  }
+ }
  Map<String,String> parse(String text){var out=new LinkedHashMap<String,String>();for(int i=0;i<text.length();){String id=text.substring(i,i+2);int length=Integer.parseInt(text.substring(i+2,i+4));out.put(id,text.substring(i+4,i+4+length));i+=4+length;}return out;}
  Map<String,Object> setupBody(long version,boolean enabled){return new HashMap<>(Map.of("enabled",enabled,"bankBin","970436","bankName","QA Vietcombank","accountNo","000001234567","accountName","QA RECEIVING ACCOUNT","version",version,"confirmed",true));}
  void configure(long version,boolean enabled)throws Exception{mvc.perform(put("/api/admin/wallet/bank-settings").header("Authorization",token(admin)).contentType("application/json").content(json.writeValueAsString(setupBody(version,enabled)))).andExpect(status().isOk());}

@@ -26,7 +26,7 @@ class LocationService {
     if (permission == LocationPermission.denied ||
         permission == LocationPermission.deniedForever) {
       throw const LocationFailure(
-        kIsWeb ? 'Cho phép vị trí trong trình duyệt rồi thử lại.' : 'Cho phép Thợ Xây truy cập vị trí trong cài đặt thiết bị rồi thử lại.',
+        kIsWeb ? 'Cho phép vị trí trong trình duyệt rồi thử lại.' : 'Cho phép Xây truy cập vị trí trong cài đặt thiết bị rồi thử lại.',
       );
     }
     try {

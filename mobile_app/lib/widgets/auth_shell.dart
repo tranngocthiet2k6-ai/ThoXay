@@ -1,3 +1,5 @@
+import 'brand_logo.dart';
+
 import 'package:flutter/material.dart';
 
 import '../services/api_service.dart';
@@ -24,7 +26,6 @@ class AuthShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = AppPalette.of(context);
-    final color = Theme.of(context).colorScheme.primary;
     return Scaffold(
       appBar: canGoBack
           ? AppBar(
@@ -46,17 +47,9 @@ class AuthShell extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Icon(
-                          Icons.engineering_outlined,
-                          color: color,
-                          size: 24,
-                        ),
+                      BrandLogo(
+                        height: 52,
+                        onDark: Theme.of(context).brightness == Brightness.dark,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -64,7 +57,7 @@ class AuthShell extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Thợ Xây',
+                              'Xây',
                               style: Theme.of(context).textTheme.headlineSmall
                                   ?.copyWith(fontSize: 24),
                             ),

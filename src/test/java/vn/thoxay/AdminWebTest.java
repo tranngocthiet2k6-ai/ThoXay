@@ -20,6 +20,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest @AutoConfigureMockMvc @Transactional
 class AdminWebTest {
+    @Test
+    void brandAssetsArePublicBeforeAdminLogin() throws Exception {
+        mvc.perform(get("/branding/logo_xay_transparent.png"))
+            .andExpect(status().isOk()).andExpect(content().contentType("image/png"));
+        mvc.perform(get("/favicon.ico")).andExpect(status().isOk());
+        mvc.perform(get("/admin/login")).andExpect(status().isOk())
+            .andExpect(content().string(org.hamcrest.Matchers.containsString("/branding/logo_xay_transparent.png")));
+    }
     @Autowired MockMvc mvc;
     @Autowired UserRepository users;
     @Autowired JobRepository jobs;

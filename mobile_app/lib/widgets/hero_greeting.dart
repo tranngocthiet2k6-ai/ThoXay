@@ -68,8 +68,8 @@ class _HeroGreetingState extends State<HeroGreeting> {
                       children: [
                         Text(
                           worker
-                              ? 'THỢ XÂY / DÀNH CHO THỢ'
-                              : 'CHỦ THẦU / QUẢN LÝ CÔNG TRÌNH',
+                              ? 'XÂY • DÀNH CHO THỢ'
+                              : 'XÂY • DÀNH CHO CHỦ THẦU',
                           style: const TextStyle(
                             fontSize: 10,
                             color: Color(0xffcbd5e1),

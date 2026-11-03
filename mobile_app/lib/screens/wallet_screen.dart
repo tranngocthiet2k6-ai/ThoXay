@@ -142,7 +142,7 @@ class _WalletScreenState extends State<WalletScreen> {
       title: Text(
         widget.api.session?.role == 'ROLE_CONTRACTOR'
             ? 'Ví & Quỹ lương'
-            : 'Ví Thợ Xây',
+            : 'Ví Xây',
       ),
       actions: [
         IconButton(

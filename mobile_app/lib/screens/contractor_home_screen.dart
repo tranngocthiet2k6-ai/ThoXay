@@ -1,3 +1,4 @@
+import '../widgets/brand_logo.dart';
 import '../widgets/applicant_evidence.dart';
 import '../widgets/figma_components.dart';
 import '../widgets/figma_job_map.dart';
@@ -151,7 +152,7 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
-      title: const Text('Chủ thầu'),
+      title: const BrandHeader(title: 'Chủ thầu'),
       actions: [
         HomeInboxActions(api: widget.api),
         const AppearanceButton(),

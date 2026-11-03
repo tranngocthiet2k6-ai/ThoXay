@@ -1,3 +1,4 @@
+import '../widgets/brand_logo.dart';
 import '../widgets/figma_job_map.dart';
 import '../widgets/week_schedule.dart';
 import 'calendar_screen.dart';
@@ -300,7 +301,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
-      title: const Text('Thợ Xây'),
+      title: const BrandHeader(title: 'Xây'),
       actions: [
         HomeInboxActions(api: widget.api),
         const AppearanceButton(),

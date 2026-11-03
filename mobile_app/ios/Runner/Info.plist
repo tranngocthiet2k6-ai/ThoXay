@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
     <key>NSCameraUsageDescription</key>
-    <string>Thợ Xây cần camera để chụp hai mặt CCCD khi bạn gửi hồ sơ xác thực.</string>
+    <string>Xây cần camera để chụp hai mặt CCCD khi bạn gửi hồ sơ xác thực.</string>
     <key>NSPhotoLibraryUsageDescription</key>
-    <string>Thợ Xây cho phép chọn ảnh CCCD khi thiết bị không hỗ trợ chụp trực tiếp.</string>
+    <string>Xây cho phép chọn ảnh CCCD khi thiết bị không hỗ trợ chụp trực tiếp.</string>
     <key>LSApplicationQueriesSchemes</key>
     <array><string>tel</string></array>
     <key>NSLocationWhenInUseUsageDescription</key>
-    <string>Thợ Xây dùng vị trí để tìm công trình gần bạn và đặt vị trí công trình.</string>
+    <string>Xây dùng vị trí để tìm công trình gần bạn và đặt vị trí công trình.</string>
     <key>NSAppTransportSecurity</key>
     <dict><key>NSAllowsLocalNetworking</key><true/></dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
@@ -17,7 +17,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Thợ Xây</string>
+	<string>Xây</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>

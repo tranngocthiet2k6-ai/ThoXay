@@ -55,7 +55,7 @@ public class SecurityConfig {
     SecurityFilterChain web(HttpSecurity http, AuthenticationManager manager) throws Exception {
         var forbidden = new AccessDeniedHandlerImpl();
         return http.authenticationManager(manager)
-            .authorizeHttpRequests(a -> a.requestMatchers("/health", "/ws/chat", "/admin/**", "/", "/error", "/css/**", "/js/**", "/vendor/**").permitAll().anyRequest().denyAll())
+            .authorizeHttpRequests(a -> a.requestMatchers("/health", "/ws/chat", "/admin/**", "/", "/error", "/css/**", "/js/**", "/vendor/**", "/branding/**", "/favicon.ico").permitAll().anyRequest().denyAll())
             .exceptionHandling(e -> e.accessDeniedHandler((request, response, exception) -> {
                 if (exception instanceof CsrfException && "POST".equals(request.getMethod())
                         && (request.getContextPath() + "/admin/login").equals(request.getRequestURI())) {

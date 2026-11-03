@@ -1,35 +1,35 @@
 {
-    "name": "ThoXay — Kết nối công trình",
-    "short_name": "ThoXay",
-    "start_url": ".",
-    "display": "standalone",
-    "background_color": "#f7f8fa",
-    "theme_color": "#EA580C",
-    "description": "Kết nối lao động phổ thông và chủ thầu.",
-    "orientation": "portrait-primary",
-    "prefer_related_applications": false,
-    "icons": [
-        {
-            "src": "icons/Icon-192.png",
-            "sizes": "192x192",
-            "type": "image/png"
-        },
-        {
-            "src": "icons/Icon-512.png",
-            "sizes": "512x512",
-            "type": "image/png"
-        },
-        {
-            "src": "icons/Icon-maskable-192.png",
-            "sizes": "192x192",
-            "type": "image/png",
-            "purpose": "maskable"
-        },
-        {
-            "src": "icons/Icon-maskable-512.png",
-            "sizes": "512x512",
-            "type": "image/png",
-            "purpose": "maskable"
-        }
-    ]
+    "name":  "Xây — Kết nối Thợ \u0026 Chủ thầu",
+    "short_name":  "Xây",
+    "start_url":  ".",
+    "display":  "standalone",
+    "background_color":  "#f7f8fa",
+    "theme_color":  "#EA580C",
+    "description":  "Xây — Kết nối Thợ \u0026 Chủ thầu.",
+    "orientation":  "portrait-primary",
+    "prefer_related_applications":  false,
+    "icons":  [
+                  {
+                      "src":  "icons/Icon-192.png",
+                      "sizes":  "192x192",
+                      "type":  "image/png"
+                  },
+                  {
+                      "src":  "icons/Icon-512.png",
+                      "sizes":  "512x512",
+                      "type":  "image/png"
+                  },
+                  {
+                      "src":  "icons/Icon-maskable-192.png",
+                      "sizes":  "192x192",
+                      "type":  "image/png",
+                      "purpose":  "maskable"
+                  },
+                  {
+                      "src":  "icons/Icon-maskable-512.png",
+                      "sizes":  "512x512",
+                      "type":  "image/png",
+                      "purpose":  "maskable"
+                  }
+              ]
 }
