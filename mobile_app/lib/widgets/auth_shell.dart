@@ -57,7 +57,7 @@ class AuthShell extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Xây',
+                              'Thợ Xây',
                               style: Theme.of(context).textTheme.headlineSmall
                                   ?.copyWith(fontSize: 24),
                             ),

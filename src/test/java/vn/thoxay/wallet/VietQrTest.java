@@ -69,11 +69,11 @@ class VietQrTest {
   assertThat(qr).isEqualTo("00020101021238560010A0000007270126000697043601120000012345670208QRIBFTTA530370454061000005802VN62130809TXQA1234563041385");var fields=parse(qr);assertThat(fields.get("00")).isEqualTo("01");assertThat(fields.get("01")).isEqualTo("12");assertThat(fields.get("53")).isEqualTo("704");assertThat(fields.get("54")).isEqualTo("100000");assertThat(fields.get("58")).isEqualTo("VN");assertThat(parse(fields.get("62")).get("08")).isEqualTo("TXQA12345");var merchant=parse(fields.get("38"));assertThat(merchant.get("00")).isEqualTo("A000000727");assertThat(merchant.get("02")).isEqualTo("QRIBFTTA");assertThat(parse(merchant.get("01"))).containsEntry("00","970436").containsEntry("01","000001234567");
   org.assertj.core.api.Assertions.assertThatThrownBy(()->VietQrPayload.build("970436","A".repeat(20),1000,"TX1")).isInstanceOf(IllegalArgumentException.class);
  }
- @Test void newDepositsUseXayButHistoricalQrSnapshotsRemainUnchanged()throws Exception{
+ @Test void newDepositsUseThoXayButHistoricalQrSnapshotsRemainUnchanged()throws Exception{
   configure(-1,true);
   long fresh=deposit("xay-brand-request");
   var created=requests.findById(fresh).orElseThrow();
-  assertThat(created.getDepositReference()).startsWith("XAY NAP ");
+  assertThat(created.getDepositReference()).startsWith("THOXAY NAP ");
   assertThat(parse(parse(created.getQrPayload()).get("62")).get("08")).isEqualTo(created.getDepositReference());
   int n=0;
   for(String reference:List.of("XAY NAP QA1","THOXAY NAP QA2","TXQA3")){

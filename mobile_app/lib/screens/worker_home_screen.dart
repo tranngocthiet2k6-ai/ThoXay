@@ -301,7 +301,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
-      title: const BrandHeader(title: 'Xây'),
+      title: const BrandHeader(title: 'Thợ Xây'),
       actions: [
         HomeInboxActions(api: widget.api),
         const AppearanceButton(),

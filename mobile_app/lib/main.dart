@@ -82,7 +82,7 @@ class _ThoXayAppState extends State<ThoXayApp> {
     child: ListenableBuilder(
       listenable: Listenable.merge([api, _appearance]),
       builder: (context, _) => MaterialApp(
-        title: 'Xây',
+        title: 'Thợ Xây',
         navigatorKey: _navigator,
         scaffoldMessengerKey: _messenger,
         debugShowCheckedModeBanner: false,
@@ -119,7 +119,7 @@ class _ThoXayAppState extends State<ThoXayApp> {
               );
             }
             return Scaffold(
-              appBar: AppBar(title: const Text('Tài khoản Xây')),
+              appBar: AppBar(title: const Text('Tài khoản Thợ Xây')),
               body: Center(
                 child: Padding(
                   padding: const EdgeInsets.all(24),

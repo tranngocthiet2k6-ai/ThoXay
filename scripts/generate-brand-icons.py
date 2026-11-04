@@ -4,7 +4,7 @@ from pathlib import Path
 from PIL import Image, ImageOps
 
 ROOT = Path(__file__).resolve().parents[1]
-logo = Image.open(ROOT / 'branding/logo_xay_transparent.png').convert('RGBA')
+logo = Image.open(ROOT / 'branding/logo_thoxay_transparent.png').convert('RGBA')
 assert logo.getextrema()[3][0] == 0, 'Master logo must preserve transparency'
 
 def save(image, relative):
@@ -19,7 +19,9 @@ def icon(size):
     return canvas.convert('RGB')
 
 save(icon(1024), 'branding/app_icon.png')
+save(logo, 'branding/logo_xay_transparent.png')  # Compatibility for cached clients.
 for folder in ['mobile_app/assets/branding', 'mobile_app/web/branding', 'src/main/resources/static/branding']:
+    save(logo, folder + '/logo_thoxay_transparent.png')
     save(logo, folder + '/logo_xay_transparent.png')
     save(icon(512), folder + '/app_icon.png')
 for density, size in [('mdpi',48),('hdpi',72),('xhdpi',96),('xxhdpi',144),('xxxhdpi',192)]:
@@ -37,4 +39,4 @@ for folder in ['mobile_app/web','src/main/resources/static']:
     icon(256).save(target, format='ICO', sizes=[(16,16),(32,32),(48,48),(64,64),(128,128),(256,256)])
 preview = Image.new('RGBA',logo.size,'white');preview.alpha_composite(logo)
 save(preview.convert('RGB'), '.local/xay/logo-on-white.png')
-print('Xây logo copied; Android/iOS/Web icons and ICO exported. Package IDs unchanged.')
+print('Tho Xay logo copied; Android/iOS/Web icons and ICO exported. Package IDs unchanged.')

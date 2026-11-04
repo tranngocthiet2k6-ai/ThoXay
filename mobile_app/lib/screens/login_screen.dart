@@ -52,7 +52,7 @@ class _LoginScreenState extends State<LoginScreen> {
     child: AuthShell(
       api: widget.api,
       title: 'Chào mừng bạn trở lại!',
-      subtitle: 'Chọn vai trò để bắt đầu cùng Xây.',
+      subtitle: 'Chọn vai trò để bắt đầu cùng Thợ Xây.',
       roleSelection: RoleCards(
         role: _role,
         onChanged: _busy ? null : (role) => setState(() => _role = role),

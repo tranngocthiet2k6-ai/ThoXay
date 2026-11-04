@@ -211,7 +211,7 @@ class _HomeNavigationState extends State<HomeNavigation>
                   const BrandLogo(height: 32),
                   const SizedBox(width: 10),
                   const Text(
-                    'Xây',
+                    'Thợ Xây',
                     style: TextStyle(
                       fontSize: 19,
                       fontWeight: FontWeight.w800,

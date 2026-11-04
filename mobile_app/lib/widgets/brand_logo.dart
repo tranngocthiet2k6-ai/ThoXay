@@ -14,11 +14,11 @@ class BrandLogo extends StatelessWidget {
       borderRadius: BorderRadius.circular(8),
     ),
     child: Image.asset(
-      'assets/branding/logo_xay_transparent.png',
+      'assets/branding/logo_thoxay_transparent.png',
       height: height,
-      width: height * 1.34,
+      width: height * 2.34,
       fit: BoxFit.contain,
-      semanticLabel: 'Xây',
+      semanticLabel: 'Thợ Xây',
     ),
   );
 }

@@ -2,7 +2,7 @@
 <html data-bs-theme="light" lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Tổng quan quản trị · Xây</title>
+  <title>Tổng quan quản trị · Thợ Xây</title>
   <link th:href="@{/vendor/bootstrap/bootstrap.min.css}" rel="stylesheet">
   <link th:href="@{/css/admin.css}" rel="stylesheet">
 <link th:href="@{/css/admin-commercial.css}" rel="stylesheet"><link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}"></head>
@@ -18,7 +18,7 @@
   <symbol id="i-exit" viewBox="0 0 24 24"><path d="M9 4H4v16h5M13 7l5 5-5 5M8 12h13"/></symbol>
 </defs></svg>
 <aside class="admin-sidebar" aria-label="Điều hướng quản trị">
-  <a class="sidebar-brand" th:href="@{/admin/dashboard}"><img class="xay-brand-logo" th:src="@{/branding/logo_xay_transparent.png}" alt="Xây"><span>Xây<small>KẾT NỐI &amp; KIẾN TẠO</small></span></a>
+  <a class="sidebar-brand" th:href="@{/admin/dashboard}"><img class="xay-brand-logo" th:src="@{/branding/logo_thoxay_transparent.png}" alt="Thợ Xây"><span>Thợ Xây<small>KẾT NỐI &amp; KIẾN TẠO</small></span></a>
   <p class="sidebar-label">KHÔNG GIAN LÀM VIỆC</p>
   <nav class="sidebar-nav">
     <a th:href="@{/admin/incidents}">SOS &amp; Sự cố <span class="badge bg-danger ms-auto" data-incident-count data-hide-zero th:text="${incidentCounts.open}" th:hidden="${incidentCounts.open == 0}"></span></a>
@@ -30,14 +30,14 @@
   <div class="sidebar-note"><svg class="ui-icon" aria-hidden="true"><use href="#i-shield"/></svg><strong>Kết nối từ niềm tin</strong><p>Kiểm tra danh tính để xây dựng cộng đồng lao động an toàn.</p></div>
 </aside>
 <header class="admin-topbar">
-  <a class="mobile-brand" th:href="@{/admin/dashboard}"><img class="xay-brand-logo" th:src="@{/branding/logo_xay_transparent.png}" alt="Xây">Xây</a>
+  <a class="mobile-brand" th:href="@{/admin/dashboard}"><img class="xay-brand-logo" th:src="@{/branding/logo_thoxay_transparent.png}" alt="Thợ Xây">Thợ Xây</a>
   <span class="topbar-label">Hệ thống quản trị <span>/ Tổng quan</span></span>
   <div class="d-flex align-items-center gap-3"><span class="admin-identity"><span class="admin-avatar">QT</span>Quản trị viên</span>
     <form th:action="@{/admin/logout}" method="post"><button class="btn btn-outline-secondary btn-sm"><svg class="ui-icon" aria-hidden="true"><use href="#i-exit"/></svg>Đăng xuất</button></form>
   </div>
 </header>
 <main class="admin-main" id="overview">
-  <div class="page-heading"><div><p class="eyebrow">XÂY · KHÔNG GIAN QUẢN TRỊ</p><h1>Control Center</h1><p class="text-secondary mb-0">Theo dõi cộng đồng, xác thực danh tính và xử lý các giao dịch cần ưu tiên.</p></div>
+  <div class="page-heading"><div><p class="eyebrow">THỢ XÂY · KHÔNG GIAN QUẢN TRỊ</p><h1>Control Center</h1><p class="text-secondary mb-0">Theo dõi cộng đồng, xác thực danh tính và xử lý các giao dịch cần ưu tiên.</p></div>
     <span class="workspace-chip"><svg class="ui-icon" aria-hidden="true"><use href="#i-shield"/></svg>Quản lý cộng đồng</span>
   </div>
   <div id="incident-banner" class="alert" role="status" aria-live="polite" th:classappend="${incidentCounts.sos > 0 ? 'alert-danger' : 'alert-warning'}" th:hidden="${incidentCounts.open == 0}"><strong><span data-incident-count th:text="${incidentCounts.open}"></span> báo cáo đang chờ hỗ trợ</strong> · <span data-incident-sos th:text="${incidentCounts.sos}"></span> SOS cần ưu tiên. <a th:href="@{/admin/incidents}" class="alert-link">Mở trang xử lý sự cố</a></div>
@@ -107,7 +107,7 @@
       </tbody>
     </table></div>
   </section>
-  <footer class="text-secondary small py-4">Xây · Kết nối lao động phổ thông &amp; chủ thầu</footer>
+  <footer class="text-secondary small py-4">Thợ Xây · Kết nối lao động phổ thông &amp; chủ thầu</footer>
 </main>
 
 <div class="modal fade" id="kyc-modal" tabindex="-1" aria-labelledby="kyc-modal-title" aria-hidden="true">
