@@ -142,7 +142,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Công trình được chia sẻ'), findsOneWidget);
     expect(find.text('Nhà phố QA'), findsOneWidget);
-    expect(find.text('Ứng tuyển'), findsOneWidget);
+    expect(find.text('Ứng tuyển ngay'), findsNothing);
+    await tester.tap(find.text('Nhà phố QA'));
+    await tester.pumpAndSettle();
+    expect(find.text('Ứng tuyển ngay'), findsOneWidget);
     await tester.pumpWidget(const SizedBox());
     api.dispose();
   });

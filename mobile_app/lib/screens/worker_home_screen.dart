@@ -1,4 +1,7 @@
 import '../widgets/brand_logo.dart';
+import '../widgets/job_application_actions.dart';
+import '../widgets/wage_offer_sheet.dart';
+import 'chat_screen.dart';
 import '../widgets/figma_job_map.dart';
 import '../widgets/week_schedule.dart';
 import 'calendar_screen.dart';
@@ -136,7 +139,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
     }
   }
 
-  Future<void> _apply(Job job) async {
+  Future<void> _apply(Job job, {bool negotiate = false}) async {
     if (_proposalOpen ||
         _applying != null ||
         _applications.any((a) => a.job.id == job.id)) {
@@ -146,7 +149,19 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
     if (job.startsOn != null) {
       setState(() => _proposalOpen = true);
       try {
-        proposal = await showWorkProposal(context, widget.api, job);
+        WageOffer? offer;
+        if (negotiate) {
+          offer = await showWageOffer(context);
+          if (offer == null || !mounted) return;
+        }
+        if (!mounted) return;
+        proposal = await showWorkProposal(
+          context,
+          widget.api,
+          job,
+          proposedRate: offer?.rate,
+          note: offer?.note ?? '',
+        );
       } finally {
         if (mounted) setState(() => _proposalOpen = false);
       }
@@ -180,40 +195,44 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
   Future<void> _showMapJob(Job job) async {
     if (_cancelling) return;
     final alreadyApplied = _applications.any((a) => a.job.id == job.id);
-    final apply = await showJobDetails<bool>(
+    final canChat = _applications.any(
+      (a) => a.job.id == job.id && a.status == 'ACCEPTED',
+    );
+    await showJobDetails<void>(
       context,
       job,
       api: widget.api,
-      action: FilledButton(
-        onPressed: alreadyApplied || _applying != null
+      actionBuilder: (sheetContext) => JobApplicationActions(
+        applied: alreadyApplied,
+        busy: _applying != null || _proposalOpen || _loading,
+        onApply: () {
+          Navigator.pop(sheetContext);
+          _apply(job);
+        },
+        onNegotiate: job.startsOn == null
             ? null
-            : () => Navigator.pop(context, true),
-        child: Text(alreadyApplied ? 'Đã ứng tuyển' : 'Ứng tuyển'),
+            : () {
+                Navigator.pop(sheetContext);
+                _apply(job, negotiate: true);
+              },
+        onChat: !canChat
+            ? null
+            : () {
+                Navigator.pop(sheetContext);
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => ChatScreen(
+                      api: widget.api,
+                      job: job,
+                      peerId: job.contractorId,
+                      peerName: job.contractorName,
+                    ),
+                  ),
+                );
+              },
       ),
     );
-    if (apply == true && mounted) await _apply(job);
   }
-
-  Widget _applyButton(Job job, {BuildContext? sheetContext}) => FilledButton(
-    onPressed:
-        _applying != null ||
-            _proposalOpen ||
-            _cancelling ||
-            _loading ||
-            _applications.any((a) => a.job.id == job.id)
-        ? null
-        : () async {
-            if (sheetContext != null) Navigator.pop(sheetContext);
-            await _apply(job);
-          },
-    child: Text(
-      _applying == job.id
-          ? 'Đang gửi…'
-          : _applications.any((a) => a.job.id == job.id)
-          ? 'Đã ứng tuyển'
-          : 'Ứng tuyển',
-    ),
-  );
 
   Future<void> _cancel(JobApplication application) async {
     if (_cancelling || _loading) return;
@@ -576,12 +595,9 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                                 JobCard(
                                   api: widget.api,
                                   job: job,
-                                  action: _applyButton(job),
-                                  detailsActionBuilder: (sheetContext) =>
-                                      _applyButton(
-                                        job,
-                                        sheetContext: sheetContext,
-                                      ),
+                                  previewOnly: true,
+                                  onTap: () => _showMapJob(job),
+                                  action: const SizedBox.shrink(),
                                 ),
                             ],
                           ),

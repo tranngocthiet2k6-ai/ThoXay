@@ -5,10 +5,53 @@ import 'package:tho_xay_mobile/screens/worker_home_screen.dart';
 import 'package:tho_xay_mobile/services/api_service.dart';
 import 'package:tho_xay_mobile/services/location_service.dart';
 import 'package:tho_xay_mobile/widgets/call_button.dart';
+import 'package:tho_xay_mobile/models/scheduling.dart';
+import 'package:tho_xay_mobile/widgets/job_application_actions.dart';
 
 class FixedLocation extends LocationService {
   @override
   Future<GeoPoint> currentPosition() async => const GeoPoint(10.7769, 106.7009);
+}
+
+class NegotiatingWorkerApi extends WorkerApi {
+  WorkProposal? submitted;
+  int? termsRate;
+  @override
+  Job get job => Job(
+    id: 1,
+    contractorId: 2,
+    contractorName: 'Chủ thầu',
+    contractorPhone: null,
+    title: 'Công trình có lịch',
+    description: '',
+    jobType: 'Thợ chính',
+    salaryPerDay: 500000,
+    address: 'Quận 1',
+    latitude: 10,
+    longitude: 106,
+    requiredWorkers: 1,
+    status: 'OPEN',
+    startsOn: DateTime(2030),
+    endsOn: DateTime(2030, 1, 2),
+    termsVersion: 3,
+  );
+  @override
+  Future<CommitmentDocument> jobTerms(int id, {int? proposedRate}) async {
+    termsRate = proposedRate;
+    return CommitmentDocument.fromJson({
+      'termsVersion': 3,
+      'state': 'DRAFT',
+      'text': 'Cam kết đúng mức lương đã chọn',
+      'selectedDailyRate': proposedRate ?? 500000,
+    });
+  }
+
+  @override
+  Future<JobApplication> applyWithTerms(int id, WorkProposal proposal) async {
+    submitted = proposal;
+    applied = true;
+    return application;
+  }
 }
 
 class WorkerApi extends ApiService {
@@ -111,6 +154,7 @@ void main() {
         scrollable: find.byType(Scrollable).first,
       );
       expect(find.text('Xây nhà phố'), findsOneWidget);
+      expect(find.text('Ứng tuyển ngay'), findsNothing);
       expect(find.byType(TextField).hitTestable(), findsOneWidget);
       await tester.ensureVisible(find.text('Xem chi tiết'));
       await tester.pumpAndSettle();
@@ -223,9 +267,11 @@ void main() {
         scrollable: find.byType(Scrollable).first,
       );
       expect(find.text('Xây nhà phố'), findsOneWidget);
-      await tester.ensureVisible(find.text('Ứng tuyển'));
+      await Scrollable.ensureVisible(tester.element(find.text('Xây nhà phố')), alignment: .4);
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Ứng tuyển'));
+      await tester.tap(find.text('Xây nhà phố'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Ứng tuyển ngay'));
       await tester.pumpAndSettle();
       expect(api.applied, isTrue);
       await tester.tap(find.text('Việc của tôi').last);
@@ -233,6 +279,61 @@ void main() {
       expect(find.text('Chờ duyệt'), findsOneWidget);
       expect(find.text('Nhắn tin'), findsNothing);
       expect(find.byType(CallButton), findsNothing);
+      api.dispose();
+    },
+  );
+  testWidgets(
+    'negotiation opens only on demand and preserves offer and consent',
+    (tester) async {
+      final api = NegotiatingWorkerApi();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: WorkerHomeScreen(api: api, location: FixedLocation()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text('Công trình có lịch'),
+        180,
+        scrollable: find.byType(Scrollable).first,
+      );
+    await Scrollable.ensureVisible(tester.element(find.text('Công trình có lịch')), alignment: .4);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Công trình có lịch'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('offer-rate')), findsNothing);
+      final bar = tester.widget<JobApplicationActions>(
+        find.byType(JobApplicationActions),
+      );
+      expect(bar.onChat, isNull);
+      await tester.tap(find.text('Thương lượng giá'));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const ValueKey('offer-rate')),
+        '450000',
+      );
+      await tester.enterText(
+        find.byKey(const ValueKey('offer-note')),
+        'Có kinh nghiệm ốp lát',
+      );
+      await tester.tap(find.text('Xem cam kết'));
+      await tester.pumpAndSettle();
+      expect(api.termsRate, 450000);
+      expect(api.submitted, isNull);
+      final submit = find.widgetWithText(FilledButton, 'Đồng ý & ứng tuyển');
+      expect(tester.widget<FilledButton>(submit).onPressed, isNull);
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('commitment-consent')),
+      );
+      await tester.tap(find.byKey(const ValueKey('commitment-consent')));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(submit);
+      await tester.tap(submit);
+      await tester.pumpAndSettle();
+      expect(api.submitted?.rate, 450000);
+      expect(api.submitted?.note, 'Có kinh nghiệm ốp lát');
+      expect(api.submitted?.version, 3);
+      await tester.pumpWidget(const SizedBox());
       api.dispose();
     },
   );

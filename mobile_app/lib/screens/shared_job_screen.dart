@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../services/api_service.dart';
 import '../widgets/job_card.dart';
+import '../widgets/job_application_actions.dart';
+import '../widgets/wage_offer_sheet.dart';
+import 'chat_screen.dart';
 import '../widgets/work_commitment.dart';
 import '../widgets/content_skeleton.dart';
 import '../widgets/app_snack_bar.dart';
@@ -55,6 +58,7 @@ class _SharedJobScreenState extends State<SharedJobScreen> {
   Job? _job;
   String? _error;
   bool _loading = true, _busy = false, _applied = false;
+  bool _canChat = false;
   @override
   void initState() {
     super.initState();
@@ -69,15 +73,19 @@ class _SharedJobScreenState extends State<SharedJobScreen> {
     try {
       final j = await widget.api.fetchJob(widget.jobId);
       bool applied = false;
+      bool canChat = false;
       if (widget.api.session?.role == 'ROLE_WORKER') {
-        applied = (await widget.api.workerApplications()).any(
-          (a) => a.job.id == j.id,
+        final applications = await widget.api.workerApplications();
+        applied = applications.any((a) => a.job.id == j.id);
+        canChat = applications.any(
+          (a) => a.job.id == j.id && a.status == 'ACCEPTED',
         );
       }
       if (mounted) {
         setState(() {
           _job = j;
           _applied = applied;
+          _canChat = canChat;
         });
       }
     } on ApiException catch (e) {
@@ -87,7 +95,7 @@ class _SharedJobScreenState extends State<SharedJobScreen> {
     }
   }
 
-  Future<void> _apply() async {
+  Future<void> _apply({bool negotiate = false}) async {
     if (_busy) return;
     setState(() => _busy = true);
     try {
@@ -95,7 +103,19 @@ class _SharedJobScreenState extends State<SharedJobScreen> {
       if (j.startsOn == null) {
         await widget.api.apply(j.id);
       } else {
-        final proposal = await showWorkProposal(context, widget.api, j);
+        WageOffer? offer;
+        if (negotiate) {
+          offer = await showWageOffer(context);
+          if (offer == null || !mounted) return;
+        }
+        if (!mounted) return;
+        final proposal = await showWorkProposal(
+          context,
+          widget.api,
+          j,
+          proposedRate: offer?.rate,
+          note: offer?.note ?? '',
+        );
         if (proposal == null || !mounted) return;
         await widget.api.applyWithTerms(j.id, proposal);
       }
@@ -111,6 +131,44 @@ class _SharedJobScreenState extends State<SharedJobScreen> {
       if (mounted) setState(() => _busy = false);
     }
   }
+
+  Future<void> _details() => showJobDetails<void>(
+    context,
+    _job!,
+    api: widget.api,
+    canContactContractor: _canChat,
+    actionBuilder: widget.api.session?.role != 'ROLE_WORKER'
+        ? null
+        : (sheetContext) => JobApplicationActions(
+            applied: _applied,
+            busy: _busy || _job!.status != 'OPEN',
+            onApply: () {
+              Navigator.pop(sheetContext);
+              _apply();
+            },
+            onNegotiate: _job!.startsOn == null
+                ? null
+                : () {
+                    Navigator.pop(sheetContext);
+                    _apply(negotiate: true);
+                  },
+            onChat: !_canChat
+                ? null
+                : () {
+                    Navigator.pop(sheetContext);
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => ChatScreen(
+                          api: widget.api,
+                          job: _job!,
+                          peerId: _job!.contractorId,
+                          peerName: _job!.contractorName,
+                        ),
+                      ),
+                    );
+                  },
+          ),
+  );
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -141,25 +199,10 @@ class _SharedJobScreenState extends State<SharedJobScreen> {
             JobCard(
               api: widget.api,
               job: _job!,
-              canContactContractor: _applied,
-              action: widget.api.session?.role == 'ROLE_WORKER'
-                  ? FilledButton.icon(
-                      onPressed:
-                          _busy ||
-                              _applied ||
-                              !['OPEN', 'IN_PROGRESS'].contains(_job!.status)
-                          ? null
-                          : _apply,
-                      icon: const Icon(Icons.handshake_outlined),
-                      label: Text(
-                        _busy
-                            ? 'Đang gửi…'
-                            : _applied
-                            ? 'Đã ứng tuyển'
-                            : 'Ứng tuyển',
-                      ),
-                    )
-                  : const SizedBox.shrink(),
+              canContactContractor: _canChat,
+              previewOnly: true,
+              onTap: _details,
+              action: const SizedBox.shrink(),
             ),
         ],
       ),

@@ -15,10 +15,17 @@ class HiringDecision {
 Future<WorkProposal?> showWorkProposal(
   BuildContext context,
   ApiService api,
-  Job job,
-) => showDialog<WorkProposal>(
+  Job job, {
+  int? proposedRate,
+  String note = '',
+}) => showDialog<WorkProposal>(
   context: context,
-  builder: (_) => WorkCommitmentDialog(api: api, job: job),
+  builder: (_) => WorkCommitmentDialog(
+    api: api,
+    job: job,
+    proposedRate: proposedRate,
+    note: note,
+  ),
 );
 Future<WorkProposal?> showWorkerCommitment(
   BuildContext context,
@@ -48,11 +55,15 @@ class WorkCommitmentDialog extends StatefulWidget {
     this.job,
     this.application,
     this.contractor = false,
+    this.proposedRate,
+    this.note = '',
   });
   final ApiService api;
   final Job? job;
   final JobApplication? application;
   final bool contractor;
+  final int? proposedRate;
+  final String note;
   @override
   State<WorkCommitmentDialog> createState() => _WorkCommitmentDialogState();
 }
@@ -65,6 +76,8 @@ class _WorkCommitmentDialogState extends State<WorkCommitmentDialog> {
   @override
   void initState() {
     super.initState();
+    _rate.text = widget.proposedRate?.toString() ?? '';
+    _note.text = widget.note;
     _load();
   }
 
