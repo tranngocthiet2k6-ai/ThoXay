@@ -141,7 +141,7 @@ class _WalletScreenState extends State<WalletScreen> {
     appBar: AppBar(
       title: Text(
         widget.api.session?.role == 'ROLE_CONTRACTOR'
-            ? 'Ví & Quỹ lương'
+            ? 'Ví Chủ thầu'
             : 'Ví Thợ Xây',
       ),
       actions: [
@@ -215,6 +215,14 @@ class _WalletScreenState extends State<WalletScreen> {
                           fontWeight: FontWeight.w800,
                         ),
                       ),
+                    ),
+                    const SizedBox(height: 16),
+                    WalletWeeklySummary(
+                      api: widget.api,
+                      entries: List.of(_entries),
+                      hasMore: _entryMore,
+                      worker: widget.api.session?.role != 'ROLE_CONTRACTOR',
+                      hidden: _hideBalance,
                     ),
                     const SizedBox(height: 16),
                     Row(
@@ -349,13 +357,6 @@ class _WalletScreenState extends State<WalletScreen> {
                 ],
               ),
             ],
-            if (_balance != null)
-              WalletWeeklySummary(
-                api: widget.api,
-                entries: List.of(_entries),
-                hasMore: _entryMore,
-                worker: widget.api.session?.role != 'ROLE_CONTRACTOR',
-              ),
             const SizedBox(height: 24),
             Text(
               'Giao dịch gần đây',

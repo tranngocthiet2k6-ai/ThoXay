@@ -38,6 +38,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   KycCamera get _camera => widget.camera ?? KycCamera.instance;
   UserProfile? _profile;
   bool _loading = false;
+  bool _editingKyc = false;
   String? _error;
   @override
   void initState() {
@@ -57,6 +58,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         setState(() {
           _profile = profile;
           if (recovered != null) {
+            _editingKyc = true;
             if (recovered.face == 'front') {
               _frontImage = recovered.photo;
             } else {
@@ -90,6 +92,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _profile = profile;
         _frontImage = null;
         _backImage = null;
+        _editingKyc = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
         AppSnackBar(
@@ -350,19 +353,66 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 if (_profile!.role == 'ROLE_CONTRACTOR')
                   SavedWorkersPreview(api: widget.api),
                 const SizedBox(height: 24),
-                const Text(
-                  'Chụp rõ toàn bộ CCCD, đủ sáng, tránh lóa và không che thông tin. Hệ thống kiểm tra tệp ảnh tự động; quản trị viên đối chiếu danh tính trước khi xác thực. Mỗi lần gửi cần đủ hai ảnh mới.',
-                ),
-                const SizedBox(height: 16),
-                _photoCard('front', 'Mặt trước CCCD', _frontImage),
-                const SizedBox(height: 16),
-                _photoCard('back', 'Mặt sau CCCD', _backImage),
-                const SizedBox(height: 16),
-                FilledButton.icon(
-                  onPressed: _loading ? null : _save,
-                  icon: const Icon(Icons.badge_outlined),
-                  label: const Text('Cập nhật CCCD'),
-                ),
+                if (_profile!.verified && !_editingKyc)
+                  Card(
+                    child: ListTile(
+                      leading: Icon(
+                        Icons.verified_outlined,
+                        color: AppPalette.of(context).successStrong,
+                      ),
+                      title: const Text(
+                        'Định danh CCCD: Đã xác thực',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      trailing: TextButton(
+                        key: const ValueKey('edit-verified-kyc'),
+                        onPressed: _loading
+                            ? null
+                            : () => setState(() => _editingKyc = true),
+                        child: const Text('Cập nhật'),
+                      ),
+                    ),
+                  ),
+                if (!_profile!.verified || _editingKyc) ...[
+                  if (_profile!.verified)
+                    Row(
+                      children: [
+                        const Expanded(
+                          child: Text(
+                            'Ảnh mới cần được Admin xác thực lại.',
+                            style: TextStyle(fontSize: 12),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: _loading
+                              ? null
+                              : () => setState(() {
+                                  _editingKyc = false;
+                                  _frontImage = null;
+                                  _backImage = null;
+                                  _error = null;
+                                }),
+                          child: const Text('Hủy cập nhật'),
+                        ),
+                      ],
+                    ),
+                  const Text(
+                    'Chụp rõ toàn bộ CCCD, đủ sáng, tránh lóa và không che thông tin. Hệ thống kiểm tra tệp ảnh tự động; quản trị viên đối chiếu danh tính trước khi xác thực. Mỗi lần gửi cần đủ hai ảnh mới.',
+                  ),
+                  const SizedBox(height: 16),
+                  _photoCard('front', 'Mặt trước CCCD', _frontImage),
+                  const SizedBox(height: 16),
+                  _photoCard('back', 'Mặt sau CCCD', _backImage),
+                  const SizedBox(height: 16),
+                  FilledButton.icon(
+                    onPressed: _loading ? null : _save,
+                    icon: const Icon(Icons.badge_outlined),
+                    label: const Text('Cập nhật CCCD'),
+                  ),
+                ],
               ],
               if (_error != null)
                 Padding(

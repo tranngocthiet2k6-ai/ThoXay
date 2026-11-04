@@ -3,9 +3,6 @@ import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../models/wallet.dart';
 import '../services/api_service.dart';
-import '../theme/app_theme.dart';
-import 'earnings_timeline_chart.dart';
-import 'figma_components.dart';
 
 class WalletWeeklySummary extends StatefulWidget {
   const WalletWeeklySummary({
@@ -14,17 +11,19 @@ class WalletWeeklySummary extends StatefulWidget {
     required this.entries,
     required this.hasMore,
     required this.worker,
+    this.hidden = false,
   });
   final ApiService api;
   final List<WalletEntry> entries;
   final bool hasMore, worker;
+  final bool hidden;
   @override
   State<WalletWeeklySummary> createState() => _WalletWeeklySummaryState();
 }
 
 class _WalletWeeklySummaryState extends State<WalletWeeklySummary> {
   Earnings? _earnings;
-  DateTime _date = DateTime.now();
+  final DateTime _date = DateTime.now().toUtc().add(const Duration(hours: 7));
   bool _loading = true;
   @override
   void initState() {
@@ -59,13 +58,11 @@ class _WalletWeeklySummaryState extends State<WalletWeeklySummary> {
   @override
   Widget build(BuildContext context) {
     if (widget.worker && _earnings == null) {
-      return FigmaCard(
-        child: Text(
-          _loading
-              ? 'Đang tải thu nhập tuần…'
-              : 'Chưa tải được thống kê tuần. Kéo xuống để thử lại.',
-          style: TextStyle(color: AppPalette.of(context).muted),
-        ),
+      return Text(
+        _loading
+            ? 'Đang tải thu nhập tuần…'
+            : 'Chưa tải được thống kê tuần. Kéo xuống để thử lại.',
+        style: const TextStyle(color: Colors.white70, fontSize: 12),
       );
     }
     final now = _date, date = DateTime(now.year, now.month, now.day);
@@ -76,7 +73,7 @@ class _WalletWeeklySummaryState extends State<WalletWeeklySummary> {
             final day = monday.add(Duration(days: index));
             final total = widget.entries
                 .where((e) {
-                  final d = e.createdAt.toLocal();
+                  final d = e.createdAt.toUtc().add(const Duration(hours: 7));
                   return e.kind == 'JOB_PAYMENT' &&
                       DateTime(d.year, d.month, d.day) == day;
                 })
@@ -92,58 +89,41 @@ class _WalletWeeklySummaryState extends State<WalletWeeklySummary> {
     final total = widget.worker
         ? _earnings!.total
         : days.fold<int>(0, (sum, day) => sum + day.total);
+    final paid = widget.entries.where((e) {
+      final day = e.createdAt.toUtc().add(const Duration(hours: 7));
+      return e.kind == 'JOB_PAYMENT' &&
+          !day.isBefore(monday) &&
+          day.isBefore(monday.add(const Duration(days: 7)));
+    }).length;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SizedBox(height: 8),
         Row(
           children: [
+            const Icon(
+              Icons.insights_outlined,
+              color: Colors.white70,
+              size: 18,
+            ),
+            const SizedBox(width: 8),
             Expanded(
               child: Text(
-                widget.worker ? 'Thu nhập tuần' : 'Chi trả tuần',
-                style: Theme.of(context).textTheme.titleMedium,
+                '${widget.worker ? "Thu nhập tuần này" : "Chi trả tuần này"}: ${widget.hidden ? "••••••" : "${widget.worker ? '+' : '−'}${money(total.toDouble())}"} • ${widget.worker ? '${_earnings!.jobs} công trình' : '$paid khoản công'}',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  height: 1.5,
+                ),
               ),
-            ),
-            IconButton(
-              tooltip: 'Chọn tuần thống kê',
-              icon: const Icon(Icons.calendar_today_outlined, size: 18),
-              onPressed: () async {
-                final date = await showDatePicker(
-                  context: context,
-                  initialDate: _date,
-                  firstDate: DateTime(2020),
-                  lastDate: DateTime.now(),
-                );
-                if (date != null && mounted) {
-                  setState(() {
-                    _date = date;
-                    _earnings = null;
-                    _loading = true;
-                  });
-                  await _load();
-                }
-              },
             ),
           ],
         ),
-        Text(
-          'Tuần ${monday.day}/${monday.month} – ${monday.add(const Duration(days: 6)).day}/${monday.add(const Duration(days: 6)).month}',
-          style: TextStyle(fontSize: 11, color: AppPalette.of(context).muted),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          money(total.toDouble()),
-          style: Theme.of(context).textTheme.headlineSmall,
-        ),
-        if (!widget.worker)
+        if (!widget.worker && widget.hasMore)
           Text(
-            widget.hasMore
-                ? 'Tổng từ các giao dịch đã tải; tải thêm lịch sử để có đầy đủ.'
-                : 'Tiền công đã thanh toán trong tuần từ sổ giao dịch.',
-            style: TextStyle(fontSize: 11, color: AppPalette.of(context).muted),
+            'Tổng từ lịch sử đã tải; tải thêm để có đầy đủ.',
+            style: const TextStyle(fontSize: 11, color: Colors.white70),
           ),
-        const SizedBox(height: 8),
-        EarningsTimelineChart(days: days),
       ],
     );
   }

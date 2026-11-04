@@ -131,6 +131,14 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      expect(find.byType(KycScannerFrame), findsNothing);
+      await tester.scrollUntilVisible(
+        find.byKey(const ValueKey('edit-verified-kyc')),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(find.byKey(const ValueKey('edit-verified-kyc')));
+      await tester.pumpAndSettle();
       expect(find.text('Chưa có đánh giá công trình'), findsOneWidget);
       await tester.scrollUntilVisible(
         find.text('Cập nhật CCCD'),
@@ -189,6 +197,14 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      expect(find.byType(KycScannerFrame), findsNothing);
+      await tester.scrollUntilVisible(
+        find.byKey(const ValueKey('edit-verified-kyc')),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(find.byKey(const ValueKey('edit-verified-kyc')));
+      await tester.pumpAndSettle();
       await tester.scrollUntilVisible(
         find.byKey(const ValueKey('capture-front')),
         200,
@@ -204,6 +220,11 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.textContaining('Không mở được camera.'), findsOneWidget);
       expect(api.cccdUpdates, 0);
+      expect(api.person.verified, true);
+      await tester.ensureVisible(find.text('Hủy cập nhật'));
+      await tester.tap(find.text('Hủy cập nhật'));
+      await tester.pumpAndSettle();
+      expect(find.byType(KycScannerFrame), findsNothing);
       expect(api.person.verified, true);
       api.dispose();
     },
