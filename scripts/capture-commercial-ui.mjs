@@ -29,7 +29,7 @@ async function shot(page,index){
   const file=names[index-1]+'.png';await page.screenshot({path:path.join(output,file)});
   const bytes=fs.readFileSync(path.join(output,file));
   captures.push({file,sha256:crypto.createHash('sha256').update(bytes).digest('hex'),bytes:bytes.length,
-    source:'Actual localhost DEMO UI',viewport:page.viewportSize(),capturedAt:new Date().toISOString()});
+    source:'Actual localhost DEMO UI',brand:'Thợ Xây',brandLogoSha256:crypto.createHash('sha256').update(fs.readFileSync('branding/logo_thoxay_transparent.png')).digest('hex'),viewport:page.viewportSize(),capturedAt:new Date().toISOString()});
   console.log(`Captured ${index}: ${names[index-1]}`);
 }
 async function semantics(page){await page.locator('flt-semantics-placeholder').waitFor({state:'attached'});await page.locator('flt-semantics-placeholder').evaluate(n=>n.click());}
@@ -44,11 +44,14 @@ try {
       if(location.origin==='http://127.0.0.1:3008')localStorage.setItem('flutter.thoxay.session',JSON.stringify(JSON.stringify(s)));
     },session);
     const page=await context.newPage();page.setDefaultTimeout(20000);page.on('pageerror',e=>errors.push(e.message));
+    page.on('console',m=>{if(/RenderFlex overflowed|EXCEPTION CAUGHT BY WIDGETS|EXCEPTION CAUGHT BY RENDERING/.test(m.text()))errors.push(m.text());});
     async function home(){await page.goto('http://127.0.0.1:3008');await semantics(page);await page.getByRole('tab',{name:/Hồ sơ/}).waitFor();await page.waitForTimeout(1000);}
     async function chat(){await home();await page.getByRole('button',{name:'Tin nhắn',exact:true}).click();await page.getByText(/Nhà phố ven sông/).first().click();await page.waitForTimeout(600);}
     await home();await shot(page,role==='worker'?2:10);
     if(role==='worker'){
-      await page.getByRole('button',{name:'Xem chi tiết',exact:true}).first().click();await shot(page,3);
+      assert.equal(await page.getByRole('button',{name:'Ứng tuyển ngay',exact:true}).count(),0);
+      await page.getByRole('button',{name:'Xem chi tiết',exact:true}).first().click();
+      await page.getByRole('button',{name:'Ứng tuyển ngay',exact:true}).waitFor();await shot(page,3);
       await home();await page.getByRole('tab',{name:'Việc của tôi',exact:true}).click();await page.getByRole('button',{name:'Chấm công & ảnh cuối ngày',exact:true}).first().click();await shot(page,4);
       await page.getByRole('button',{name:'Radar GPS & QR toàn màn hình',exact:true}).click();await page.waitForTimeout(1800);
       assert.match(await page.locator('body').ariaSnapshot(),/Cách 35m/);await shot(page,18);
@@ -56,16 +59,10 @@ try {
       assert.match(await page.locator('body').ariaSnapshot(),/Đã xác nhận bởi 2 bên/);await shot(page,17);
       await home();await page.getByRole('button',{name:/^Thông báo/}).first().click();await page.getByRole('button',{name:'Trung tâm hỗ trợ & SOS',exact:true}).click();await shot(page,19);
     }else{
-      await page.getByRole('button',{name:'Đăng công trình',exact:true}).first().click();await shot(page,11);
+      await page.getByRole('button',{name:'Đăng công trình mới',exact:true}).first().click();await shot(page,11);
       await home();await page.getByRole('textbox').first().fill('Tuyển thợ bảo vệ');await page.waitForTimeout(500);await page.getByRole('button',{name:'Duyệt thợ',exact:true}).first().click();await shot(page,12);
       await home();
-      await page.mouse.move(180,800);await page.mouse.wheel(0,700);await page.waitForTimeout(600);
-      fs.writeFileSync('.local/commercial/review-navigation.txt',await page.locator('body').ariaSnapshot());
-      await page.screenshot({path:'.local/commercial/review-navigation.png'});
-      // Flutter merges the expansion title into the card semantics group.
-      // Its row is immediately above the separately exposed Details button.
-      const details=await page.getByRole('button',{name:'Xem chi tiết',exact:true}).first().boundingBox();
-      assert.ok(details);await page.mouse.click(details.x+60,details.y-28);
+      await page.getByRole('button',{name:'Xem chi tiết',exact:true}).first().click();
       await page.getByRole('button',{name:'Chấm công & nghiệm thu',exact:true}).first().click();
       await page.getByRole('button',{name:/2026-11-/}).first().click();
       await page.getByRole('button',{name:/^1,.*tháng 11|^Chủ Nhật, ngày 1 tháng 11|^Sunday, November 1/}).first().click();
@@ -73,12 +70,6 @@ try {
       await chat();await shot(page,16);
     }
     await home();await page.getByRole('tab',{name:'Ví tiền',exact:true}).click();await page.waitForTimeout(700);
-    // An explicit historical week shows actual approved earnings, not fabricated chart bars.
-    const week=page.getByRole('button',{name:/Chọn tuần thống kê/});
-    if(await week.count()){
-      await week.click();await page.getByRole('button',{name:'Chuyển sang chế độ nhập',exact:true}).click();
-      await page.getByRole('textbox').last().fill('30/10/2026');await page.getByRole('button',{name:'OK',exact:true}).click();
-    }
     await shot(page,role==='worker'?5:14);
     if(role==='worker'){
       await page.getByRole('button',{name:'Nạp VietQR',exact:true}).click();
@@ -92,6 +83,8 @@ try {
     if(role==='worker'){
       await page.getByText('Thông tin và tiện ích hồ sơ',{exact:true}).click();await page.getByRole('button',{name:'Bảng xếp hạng thợ',exact:true}).click();await shot(page,9);
     }
+    await page.setViewportSize({width:1440,height:1000});await home();
+    await page.screenshot({path:`.local/commercial/desktop-${role}.png`});
     await page.goto('about:blank');
   }
   const admin=await browser.newPage({viewport:{width:1440,height:1300}});

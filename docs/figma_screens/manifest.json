@@ -1,262 +1,262 @@
 [
   {
     "file": "Thợ Xây - Đăng nhập & Vai trò.png",
-    "sha256": "2fcd2cba2706effdf871223f97300916ef5730bab28d0ee9d7d4aaff04e84439",
-    "bytes": 47765,
+    "sha256": "f2d5b2de3a23b60c97a1c2e28a83ab455a92ca7142e8bea62199f629125302d0",
+    "bytes": 47227,
     "source": "Actual localhost DEMO UI",
+    "brand": "Thợ Xây",
+    "brandLogoSha256": "587fc03a0b6ce6a2f55217d3cd13ae19e0fab00b4d24ff1a6e47f8b80ce0acd3",
     "viewport": {
       "width": 390,
       "height": 1100
     },
-    "capturedAt": "2026-11-03T13:40:38.763Z",
-    "brand": "Xây",
-    "brandLogoSha256": "40b2a402ff5dda3af593be5f3dbe3cd3e0bb79fa3fb2b5fa6d74b73387766d41"
+    "capturedAt": "2026-11-04T06:57:49.884Z"
   },
   {
     "file": "Thợ Xây · Tìm việc.png",
-    "sha256": "06de0168a9bc0f0e9d46f82908410073595cb765c4ff5f2c05210c69da5cff99",
-    "bytes": 243589,
+    "sha256": "954a2406d7094098db832e937e38730a867e506f35eddc7953a1e18c0bc84ef0",
+    "bytes": 233271,
     "source": "Actual localhost DEMO UI",
+    "brand": "Thợ Xây",
+    "brandLogoSha256": "587fc03a0b6ce6a2f55217d3cd13ae19e0fab00b4d24ff1a6e47f8b80ce0acd3",
     "viewport": {
       "width": 390,
       "height": 1100
     },
-    "capturedAt": "2026-11-03T13:40:42.865Z",
-    "brand": "Xây",
-    "brandLogoSha256": "40b2a402ff5dda3af593be5f3dbe3cd3e0bb79fa3fb2b5fa6d74b73387766d41"
+    "capturedAt": "2026-11-04T06:57:54.214Z"
   },
   {
     "file": "Thợ Xây - Chi tiết việc.png",
-    "sha256": "173b2f83e486fd974d6c3715852acc6fbaa84a6243e3c112cdfc94d37a737a10",
-    "bytes": 173097,
+    "sha256": "21f835d82e03bc187078c1636bb48bccab8b567b74d22e345d4da8828ba4028e",
+    "bytes": 192643,
     "source": "Actual localhost DEMO UI",
+    "brand": "Thợ Xây",
+    "brandLogoSha256": "587fc03a0b6ce6a2f55217d3cd13ae19e0fab00b4d24ff1a6e47f8b80ce0acd3",
     "viewport": {
       "width": 390,
       "height": 1100
     },
-    "capturedAt": "2026-11-03T13:40:44.534Z",
-    "brand": "Xây",
-    "brandLogoSha256": "40b2a402ff5dda3af593be5f3dbe3cd3e0bb79fa3fb2b5fa6d74b73387766d41"
+    "capturedAt": "2026-11-04T06:57:55.936Z"
   },
   {
     "file": "Thợ Xây - Việc của tôi & Chấm công.png",
-    "sha256": "a0d98352692372b4d8cc2a9438a7ebed48af3bb2252a1e61b954161d71b58d04",
-    "bytes": 138697,
+    "sha256": "abeded40dc6a999272e755c196c00200a0861b0240ab6c4ee509970f5e176dcd",
+    "bytes": 161268,
     "source": "Actual localhost DEMO UI",
+    "brand": "Thợ Xây",
+    "brandLogoSha256": "587fc03a0b6ce6a2f55217d3cd13ae19e0fab00b4d24ff1a6e47f8b80ce0acd3",
     "viewport": {
       "width": 390,
       "height": 1100
     },
-    "capturedAt": "2026-11-03T13:40:48.860Z",
-    "brand": "Xây",
-    "brandLogoSha256": "40b2a402ff5dda3af593be5f3dbe3cd3e0bb79fa3fb2b5fa6d74b73387766d41"
+    "capturedAt": "2026-11-04T06:57:59.453Z"
   },
   {
     "file": "18 - Radar GPS & QR chấm công.png",
-    "sha256": "8c37c3beaacf75f1a52737cc469508acb0059f0facb98390e23f43f3f89094c6",
-    "bytes": 152518,
+    "sha256": "1c8544700a2a8acfdfebb59219fcc52b90ab51aead5ad027df4de7557f276f05",
+    "bytes": 152581,
     "source": "Actual localhost DEMO UI",
+    "brand": "Thợ Xây",
+    "brandLogoSha256": "587fc03a0b6ce6a2f55217d3cd13ae19e0fab00b4d24ff1a6e47f8b80ce0acd3",
     "viewport": {
       "width": 390,
       "height": 1100
     },
-    "capturedAt": "2026-11-03T13:40:52.151Z",
-    "brand": "Xây",
-    "brandLogoSha256": "40b2a402ff5dda3af593be5f3dbe3cd3e0bb79fa3fb2b5fa6d74b73387766d41"
+    "capturedAt": "2026-11-04T06:58:02.730Z"
   },
   {
     "file": "Thợ Xây - Trò chuyện.png",
     "sha256": "ad8049f2a4ad72f64701d86fb73b1b078b3b1f1f18b98f747f287c56234ce06e",
     "bytes": 46064,
     "source": "Actual localhost DEMO UI",
+    "brand": "Thợ Xây",
+    "brandLogoSha256": "587fc03a0b6ce6a2f55217d3cd13ae19e0fab00b4d24ff1a6e47f8b80ce0acd3",
     "viewport": {
       "width": 390,
       "height": 1100
     },
-    "capturedAt": "2026-11-03T13:40:56.153Z",
-    "brand": "Xây",
-    "brandLogoSha256": "40b2a402ff5dda3af593be5f3dbe3cd3e0bb79fa3fb2b5fa6d74b73387766d41"
+    "capturedAt": "2026-11-04T06:58:06.560Z"
   },
   {
     "file": "17 - Phiếu cam kết nhận việc.png",
     "sha256": "d5601dea90e71ff0e5e3f9ce1d4dcf2a09a2be61d45b2b4e569bdcd7e33d13b3",
     "bytes": 60786,
     "source": "Actual localhost DEMO UI",
+    "brand": "Thợ Xây",
+    "brandLogoSha256": "587fc03a0b6ce6a2f55217d3cd13ae19e0fab00b4d24ff1a6e47f8b80ce0acd3",
     "viewport": {
       "width": 390,
       "height": 1100
     },
-    "capturedAt": "2026-11-03T13:40:57.850Z",
-    "brand": "Xây",
-    "brandLogoSha256": "40b2a402ff5dda3af593be5f3dbe3cd3e0bb79fa3fb2b5fa6d74b73387766d41"
+    "capturedAt": "2026-11-04T06:58:08.165Z"
   },
   {
     "file": "19 - Trung tâm thông báo & SOS.png",
     "sha256": "dc0476600faff62be073a95c9fb43eb0692f13231d5accf0e119d7715352119e",
     "bytes": 79730,
     "source": "Actual localhost DEMO UI",
+    "brand": "Thợ Xây",
+    "brandLogoSha256": "587fc03a0b6ce6a2f55217d3cd13ae19e0fab00b4d24ff1a6e47f8b80ce0acd3",
     "viewport": {
       "width": 390,
       "height": 1100
     },
-    "capturedAt": "2026-11-03T13:41:01.210Z",
-    "brand": "Xây",
-    "brandLogoSha256": "40b2a402ff5dda3af593be5f3dbe3cd3e0bb79fa3fb2b5fa6d74b73387766d41"
+    "capturedAt": "2026-11-04T06:58:11.342Z"
   },
   {
     "file": "Thợ Xây · Ví tiền.png",
-    "sha256": "1ad34e819a3096b7a929d22937088764698430807c980eeefb9f9e5bfa3e4dc8",
-    "bytes": 61392,
+    "sha256": "369fa3de4d5c0c18ecca39d7ec7e64bcbf49c04a31668a8a9a75d2167424f2a2",
+    "bytes": 74415,
     "source": "Actual localhost DEMO UI",
+    "brand": "Thợ Xây",
+    "brandLogoSha256": "587fc03a0b6ce6a2f55217d3cd13ae19e0fab00b4d24ff1a6e47f8b80ce0acd3",
     "viewport": {
       "width": 390,
       "height": 1100
     },
-    "capturedAt": "2026-11-03T13:41:05.450Z",
-    "brand": "Xây",
-    "brandLogoSha256": "40b2a402ff5dda3af593be5f3dbe3cd3e0bb79fa3fb2b5fa6d74b73387766d41"
+    "capturedAt": "2026-11-04T06:58:15.114Z"
   },
   {
     "file": "Thợ Xây - Nạp ví VietQR.png",
-    "sha256": "67b4d4a58a1a6e90d1236f8b957ccb6a136bc6a8bf5e1553417b96bab04f0793",
-    "bytes": 61504,
+    "sha256": "91a6c037b724e45d7f019349ff49937dbc9673ddf2cc3d6ee947c551da26988a",
+    "bytes": 61906,
     "source": "Actual localhost DEMO UI",
+    "brand": "Thợ Xây",
+    "brandLogoSha256": "587fc03a0b6ce6a2f55217d3cd13ae19e0fab00b4d24ff1a6e47f8b80ce0acd3",
     "viewport": {
       "width": 390,
       "height": 1100
     },
-    "capturedAt": "2026-11-03T13:41:07.375Z",
-    "brand": "Xây",
-    "brandLogoSha256": "40b2a402ff5dda3af593be5f3dbe3cd3e0bb79fa3fb2b5fa6d74b73387766d41"
+    "capturedAt": "2026-11-04T06:58:16.997Z"
   },
   {
     "file": "Thợ Xây · Hồ sơ.png",
-    "sha256": "40040d91748907db816ce0c51ce5a40fa1c2cfacc2840d17cae0fb65316c784b",
-    "bytes": 127307,
+    "sha256": "239aba77901612f89b26389d1d2ec74f801e2acaf6abaff70ccad5a8c00233fc",
+    "bytes": 109153,
     "source": "Actual localhost DEMO UI",
+    "brand": "Thợ Xây",
+    "brandLogoSha256": "587fc03a0b6ce6a2f55217d3cd13ae19e0fab00b4d24ff1a6e47f8b80ce0acd3",
     "viewport": {
       "width": 390,
       "height": 1100
     },
-    "capturedAt": "2026-11-03T13:41:11.279Z",
-    "brand": "Xây",
-    "brandLogoSha256": "40b2a402ff5dda3af593be5f3dbe3cd3e0bb79fa3fb2b5fa6d74b73387766d41"
+    "capturedAt": "2026-11-04T06:58:20.964Z"
   },
   {
     "file": "Thợ Xây - Bảng xếp hạng.png",
     "sha256": "a0d145e8807e7a9b3e86ae90d10852b9d4b463bb6aae1b360be42b8fec5a178f",
     "bytes": 67951,
     "source": "Actual localhost DEMO UI",
+    "brand": "Thợ Xây",
+    "brandLogoSha256": "587fc03a0b6ce6a2f55217d3cd13ae19e0fab00b4d24ff1a6e47f8b80ce0acd3",
     "viewport": {
       "width": 390,
       "height": 1100
     },
-    "capturedAt": "2026-11-03T13:41:13.063Z",
-    "brand": "Xây",
-    "brandLogoSha256": "40b2a402ff5dda3af593be5f3dbe3cd3e0bb79fa3fb2b5fa6d74b73387766d41"
+    "capturedAt": "2026-11-04T06:58:22.869Z"
   },
   {
     "file": "Chủ thầu - Đăng việc.png",
-    "sha256": "f1aea0e633b969dfb133af0e8bc5845db6c5375f4c08cc60860a0b1d35140a60",
-    "bytes": 207017,
+    "sha256": "de7aedd188d67636175285a289b04ee173179d1f4cb784cbda6fd8e1b8978f75",
+    "bytes": 206278,
     "source": "Actual localhost DEMO UI",
+    "brand": "Thợ Xây",
+    "brandLogoSha256": "587fc03a0b6ce6a2f55217d3cd13ae19e0fab00b4d24ff1a6e47f8b80ce0acd3",
     "viewport": {
       "width": 390,
       "height": 1100
     },
-    "capturedAt": "2026-11-03T13:41:18.006Z",
-    "brand": "Xây",
-    "brandLogoSha256": "40b2a402ff5dda3af593be5f3dbe3cd3e0bb79fa3fb2b5fa6d74b73387766d41"
+    "capturedAt": "2026-11-04T06:58:29.660Z"
   },
   {
     "file": "Chủ thầu - Tạo công trình mới.png",
-    "sha256": "34611bd2da785e1da2bd1d5815cfe3b96ea686fab74d39f869325596f8a1411d",
-    "bytes": 178691,
+    "sha256": "915184dfd581fba0044c0cac73d8d16d0d88fee866f4a0a2571b99538edc87ea",
+    "bytes": 177377,
     "source": "Actual localhost DEMO UI",
+    "brand": "Thợ Xây",
+    "brandLogoSha256": "587fc03a0b6ce6a2f55217d3cd13ae19e0fab00b4d24ff1a6e47f8b80ce0acd3",
     "viewport": {
       "width": 390,
       "height": 1100
     },
-    "capturedAt": "2026-11-03T13:41:19.613Z",
-    "brand": "Xây",
-    "brandLogoSha256": "40b2a402ff5dda3af593be5f3dbe3cd3e0bb79fa3fb2b5fa6d74b73387766d41"
+    "capturedAt": "2026-11-04T06:58:31.260Z"
   },
   {
     "file": "Chủ thầu - Duyệt thợ.png",
-    "sha256": "9f5d217012cd6a4212ae66c94864587c8f4d579c3ed579e8fe1ca258eb428b38",
-    "bytes": 156839,
+    "sha256": "b9587866620048b51cf9e021b5fda20bd82b34ab0814294499118cc11d3ec641",
+    "bytes": 159971,
     "source": "Actual localhost DEMO UI",
+    "brand": "Thợ Xây",
+    "brandLogoSha256": "587fc03a0b6ce6a2f55217d3cd13ae19e0fab00b4d24ff1a6e47f8b80ce0acd3",
     "viewport": {
       "width": 390,
       "height": 1100
     },
-    "capturedAt": "2026-11-03T13:41:23.346Z",
-    "brand": "Xây",
-    "brandLogoSha256": "40b2a402ff5dda3af593be5f3dbe3cd3e0bb79fa3fb2b5fa6d74b73387766d41"
+    "capturedAt": "2026-11-04T06:58:35.062Z"
   },
   {
     "file": "Chủ thầu - Nghiệm thu.png",
-    "sha256": "fe68096a8d3716968c16e3426407b039caab1353543355b5ed185d4f10f628bd",
-    "bytes": 156057,
+    "sha256": "846ac32f8ef2366bc1d1e7493163d247d020f2d6d45df1478dea04bfd73ada29",
+    "bytes": 160342,
     "source": "Actual localhost DEMO UI",
+    "brand": "Thợ Xây",
+    "brandLogoSha256": "587fc03a0b6ce6a2f55217d3cd13ae19e0fab00b4d24ff1a6e47f8b80ce0acd3",
     "viewport": {
       "width": 390,
       "height": 1100
     },
-    "capturedAt": "2026-11-03T13:41:27.857Z",
-    "brand": "Xây",
-    "brandLogoSha256": "40b2a402ff5dda3af593be5f3dbe3cd3e0bb79fa3fb2b5fa6d74b73387766d41"
+    "capturedAt": "2026-11-04T06:58:39.134Z"
   },
   {
     "file": "Chủ thầu - Trò chuyện & Cam kết.png",
     "sha256": "08f37aff2993284ddc30ffac16ade1b4fccb762be9a92cf42a67bc7884a183a4",
     "bytes": 45731,
     "source": "Actual localhost DEMO UI",
+    "brand": "Thợ Xây",
+    "brandLogoSha256": "587fc03a0b6ce6a2f55217d3cd13ae19e0fab00b4d24ff1a6e47f8b80ce0acd3",
     "viewport": {
       "width": 390,
       "height": 1100
     },
-    "capturedAt": "2026-11-03T13:41:31.741Z",
-    "brand": "Xây",
-    "brandLogoSha256": "40b2a402ff5dda3af593be5f3dbe3cd3e0bb79fa3fb2b5fa6d74b73387766d41"
+    "capturedAt": "2026-11-04T06:58:43.361Z"
   },
   {
     "file": "Chủ thầu - Ví & Quỹ lương.png",
-    "sha256": "7c811117bec2c039490dfa7ad256ec792602ca91cd3195e80cac0910178b8c09",
-    "bytes": 66310,
+    "sha256": "5d68e1a6ca29a1b008d1c27de8a1d6573677d63271ce7872041c0834498c0123",
+    "bytes": 79396,
     "source": "Actual localhost DEMO UI",
+    "brand": "Thợ Xây",
+    "brandLogoSha256": "587fc03a0b6ce6a2f55217d3cd13ae19e0fab00b4d24ff1a6e47f8b80ce0acd3",
     "viewport": {
       "width": 390,
       "height": 1100
     },
-    "capturedAt": "2026-11-03T13:41:36.037Z",
-    "brand": "Xây",
-    "brandLogoSha256": "40b2a402ff5dda3af593be5f3dbe3cd3e0bb79fa3fb2b5fa6d74b73387766d41"
+    "capturedAt": "2026-11-04T06:58:47.569Z"
   },
   {
     "file": "Chủ thầu - Hồ sơ & Thợ ruột.png",
-    "sha256": "d3cdf7ae526d5be97820fcf170614d524acc50db053c7c3cba390f7537db45f4",
-    "bytes": 131005,
+    "sha256": "56834f9a943c368020643da5fc636f3f3ff52aad2f26849eabb790d1e3ba6877",
+    "bytes": 111127,
     "source": "Actual localhost DEMO UI",
+    "brand": "Thợ Xây",
+    "brandLogoSha256": "587fc03a0b6ce6a2f55217d3cd13ae19e0fab00b4d24ff1a6e47f8b80ce0acd3",
     "viewport": {
       "width": 390,
       "height": 1100
     },
-    "capturedAt": "2026-11-03T13:41:40.149Z",
-    "brand": "Xây",
-    "brandLogoSha256": "40b2a402ff5dda3af593be5f3dbe3cd3e0bb79fa3fb2b5fa6d74b73387766d41"
+    "capturedAt": "2026-11-04T06:58:51.835Z"
   },
   {
     "file": "20 - Web Admin Control Center.png",
-    "sha256": "ae86ecc73a6cd602d528dd2c7fa06044dc2c72a3197955792223a344ec7a9162",
-    "bytes": 130488,
+    "sha256": "c02b5426486613271175af43fec147cc5b11a76fe9d85eba6d12ab9fea3269ae",
+    "bytes": 130793,
     "source": "Actual localhost DEMO UI",
+    "brand": "Thợ Xây",
+    "brandLogoSha256": "587fc03a0b6ce6a2f55217d3cd13ae19e0fab00b4d24ff1a6e47f8b80ce0acd3",
     "viewport": {
       "width": 1440,
       "height": 1300
     },
-    "capturedAt": "2026-11-03T13:41:42.908Z",
-    "brand": "Xây",
-    "brandLogoSha256": "40b2a402ff5dda3af593be5f3dbe3cd3e0bb79fa3fb2b5fa6d74b73387766d41"
+    "capturedAt": "2026-11-04T06:58:56.070Z"
   }
 ]

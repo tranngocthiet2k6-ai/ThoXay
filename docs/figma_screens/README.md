@@ -1,9 +1,8 @@
-# Bộ 20 màn hình thực thi Xây
+# Bộ 20 màn hình thực thi Thợ Xây
 
-Ngày 03/11/2026, bộ 16 PNG thiết kế cũ được thay bằng **20 ảnh chụp ứng dụng
-đang chạy** với database DEMO riêng. Tên thư mục lịch sử được giữ để các liên kết
-báo cáo và hồ sơ bảo vệ tiếp tục hoạt động. Bản thiết kế cũ khôi phục từ Git trước
-checkpoint Commercial UI; các ảnh mới không phải PNG Figma nguyên gốc.
+Ngày 04/11/2026, cập nhật **20 ảnh chụp ứng dụng đang chạy** với thương hiệu
+**Thợ Xây** và database DEMO riêng. Đây là ảnh giao diện thực thi, không phải
+PNG Figma nguyên gốc. Thư mục hồ sơ bảo vệ và workspace bảo vệ không được tạo lại.
 
 Chạy lại sau `scripts/start-demo.ps1`:
 
@@ -18,8 +17,14 @@ tiền. GPS trình duyệt được mô phỏng để kiểm thử Haversine, c�
 không thay thế kiểm thử GPS điện thoại thật. Đồng hồ chỉ chạy sau check-in server.
 
 [manifest.json](manifest.json) lưu SHA256, kích thước, viewport và thời gian chụp.
-19 view Flutter chụp ở viewport mobile; Admin ở viewport desktop. Bản sao nguyên
-byte nằm trong `00_BAO_VE_DO_AN/06_ANH_THIET_KE_FIGMA/`.
+19 view Flutter chụp ở viewport mobile; Admin ở viewport desktop.
+Các ảnh kiểm tra trang chủ Desktop được giữ riêng trong `.local/commercial/`.
+
+Thẻ tìm việc mở toàn bộ khi bấm, không lặp nút ứng tuyển. Thanh đáy chi tiết
+gom chat, thương lượng và ứng tuyển; thương lượng mở bằng Bottom Sheet.
+GPS/QR cùng hàng, SOS trên thanh tiêu đề; nghiệm thu có thao tác cố định ở đáy.
+Ví dùng thống kê tuần trong thẻ số dư, hồ sơ đã KYC thu gọn trạng thái CCCD.
+Các ảnh tay nghề được sắp 3 ảnh vuông mỗi hàng.
 
 16 luồng ban đầu: Đăng nhập; Tìm việc; Chi tiết; Chấm công; Ví; Nạp VietQR;
 Hồ sơ Thợ; Chat Thợ; Xếp hạng; Trang chủ Chủ thầu; Tạo công trình; Duyệt ứng viên;

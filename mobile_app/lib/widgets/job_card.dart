@@ -35,11 +35,36 @@ class JobCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = AppPalette.of(context);
     final color = Theme.of(context).colorScheme.primary;
+    void open() {
+      if (onTap != null) {
+        onTap!();
+      } else {
+        showJobDetails<void>(
+          context,
+          job,
+          api: api,
+          canContactContractor: canContactContractor,
+          action: action,
+          actionBuilder: detailsActionBuilder,
+        );
+      }
+    }
+
+    Widget detailsLink() => TextButton.icon(
+      style: TextButton.styleFrom(
+        padding: EdgeInsets.zero,
+        minimumSize: const Size(44, 40),
+        visualDensity: VisualDensity.compact,
+      ),
+      onPressed: open,
+      icon: const Icon(Icons.arrow_outward_rounded, size: 14),
+      label: const Text('Xem chi tiết'),
+    );
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: DesignReveal(
         child: InkWell(
-          onTap: previewOnly ? onTap : null,
+          onTap: previewOnly ? open : null,
           borderRadius: BorderRadius.circular(16),
           child: DesignSurface(
             padding: const EdgeInsets.all(16),
@@ -93,12 +118,36 @@ class JobCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '${job.address} · ${job.jobType} · ${job.requiredWorkers} thợ',
+                  previewOnly
+                      ? job.address
+                      : '${job.address} · ${job.jobType} · ${job.requiredWorkers} thợ',
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(fontSize: 11, color: palette.muted),
                 ),
-                if (job.startsOn != null)
+                if (previewOnly)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: .08),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        job.jobType,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: color,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                if (job.startsOn != null && !previewOnly)
                   Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: Text(
@@ -135,7 +184,7 @@ class JobCard extends StatelessWidget {
                         ],
                       ),
                     ),
-                    if (!previewOnly) primaryAction ?? action,
+                    if (previewOnly) detailsLink() else primaryAction ?? action,
                   ],
                 ),
                 if (primaryAction != null)
@@ -148,28 +197,8 @@ class JobCard extends StatelessWidget {
                     ),
                     children: [action],
                   ),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: TextButton.icon(
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      minimumSize: const Size(44, 40),
-                      visualDensity: VisualDensity.compact,
-                    ),
-                    onPressed:
-                        onTap ??
-                        () => showJobDetails<void>(
-                          context,
-                          job,
-                          api: api,
-                          canContactContractor: canContactContractor,
-                          action: action,
-                          actionBuilder: detailsActionBuilder,
-                        ),
-                    icon: const Icon(Icons.arrow_outward_rounded, size: 14),
-                    label: const Text('Xem chi tiết'),
-                  ),
-                ),
+                if (!previewOnly)
+                  Align(alignment: Alignment.centerLeft, child: detailsLink()),
               ],
             ),
           ),
@@ -278,9 +307,9 @@ Future<T?> showJobDetails<T>(
                 const SizedBox(height: 16),
                 _JobInfo(icon: Icons.location_on_outlined, label: job.address),
                 const SizedBox(height: 24),
-                const SectionIntro(
-                  title: 'Thông tin công việc',
-                  subtitle: 'Tìm hiểu yêu cầu trước khi nhận việc.',
+                Text(
+                  'Thông tin công việc',
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 8),
                 Text(

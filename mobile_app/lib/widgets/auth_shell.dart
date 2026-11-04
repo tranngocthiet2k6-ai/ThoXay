@@ -57,14 +57,10 @@ class AuthShell extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Thợ Xây',
-                              style: Theme.of(context).textTheme.headlineSmall
-                                  ?.copyWith(fontSize: 24),
-                            ),
-                            Text(
                               'Kết nối tay nghề, dựng xây uy tín',
                               style: TextStyle(
-                                fontSize: 11,
+                                fontSize: 13,
+                                height: 1.5,
                                 color: palette.muted,
                               ),
                             ),

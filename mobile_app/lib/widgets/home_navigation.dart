@@ -209,15 +209,6 @@ class _HomeNavigationState extends State<HomeNavigation>
               child: Row(
                 children: [
                   const BrandLogo(height: 32),
-                  const SizedBox(width: 10),
-                  const Text(
-                    'Thợ Xây',
-                    style: TextStyle(
-                      fontSize: 19,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -.7,
-                    ),
-                  ),
                   const SizedBox(width: 32),
                   Expanded(child: bar),
                 ],

@@ -28,17 +28,11 @@ class BrandHeader extends StatelessWidget {
   final String title;
 
   @override
-  Widget build(BuildContext context) => Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      BrandLogo(
-        height: 32,
-        onDark: Theme.of(context).brightness == Brightness.dark,
-      ),
-      const SizedBox(width: 8),
-      Flexible(
-        child: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis),
-      ),
-    ],
+  Widget build(BuildContext context) => Semantics(
+    label: '$title · Thợ Xây',
+    child: BrandLogo(
+      height: 36,
+      onDark: Theme.of(context).brightness == Brightness.dark,
+    ),
   );
 }
