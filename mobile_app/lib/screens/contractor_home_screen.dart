@@ -229,7 +229,7 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
                         FilledButton.icon(
                           onPressed: _loading ? null : _create,
                           icon: const Icon(Icons.add),
-                          label: const Text('Đăng công trình'),
+                          label: const Text('Đăng công trình mới'),
                         ),
                         if (_weatherJob != null) ...[
                           const SizedBox(height: 16),
@@ -399,7 +399,7 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
                               JobCard(
                                 api: widget.api,
                                 job: job,
-                                primaryAction: FilledButton(
+                                primaryAction: OutlinedButton(
                                   onPressed: () => _applicants(job),
                                   child: const Text('Duyệt thợ'),
                                 ),
@@ -452,10 +452,6 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
                                           'Thanh toán thu nhập',
                                         ),
                                       ),
-                                    FilledButton.tonal(
-                                      onPressed: () => _applicants(job),
-                                      child: const Text('Xem & duyệt thợ'),
-                                    ),
                                     if (job.status == 'IN_PROGRESS')
                                       OutlinedButton.icon(
                                         onPressed: () => _complete(job),
@@ -477,11 +473,6 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
           ),
         ),
       ],
-    ),
-    floatingActionButton: FloatingActionButton.extended(
-      onPressed: _create,
-      icon: const Icon(Icons.add),
-      label: const Text('Đăng công trình'),
     ),
     bottomNavigationBar: HomeNavigation(api: widget.api, onCreate: _create),
   );
@@ -1087,14 +1078,6 @@ class _ApplicantsSheetState extends State<_ApplicantsSheet> {
                               icon: const Icon(Icons.badge_outlined),
                               label: const Text('Xem hồ sơ thợ'),
                             ),
-                          if (application.status == 'ACCEPTED' &&
-                              application.workerActive)
-                            ChatButton(
-                              api: widget.api,
-                              job: widget.job,
-                              peerId: application.workerId,
-                              peerName: application.workerName,
-                            ),
                           const SizedBox(height: 8),
                           Text(
                             'Đánh giá ${application.workerRating.toStringAsFixed(1)}/5 · ${application.workerVerified ? 'Đã xác thực CCCD' : 'Chưa xác thực CCCD'}',
@@ -1141,39 +1124,71 @@ class _ApplicantsSheetState extends State<_ApplicantsSheet> {
                             Text(
                               'Điểm công trình: ${application.jobRating}/5 ★',
                             ),
-                          if (application.status == 'PENDING')
-                            Wrap(
-                              spacing: 12,
+                          if (application.status == 'PENDING' ||
+                              application.status == 'ACCEPTED')
+                            Row(
                               children: [
-                                FilledButton(
-                                  onPressed:
-                                      _updating != null ||
-                                          _loading ||
-                                          accepted >=
-                                              widget.job.requiredWorkers ||
-                                          !application.workerActive ||
-                                          !application.workerAvailable
-                                      ? null
-                                      : () => _decide(application, 'ACCEPTED'),
-                                  child: Text(
-                                    _updating == application.id
-                                        ? 'Đang xử lý…'
-                                        : application.crewBatchId != null
-                                        ? 'Duyệt nhận cả tổ'
-                                        : 'Nhận thợ',
-                                  ),
+                                Expanded(
+                                  child:
+                                      application.status == 'ACCEPTED' &&
+                                          application.workerActive
+                                      ? ChatButton(
+                                          api: widget.api,
+                                          job: widget.job,
+                                          peerId: application.workerId,
+                                          peerName: application.workerName,
+                                        )
+                                      : Tooltip(
+                                          message:
+                                              'Nhắn tin sau khi đơn được duyệt',
+                                          child: OutlinedButton.icon(
+                                            onPressed: null,
+                                            icon: Icon(
+                                              Icons.chat_bubble_outline,
+                                              size: 18,
+                                            ),
+                                            label: Text('Nhắn tin'),
+                                          ),
+                                        ),
                                 ),
-                                OutlinedButton(
-                                  onPressed: _updating != null || _loading
-                                      ? null
-                                      : () => _decide(application, 'REJECTED'),
-                                  child: Text(
-                                    application.crewBatchId != null
-                                        ? 'Từ chối toàn tổ'
-                                        : 'Từ chối',
+                                if (application.status == 'PENDING') ...[
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: FilledButton(
+                                      onPressed:
+                                          _updating != null ||
+                                              _loading ||
+                                              accepted >=
+                                                  widget.job.requiredWorkers ||
+                                              !application.workerActive ||
+                                              !application.workerAvailable
+                                          ? null
+                                          : () => _decide(
+                                              application,
+                                              'ACCEPTED',
+                                            ),
+                                      child: Text(
+                                        _updating == application.id
+                                            ? 'Đang xử lý…'
+                                            : application.crewBatchId != null
+                                            ? 'Duyệt nhận cả tổ'
+                                            : 'Duyệt nhận việc',
+                                      ),
+                                    ),
                                   ),
-                                ),
+                                ],
                               ],
+                            ),
+                          if (application.status == 'PENDING')
+                            TextButton(
+                              onPressed: _updating != null || _loading
+                                  ? null
+                                  : () => _decide(application, 'REJECTED'),
+                              child: Text(
+                                application.crewBatchId != null
+                                    ? 'Từ chối toàn tổ'
+                                    : 'Từ chối',
+                              ),
                             ),
                         ],
                       ),

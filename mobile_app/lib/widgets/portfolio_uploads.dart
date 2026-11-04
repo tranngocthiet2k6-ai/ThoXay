@@ -15,11 +15,13 @@ class PortfolioUploads extends StatefulWidget {
     required this.ownerId,
     this.editable = false,
     this.picker,
+    this.compact = false,
   });
   final ApiService api;
   final int ownerId;
   final bool editable;
   final DevicePhotoPicker? picker;
+  final bool compact;
   @override
   State<PortfolioUploads> createState() => _PortfolioUploadsState();
 }
@@ -120,7 +122,9 @@ class _PortfolioUploadsState extends State<PortfolioUploads> {
         children: [
           Text(
             'Tay nghề & công trình',
-            style: Theme.of(context).textTheme.titleLarge,
+            style: widget.compact
+                ? Theme.of(context).textTheme.titleSmall
+                : Theme.of(context).textTheme.titleLarge,
           ),
           if (widget.editable)
             PopupMenuButton<ImageSource>(
@@ -176,15 +180,9 @@ class _PortfolioUploadsState extends State<PortfolioUploads> {
             spacing: 12,
             runSpacing: 16,
             children: [
-              for (final photo
-                  in (_showAll
-                      ? _photos
-                      : _photos.take(bounds.maxWidth >= 640 ? 4 : 3)))
+              for (final photo in (_showAll ? _photos : _photos.take(3)))
                 SizedBox(
-                  width:
-                      (bounds.maxWidth -
-                          12 * ((bounds.maxWidth >= 640 ? 4 : 3) - 1)) /
-                      (bounds.maxWidth >= 640 ? 4 : 3),
+                  width: (bounds.maxWidth - 24) / 3,
                   child: Card(
                     clipBehavior: Clip.antiAlias,
                     child: Column(
@@ -197,8 +195,8 @@ class _PortfolioUploadsState extends State<PortfolioUploads> {
                             photo.path,
                             photo.caption,
                           ),
-                          child: SizedBox(
-                            height: bounds.maxWidth >= 640 ? 176 : 124,
+                          child: AspectRatio(
+                            aspectRatio: 1,
                             child: Stack(
                               fit: StackFit.expand,
                               children: [
@@ -214,7 +212,7 @@ class _PortfolioUploadsState extends State<PortfolioUploads> {
                                         padding: const EdgeInsets.all(8),
                                         child: Text(
                                           photo.caption,
-                                          maxLines: 2,
+                                          maxLines: widget.compact ? 1 : 2,
                                           overflow: TextOverflow.ellipsis,
                                           style: const TextStyle(
                                             fontSize: 10,
@@ -242,7 +240,7 @@ class _PortfolioUploadsState extends State<PortfolioUploads> {
             ],
           ),
         ),
-      if (!_showAll && _photos.length > 3)
+      if (!widget.compact && !_showAll && _photos.length > 3)
         TextButton(
           onPressed: () => setState(() => _showAll = true),
           child: Text('Xem tất cả ${_photos.length} ảnh công trình'),

@@ -132,12 +132,12 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Check-in GPS'));
+    await tester.tap(find.text('Chấm công GPS'));
     await tester.pumpAndSettle();
     expect(api.checkedIn, isTrue);
     expect(api.accuracy, 8);
-    expect(find.text('Check-out GPS'), findsOneWidget);
-    await tester.tap(find.text('Check-out GPS'));
+    expect(find.text('Kết thúc ca GPS'), findsOneWidget);
+    await tester.tap(find.text('Kết thúc ca GPS'));
     await tester.pumpAndSettle();
     expect(api.checkedOut, isTrue);
     await tester.scrollUntilVisible(
@@ -189,13 +189,13 @@ void main() {
     );
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(
-      find.text('Nghiệm thu ngày công'),
+      find.text('Nghiệm thu & Mở khóa thanh toán'),
       180,
       scrollable: find.byType(Scrollable).first,
     );
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.text('Nghiệm thu ngày công'));
-    await tester.tap(find.text('Nghiệm thu ngày công'));
+    await tester.ensureVisible(find.text('Nghiệm thu & Mở khóa thanh toán'));
+    await tester.tap(find.text('Nghiệm thu & Mở khóa thanh toán'));
     await tester.pumpAndSettle();
     expect(api.reviews, 0);
     await tester.tap(find.text('Xác nhận'));

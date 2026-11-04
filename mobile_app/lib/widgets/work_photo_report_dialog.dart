@@ -118,7 +118,7 @@ class _WorkPhotoReportDialogState extends State<WorkPhotoReportDialog> {
                                 ),
                         ),
                         Text(
-                          i == 0 ? 'Ảnh toàn cảnh' : 'Ảnh chi tiết',
+                          i == 0 ? 'Trước · Toàn cảnh' : 'Sau · Chi tiết',
                           style: const TextStyle(fontSize: 11),
                         ),
                         PopupMenuButton<ImageSource>(

@@ -679,6 +679,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                                   IncidentActions(
                                     api: widget.api,
                                     job: application.job,
+                                    compact: true,
                                   ),
                                 if (application.jobRating != null)
                                   Text(

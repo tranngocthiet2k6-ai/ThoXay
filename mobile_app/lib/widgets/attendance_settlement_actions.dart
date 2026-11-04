@@ -12,9 +12,15 @@ class AttendanceSettlementActions extends StatefulWidget {
     super.key,
     required this.api,
     required this.job,
+    this.onReview,
+    this.reviewLabel,
+    this.busy = false,
   });
   final ApiService api;
   final Job job;
+  final VoidCallback? onReview;
+  final String? reviewLabel;
+  final bool busy;
   @override
   State<AttendanceSettlementActions> createState() =>
       _AttendanceSettlementActionsState();
@@ -49,46 +55,74 @@ class _AttendanceSettlementActionsState
       ),
       child: SafeArea(
         top: false,
-        child: Wrap(
-          spacing: 12,
-          runSpacing: 8,
-          alignment: WrapAlignment.center,
-          children: [
-            if (!completed && widget.job.status == 'IN_PROGRESS')
-              OutlinedButton.icon(
-                onPressed: _busy ? null : _complete,
-                icon: const Icon(Icons.star_outline),
-                label: const Text('Đánh giá & hoàn thành'),
+        child: widget.onReview != null
+            ? Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    widget.reviewLabel ?? '',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                  const SizedBox(height: 8),
+                  FilledButton.icon(
+                    onPressed: widget.busy ? null : widget.onReview,
+                    icon: const Icon(Icons.task_alt),
+                    label: const Text(
+                      'Nghiệm thu & Mở khóa thanh toán',
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Xác nhận ngày công đã chọn. Thanh toán sau khi hoàn thành và đánh giá.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 11),
+                  ),
+                ],
+              )
+            : Wrap(
+                spacing: 12,
+                runSpacing: 8,
+                alignment: WrapAlignment.center,
+                children: [
+                  if (!completed && widget.job.status == 'IN_PROGRESS')
+                    FilledButton.icon(
+                      onPressed: _busy || widget.busy ? null : _complete,
+                      icon: const Icon(Icons.star_outline),
+                      label: const Text('Đánh giá & hoàn thành'),
+                    ),
+                  if (completed)
+                    FilledButton.icon(
+                      onPressed: _busy || widget.busy
+                          ? null
+                          : () async {
+                              try {
+                                await Navigator.of(context).push(
+                                  MaterialPageRoute<void>(
+                                    builder: (_) => JobPaymentsScreen(
+                                      api: widget.api,
+                                      job: widget.job,
+                                    ),
+                                  ),
+                                );
+                              } on ApiException catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    AppSnackBar(
+                                      content: Text(e.message),
+                                      kind: NoticeKind.error,
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                      icon: const Icon(Icons.payments_outlined),
+                      label: const Text('Mở thanh toán ngày công'),
+                    ),
+                ],
               ),
-            FilledButton.icon(
-              onPressed: !completed || _busy
-                  ? null
-                  : () async {
-                      try {
-                        await Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder: (_) => JobPaymentsScreen(
-                              api: widget.api,
-                              job: widget.job,
-                            ),
-                          ),
-                        );
-                      } on ApiException catch (e) {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            AppSnackBar(
-                              content: Text(e.message),
-                              kind: NoticeKind.error,
-                            ),
-                          );
-                        }
-                      }
-                    },
-              icon: const Icon(Icons.payments_outlined),
-              label: const Text('Mở thanh toán ngày công'),
-            ),
-          ],
-        ),
       ),
     );
   }

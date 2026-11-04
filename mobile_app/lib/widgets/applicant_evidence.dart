@@ -58,6 +58,7 @@ class _ApplicantEvidenceState extends State<ApplicantEvidence> {
           api: widget.api,
           ownerId: widget.workerId,
           editable: false,
+          compact: true,
         ),
       ],
     );

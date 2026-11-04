@@ -54,8 +54,10 @@ void main() {
         MaterialApp(home: ContractorHomeScreen(api: api)),
       );
       await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Đăng công trình mới'));
+      await tester.pumpAndSettle();
       await tester.tap(
-        find.widgetWithText(FloatingActionButton, 'Đăng công trình'),
+        find.widgetWithText(FilledButton, 'Đăng công trình mới'),
       );
       await tester.pumpAndSettle();
       await tester.enterText(
@@ -86,8 +88,8 @@ void main() {
     await tester.tap(find.text('Duyệt thợ'));
     await tester.pumpAndSettle();
     expect(find.text('Nguyễn Văn Thợ'), findsOneWidget);
-    await tester.ensureVisible(find.text('Nhận thợ'));
-    await tester.tap(find.text('Nhận thợ'));
+    await tester.ensureVisible(find.text('Duyệt nhận việc'));
+    await tester.tap(find.text('Duyệt nhận việc'));
     await tester.pumpAndSettle();
     expect(api.decision, 'ACCEPTED');
     expect(find.text('Đã nhận 1 / 1 thợ'), findsOneWidget);
@@ -99,9 +101,9 @@ void main() {
     final api = ContractorApi();
     await tester.pumpWidget(MaterialApp(home: ContractorHomeScreen(api: api)));
     await tester.pumpAndSettle();
-    await tester.tap(
-      find.widgetWithText(FloatingActionButton, 'Đăng công trình'),
-    );
+    await tester.ensureVisible(find.text('Đăng công trình mới'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Đăng công trình mới'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Đăng việc'));
     await tester.pump();

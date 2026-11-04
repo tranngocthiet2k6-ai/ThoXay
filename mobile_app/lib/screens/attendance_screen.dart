@@ -44,6 +44,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   String? _error;
   DateTime _day = DateTime.now().toUtc().add(const Duration(hours: 7));
   int _page = 0, _generation = 0;
+  int? _selectedLogId;
   bool get _worker => widget.applicationId != null;
   @override
   void initState() {
@@ -220,13 +221,55 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     }
     final checkout = today != null && today.checkedOutAt == null;
     final done = today?.checkedOutAt != null;
+    final pending = _items
+        .where(
+          (row) =>
+              row.logId != null &&
+              row.logVersion != null &&
+              row.reviewStatus != 'APPROVED',
+        )
+        .toList();
+    final selected =
+        pending.where((row) => row.logId == _selectedLogId).firstOrNull ??
+        pending.firstOrNull;
     return Scaffold(
       bottomNavigationBar: _worker
           ? null
-          : AttendanceSettlementActions(api: widget.api, job: widget.job),
+          : AttendanceSettlementActions(
+              api: widget.api,
+              job: widget.job,
+              busy: _busy || _loading,
+              reviewLabel: selected == null
+                  ? null
+                  : '${selected.workerName} · ${isoDay(selected.day)}',
+              onReview: selected == null ? null : () => _review(selected, true),
+            ),
       appBar: AppBar(
         title: Text(_worker ? 'Chấm công của tôi' : 'Chấm công & nghiệm thu'),
         actions: [
+          if (_worker) ...[
+            IconButton(
+              tooltip: 'Radar GPS & QR toàn màn hình',
+              onPressed: _busy
+                  ? null
+                  : () => Navigator.of(context)
+                        .push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => AttendanceRadarScreen(
+                              api: widget.api,
+                              job: widget.job,
+                              applicationId: widget.applicationId!,
+                              location: widget.location,
+                            ),
+                          ),
+                        )
+                        .then((_) {
+                          if (mounted) _load();
+                        }),
+              icon: const Icon(Icons.radar),
+            ),
+            IncidentActions(api: widget.api, job: widget.job, compact: true),
+          ],
           IconButton(
             onPressed: _loading || _busy ? null : () => _load(),
             tooltip: 'Làm mới',
@@ -241,28 +284,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(24),
             children: [
-              if (_worker)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: FilledButton.icon(
-                    onPressed: () => Navigator.of(context)
-                        .push(
-                          MaterialPageRoute<void>(
-                            builder: (_) => AttendanceRadarScreen(
-                              api: widget.api,
-                              job: widget.job,
-                              applicationId: widget.applicationId!,
-                              location: widget.location,
-                            ),
-                          ),
-                        )
-                        .then((_) {
-                          if (mounted) _load();
-                        }),
-                    icon: const Icon(Icons.radar),
-                    label: const Text('Radar GPS & QR toàn màn hình'),
-                  ),
-                ),
               if (_worker) ...[
                 WeekSchedule(jobs: [widget.job], today: _data?.today),
                 const SizedBox(height: 16),
@@ -299,25 +320,34 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                             'Đã check-out hôm nay. Gửi ảnh kết quả công việc bên dưới.',
                           )
                         else
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              FilledButton.icon(
-                                onPressed: _busy || _loading
-                                    ? null
-                                    : () => _mark(checkout),
-                                icon: const Icon(Icons.my_location),
-                                label: Text(
-                                  checkout ? 'Check-out GPS' : 'Check-in GPS',
-                                ),
-                              ),
-                              OutlinedButton.icon(
-                                onPressed: _busy || _loading
-                                    ? null
-                                    : () => _qr(checkout),
-                                icon: const Icon(Icons.qr_code_scanner),
-                                label: const Text('Quét QR ca làm'),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: FilledButton.icon(
+                                      key: const ValueKey('attendance-gps'),
+                                      onPressed: _busy || _loading
+                                          ? null
+                                          : () => _mark(checkout),
+                                      icon: const Icon(Icons.my_location),
+                                      label: Text(
+                                        checkout
+                                            ? 'Kết thúc ca GPS'
+                                            : 'Chấm công GPS',
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  IconButton.outlined(
+                                    tooltip: 'Quét QR ca làm',
+                                    onPressed: _busy || _loading
+                                        ? null
+                                        : () => _qr(checkout),
+                                    icon: const Icon(Icons.qr_code_scanner),
+                                  ),
+                                ],
                               ),
                               TextButton(
                                 onPressed: _busy || _loading
@@ -353,7 +383,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                               icon: const Icon(Icons.calendar_today_outlined),
                               label: Text(isoDay(_day)),
                             ),
-                            FilledButton.icon(
+                            OutlinedButton.icon(
                               onPressed: _busy
                                   ? null
                                   : () => showDialog<void>(
@@ -373,11 +403,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              if (_worker)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: IncidentActions(api: widget.api, job: widget.job),
-                ),
               Text(
                 _worker
                     ? 'Báo cáo tiến độ cuối ngày'
@@ -427,9 +452,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               for (final entry in [
-                                (row.photoPath!, 'Toàn cảnh'),
+                                (row.photoPath!, 'Trước · Toàn cảnh'),
                                 if (row.detailPhotoPath != null)
-                                  (row.detailPhotoPath!, 'Chi tiết'),
+                                  (row.detailPhotoPath!, 'Sau · Chi tiết'),
                               ])
                                 Expanded(
                                   child: Padding(
@@ -510,12 +535,22 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                             spacing: 8,
                             runSpacing: 8,
                             children: [
-                              FilledButton.icon(
+                              OutlinedButton.icon(
                                 onPressed: _busy
                                     ? null
-                                    : () => _review(row, true),
-                                icon: const Icon(Icons.task_alt),
-                                label: const Text('Nghiệm thu ngày công'),
+                                    : () => setState(
+                                        () => _selectedLogId = row.logId,
+                                      ),
+                                icon: Icon(
+                                  selected?.logId == row.logId
+                                      ? Icons.radio_button_checked
+                                      : Icons.radio_button_off,
+                                ),
+                                label: Text(
+                                  selected?.logId == row.logId
+                                      ? 'Đang chọn nghiệm thu'
+                                      : 'Chọn nghiệm thu',
+                                ),
                               ),
                               OutlinedButton(
                                 onPressed: _busy

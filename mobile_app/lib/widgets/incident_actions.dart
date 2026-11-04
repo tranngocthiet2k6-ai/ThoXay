@@ -8,9 +8,15 @@ import 'incident_report_dialog.dart';
 import 'app_snack_bar.dart';
 
 class IncidentActions extends StatelessWidget {
-  const IncidentActions({super.key, required this.api, required this.job});
+  const IncidentActions({
+    super.key,
+    required this.api,
+    required this.job,
+    this.compact = false,
+  });
   final ApiService api;
   final Job job;
+  final bool compact;
   Future<void> _sos(BuildContext context) async {
     final detail = await showDialog<IncidentDetail>(
       context: context,
@@ -28,27 +34,50 @@ class IncidentActions extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) => Wrap(
-    spacing: 8,
-    runSpacing: 8,
-    children: [
-      OutlinedButton.icon(
-        onPressed: () => _sos(context),
-        style: OutlinedButton.styleFrom(
-          foregroundColor: Theme.of(context).colorScheme.error,
-        ),
-        icon: const Icon(Icons.sos),
-        label: const Text('SOS tới Admin'),
-      ),
-      TextButton.icon(
-        onPressed: () => Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (_) => IncidentsScreen(api: api, job: job),
+  Widget build(BuildContext context) => compact
+      ? PopupMenuButton<String>(
+          tooltip: 'SOS / Báo cáo sự cố',
+          icon: Icon(
+            Icons.health_and_safety_outlined,
+            color: Theme.of(context).colorScheme.error,
           ),
-        ),
-        icon: const Icon(Icons.report_outlined),
-        label: const Text('Sự cố / tranh chấp'),
-      ),
-    ],
-  );
+          onSelected: (value) {
+            if (value == 'sos') {
+              _sos(context);
+            } else {
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => IncidentsScreen(api: api, job: job),
+                ),
+              );
+            }
+          },
+          itemBuilder: (_) => const [
+            PopupMenuItem(value: 'sos', child: Text('SOS tới Admin')),
+            PopupMenuItem(value: 'incident', child: Text('Sự cố / tranh chấp')),
+          ],
+        )
+      : Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            OutlinedButton.icon(
+              onPressed: () => _sos(context),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.error,
+              ),
+              icon: const Icon(Icons.sos),
+              label: const Text('SOS tới Admin'),
+            ),
+            TextButton.icon(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => IncidentsScreen(api: api, job: job),
+                ),
+              ),
+              icon: const Icon(Icons.report_outlined),
+              label: const Text('Sự cố / tranh chấp'),
+            ),
+          ],
+        );
 }
