@@ -10,6 +10,7 @@ class AppearanceController extends ChangeNotifier {
       _mode == DisplayMode.dark ? Brightness.dark : Brightness.light;
   Future<void> _saving = Future.value();
   Future<void> restore() async {
+    final previous = _mode;
     try {
       final value = (await SharedPreferences.getInstance()).getString(
         'display_mode',
@@ -20,6 +21,7 @@ class AppearanceController extends ChangeNotifier {
     } catch (_) {
       _mode = DisplayMode.light;
     }
+    if (_mode != previous) notifyListeners();
   }
 
   Future<bool> setMode(DisplayMode mode) async {

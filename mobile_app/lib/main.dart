@@ -15,6 +15,7 @@ import 'services/push_notifications.dart';
 import 'screens/notifications_screen.dart';
 import 'widgets/adaptive_viewport.dart';
 import 'theme/appearance_controller.dart';
+import 'widgets/startup_gate.dart';
 
 final _navigator = GlobalKey<NavigatorState>();
 final _messenger = GlobalKey<ScaffoldMessengerState>();
@@ -22,8 +23,7 @@ final _messenger = GlobalKey<ScaffoldMessengerState>();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final api = ApiService(warmUpServer: true);
-  await api.restoreSession();
-  await KycCamera.instance.restoreLostPhoto();
+  final appearance = AppearanceController();
   api.addListener(() {
     if (api.session == null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -34,9 +34,13 @@ Future<void> main() async {
     }
   });
   final push = PushNotifications.instance;
-  await push.initialize();
-  push.attach(api);
+  var ready = false;
+  var pendingNotification = false;
   push.onOpen = () {
+    if (!ready) {
+      pendingNotification = true;
+      return;
+    }
     if (api.session != null) {
       _navigator.currentState?.push(
         MaterialPageRoute<void>(builder: (_) => NotificationsScreen(api: api)),
@@ -50,18 +54,44 @@ Future<void> main() async {
       );
     }
   };
-  final appearance = AppearanceController();
-  await appearance.restore();
-  runApp(ThoXayApp(api: api, appearance: appearance));
-  WidgetsBinding.instance.addPostFrameCallback(
-    (_) => push.openInitialIfNeeded(),
+  runApp(
+    ThoXayApp(
+      api: api,
+      appearance: appearance,
+      initialize: () async {
+        await api.restoreSession();
+        await KycCamera.instance.restoreLostPhoto();
+        await push.initialize();
+        push.attach(api);
+        await appearance.restore();
+      },
+      onReady: () {
+        ready = true;
+        if (pendingNotification) {
+          pendingNotification = false;
+          push.onOpen?.call();
+        } else {
+          push.openInitialIfNeeded();
+        }
+      },
+    ),
   );
 }
 
 class ThoXayApp extends StatefulWidget {
-  const ThoXayApp({super.key, required this.api, this.appearance});
+  const ThoXayApp({
+    super.key,
+    required this.api,
+    this.appearance,
+    this.initialize,
+    this.onReady,
+    this.splashDuration,
+  });
   final ApiService api;
   final AppearanceController? appearance;
+  final Future<void> Function()? initialize;
+  final VoidCallback? onReady;
+  final Duration? splashDuration;
   @override
   State<ThoXayApp> createState() => _ThoXayAppState();
 }
@@ -99,58 +129,63 @@ class _ThoXayAppState extends State<ThoXayApp> {
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
-        home: ListenableBuilder(
-          listenable: api,
-          builder: (context, _) {
-            if (api.session == null) return LoginScreen(api: api);
-            final session = api.session!;
-            if (session.role == 'ROLE_WORKER') {
-              return SharedJobGate(
-                api: api,
-                jobId: JobLinks.parse(Uri.base),
-                child: WorkerHomeScreen(api: api),
-              );
-            }
-            if (session.role == 'ROLE_CONTRACTOR') {
-              return SharedJobGate(
-                api: api,
-                jobId: JobLinks.parse(Uri.base),
-                child: ContractorHomeScreen(api: api),
-              );
-            }
-            return Scaffold(
-              appBar: AppBar(title: const Text('Tài khoản Thợ Xây')),
-              body: Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.verified_user_outlined, size: 64),
-                      const SizedBox(height: 16),
-                      Text(
-                        session.fullName,
-                        style: Theme.of(context).textTheme.headlineSmall,
-                      ),
-                      Text(session.phoneNumber),
-                      Text(
-                        session.role == 'ROLE_ADMIN'
-                            ? 'Quản trị hệ thống · /admin/dashboard'
-                            : session.role == 'ROLE_WORKER'
-                            ? 'Thợ'
-                            : 'Chủ thầu',
-                      ),
-                      const SizedBox(height: 24),
-                      OutlinedButton(
-                        onPressed: api.logout,
-                        child: const Text('Đăng xuất'),
-                      ),
-                    ],
+        home: StartupGate(
+          initialize: widget.initialize,
+          onReady: widget.onReady,
+          minimumDuration: widget.splashDuration,
+          builder: (context) => ListenableBuilder(
+            listenable: api,
+            builder: (context, _) {
+              if (api.session == null) return LoginScreen(api: api);
+              final session = api.session!;
+              if (session.role == 'ROLE_WORKER') {
+                return SharedJobGate(
+                  api: api,
+                  jobId: JobLinks.parse(Uri.base),
+                  child: WorkerHomeScreen(api: api),
+                );
+              }
+              if (session.role == 'ROLE_CONTRACTOR') {
+                return SharedJobGate(
+                  api: api,
+                  jobId: JobLinks.parse(Uri.base),
+                  child: ContractorHomeScreen(api: api),
+                );
+              }
+              return Scaffold(
+                appBar: AppBar(title: const Text('Tài khoản Thợ Xây')),
+                body: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.verified_user_outlined, size: 64),
+                        const SizedBox(height: 16),
+                        Text(
+                          session.fullName,
+                          style: Theme.of(context).textTheme.headlineSmall,
+                        ),
+                        Text(session.phoneNumber),
+                        Text(
+                          session.role == 'ROLE_ADMIN'
+                              ? 'Quản trị hệ thống · /admin/dashboard'
+                              : session.role == 'ROLE_WORKER'
+                              ? 'Thợ'
+                              : 'Chủ thầu',
+                        ),
+                        const SizedBox(height: 24),
+                        OutlinedButton(
+                          onPressed: api.logout,
+                          child: const Text('Đăng xuất'),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     ),
