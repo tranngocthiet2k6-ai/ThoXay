@@ -25,6 +25,7 @@ class ChatController extends ChangeNotifier {
   ChatStatus status = ChatStatus.connecting;
   bool loading = true, sending = false, loadingOlder = false, hasOlder = false;
   String? error;
+  int? peerLastReadMessageId;
   bool _disposed = false, _initialized = false;
   int _generation = 0, _attempt = 0, _syncCursor = 0;
   ChatConnection? _connection;
@@ -115,6 +116,10 @@ class ChatController extends ChangeNotifier {
       while (_current(generation)) {
         final page = await api.messageHistory(jobId, peerId, afterId: after);
         if (!_current(generation)) return;
+        final read = page.peerLastReadMessageId;
+        if (read != null && read >= 0) {
+          peerLastReadMessageId = max(peerLastReadMessageId ?? 0, read);
+        }
         _merge(page.messages);
         if (page.messages.isNotEmpty) _syncCursor = page.messages.last.id;
         if (after == null) {

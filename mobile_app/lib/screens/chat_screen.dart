@@ -1,21 +1,22 @@
-import 'commitment_screen.dart';
-import '../widgets/app_snack_bar.dart';
-import '../theme/app_theme.dart';
-import '../widgets/empty_state.dart';
-import '../widgets/content_skeleton.dart';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../models/models.dart';
 import '../services/api_service.dart';
+import '../services/chat_contact.dart';
 import '../services/chat_controller.dart';
-import '../widgets/job_card.dart';
-import '../widgets/private_image.dart';
-import '../widgets/chat_attachment_dialog.dart';
 import '../services/device_photo_picker.dart';
 import '../services/location_service.dart';
+import '../theme/app_theme.dart';
+import '../widgets/app_snack_bar.dart';
+import '../widgets/chat_attachment_dialog.dart';
+import '../widgets/chat_call_sheet.dart';
+import '../widgets/chat_ui.dart';
+import '../widgets/content_skeleton.dart';
+import '../widgets/empty_state.dart';
+import '../widgets/job_card.dart';
+import 'commitment_screen.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({
@@ -26,6 +27,8 @@ class ChatScreen extends StatefulWidget {
     required this.peerName,
     this.picker,
     this.location,
+    this.embedded = false,
+    this.onRead,
   });
   final ApiService api;
   final Job job;
@@ -33,6 +36,8 @@ class ChatScreen extends StatefulWidget {
   final String peerName;
   final DevicePhotoPicker? picker;
   final LocationService? location;
+  final bool embedded;
+  final VoidCallback? onRead;
   @override
   State<ChatScreen> createState() => _ChatScreenState();
 }
@@ -40,10 +45,18 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
   late final ChatController _chat;
   final _draft = TextEditingController();
+  final _focus = FocusNode();
   final _scroll = ScrollController();
-  int _lastMessageId = 0;
-  int _lastRead = 0;
-  bool _reading = false, _foreground = true;
+  ChatContact? _contact;
+  int _lastMessageId = 0, _lastRead = 0;
+  bool _reading = false, _foreground = true, _calling = false;
+  static const _replies = [
+    'Tôi đang tới công trình',
+    'Đã có mặt tại công trường',
+    'Đã gửi ảnh nghiệm thu',
+    'Nhờ anh kiểm tra nghiệm thu giúp',
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -52,6 +65,22 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
     _chat.addListener(_changed);
     _scroll.addListener(_markVisible);
     _chat.start();
+    _loadContact();
+  }
+
+  Future<void> _loadContact() async {
+    try {
+      final contact = await loadChatContact(
+        widget.api,
+        widget.job,
+        widget.peerId,
+      );
+      if (mounted && _chat.status != ChatStatus.stopped) {
+        setState(() => _contact = contact);
+      }
+    } on ApiException {
+      /* Chat remains usable when optional contact data is offline. */
+    }
   }
 
   void _changed() {
@@ -61,7 +90,9 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
         latest != _lastMessageId &&
         (!_scroll.hasClients || _scroll.offset < 100);
     _lastMessageId = latest;
-    setState(() {});
+    setState(() {
+      if (_chat.status == ChatStatus.stopped) _contact = null;
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) => _markVisible());
     if (scrollDown) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -79,7 +110,10 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     _foreground = state == AppLifecycleState.resumed;
-    if (state == AppLifecycleState.resumed) _chat.reconnect();
+    if (_foreground) {
+      _chat.reconnect();
+      _loadContact();
+    }
   }
 
   Future<void> _markVisible() async {
@@ -97,9 +131,11 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
     _reading = true;
     try {
       await widget.api.readMessages(widget.job.id, widget.peerId, latest);
+      if (!mounted) return;
       _lastRead = latest;
+      widget.onRead?.call();
     } on ApiException {
-      // A failed read receipt leaves the badge intact and is retried on the next visible update.
+      /* Retry only when this conversation is actually visible. */
     } finally {
       _reading = false;
       if (mounted &&
@@ -115,6 +151,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
     final draft = _draft.text;
     if (await _chat.send(draft) && mounted && _draft.text == draft) {
       _draft.clear();
+      setState(() {});
     }
   }
 
@@ -136,6 +173,63 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
     if (mounted) _markVisible();
   }
 
+  Future<void> _call() async {
+    if (_calling || _chat.status == ChatStatus.stopped) return;
+    setState(() => _calling = true);
+    try {
+      await showChatCallSheet(
+        context,
+        api: widget.api,
+        job: widget.job,
+        peerId: widget.peerId,
+        peerName: widget.peerName,
+        logCall: (key) => _chat.sendMedia(
+          () => widget.api.sendMessage(
+            widget.job.id,
+            widget.peerId,
+            simulatedCallLog,
+            key,
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _calling = false);
+    }
+  }
+
+  Future<void> _openJob() async {
+    try {
+      final contact = await loadChatContact(
+        widget.api,
+        widget.job,
+        widget.peerId,
+      );
+      if (!mounted) return;
+      if (contact == null) {
+        await showJobDetails<void>(context, widget.job);
+      } else {
+        await Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => CommitmentScreen(
+              api: widget.api,
+              applicationId: contact.application.id,
+            ),
+          ),
+        );
+      }
+    } on ApiException catch (e) {
+      _notice(e.message);
+    }
+  }
+
+  void _notice(String text) {
+    if (mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(AppSnackBar(content: Text(text), kind: NoticeKind.error));
+    }
+  }
+
   Future<void> _openLocation(double lat, double lng) async {
     final uri = Uri.https('www.google.com', '/maps/dir/', {
       'api': '1',
@@ -143,14 +237,10 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
     });
     try {
       if (await launchUrl(uri, mode: LaunchMode.externalApplication)) return;
-    } catch (_) {
-      /* Report an unavailable map app without breaking chat. */
+    } on Object {
+      /* Keep the conversation available without a map handler. */
     }
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Không mở được bản đồ. Hãy thử lại.')),
-      );
-    }
+    _notice('Không mở được bản đồ. Hãy thử lại.');
   }
 
   @override
@@ -159,380 +249,361 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
     _chat.removeListener(_changed);
     _chat.dispose();
     _draft.dispose();
+    _focus.dispose();
     _scroll.removeListener(_markVisible);
     _scroll.dispose();
     super.dispose();
   }
 
-  String _time(DateTime date) {
-    final local = date.toLocal();
-    String two(int value) => '$value'.padLeft(2, '0');
-    return '${two(local.day)}/${two(local.month)} ${two(local.hour)}:${two(local.minute)}';
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _header(BuildContext context) {
     final theme = Theme.of(context);
-    final rows = _chat.messages.reversed.toList();
-    return Scaffold(
-      appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(widget.peerName, maxLines: 1, overflow: TextOverflow.ellipsis),
-            Text(
-              widget.job.title,
-              style: theme.textTheme.bodySmall,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
+    return Material(
+      color: AppPalette.of(context).surface,
+      child: SafeArea(
+        bottom: false,
+        top: !widget.embedded,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(widget.embedded ? 16 : 4, 8, 8, 8),
+          child: Row(
+            children: [
+              if (!widget.embedded) const BackButton(),
+              ChatAvatar(
+                name: widget.peerName,
+                connected: _chat.status == ChatStatus.connected,
+                statusLabel: 'Kết nối tới máy chủ trò chuyện; chưa có dữ liệu online của đối phương',
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.peerName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    if (_contact?.verified == true)
+                      const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.verified,
+                            size: 12,
+                            color: Color(0xFF059669),
+                          ),
+                          SizedBox(width: 4),
+                          Text(
+                            'Đã KYC',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: Color(0xFF059669),
+                            ),
+                          ),
+                        ],
+                      ),
+                    Text(
+                      switch (_chat.status) {
+                        ChatStatus.connected => 'Đã kết nối',
+                        ChatStatus.connecting => 'Đang kết nối…',
+                        ChatStatus.reconnecting => 'Đang kết nối lại…',
+                        ChatStatus.stopped => 'Cuộc trò chuyện đã ngắt',
+                      },
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: AppPalette.of(context).muted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                tooltip: 'Phiếu cam kết / Chi tiết việc',
+                onPressed: _openJob,
+                icon: const Icon(Icons.description_outlined),
+              ),
+              IconButton.filledTonal(
+                tooltip: 'Gọi điện',
+                onPressed: _calling || _chat.status == ChatStatus.stopped
+                    ? null
+                    : _call,
+                icon: const Icon(Icons.call_outlined),
+              ),
+            ],
+          ),
         ),
       ),
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 960),
-            child: Column(
-              children: [
-                Card(
-                  margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                  child: ListTile(
-                    leading: Icon(
-                      Icons.push_pin_outlined,
-                      color: theme.colorScheme.primary,
-                    ),
-                    title: Text(
+    );
+  }
+
+  Widget _jobBanner(BuildContext context) {
+    final theme = Theme.of(context);
+    final palette = AppPalette.of(context);
+    final phone = _contact?.phone;
+    return Material(
+      color: theme.colorScheme.primary.withValues(alpha: .06),
+      child: InkWell(
+        onTap: _openJob,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            children: [
+              Icon(Icons.apartment_outlined, color: theme.colorScheme.primary),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
                       widget.job.title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.labelLarge,
                     ),
-                    subtitle: Text(
-                      '${money(widget.job.salaryPerDay)} / ngày · Xem phiếu cam kết',
-                    ),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () async {
-                      try {
-                        final list =
-                            widget.api.session?.role == 'ROLE_CONTRACTOR'
-                            ? await widget.api.jobApplications(widget.job.id)
-                            : await widget.api.workerApplications();
-                        if (!context.mounted) return;
-                        final application = list
-                            .where(
-                              (a) =>
-                                  a.job.id == widget.job.id &&
-                                  a.workerId ==
-                                      (widget.api.session?.role ==
-                                              'ROLE_CONTRACTOR'
-                                          ? widget.peerId
-                                          : widget.api.session!.userId),
-                            )
-                            .firstOrNull;
-                        if (application == null) {
-                          await showJobDetails<void>(context, widget.job);
-                          return;
-                        }
-                        await Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder: (_) => CommitmentScreen(
-                              api: widget.api,
-                              applicationId: application.id,
-                            ),
+                    const SizedBox(height: 4),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      children: [
+                        Text(
+                          '${money(_contact?.dailyRate ?? widget.job.salaryPerDay)}/ngày',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w800,
+                            color: theme.colorScheme.primary,
                           ),
-                        );
-                      } on ApiException catch (e) {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            AppSnackBar(
-                              content: Text(e.message),
-                              kind: NoticeKind.error,
-                            ),
-                          );
-                        }
-                      }
+                        ),
+                        Text(
+                          statusLabel(widget.job.status),
+                          style: TextStyle(fontSize: 12, color: palette.muted),
+                        ),
+                      ],
+                    ),
+                    if (phone != null && phone.isNotEmpty)
+                      Text(
+                        'Liên hệ: $phone',
+                        style: TextStyle(fontSize: 12, color: palette.muted),
+                      ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right, size: 20),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _messages(BuildContext context) {
+    if (_chat.loading) {
+      return const SingleChildScrollView(child: ContentSkeleton(chat: true));
+    }
+    final rows = _chat.messages.reversed.toList();
+    if (rows.isEmpty) {
+      return Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: EmptyState(
+            icon: Icons.forum_outlined,
+            title: 'Bắt đầu cuộc trò chuyện',
+            message: 'Trao đổi rõ ràng hôm nay, phối hợp nhịp nhàng ngày mai.',
+            action: FilledButton.icon(
+              icon: const Icon(Icons.waving_hand_outlined),
+              label: const Text('Soạn lời chào'),
+              onPressed: _chat.status == ChatStatus.stopped
+                  ? null
+                  : () {
+                      _draft.text =
+                          'Xin chào, tôi muốn trao đổi về công trình này.';
+                      _focus.requestFocus();
+                      setState(() {});
                     },
+            ),
+          ),
+        ),
+      );
+    }
+    return ListView.builder(
+      key: const ValueKey('chat-messages'),
+      controller: _scroll,
+      reverse: true,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      itemCount: rows.length + (_chat.hasOlder ? 1 : 0),
+      itemBuilder: (context, index) {
+        if (index == rows.length) {
+          return TextButton(
+            onPressed: _chat.loadingOlder ? null : _chat.loadOlder,
+            child: Text(_chat.loadingOlder ? 'Đang tải…' : 'Tải tin nhắn cũ'),
+          );
+        }
+        final message = rows[index];
+        final firstOfDay =
+            index == rows.length - 1 ||
+            chatDay(rows[index + 1].createdAt) != chatDay(message.createdAt);
+        return Column(
+          children: [
+            if (firstOfDay) ChatDayDivider(date: message.createdAt),
+            ChatMessageBubble(
+              api: widget.api,
+              message: message,
+              mine: message.senderId == _chat.userId,
+              peerName: widget.peerName,
+              peerLastReadMessageId: _chat.peerLastReadMessageId,
+              onLocation: _openLocation,
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _composer(BuildContext context) => Material(
+    color: AppPalette.of(context).surface,
+    child: SafeArea(
+      top: false,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+            child: Row(
+              children: [
+                for (final reply in _replies)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ActionChip(
+                      label: Text(reply),
+                      onPressed: _chat.status == ChatStatus.stopped
+                          ? null
+                          : () {
+                              _draft.text = reply;
+                              _focus.requestFocus();
+                              setState(() {});
+                            },
+                    ),
                   ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(4, 8, 8, 12),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                PopupMenuButton<String>(
+                  tooltip: 'Đính kèm ảnh hoặc vị trí',
+                  enabled: _chat.canSend,
+                  onSelected: _attach,
+                  icon: const Icon(Icons.add_photo_alternate_outlined),
+                  itemBuilder: (_) => const [
+                    PopupMenuItem(
+                      value: 'camera',
+                      child: Text('Chụp ảnh công trường'),
+                    ),
+                    PopupMenuItem(
+                      value: 'gallery',
+                      child: Text('Chọn ảnh từ thư viện'),
+                    ),
+                    PopupMenuItem(
+                      value: 'gps',
+                      child: Text('Chia sẻ vị trí GPS'),
+                    ),
+                  ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.circle,
-                        size: 10,
-                        color: _chat.status == ChatStatus.connected
-                            ? Colors.green
-                            : Colors.orange,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(switch (_chat.status) {
-                          ChatStatus.connected => 'Đã kết nối',
-                          ChatStatus.connecting => 'Đang kết nối…',
-                          ChatStatus.reconnecting => 'Đang kết nối lại…',
-                          ChatStatus.stopped => 'Cuộc trò chuyện đã ngắt',
-                        }, style: theme.textTheme.bodySmall),
-                      ),
-                      if (_chat.status == ChatStatus.reconnecting)
-                        TextButton(
-                          onPressed: _chat.reconnect,
-                          child: const Text('Kết nối lại'),
-                        ),
-                    ],
-                  ),
+                IconButton(
+                  tooltip: 'Gửi tọa độ hiện tại',
+                  onPressed: _chat.canSend ? () => _attach('gps') : null,
+                  icon: const Icon(Icons.location_on_outlined),
                 ),
-                if (_chat.error != null)
-                  Container(
-                    width: double.infinity,
-                    color: theme.colorScheme.errorContainer,
-                    padding: const EdgeInsets.all(12),
-                    child: Text(_chat.error!),
-                  ),
                 Expanded(
-                  child: _chat.loading
-                      ? const SingleChildScrollView(
-                          child: ContentSkeleton(chat: true),
-                        )
-                      : rows.isEmpty
-                      ? Center(
-                          child: SingleChildScrollView(
-                            padding: const EdgeInsets.all(16),
-                            child: EmptyState(
-                              icon: Icons.forum_outlined,
-                              title: 'Bắt đầu cuộc trò chuyện',
-                              message: 'Chưa có tin nhắn. Hãy bắt đầu trao đổi về công việc.',
-                              action: FilledButton.icon(
-                                icon: const Icon(Icons.waving_hand_outlined),
-                                label: const Text('Soạn lời chào'),
-                                onPressed: _chat.status == ChatStatus.stopped
-                                    ? null
-                                    : () {
-                                        _draft.text = 'Xin chào, tôi muốn trao đổi về công trình này.';
-                                        setState(() {});
-                                      },
-                              ),
-                            ),
-                          ),
-                        )
-                      : ListView.builder(
-                          controller: _scroll,
-                          reverse: true,
-                          padding: const EdgeInsets.all(16),
-                          itemCount: rows.length + (_chat.hasOlder ? 1 : 0),
-                          itemBuilder: (context, index) {
-                            if (index == rows.length) {
-                              return TextButton(
-                                onPressed: _chat.loadingOlder
-                                    ? null
-                                    : _chat.loadOlder,
-                                child: Text(
-                                  _chat.loadingOlder
-                                      ? 'Đang tải…'
-                                      : 'Tải tin nhắn cũ',
-                                ),
-                              );
-                            }
-                            final message = rows[index];
-                            final mine = message.senderId == _chat.userId;
-                            return Align(
-                              alignment: mine
-                                  ? Alignment.centerRight
-                                  : Alignment.centerLeft,
-                              child: Container(
-                                key: ValueKey('message-${message.id}'),
-                                constraints: BoxConstraints(
-                                  maxWidth:
-                                      (MediaQuery.sizeOf(context).width
-                                                  .clamp(0, 960) *
-                                              .8)
-                                          .toDouble(),
-                                ),
-                                margin: const EdgeInsets.only(bottom: 10),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
-                                ),
-                                decoration: BoxDecoration(
-                                  color:
-                                      mine &&
-                                          widget.api.session?.role ==
-                                              'ROLE_CONTRACTOR'
-                                      ? const Color(0xff047857)
-                                      : mine
-                                      ? theme.colorScheme.primaryContainer
-                                      : AppPalette.of(context).surface,
-                                  border: Border.all(
-                                    color: mine
-                                        ? theme.colorScheme.primaryContainer
-                                        : AppPalette.of(context).border,
-                                  ),
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: const Radius.circular(20),
-                                    topRight: const Radius.circular(20),
-                                    bottomLeft: Radius.circular(mine ? 20 : 4),
-                                    bottomRight: Radius.circular(mine ? 4 : 20),
-                                  ),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    if (message.kind == 'IMAGE' &&
-                                        message.imagePath != null) ...[
-                                      Semantics(
-                                        label: 'Phóng to ảnh công trường',
-                                        button: true,
-                                        child: InkWell(
-                                          onTap: () => showPrivatePhoto(
-                                            context,
-                                            widget.api,
-                                            message.imagePath!,
-                                            message.content,
-                                          ),
-                                          child: ClipRRect(
-                                            borderRadius: BorderRadius.circular(
-                                              12,
-                                            ),
-                                            child: SizedBox(
-                                              width: 260,
-                                              height: 190,
-                                              child: PrivateImage(
-                                                api: widget.api,
-                                                path: message.imagePath!,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                    ],
-                                    if (message.kind == 'LOCATION' &&
-                                        message.latitude != null &&
-                                        message.longitude != null)
-                                      OutlinedButton.icon(
-                                        onPressed: () => _openLocation(
-                                          message.latitude!,
-                                          message.longitude!,
-                                        ),
-                                        icon: const Icon(
-                                          Icons.location_on_outlined,
-                                        ),
-                                        label: const Text(
-                                          'Mở vị trí trên bản đồ',
-                                        ),
-                                      ),
-                                    Text(
-                                      message.content,
-                                      style: TextStyle(
-                                        color:
-                                            mine &&
-                                                widget.api.session?.role ==
-                                                    'ROLE_CONTRACTOR'
-                                            ? Colors.white
-                                            : AppPalette.of(context).ink,
-                                      ),
-                                    ),
-                                    if (message.kind == 'LOCATION' &&
-                                        message.latitude != null &&
-                                        message.longitude != null)
-                                      Text(
-                                        '${message.latitude!.toStringAsFixed(5)}, ${message.longitude!.toStringAsFixed(5)}',
-                                        style: theme.textTheme.bodySmall,
-                                      ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      _time(message.createdAt),
-                                      style: theme.textTheme.labelSmall
-                                          ?.copyWith(
-                                            color:
-                                                mine &&
-                                                    widget.api.session?.role ==
-                                                        'ROLE_CONTRACTOR'
-                                                ? Colors.white70
-                                                : AppPalette.of(context).muted,
-                                          ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 24),
-                        child: PopupMenuButton<String>(
-                          tooltip: 'Đính kèm ảnh hoặc vị trí',
-                          enabled: _chat.canSend,
-                          onSelected: _attach,
-                          icon: const Icon(Icons.add_circle_outline),
-                          itemBuilder: (_) => [
-                            const PopupMenuItem(
-                              value: 'camera',
-                              child: Text('Chụp ảnh công trường'),
-                            ),
-                            const PopupMenuItem(
-                              value: 'gallery',
-                              child: Text('Chọn ảnh từ thư viện'),
-                            ),
-                            const PopupMenuItem(
-                              value: 'gps',
-                              child: Text('Chia sẻ vị trí GPS'),
-                            ),
-                          ],
-                        ),
+                  child: TextField(
+                    key: const ValueKey('chat-input'),
+                    controller: _draft,
+                    focusNode: _focus,
+                    enabled: _chat.status != ChatStatus.stopped,
+                    minLines: 1,
+                    maxLines: 4,
+                    maxLength: 2000,
+                    decoration: InputDecoration(
+                      hintText: 'Nhập tin nhắn…',
+                      counterText: '',
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
                       ),
-                      Expanded(
-                        child: TextField(
-                          key: const ValueKey('chat-input'),
-                          controller: _draft,
-                          enabled: _chat.status != ChatStatus.stopped,
-                          minLines: 1,
-                          maxLines: 4,
-                          maxLength: 2000,
-                          decoration: const InputDecoration(
-                            hintText: 'Nhập tin nhắn…',
-                            border: OutlineInputBorder(),
-                          ),
-                          onChanged: (_) => setState(() {}),
-                        ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(24),
                       ),
-                      const SizedBox(width: 8),
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 24),
-                        child: IconButton.filled(
-                          key: const ValueKey('chat-send'),
-                          tooltip: 'Gửi tin nhắn',
-                          onPressed:
-                              _chat.canSend && _draft.text.trim().isNotEmpty
-                              ? _send
-                              : null,
-                          icon: _chat.sending
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : const Icon(Icons.send),
-                        ),
-                      ),
-                    ],
+                    ),
+                    onChanged: (_) => setState(() {}),
                   ),
+                ),
+                const SizedBox(width: 8),
+                IconButton.filled(
+                  key: const ValueKey('chat-send'),
+                  tooltip: 'Gửi tin nhắn',
+                  onPressed: _chat.canSend && _draft.text.trim().isNotEmpty
+                      ? _send
+                      : null,
+                  icon: _chat.sending
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.send_rounded),
                 ),
               ],
             ),
           ),
+        ],
+      ),
+    ),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final body = Column(
+      children: [
+        _header(context),
+        _jobBanner(context),
+        if (_chat.error != null)
+          Container(
+            width: double.infinity,
+            color: Theme.of(context).colorScheme.errorContainer,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    _chat.error!,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (_chat.status == ChatStatus.reconnecting)
+                  TextButton(
+                    onPressed: _chat.reconnect,
+                    child: const Text('Kết nối lại'),
+                  ),
+              ],
+            ),
+          ),
+        Expanded(child: _messages(context)),
+        _composer(context),
+      ],
+    );
+    if (widget.embedded) {
+      return ColoredBox(color: AppPalette.of(context).canvas, child: body);
+    }
+    return Scaffold(
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1120),
+          child: body,
         ),
       ),
     );

@@ -35,7 +35,9 @@ class ChatMessage {
 }
 
 class MessagePage {
-  const MessagePage(this.messages, this.hasMore);
+  const MessagePage(this.messages, this.hasMore, {this.peerLastReadMessageId});
   final List<ChatMessage> messages;
   final bool hasMore;
+  // Null with the current Backend: our own read cursor is not a peer receipt.
+  final int? peerLastReadMessageId;
 }

@@ -809,6 +809,7 @@ class ApiService extends ChangeNotifier {
           .map((m) => ChatMessage.fromJson(m as Map<String, dynamic>))
           .toList(),
       data['hasMore'] as bool,
+      peerLastReadMessageId: (data['peerLastReadMessageId'] as num?)?.toInt(),
     );
   }
 
