@@ -5,7 +5,6 @@ import 'chat_screen.dart';
 import '../widgets/figma_job_map.dart';
 import '../widgets/week_schedule.dart';
 import 'calendar_screen.dart';
-import '../widgets/appearance_button.dart';
 import '../widgets/incident_actions.dart';
 import '../widgets/weather_card.dart';
 import 'attendance_screen.dart';
@@ -29,7 +28,6 @@ import '../widgets/empty_state.dart';
 import '../widgets/hero_greeting.dart';
 import '../widgets/job_search_header.dart';
 import '../widgets/cancel_work_dialog.dart';
-import '../widgets/finance_menu.dart';
 import '../widgets/home_navigation.dart';
 
 class WorkerHomeScreen extends StatefulWidget {
@@ -323,25 +321,10 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
       title: const BrandHeader(title: 'Thợ Xây'),
       actions: [
         HomeInboxActions(api: widget.api),
-        const AppearanceButton(),
-        FinanceMenu(api: widget.api, worker: true),
-        PopupMenuButton<String>(
-          tooltip: 'Tài khoản và làm mới',
-          onSelected: (value) {
-            if (value == 'logout') {
-              widget.api.logout();
-            } else {
-              _refresh();
-            }
-          },
-          itemBuilder: (_) => [
-            PopupMenuItem(
-              value: 'refresh',
-              enabled: !_loading,
-              child: const Text('Làm mới'),
-            ),
-            const PopupMenuItem(value: 'logout', child: Text('Đăng xuất')),
-          ],
+        HomeAppMenu(
+          api: widget.api,
+          onRefresh: _refresh,
+          refreshing: _loading || _cancelling,
         ),
       ],
     ),

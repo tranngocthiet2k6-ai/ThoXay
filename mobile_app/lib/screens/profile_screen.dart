@@ -1,6 +1,5 @@
 import '../widgets/saved_workers_preview.dart';
 import '../widgets/home_navigation.dart';
-import '../widgets/appearance_button.dart';
 import 'incidents_screen.dart';
 import '../widgets/portfolio_uploads.dart';
 import 'saved_screen.dart';
@@ -193,12 +192,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       actions: [
         HomeInboxActions(api: widget.api),
-        const AppearanceButton(),
-        IconButton(
-          tooltip: 'Làm mới hồ sơ',
-          onPressed: _loading ? null : _load,
-          icon: const Icon(Icons.refresh),
-        ),
+        HomeAppMenu(api: widget.api, onRefresh: _load, refreshing: _loading),
       ],
     ),
     body: ContentFrame(

@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../models/wallet.dart';
 import '../services/api_service.dart';
-import 'wallet_screen.dart';
+import '../widgets/home_navigation.dart';
 import '../widgets/earnings_chart.dart';
 import '../widgets/earnings_timeline_chart.dart';
 
@@ -74,15 +74,8 @@ class _EarningsScreenState extends State<EarningsScreen> {
     appBar: AppBar(
       title: const Text('Thu nhập'),
       actions: [
-        IconButton(
-          tooltip: 'Mở ví',
-          onPressed: () => Navigator.of(context).push(
-            MaterialPageRoute<void>(
-              builder: (_) => WalletScreen(api: widget.api),
-            ),
-          ),
-          icon: const Icon(Icons.account_balance_wallet_outlined),
-        ),
+        HomeInboxActions(api: widget.api),
+        HomeAppMenu(api: widget.api, onRefresh: _load, refreshing: _busy),
       ],
     ),
     body: ContentFrame(

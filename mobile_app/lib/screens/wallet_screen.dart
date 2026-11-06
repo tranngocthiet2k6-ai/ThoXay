@@ -1,4 +1,6 @@
 import '../widgets/commercial_hero.dart';
+import '../widgets/home_navigation.dart';
+import 'earnings_screen.dart';
 import '../widgets/figma_components.dart';
 import '../widgets/wallet_weekly_summary.dart';
 import '../widgets/design_motion.dart';
@@ -145,11 +147,8 @@ class _WalletScreenState extends State<WalletScreen> {
             : 'Ví Thợ Xây',
       ),
       actions: [
-        IconButton(
-          tooltip: 'Làm mới ví',
-          onPressed: _busy ? null : () => _load(),
-          icon: const Icon(Icons.refresh),
-        ),
+        HomeInboxActions(api: widget.api),
+        HomeAppMenu(api: widget.api, onRefresh: _load, refreshing: _busy),
       ],
     ),
     body: ContentFrame(
@@ -224,6 +223,19 @@ class _WalletScreenState extends State<WalletScreen> {
                       worker: widget.api.session?.role != 'ROLE_CONTRACTOR',
                       hidden: _hideBalance,
                     ),
+                    if (widget.api.session?.role == 'ROLE_WORKER')
+                      TextButton.icon(
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.white,
+                        ),
+                        onPressed: () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => EarningsScreen(api: widget.api),
+                          ),
+                        ),
+                        icon: const Icon(Icons.bar_chart_outlined, size: 18),
+                        label: const Text('Xem thu nhập chi tiết'),
+                      ),
                     const SizedBox(height: 16),
                     Row(
                       children: [

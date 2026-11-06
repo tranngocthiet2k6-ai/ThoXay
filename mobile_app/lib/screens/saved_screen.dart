@@ -1,4 +1,5 @@
 import '../widgets/design_motion.dart';
+import '../widgets/home_navigation.dart';
 
 import 'package:flutter/material.dart';
 
@@ -61,6 +62,10 @@ class _SavedScreenState extends State<SavedScreen> {
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
       title: Text(widget.worker ? 'Công trình yêu thích' : 'Thợ quen'),
+      actions: [
+        HomeInboxActions(api: widget.api),
+        HomeAppMenu(api: widget.api, onRefresh: _load, refreshing: _loading),
+      ],
     ),
     body: ContentFrame(
       child: RefreshIndicator(

@@ -113,15 +113,19 @@ class _HeroGreetingState extends State<HeroGreeting> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            widget.availability == true
-                                ? 'Đang nhận việc'
-                                : widget.availability == false
-                                ? 'Tạm ngưng nhận việc'
-                                : 'Đang đồng bộ trạng thái',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
+                          Flexible(
+                            child: Text(
+                              widget.availability == true
+                                  ? 'Đang nhận việc'
+                                  : widget.availability == false
+                                  ? 'Tạm ngưng nhận việc'
+                                  : 'Đang đồng bộ trạng thái',
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                           const SizedBox(width: 4),

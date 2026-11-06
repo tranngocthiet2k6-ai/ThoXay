@@ -90,6 +90,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
+            appBar: AppBar(actions: [HomeInboxActions(api: api)]),
             bottomNavigationBar: HomeNavigation(api: api, worker: true),
           ),
         ),

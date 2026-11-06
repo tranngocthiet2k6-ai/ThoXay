@@ -2,7 +2,6 @@ import '../widgets/brand_logo.dart';
 import '../widgets/applicant_evidence.dart';
 import '../widgets/figma_components.dart';
 import '../widgets/figma_job_map.dart';
-import '../widgets/appearance_button.dart';
 import '../widgets/incident_actions.dart';
 import '../widgets/weather_card.dart';
 import 'attendance_screen.dart';
@@ -28,7 +27,6 @@ import '../widgets/empty_state.dart';
 import '../widgets/hero_greeting.dart';
 import '../widgets/job_search_header.dart';
 import 'worker_profile_screen.dart';
-import '../widgets/finance_menu.dart';
 import 'job_payments_screen.dart';
 import '../widgets/home_navigation.dart';
 
@@ -155,26 +153,7 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
       title: const BrandHeader(title: 'Chủ thầu'),
       actions: [
         HomeInboxActions(api: widget.api),
-        const AppearanceButton(),
-        FinanceMenu(api: widget.api),
-        PopupMenuButton<String>(
-          tooltip: 'Tài khoản và làm mới',
-          onSelected: (value) {
-            if (value == 'logout') {
-              widget.api.logout();
-            } else {
-              _refresh();
-            }
-          },
-          itemBuilder: (_) => [
-            PopupMenuItem(
-              value: 'refresh',
-              enabled: !_loading,
-              child: const Text('Làm mới'),
-            ),
-            const PopupMenuItem(value: 'logout', child: Text('Đăng xuất')),
-          ],
-        ),
+        HomeAppMenu(api: widget.api, onRefresh: _refresh, refreshing: _loading),
       ],
     ),
     body: Column(
@@ -474,7 +453,7 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
         ),
       ],
     ),
-    bottomNavigationBar: HomeNavigation(api: widget.api, onCreate: _create),
+    bottomNavigationBar: HomeNavigation(api: widget.api),
   );
 }
 
