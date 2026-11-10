@@ -52,11 +52,18 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(title: const Text('Hồ sơ thợ')),
     body: _loading
-        ? const SingleChildScrollView(child: ContentSkeleton())
+        ? const SingleChildScrollView(
+            physics: BouncingScrollPhysics(
+              parent: AlwaysScrollableScrollPhysics(),
+            ),
+            child: ContentSkeleton(),
+          )
         : RefreshIndicator(
             onRefresh: _load,
             child: ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
+              physics: const BouncingScrollPhysics(
+                parent: AlwaysScrollableScrollPhysics(),
+              ),
               padding: const EdgeInsets.all(24),
               children: [
                 const SectionIntro(

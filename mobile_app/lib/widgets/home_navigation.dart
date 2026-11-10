@@ -12,6 +12,7 @@ import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import '../theme/appearance_controller.dart';
 import 'app_snack_bar.dart';
+import 'bouncing_button.dart';
 
 /// Four destinations at every breakpoint; inbox badges live on the AppBar.
 class HomeNavigation extends StatelessWidget {
@@ -28,6 +29,7 @@ class HomeNavigation extends StatelessWidget {
   final ValueChanged<int>? onSelected;
 
   void _select(BuildContext context, int index) {
+    AppHaptics.light();
     if (index == 0 || (worker && index == 1)) {
       onSelected?.call(index);
       return;

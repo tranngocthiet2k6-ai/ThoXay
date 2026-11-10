@@ -1,3 +1,4 @@
+import 'bouncing_button.dart';
 import '../screens/commitment_screen.dart';
 
 import 'package:flutter/material.dart';
@@ -237,16 +238,18 @@ class _WorkCommitmentDialogState extends State<WorkCommitmentDialog> {
         onPressed: () => Navigator.pop(context),
         child: const Text('Để sau'),
       ),
-      FilledButton(
-        onPressed: _accepted && !_busy && !_dirty && _document != null
-            ? _submit
-            : null,
-        child: Text(
-          widget.contractor
-              ? 'Xác nhận nhận thợ'
-              : widget.job != null
-              ? 'Đồng ý & ứng tuyển'
-              : 'Xác nhận cam kết',
+      BouncingButton(
+        child: FilledButton(
+          onPressed: _accepted && !_busy && !_dirty && _document != null
+              ? _submit
+              : null,
+          child: Text(
+            widget.contractor
+                ? 'Xác nhận nhận thợ'
+                : widget.job != null
+                ? 'Đồng ý & ứng tuyển'
+                : 'Xác nhận cam kết',
+          ),
         ),
       ),
     ],

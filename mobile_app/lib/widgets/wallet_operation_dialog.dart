@@ -1,3 +1,5 @@
+import 'bouncing_button.dart';
+
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -52,6 +54,7 @@ class _WalletOperationState extends State<_WalletOperation> {
 
   Future<void> _submit() async {
     if (_busy || !_form.currentState!.validate()) return;
+    AppHaptics.light();
     setState(() {
       _busy = true;
       _error = null;
@@ -223,14 +226,16 @@ class _WalletOperationState extends State<_WalletOperation> {
             onPressed: _busy ? null : () => Navigator.pop(context),
             child: const Text('Đóng'),
           ),
-          FilledButton(
-            onPressed: _busy ? null : _submit,
-            child: Text(
-              _busy
-                  ? 'Đang xử lý…'
-                  : widget.kind == 'TOP_UP' || widget.kind == 'WITHDRAW'
-                  ? 'Gửi yêu cầu'
-                  : 'Xác nhận chuyển',
+          BouncingButton(
+            child: FilledButton(
+              onPressed: _busy ? null : _submit,
+              child: Text(
+                _busy
+                    ? 'Đang xử lý…'
+                    : widget.kind == 'TOP_UP' || widget.kind == 'WITHDRAW'
+                    ? 'Gửi yêu cầu'
+                    : 'Xác nhận chuyển',
+              ),
             ),
           ),
         ],

@@ -1,3 +1,5 @@
+import '../widgets/bouncing_button.dart';
+
 import 'package:flutter/material.dart';
 
 import '../models/scheduling.dart';
@@ -93,7 +95,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
       child: RefreshIndicator(
         onRefresh: _load,
         child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
           padding: const EdgeInsets.all(16),
           children: [
             const SectionIntro(
@@ -110,10 +114,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 _load();
               },
             ),
-            FilledButton.icon(
-              onPressed: _busy ? null : _block,
-              icon: const Icon(Icons.event_busy),
-              label: const Text('Đánh dấu ngày bận'),
+            BouncingButton(
+              child: FilledButton.icon(
+                onPressed: _busy ? null : _block,
+                icon: const Icon(Icons.event_busy),
+                label: const Text('Đánh dấu ngày bận'),
+              ),
             ),
             const SizedBox(height: 16),
             if (_busy) const ContentSkeleton(compact: true),

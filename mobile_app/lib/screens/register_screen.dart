@@ -1,3 +1,4 @@
+import '../widgets/bouncing_button.dart';
 import '../theme/app_theme.dart';
 
 import 'dart:convert';
@@ -167,18 +168,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                 ),
               const SizedBox(height: 24),
-              FilledButton(
-                onPressed: _busy ? null : _submit,
-                style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.all(16),
+              BouncingButton(
+                child: FilledButton(
+                  onPressed: _busy ? null : _submit,
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.all(16),
+                  ),
+                  child: _busy
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('Tạo tài khoản'),
                 ),
-                child: _busy
-                    ? const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Text('Tạo tài khoản'),
               ),
               const SizedBox(height: 16),
             ],

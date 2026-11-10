@@ -1,3 +1,5 @@
+import 'bouncing_button.dart';
+
 import 'package:flutter/material.dart';
 
 /// One primary application action; chat remains governed by ACCEPTED status.
@@ -39,18 +41,20 @@ class JobApplicationActions extends StatelessWidget {
       ),
       const SizedBox(width: 8),
       Expanded(
-        child: FilledButton(
-          style: FilledButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            textStyle: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
+        child: BouncingButton(
+          child: FilledButton(
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              textStyle: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+              ),
             ),
-          ),
-          onPressed: applied || busy ? null : onApply,
-          child: Text(
-            applied ? 'Đã ứng tuyển' : 'Ứng tuyển ngay',
-            textAlign: TextAlign.center,
+            onPressed: applied || busy ? null : onApply,
+            child: Text(
+              applied ? 'Đã ứng tuyển' : 'Ứng tuyển ngay',
+              textAlign: TextAlign.center,
+            ),
           ),
         ),
       ),

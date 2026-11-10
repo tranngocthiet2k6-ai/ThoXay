@@ -59,6 +59,9 @@ class _EarningsTimelineChartState extends State<EarningsTimelineChart> {
                     controller: _scroll,
                     thumbVisibility: days.length * width > bounds.maxWidth,
                     child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(
+                        parent: AlwaysScrollableScrollPhysics(),
+                      ),
                       controller: _scroll,
                       scrollDirection: Axis.horizontal,
                       padding: const EdgeInsets.only(bottom: 20),

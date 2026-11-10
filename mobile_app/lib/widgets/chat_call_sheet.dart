@@ -1,3 +1,5 @@
+import 'bouncing_button.dart';
+
 import 'dart:async';
 import 'dart:math';
 
@@ -250,6 +252,9 @@ class _ChatCallSheetState extends State<ChatCallSheet>
         child: SafeArea(
           top: false,
           child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(
+              parent: AlwaysScrollableScrollPhysics(),
+            ),
             padding: const EdgeInsets.all(24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -345,12 +350,14 @@ class _ChatCallSheetState extends State<ChatCallSheet>
                 if (_phase == _CallPhase.idle) ...[
                   SizedBox(
                     width: double.infinity,
-                    child: FilledButton.icon(
-                      onPressed: _busy || phone == null || phone.isEmpty
-                          ? null
-                          : _sim,
-                      icon: const Icon(Icons.sim_card_outlined),
-                      label: const Text('Gọi qua SIM'),
+                    child: BouncingButton(
+                      child: FilledButton.icon(
+                        onPressed: _busy || phone == null || phone.isEmpty
+                            ? null
+                            : _sim,
+                        icon: const Icon(Icons.sim_card_outlined),
+                        label: const Text('Gọi qua SIM'),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 8),

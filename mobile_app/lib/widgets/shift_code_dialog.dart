@@ -1,3 +1,5 @@
+import 'bouncing_button.dart';
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -96,9 +98,11 @@ class _ShiftCodeDialogState extends State<ShiftCodeDialog> {
           onPressed: () => Navigator.pop(context),
           child: const Text('Đóng'),
         ),
-        FilledButton(
-          onPressed: _loading ? null : _load,
-          child: const Text('Tạo mã mới'),
+        BouncingButton(
+          child: FilledButton(
+            onPressed: _loading ? null : _load,
+            child: const Text('Tạo mã mới'),
+          ),
         ),
       ],
     );

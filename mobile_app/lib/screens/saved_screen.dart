@@ -1,3 +1,4 @@
+import '../widgets/bouncing_button.dart';
 import '../widgets/design_motion.dart';
 import '../widgets/home_navigation.dart';
 
@@ -71,7 +72,9 @@ class _SavedScreenState extends State<SavedScreen> {
       child: RefreshIndicator(
         onRefresh: _load,
         child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
           padding: const EdgeInsets.all(24),
           children: [
             if (_loading) const ContentSkeleton(),
@@ -90,9 +93,11 @@ class _SavedScreenState extends State<SavedScreen> {
                 message: widget.worker
                     ? 'Bấm Lưu công trình trong phần chi tiết để xem lại tại đây.'
                     : 'Bấm Lưu thợ quen trong hồ sơ để kết nối ở công trình tiếp theo.',
-                action: FilledButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Khám phá ngay'),
+                action: BouncingButton(
+                  child: FilledButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Khám phá ngay'),
+                  ),
                 ),
               ),
             if (!_loading)
@@ -102,10 +107,13 @@ class _SavedScreenState extends State<SavedScreen> {
                   child: JobCard(
                     api: widget.api,
                     job: j,
-                    action: FilledButton.tonal(
-                      onPressed: () =>
-                          _open(SharedJobScreen(api: widget.api, jobId: j.id)),
-                      child: const Text('Mở công trình'),
+                    action: BouncingButton(
+                      child: FilledButton.tonal(
+                        onPressed: () => _open(
+                          SharedJobScreen(api: widget.api, jobId: j.id),
+                        ),
+                        child: const Text('Mở công trình'),
+                      ),
                     ),
                   ),
                 ),

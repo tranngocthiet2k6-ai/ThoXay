@@ -1,3 +1,5 @@
+import 'bouncing_button.dart';
+
 import 'package:flutter/material.dart';
 
 import '../models/models.dart';
@@ -66,12 +68,14 @@ class _AttendanceSettlementActionsState
                     style: const TextStyle(fontSize: 12),
                   ),
                   const SizedBox(height: 8),
-                  FilledButton.icon(
-                    onPressed: widget.busy ? null : widget.onReview,
-                    icon: const Icon(Icons.task_alt),
-                    label: const Text(
-                      'Nghiệm thu & Mở khóa thanh toán',
-                      textAlign: TextAlign.center,
+                  BouncingButton(
+                    child: FilledButton.icon(
+                      onPressed: widget.busy ? null : widget.onReview,
+                      icon: const Icon(Icons.task_alt),
+                      label: const Text(
+                        'Nghiệm thu & Mở khóa thanh toán',
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -88,38 +92,42 @@ class _AttendanceSettlementActionsState
                 alignment: WrapAlignment.center,
                 children: [
                   if (!completed && widget.job.status == 'IN_PROGRESS')
-                    FilledButton.icon(
-                      onPressed: _busy || widget.busy ? null : _complete,
-                      icon: const Icon(Icons.star_outline),
-                      label: const Text('Đánh giá & hoàn thành'),
+                    BouncingButton(
+                      child: FilledButton.icon(
+                        onPressed: _busy || widget.busy ? null : _complete,
+                        icon: const Icon(Icons.star_outline),
+                        label: const Text('Đánh giá & hoàn thành'),
+                      ),
                     ),
                   if (completed)
-                    FilledButton.icon(
-                      onPressed: _busy || widget.busy
-                          ? null
-                          : () async {
-                              try {
-                                await Navigator.of(context).push(
-                                  MaterialPageRoute<void>(
-                                    builder: (_) => JobPaymentsScreen(
-                                      api: widget.api,
-                                      job: widget.job,
-                                    ),
-                                  ),
-                                );
-                              } on ApiException catch (e) {
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    AppSnackBar(
-                                      content: Text(e.message),
-                                      kind: NoticeKind.error,
+                    BouncingButton(
+                      child: FilledButton.icon(
+                        onPressed: _busy || widget.busy
+                            ? null
+                            : () async {
+                                try {
+                                  await Navigator.of(context).push(
+                                    MaterialPageRoute<void>(
+                                      builder: (_) => JobPaymentsScreen(
+                                        api: widget.api,
+                                        job: widget.job,
+                                      ),
                                     ),
                                   );
+                                } on ApiException catch (e) {
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      AppSnackBar(
+                                        content: Text(e.message),
+                                        kind: NoticeKind.error,
+                                      ),
+                                    );
+                                  }
                                 }
-                              }
-                            },
-                      icon: const Icon(Icons.payments_outlined),
-                      label: const Text('Mở thanh toán ngày công'),
+                              },
+                        icon: const Icon(Icons.payments_outlined),
+                        label: const Text('Mở thanh toán ngày công'),
+                      ),
                     ),
                 ],
               ),

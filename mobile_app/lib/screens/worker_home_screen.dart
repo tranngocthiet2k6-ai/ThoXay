@@ -1,3 +1,4 @@
+import '../widgets/bouncing_button.dart';
 import '../widgets/brand_logo.dart';
 import '../widgets/job_application_actions.dart';
 import '../widgets/wage_offer_sheet.dart';
@@ -273,9 +274,11 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
             onPressed: () => Navigator.pop(context, false),
             child: const Text('Quay lại'),
           ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Rút toàn bộ tổ'),
+          BouncingButton(
+            child: FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Rút toàn bộ tổ'),
+            ),
           ),
         ],
       ),
@@ -336,7 +339,9 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
               if (!_cancelling) await _refresh();
             },
             child: CustomScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
+              physics: const BouncingScrollPhysics(
+                parent: AlwaysScrollableScrollPhysics(),
+              ),
               slivers: [
                 SliverPadding(
                   padding: const EdgeInsets.all(16),
@@ -589,9 +594,11 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                           EmptyState(
                             title: 'Hành trình mới bắt đầu',
                             message: 'Bạn chưa ứng tuyển công trình nào. Khám phá công việc gần bạn và gửi đơn đầu tiên nhé!',
-                            action: FilledButton(
-                              onPressed: () => setState(() => _tab = 0),
-                              child: const Text('Khám phá công trình'),
+                            action: BouncingButton(
+                              child: FilledButton(
+                                onPressed: () => setState(() => _tab = 0),
+                                child: const Text('Khám phá công trình'),
+                              ),
                             ),
                           ),
                         for (final application in _applications)

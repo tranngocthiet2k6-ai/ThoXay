@@ -1,3 +1,4 @@
+import 'bouncing_button.dart';
 import 'app_snack_bar.dart';
 
 import 'package:flutter/material.dart';
@@ -230,10 +231,12 @@ class _ProfileEditorState extends State<ProfileEditor> {
             style: TextStyle(color: Theme.of(context).colorScheme.error),
           ),
         const SizedBox(height: 12),
-        FilledButton.icon(
-          onPressed: _busy ? null : _save,
-          icon: const Icon(Icons.save_outlined),
-          label: Text(_busy ? 'Đang lưu…' : 'Lưu hồ sơ'),
+        BouncingButton(
+          child: FilledButton.icon(
+            onPressed: _busy ? null : _save,
+            icon: const Icon(Icons.save_outlined),
+            label: Text(_busy ? 'Đang lưu…' : 'Lưu hồ sơ'),
+          ),
         ),
       ],
     ),

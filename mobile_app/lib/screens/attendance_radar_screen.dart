@@ -1,3 +1,5 @@
+import '../widgets/bouncing_button.dart';
+
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -174,6 +176,9 @@ class _AttendanceRadarScreenState extends State<AttendanceRadarScreen> {
       ),
       body: ContentFrame(
         child: ListView(
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
           padding: const EdgeInsets.all(16),
           children: [
             SizedBox(
@@ -326,11 +331,13 @@ class _AttendanceRadarScreenState extends State<AttendanceRadarScreen> {
                 ),
               ),
             const SizedBox(height: 16),
-            FilledButton.icon(
-              onPressed: _busy || done || !valid ? null : () => _mark(),
-              icon: const Icon(Icons.location_on_outlined),
-              label: Text(
-                row == null ? 'Chấm công GPS' : 'Kết thúc ca bằng GPS',
+            BouncingButton(
+              child: FilledButton.icon(
+                onPressed: _busy || done || !valid ? null : () => _mark(),
+                icon: const Icon(Icons.location_on_outlined),
+                label: Text(
+                  row == null ? 'Chấm công GPS' : 'Kết thúc ca bằng GPS',
+                ),
               ),
             ),
             const SizedBox(height: 12),

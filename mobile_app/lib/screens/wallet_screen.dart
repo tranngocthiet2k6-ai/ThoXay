@@ -1,3 +1,4 @@
+import '../widgets/bouncing_button.dart';
 import '../widgets/commercial_hero.dart';
 import '../widgets/home_navigation.dart';
 import 'earnings_screen.dart';
@@ -156,7 +157,9 @@ class _WalletScreenState extends State<WalletScreen> {
         onRefresh: () => _load(),
         child: ListView(
           padding: const EdgeInsets.all(16),
-          physics: const AlwaysScrollableScrollPhysics(),
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
           children: [
             if (_busy && _balance == null) const ContentSkeleton(compact: true),
             if (_error != null) ...[
@@ -240,12 +243,14 @@ class _WalletScreenState extends State<WalletScreen> {
                     Row(
                       children: [
                         Expanded(
-                          child: FilledButton.icon(
-                            onPressed: _busy || balance.main < 1000
-                                ? null
-                                : () => _operate('WITHDRAW'),
-                            icon: const Icon(Icons.north_east, size: 18),
-                            label: const Text('Rút tiền'),
+                          child: BouncingButton(
+                            child: FilledButton.icon(
+                              onPressed: _busy || balance.main < 1000
+                                  ? null
+                                  : () => _operate('WITHDRAW'),
+                              icon: const Icon(Icons.north_east, size: 18),
+                              label: const Text('Rút tiền'),
+                            ),
                           ),
                         ),
                         const SizedBox(width: 12),

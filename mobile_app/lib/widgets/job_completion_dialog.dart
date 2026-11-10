@@ -1,3 +1,5 @@
+import 'bouncing_button.dart';
+
 import 'package:flutter/material.dart';
 
 import 'content_skeleton.dart';
@@ -76,6 +78,9 @@ class _JobCompletionDialogState extends State<_JobCompletionDialog> {
       content: SizedBox(
         width: 480,
         child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -149,15 +154,17 @@ class _JobCompletionDialogState extends State<_JobCompletionDialog> {
           onPressed: _saving ? null : () => Navigator.pop(context),
           child: const Text('Hủy'),
         ),
-        FilledButton(
-          onPressed:
-              _loading ||
-                  _saving ||
-                  _workers.isEmpty ||
-                  _ratings.length != _workers.length
-              ? null
-              : _complete,
-          child: Text(_saving ? 'Đang lưu…' : 'Hoàn thành & lưu điểm'),
+        BouncingButton(
+          child: FilledButton(
+            onPressed:
+                _loading ||
+                    _saving ||
+                    _workers.isEmpty ||
+                    _ratings.length != _workers.length
+                ? null
+                : _complete,
+            child: Text(_saving ? 'Đang lưu…' : 'Hoàn thành & lưu điểm'),
+          ),
         ),
       ],
     ),

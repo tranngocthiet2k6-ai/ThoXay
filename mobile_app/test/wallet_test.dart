@@ -215,6 +215,9 @@ void main() {
         -180,
         scrollable: find.byType(Scrollable).first,
       );
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Tuần'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Tuần'));
       await tester.pumpAndSettle();
       expect(api.period, 'WEEK');

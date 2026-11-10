@@ -1,3 +1,5 @@
+import 'bouncing_button.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -178,18 +180,20 @@ class _WorkPhotoReportDialogState extends State<WorkPhotoReportDialog> {
           onPressed: _choosing ? null : () => Navigator.pop(context),
           child: const Text('Hủy'),
         ),
-        FilledButton(
-          onPressed: _choosing || _photos.any((p) => p == null)
-              ? null
-              : () => Navigator.pop(
-                  context,
-                  WorkPhotoDraft(
-                    _photos[0]!,
-                    _photos[1]!,
-                    _caption.text.trim(),
+        BouncingButton(
+          child: FilledButton(
+            onPressed: _choosing || _photos.any((p) => p == null)
+                ? null
+                : () => Navigator.pop(
+                    context,
+                    WorkPhotoDraft(
+                      _photos[0]!,
+                      _photos[1]!,
+                      _caption.text.trim(),
+                    ),
                   ),
-                ),
-          child: const Text('Gửi báo cáo'),
+            child: const Text('Gửi báo cáo'),
+          ),
         ),
       ],
     ),

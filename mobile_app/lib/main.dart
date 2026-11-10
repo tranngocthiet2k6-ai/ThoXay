@@ -16,6 +16,7 @@ import 'screens/notifications_screen.dart';
 import 'widgets/adaptive_viewport.dart';
 import 'theme/appearance_controller.dart';
 import 'widgets/startup_gate.dart';
+import 'widgets/bouncing_button.dart';
 
 final _navigator = GlobalKey<NavigatorState>();
 final _messenger = GlobalKey<ScaffoldMessengerState>();
@@ -113,6 +114,7 @@ class _ThoXayAppState extends State<ThoXayApp> {
       listenable: Listenable.merge([api, _appearance]),
       builder: (context, _) => MaterialApp(
         title: 'Thợ Xây',
+        scrollBehavior: const AppScrollBehavior(),
         navigatorKey: _navigator,
         scaffoldMessengerKey: _messenger,
         debugShowCheckedModeBanner: false,

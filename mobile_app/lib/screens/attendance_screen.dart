@@ -1,3 +1,4 @@
+import '../widgets/bouncing_button.dart';
 import '../widgets/week_schedule.dart';
 import '../widgets/attendance_settlement_actions.dart';
 import '../widgets/incident_actions.dart';
@@ -281,7 +282,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         child: RefreshIndicator(
           onRefresh: () => _load(),
           child: ListView(
-            physics: const AlwaysScrollableScrollPhysics(),
+            physics: const BouncingScrollPhysics(
+              parent: AlwaysScrollableScrollPhysics(),
+            ),
             padding: const EdgeInsets.all(24),
             children: [
               if (_worker) ...[
@@ -326,16 +329,18 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                               Row(
                                 children: [
                                   Expanded(
-                                    child: FilledButton.icon(
-                                      key: const ValueKey('attendance-gps'),
-                                      onPressed: _busy || _loading
-                                          ? null
-                                          : () => _mark(checkout),
-                                      icon: const Icon(Icons.my_location),
-                                      label: Text(
-                                        checkout
-                                            ? 'Kết thúc ca GPS'
-                                            : 'Chấm công GPS',
+                                    child: BouncingButton(
+                                      child: FilledButton.icon(
+                                        key: const ValueKey('attendance-gps'),
+                                        onPressed: _busy || _loading
+                                            ? null
+                                            : () => _mark(checkout),
+                                        icon: const Icon(Icons.my_location),
+                                        label: Text(
+                                          checkout
+                                              ? 'Kết thúc ca GPS'
+                                              : 'Chấm công GPS',
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -612,13 +617,15 @@ class _CodeInputState extends State<_CodeInput> {
         onPressed: () => Navigator.pop(context),
         child: const Text('Hủy'),
       ),
-      FilledButton(
-        onPressed: () {
-          if (_form.currentState!.validate()) {
-            Navigator.pop(context, _text.text.trim());
-          }
-        },
-        child: const Text('Xác nhận chấm công'),
+      BouncingButton(
+        child: FilledButton(
+          onPressed: () {
+            if (_form.currentState!.validate()) {
+              Navigator.pop(context, _text.text.trim());
+            }
+          },
+          child: const Text('Xác nhận chấm công'),
+        ),
       ),
     ],
   );
@@ -673,13 +680,15 @@ class _ReviewDialogState extends State<_ReviewDialog> {
         onPressed: () => Navigator.pop(context),
         child: const Text('Quay lại'),
       ),
-      FilledButton(
-        onPressed: () {
-          if (_form.currentState!.validate()) {
-            Navigator.pop(context, _feedback.text.trim());
-          }
-        },
-        child: const Text('Xác nhận'),
+      BouncingButton(
+        child: FilledButton(
+          onPressed: () {
+            if (_form.currentState!.validate()) {
+              Navigator.pop(context, _feedback.text.trim());
+            }
+          },
+          child: const Text('Xác nhận'),
+        ),
       ),
     ],
   );

@@ -1,3 +1,5 @@
+import '../widgets/bouncing_button.dart';
+
 import 'package:flutter/material.dart';
 
 import '../models/models.dart';
@@ -90,6 +92,9 @@ class _SupportCenterScreenState extends State<SupportCenterScreen> {
       child: RefreshIndicator(
         onRefresh: _load,
         child: ListView(
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
           padding: const EdgeInsets.all(24),
           children: [
             const CommercialHero(
@@ -162,12 +167,14 @@ class _SupportCenterScreenState extends State<SupportCenterScreen> {
                       'Bạn có thể gửi báo cáo khi tham gia hoặc sở hữu công trình.',
                     ),
                   const SizedBox(height: 12),
-                  FilledButton.icon(
-                    onPressed: _loading || _job == null
-                        ? null
-                        : () => _report(false),
-                    icon: const Icon(Icons.add_photo_alternate_outlined),
-                    label: const Text('Khiếu nại & đính kèm bằng chứng'),
+                  BouncingButton(
+                    child: FilledButton.icon(
+                      onPressed: _loading || _job == null
+                          ? null
+                          : () => _report(false),
+                      icon: const Icon(Icons.add_photo_alternate_outlined),
+                      label: const Text('Khiếu nại & đính kèm bằng chứng'),
+                    ),
                   ),
                   const SizedBox(height: 8),
                   OutlinedButton.icon(

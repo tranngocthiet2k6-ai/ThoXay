@@ -1,3 +1,4 @@
+import '../widgets/bouncing_button.dart';
 import '../widgets/saved_workers_preview.dart';
 import '../widgets/home_navigation.dart';
 import 'incidents_screen.dart';
@@ -201,7 +202,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           if (!_loading) await _load();
         },
         child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
           padding: const EdgeInsets.all(24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -401,10 +404,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const SizedBox(height: 16),
                   _photoCard('back', 'Mặt sau CCCD', _backImage),
                   const SizedBox(height: 16),
-                  FilledButton.icon(
-                    onPressed: _loading ? null : _save,
-                    icon: const Icon(Icons.badge_outlined),
-                    label: const Text('Cập nhật CCCD'),
+                  BouncingButton(
+                    child: FilledButton.icon(
+                      onPressed: _loading ? null : _save,
+                      icon: const Icon(Icons.badge_outlined),
+                      label: const Text('Cập nhật CCCD'),
+                    ),
                   ),
                 ],
               ],

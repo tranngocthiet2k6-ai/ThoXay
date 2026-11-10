@@ -1,3 +1,5 @@
+import 'bouncing_button.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -180,21 +182,25 @@ class JobUtilities extends StatelessWidget {
                 onPressed: () => Navigator.pop(context),
                 child: const Text('Đóng'),
               ),
-              FilledButton.icon(
-                onPressed: () async {
-                  await Clipboard.setData(
-                    ClipboardData(text: JobLinks.share(job.id).toString()),
-                  );
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      AppSnackBar(
-                        content: const Text('Đã sao chép liên kết công trình.'),
-                      ),
+              BouncingButton(
+                child: FilledButton.icon(
+                  onPressed: () async {
+                    await Clipboard.setData(
+                      ClipboardData(text: JobLinks.share(job.id).toString()),
                     );
-                  }
-                },
-                icon: const Icon(Icons.copy),
-                label: const Text('Sao chép link'),
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        AppSnackBar(
+                          content: const Text(
+                            'Đã sao chép liên kết công trình.',
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                  icon: const Icon(Icons.copy),
+                  label: const Text('Sao chép link'),
+                ),
               ),
             ],
           ),

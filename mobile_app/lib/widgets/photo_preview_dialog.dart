@@ -1,3 +1,5 @@
+import 'bouncing_button.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 
@@ -61,10 +63,12 @@ class _PhotoPreviewDialogState extends State<PhotoPreviewDialog> {
         onPressed: () => Navigator.pop(context),
         child: const Text('Chọn lại sau'),
       ),
-      FilledButton.icon(
-        onPressed: () => Navigator.pop(context, _caption.text.trim()),
-        icon: const Icon(Icons.cloud_upload_outlined),
-        label: Text(widget.confirmLabel),
+      BouncingButton(
+        child: FilledButton.icon(
+          onPressed: () => Navigator.pop(context, _caption.text.trim()),
+          icon: const Icon(Icons.cloud_upload_outlined),
+          label: Text(widget.confirmLabel),
+        ),
       ),
     ],
   );

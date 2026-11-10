@@ -1,3 +1,4 @@
+import '../widgets/bouncing_button.dart';
 import '../widgets/design_motion.dart';
 
 import 'package:flutter/material.dart';
@@ -74,7 +75,9 @@ class _IncidentsScreenState extends State<IncidentsScreen> {
       child: RefreshIndicator(
         onRefresh: () => _load(),
         child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
           padding: const EdgeInsets.all(24),
           children: [
             if (widget.job != null)
@@ -89,10 +92,12 @@ class _IncidentsScreenState extends State<IncidentsScreen> {
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                       const SizedBox(height: 12),
-                      FilledButton.icon(
-                        onPressed: _loading ? null : _report,
-                        icon: const Icon(Icons.report_outlined),
-                        label: const Text('Báo cáo sự cố / tranh chấp'),
+                      BouncingButton(
+                        child: FilledButton.icon(
+                          onPressed: _loading ? null : _report,
+                          icon: const Icon(Icons.report_outlined),
+                          label: const Text('Báo cáo sự cố / tranh chấp'),
+                        ),
                       ),
                     ],
                   ),
@@ -203,7 +208,9 @@ class _IncidentDetailScreenState extends State<IncidentDetailScreen> {
       child: RefreshIndicator(
         onRefresh: _load,
         child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
           padding: const EdgeInsets.all(24),
           children: [
             if (_loading) const ContentSkeleton(),

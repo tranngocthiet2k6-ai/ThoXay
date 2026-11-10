@@ -1,3 +1,5 @@
+import 'bouncing_button.dart';
+
 import 'package:flutter/material.dart';
 
 import '../services/location_service.dart';
@@ -81,19 +83,21 @@ class _CoordinatesDialogState extends State<_CoordinatesDialog> {
         onPressed: () => Navigator.pop(context),
         child: const Text('Hủy'),
       ),
-      FilledButton(
-        onPressed: () {
-          if (_form.currentState!.validate()) {
-            Navigator.pop(
-              context,
-              GeoPoint(
-                double.parse(_lat.text.trim()),
-                double.parse(_lng.text.trim()),
-              ),
-            );
-          }
-        },
-        child: const Text('Dùng vị trí này'),
+      BouncingButton(
+        child: FilledButton(
+          onPressed: () {
+            if (_form.currentState!.validate()) {
+              Navigator.pop(
+                context,
+                GeoPoint(
+                  double.parse(_lat.text.trim()),
+                  double.parse(_lng.text.trim()),
+                ),
+              );
+            }
+          },
+          child: const Text('Dùng vị trí này'),
+        ),
       ),
     ],
   );

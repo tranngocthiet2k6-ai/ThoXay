@@ -1,3 +1,5 @@
+import 'bouncing_button.dart';
+
 import 'package:flutter/material.dart';
 
 Future<String?> showCancelWorkDialog(BuildContext context) =>
@@ -54,13 +56,15 @@ class _CancelWorkDialogState extends State<_CancelWorkDialog> {
         onPressed: () => Navigator.pop(context),
         child: const Text('Tiếp tục làm việc'),
       ),
-      FilledButton(
-        onPressed: () {
-          if (_form.currentState!.validate()) {
-            Navigator.pop(context, _reason.text.trim());
-          }
-        },
-        child: const Text('Xác nhận hủy việc'),
+      BouncingButton(
+        child: FilledButton(
+          onPressed: () {
+            if (_form.currentState!.validate()) {
+              Navigator.pop(context, _reason.text.trim());
+            }
+          },
+          child: const Text('Xác nhận hủy việc'),
+        ),
       ),
     ],
   );

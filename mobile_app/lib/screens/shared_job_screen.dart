@@ -176,7 +176,9 @@ class _SharedJobScreenState extends State<SharedJobScreen> {
     body: RefreshIndicator(
       onRefresh: _load,
       child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
+        physics: const BouncingScrollPhysics(
+          parent: AlwaysScrollableScrollPhysics(),
+        ),
         padding: const EdgeInsets.all(24),
         children: [
           if (_loading) const ContentSkeleton(),

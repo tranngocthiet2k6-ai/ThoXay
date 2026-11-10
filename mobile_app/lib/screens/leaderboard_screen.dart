@@ -50,7 +50,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
       child: RefreshIndicator(
         onRefresh: _load,
         child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
           padding: const EdgeInsets.all(16),
           children: [
             Text(

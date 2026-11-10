@@ -1,3 +1,5 @@
+import 'bouncing_button.dart';
+
 import 'package:flutter/material.dart';
 
 class WageOffer {
@@ -41,6 +43,9 @@ class _WageOfferSheetState extends State<_WageOfferSheet> {
       24 + MediaQuery.viewInsetsOf(context).bottom,
     ),
     child: SingleChildScrollView(
+      physics: const BouncingScrollPhysics(
+        parent: AlwaysScrollableScrollPhysics(),
+      ),
       child: Form(
         key: _form,
         child: Column(
@@ -82,16 +87,21 @@ class _WageOfferSheetState extends State<_WageOfferSheet> {
               ),
             ),
             const SizedBox(height: 16),
-            FilledButton(
-              onPressed: () {
-                if (_form.currentState!.validate()) {
-                  Navigator.pop(
-                    context,
-                    WageOffer(int.parse(_rate.text.trim()), _note.text.trim()),
-                  );
-                }
-              },
-              child: const Text('Xem cam kết'),
+            BouncingButton(
+              child: FilledButton(
+                onPressed: () {
+                  if (_form.currentState!.validate()) {
+                    Navigator.pop(
+                      context,
+                      WageOffer(
+                        int.parse(_rate.text.trim()),
+                        _note.text.trim(),
+                      ),
+                    );
+                  }
+                },
+                child: const Text('Xem cam kết'),
+              ),
             ),
           ],
         ),

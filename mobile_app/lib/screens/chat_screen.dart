@@ -1,3 +1,5 @@
+import '../widgets/bouncing_button.dart';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -397,34 +399,47 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
 
   Widget _messages(BuildContext context) {
     if (_chat.loading) {
-      return const SingleChildScrollView(child: ContentSkeleton(chat: true));
+      return const SingleChildScrollView(
+        physics: BouncingScrollPhysics(
+          parent: AlwaysScrollableScrollPhysics(),
+        ),
+        child: ContentSkeleton(chat: true),
+      );
     }
     final rows = _chat.messages.reversed.toList();
     if (rows.isEmpty) {
       return Center(
         child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
           padding: const EdgeInsets.all(16),
           child: EmptyState(
             icon: Icons.forum_outlined,
             title: 'Bắt đầu cuộc trò chuyện',
             message: 'Trao đổi rõ ràng hôm nay, phối hợp nhịp nhàng ngày mai.',
-            action: FilledButton.icon(
-              icon: const Icon(Icons.waving_hand_outlined),
-              label: const Text('Soạn lời chào'),
-              onPressed: _chat.status == ChatStatus.stopped
-                  ? null
-                  : () {
-                      _draft.text =
-                          'Xin chào, tôi muốn trao đổi về công trình này.';
-                      _focus.requestFocus();
-                      setState(() {});
-                    },
+            action: BouncingButton(
+              child: FilledButton.icon(
+                icon: const Icon(Icons.waving_hand_outlined),
+                label: const Text('Soạn lời chào'),
+                onPressed: _chat.status == ChatStatus.stopped
+                    ? null
+                    : () {
+                        _draft.text =
+                            'Xin chào, tôi muốn trao đổi về công trình này.';
+                        _focus.requestFocus();
+                        setState(() {});
+                      },
+              ),
             ),
           ),
         ),
       );
     }
     return ListView.builder(
+      physics: const BouncingScrollPhysics(
+        parent: AlwaysScrollableScrollPhysics(),
+      ),
       key: const ValueKey('chat-messages'),
       controller: _scroll,
       reverse: true,
@@ -466,6 +481,9 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
         mainAxisSize: MainAxisSize.min,
         children: [
           SingleChildScrollView(
+            physics: const BouncingScrollPhysics(
+              parent: AlwaysScrollableScrollPhysics(),
+            ),
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
             child: Row(

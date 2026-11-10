@@ -107,6 +107,9 @@ class SplashScreen extends StatelessWidget {
         child: SafeArea(
           child: LayoutBuilder(
             builder: (context, bounds) => SingleChildScrollView(
+              physics: const BouncingScrollPhysics(
+                parent: AlwaysScrollableScrollPhysics(),
+              ),
               child: ConstrainedBox(
                 constraints: BoxConstraints(minHeight: bounds.maxHeight),
                 child: Center(

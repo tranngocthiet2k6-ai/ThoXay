@@ -1,3 +1,5 @@
+import 'bouncing_button.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -160,9 +162,11 @@ class _SavedWorkersPreviewState extends State<SavedWorkersPreview> {
                       ),
                       child: const Text('Xem hồ sơ'),
                     ),
-                    FilledButton(
-                      onPressed: _busy ? null : () => _invite(worker),
-                      child: const Text('Mời làm việc'),
+                    BouncingButton(
+                      child: FilledButton(
+                        onPressed: _busy ? null : () => _invite(worker),
+                        child: const Text('Mời làm việc'),
+                      ),
                     ),
                   ],
                 ),

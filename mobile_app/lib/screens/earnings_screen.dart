@@ -83,7 +83,9 @@ class _EarningsScreenState extends State<EarningsScreen> {
         onRefresh: _load,
         child: ListView(
           padding: const EdgeInsets.all(16),
-          physics: const AlwaysScrollableScrollPhysics(),
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
           children: [
             const SectionIntro(
               title: 'Thành quả từ đôi bàn tay',

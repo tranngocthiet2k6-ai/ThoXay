@@ -1,3 +1,5 @@
+import 'bouncing_button.dart';
+
 import 'dart:convert';
 import 'dart:math';
 
@@ -182,20 +184,27 @@ class _ChatAttachmentDialogState extends State<ChatAttachmentDialog> {
           child: const Text('Đóng'),
         ),
         if (!_loading && _bytes == null && _point == null)
-          FilledButton(onPressed: _prepare, child: const Text('Thử lại'))
+          BouncingButton(
+            child: FilledButton(
+              onPressed: _prepare,
+              child: const Text('Thử lại'),
+            ),
+          )
         else
-          FilledButton.icon(
-            onPressed:
-                !_loading && !_sending && (_bytes != null || _point != null)
-                ? _send
-                : null,
-            icon: const Icon(Icons.send),
-            label: Text(
-              _sending
-                  ? 'Đang gửi…'
-                  : _attempted
-                  ? 'Gửi lại'
-                  : 'Xác nhận gửi',
+          BouncingButton(
+            child: FilledButton.icon(
+              onPressed:
+                  !_loading && !_sending && (_bytes != null || _point != null)
+                  ? _send
+                  : null,
+              icon: const Icon(Icons.send),
+              label: Text(
+                _sending
+                    ? 'Đang gửi…'
+                    : _attempted
+                    ? 'Gửi lại'
+                    : 'Xác nhận gửi',
+              ),
             ),
           ),
       ],

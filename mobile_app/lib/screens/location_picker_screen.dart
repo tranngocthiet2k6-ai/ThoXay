@@ -1,3 +1,4 @@
+import '../widgets/bouncing_button.dart';
 import '../widgets/design_motion.dart';
 
 import 'package:flutter/material.dart';
@@ -64,12 +65,14 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                   : 'Đã chọn: ${_selected!.latitude.toStringAsFixed(6)}, ${_selected!.longitude.toStringAsFixed(6)}',
             ),
             const SizedBox(height: 12),
-            FilledButton.icon(
-              onPressed: _selected == null
-                  ? null
-                  : () => Navigator.pop(context, _selected),
-              icon: const Icon(Icons.check),
-              label: const Text('Dùng vị trí đã chọn'),
+            BouncingButton(
+              child: FilledButton.icon(
+                onPressed: _selected == null
+                    ? null
+                    : () => Navigator.pop(context, _selected),
+                icon: const Icon(Icons.check),
+                label: const Text('Dùng vị trí đã chọn'),
+              ),
             ),
           ],
         ),

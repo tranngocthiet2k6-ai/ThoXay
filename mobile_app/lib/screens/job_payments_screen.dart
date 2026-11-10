@@ -1,3 +1,4 @@
+import '../widgets/bouncing_button.dart';
 import '../widgets/design_motion.dart';
 import '../widgets/app_snack_bar.dart';
 
@@ -84,7 +85,9 @@ class _JobPaymentsScreenState extends State<JobPaymentsScreen> {
         onRefresh: _load,
         child: ListView(
           padding: const EdgeInsets.all(16),
-          physics: const AlwaysScrollableScrollPhysics(),
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
           children: [
             const SectionIntro(
               title: 'Chi trả công trình',
@@ -149,10 +152,12 @@ class _JobPaymentsScreenState extends State<JobPaymentsScreen> {
                           'Tip ${money(payment.tip.toDouble())} · Thưởng ${money(payment.bonus.toDouble())}',
                         ),
                       ] else
-                        FilledButton.icon(
-                          onPressed: _busy ? null : () => _pay(worker),
-                          icon: const Icon(Icons.payments_outlined),
-                          label: Text('Thanh toán cho ${worker.workerName}'),
+                        BouncingButton(
+                          child: FilledButton.icon(
+                            onPressed: _busy ? null : () => _pay(worker),
+                            icon: const Icon(Icons.payments_outlined),
+                            label: Text('Thanh toán cho ${worker.workerName}'),
+                          ),
                         ),
                     ],
                   ),
@@ -316,9 +321,11 @@ class _PayDialogState extends State<_PayDialog> {
           onPressed: _busy ? null : () => Navigator.pop(context),
           child: const Text('Đóng'),
         ),
-        FilledButton(
-          onPressed: _busy || _total > widget.available ? null : _submit,
-          child: Text(_busy ? 'Đang thanh toán…' : 'Xác nhận thanh toán'),
+        BouncingButton(
+          child: FilledButton(
+            onPressed: _busy || _total > widget.available ? null : _submit,
+            child: Text(_busy ? 'Đang thanh toán…' : 'Xác nhận thanh toán'),
+          ),
         ),
       ],
     ),

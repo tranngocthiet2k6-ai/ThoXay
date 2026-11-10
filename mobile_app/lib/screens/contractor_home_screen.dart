@@ -1,3 +1,4 @@
+import '../widgets/bouncing_button.dart';
 import '../widgets/brand_logo.dart';
 import '../widgets/applicant_evidence.dart';
 import '../widgets/figma_components.dart';
@@ -162,7 +163,9 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
           child: RefreshIndicator(
             onRefresh: _refresh,
             child: CustomScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
+              physics: const BouncingScrollPhysics(
+                parent: AlwaysScrollableScrollPhysics(),
+              ),
               slivers: [
                 SliverPadding(
                   padding: const EdgeInsets.all(16),
@@ -205,10 +208,12 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        FilledButton.icon(
-                          onPressed: _loading ? null : _create,
-                          icon: const Icon(Icons.add),
-                          label: const Text('Đăng công trình mới'),
+                        BouncingButton(
+                          child: FilledButton.icon(
+                            onPressed: _loading ? null : _create,
+                            icon: const Icon(Icons.add),
+                            label: const Text('Đăng công trình mới'),
+                          ),
                         ),
                         if (_weatherJob != null) ...[
                           const SizedBox(height: 16),
@@ -228,9 +233,11 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
                               context,
                               j,
                               api: widget.api,
-                              action: FilledButton(
-                                onPressed: () => _applicants(j),
-                                child: const Text('Duyệt thợ'),
+                              action: BouncingButton(
+                                child: FilledButton(
+                                  onPressed: () => _applicants(j),
+                                  child: const Text('Duyệt thợ'),
+                                ),
                               ),
                             ),
                           ),
@@ -317,6 +324,9 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
                           ),
                           const SizedBox(height: 8),
                           SingleChildScrollView(
+                            physics: const BouncingScrollPhysics(
+                              parent: AlwaysScrollableScrollPhysics(),
+                            ),
                             scrollDirection: Axis.horizontal,
                             child: Row(
                               children: [
@@ -365,10 +375,12 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
                         EmptyState(
                           title: 'Công trình mới, cơ hội mới',
                           message: 'Đăng công trình đầu tiên để kết nối với người thợ quanh bạn.',
-                          action: FilledButton.icon(
-                            onPressed: _create,
-                            icon: const Icon(Icons.add),
-                            label: const Text('Tạo công trình đầu tiên'),
+                          action: BouncingButton(
+                            child: FilledButton.icon(
+                              onPressed: _create,
+                              icon: const Icon(Icons.add),
+                              label: const Text('Tạo công trình đầu tiên'),
+                            ),
                           ),
                         ),
                       if (!_loading)
@@ -598,6 +610,9 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
       content: SizedBox(
         width: 480,
         child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
           child: Form(
             key: _form,
             child: Column(
@@ -802,14 +817,16 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
           onPressed: _busy || _gps ? null : () => Navigator.pop(context),
           child: const Text('Hủy'),
         ),
-        FilledButton(
-          onPressed: _busy || _gps ? null : _submit,
-          child: Text(
-            _busy
-                ? 'Đang lưu…'
-                : widget.job == null
-                ? 'Đăng việc'
-                : 'Lưu thay đổi',
+        BouncingButton(
+          child: FilledButton(
+            onPressed: _busy || _gps ? null : _submit,
+            child: Text(
+              _busy
+                  ? 'Đang lưu…'
+                  : widget.job == null
+                  ? 'Đăng việc'
+                  : 'Lưu thay đổi',
+            ),
           ),
         ),
       ],
@@ -873,9 +890,11 @@ class _ApplicantsSheetState extends State<_ApplicantsSheet> {
               onPressed: () => Navigator.pop(context, false),
               child: const Text('Quay lại'),
             ),
-            FilledButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('Tiếp tục'),
+            BouncingButton(
+              child: FilledButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Tiếp tục'),
+              ),
             ),
           ],
         ),
@@ -964,6 +983,9 @@ class _ApplicantsSheetState extends State<_ApplicantsSheet> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(
+                parent: AlwaysScrollableScrollPhysics(),
+              ),
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
@@ -987,6 +1009,9 @@ class _ApplicantsSheetState extends State<_ApplicantsSheet> {
           if (_loading) const ContentSkeleton(compact: true),
           Expanded(
             child: ListView(
+              physics: const BouncingScrollPhysics(
+                parent: AlwaysScrollableScrollPhysics(),
+              ),
               padding: const EdgeInsets.all(16),
               children: [
                 if (_error != null)
@@ -1133,25 +1158,29 @@ class _ApplicantsSheetState extends State<_ApplicantsSheet> {
                                 if (application.status == 'PENDING') ...[
                                   const SizedBox(width: 12),
                                   Expanded(
-                                    child: FilledButton(
-                                      onPressed:
-                                          _updating != null ||
-                                              _loading ||
-                                              accepted >=
-                                                  widget.job.requiredWorkers ||
-                                              !application.workerActive ||
-                                              !application.workerAvailable
-                                          ? null
-                                          : () => _decide(
-                                              application,
-                                              'ACCEPTED',
-                                            ),
-                                      child: Text(
-                                        _updating == application.id
-                                            ? 'Đang xử lý…'
-                                            : application.crewBatchId != null
-                                            ? 'Duyệt nhận cả tổ'
-                                            : 'Duyệt nhận việc',
+                                    child: BouncingButton(
+                                      child: FilledButton(
+                                        onPressed:
+                                            _updating != null ||
+                                                _loading ||
+                                                accepted >=
+                                                    widget
+                                                        .job
+                                                        .requiredWorkers ||
+                                                !application.workerActive ||
+                                                !application.workerAvailable
+                                            ? null
+                                            : () => _decide(
+                                                application,
+                                                'ACCEPTED',
+                                              ),
+                                        child: Text(
+                                          _updating == application.id
+                                              ? 'Đang xử lý…'
+                                              : application.crewBatchId != null
+                                              ? 'Duyệt nhận cả tổ'
+                                              : 'Duyệt nhận việc',
+                                        ),
                                       ),
                                     ),
                                   ),

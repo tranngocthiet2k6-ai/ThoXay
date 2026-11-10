@@ -81,7 +81,7 @@ class _JobMapPreviewState extends State<JobMapPreview> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                    'Gần bạn · ${job.title}',
+                                'Gần bạn · ${job.title}',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(

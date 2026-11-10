@@ -175,7 +175,9 @@ class _NotificationsScreenState extends State<NotificationsScreen>
       child: RefreshIndicator(
         onRefresh: _refresh,
         child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
           padding: const EdgeInsets.all(16),
           children: [
             Card(

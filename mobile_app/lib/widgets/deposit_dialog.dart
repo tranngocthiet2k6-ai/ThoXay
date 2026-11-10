@@ -1,3 +1,5 @@
+import 'bouncing_button.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -53,6 +55,7 @@ class _DepositDialogState extends State<DepositDialog> {
 
   Future<void> _create() async {
     if (_busy || !_form.currentState!.validate()) return;
+    AppHaptics.light();
     setState(() {
       _busy = true;
       _error = null;
@@ -214,15 +217,19 @@ class _DepositDialogState extends State<DepositDialog> {
           child: const Text('Đóng'),
         ),
         if (_deposit == null && widget.requestId == null)
-          FilledButton.icon(
-            onPressed: _busy ? null : _create,
-            icon: const Icon(Icons.qr_code_2),
-            label: const Text('Tạo QR nạp tiền'),
+          BouncingButton(
+            child: FilledButton.icon(
+              onPressed: _busy ? null : _create,
+              icon: const Icon(Icons.qr_code_2),
+              label: const Text('Tạo QR nạp tiền'),
+            ),
           ),
         if (_deposit == null && widget.requestId != null)
-          FilledButton(
-            onPressed: _busy ? null : _load,
-            child: const Text('Thử lại'),
+          BouncingButton(
+            child: FilledButton(
+              onPressed: _busy ? null : _load,
+              child: const Text('Thử lại'),
+            ),
           ),
       ],
     ),

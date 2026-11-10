@@ -83,6 +83,9 @@ class JobSearchFilters extends StatelessWidget {
       ),
       const SizedBox(height: 8),
       SingleChildScrollView(
+        physics: const BouncingScrollPhysics(
+          parent: AlwaysScrollableScrollPhysics(),
+        ),
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [

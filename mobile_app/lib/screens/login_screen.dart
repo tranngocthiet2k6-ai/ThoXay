@@ -1,3 +1,5 @@
+import '../widgets/bouncing_button.dart';
+
 import 'package:flutter/material.dart';
 
 import '../services/api_service.dart';
@@ -27,6 +29,8 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _submit() async {
+    if (_busy) return;
+    AppHaptics.light();
     if (!_form.currentState!.validate()) return;
     FocusScope.of(context).unfocus();
     setState(() {
@@ -115,18 +119,20 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               const SizedBox(height: 24),
-              FilledButton(
-                onPressed: _busy ? null : _submit,
-                style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.all(16),
+              BouncingButton(
+                child: FilledButton(
+                  onPressed: _busy ? null : _submit,
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.all(16),
+                  ),
+                  child: _busy
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('Đăng nhập'),
                 ),
-                child: _busy
-                    ? const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Text('Đăng nhập'),
               ),
               const SizedBox(height: 12),
               TextButton(

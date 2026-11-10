@@ -44,6 +44,9 @@ class _CommitmentScreenState extends State<CommitmentScreen> {
           }
           if (!snapshot.hasData) return const ContentSkeleton();
           return ListView(
+            physics: const BouncingScrollPhysics(
+              parent: AlwaysScrollableScrollPhysics(),
+            ),
             padding: const EdgeInsets.all(24),
             children: [CommitmentSummary(document: snapshot.data!)],
           );

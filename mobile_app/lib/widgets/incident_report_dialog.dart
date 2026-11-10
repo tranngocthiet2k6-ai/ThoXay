@@ -1,3 +1,5 @@
+import 'bouncing_button.dart';
+
 import 'package:flutter/material.dart';
 
 import '../models/models.dart';
@@ -267,16 +269,18 @@ class _IncidentReportDialogState extends State<IncidentReportDialog> {
           onPressed: _busy ? null : () => Navigator.pop(context),
           child: const Text('Quay lại'),
         ),
-        FilledButton.icon(
-          onPressed: _busy || _locating ? null : _send,
-          style: _type == 'SOS'
-              ? FilledButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.error,
-                  foregroundColor: Theme.of(context).colorScheme.onError,
-                )
-              : null,
-          icon: Icon(_type == 'SOS' ? Icons.sos : Icons.send_outlined),
-          label: Text(_type == 'SOS' ? 'Xác nhận gửi SOS' : 'Gửi báo cáo'),
+        BouncingButton(
+          child: FilledButton.icon(
+            onPressed: _busy || _locating ? null : _send,
+            style: _type == 'SOS'
+                ? FilledButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.error,
+                    foregroundColor: Theme.of(context).colorScheme.onError,
+                  )
+                : null,
+            icon: Icon(_type == 'SOS' ? Icons.sos : Icons.send_outlined),
+            label: Text(_type == 'SOS' ? 'Xác nhận gửi SOS' : 'Gửi báo cáo'),
+          ),
         ),
       ],
     ),

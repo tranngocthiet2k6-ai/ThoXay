@@ -1,3 +1,5 @@
+import 'bouncing_button.dart';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -92,9 +94,11 @@ class _PortfolioUploadsState extends State<PortfolioUploads> {
             onPressed: () => Navigator.pop(context, false),
             child: const Text('Giữ lại'),
           ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Xóa ảnh'),
+          BouncingButton(
+            child: FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Xóa ảnh'),
+            ),
           ),
         ],
       ),

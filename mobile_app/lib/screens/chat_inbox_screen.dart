@@ -1,3 +1,5 @@
+import '../widgets/bouncing_button.dart';
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -342,7 +344,9 @@ class _ChatInboxScreenState extends State<ChatInboxScreen>
             onRefresh: _load,
             child: ListView(
               key: const ValueKey('inbox-list'),
-              physics: const AlwaysScrollableScrollPhysics(),
+              physics: const BouncingScrollPhysics(
+                parent: AlwaysScrollableScrollPhysics(),
+              ),
               padding: const EdgeInsets.fromLTRB(8, 0, 8, 16),
               children: [
                 if (_loading) const ContentSkeleton(chat: true),
@@ -359,10 +363,12 @@ class _ChatInboxScreenState extends State<ChatInboxScreen>
                     icon: Icons.mark_chat_read_outlined,
                     title: 'Cuộc trò chuyện bắt đầu từ công trình',
                     message: 'Sau khi đơn được duyệt, chọn Nhắn tin để trao đổi với thợ hoặc chủ thầu.',
-                    action: FilledButton.icon(
-                      onPressed: () => Navigator.maybePop(context),
-                      icon: const Icon(Icons.apartment_outlined),
-                      label: const Text('Xem công trình'),
+                    action: BouncingButton(
+                      child: FilledButton.icon(
+                        onPressed: () => Navigator.maybePop(context),
+                        icon: const Icon(Icons.apartment_outlined),
+                        label: const Text('Xem công trình'),
+                      ),
                     ),
                   ),
                 if (!_loading && _rows.isNotEmpty && filtered.isEmpty)
@@ -418,6 +424,9 @@ class _ChatInboxScreenState extends State<ChatInboxScreen>
                   child: selected == null
                       ? Center(
                           child: SingleChildScrollView(
+                            physics: const BouncingScrollPhysics(
+                              parent: AlwaysScrollableScrollPhysics(),
+                            ),
                             padding: const EdgeInsets.all(24),
                             child: EmptyState(
                               icon: Icons.forum_outlined,
