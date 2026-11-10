@@ -192,42 +192,47 @@ class _PortfolioUploadsState extends State<PortfolioUploads> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        InkWell(
-                          onTap: () => showPrivatePhoto(
-                            context,
-                            widget.api,
-                            photo.path,
-                            photo.caption,
-                          ),
-                          child: AspectRatio(
-                            aspectRatio: 1,
-                            child: Stack(
-                              fit: StackFit.expand,
-                              children: [
-                                PrivateImage(api: widget.api, path: photo.path),
-                                if (photo.caption.isNotEmpty)
-                                  Positioned(
-                                    left: 0,
-                                    right: 0,
-                                    bottom: 0,
-                                    child: ColoredBox(
-                                      color: const Color(0xdd0f172a),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8),
-                                        child: Text(
-                                          photo.caption,
-                                          maxLines: widget.compact ? 1 : 2,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                            fontSize: 10,
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w600,
+                        BouncingButton(
+                          child: InkWell(
+                            onTap: () => showPrivatePhoto(
+                              context,
+                              widget.api,
+                              photo.path,
+                              photo.caption,
+                            ),
+                            child: AspectRatio(
+                              aspectRatio: 1,
+                              child: Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  PrivateImage(
+                                    api: widget.api,
+                                    path: photo.path,
+                                  ),
+                                  if (photo.caption.isNotEmpty)
+                                    Positioned(
+                                      left: 0,
+                                      right: 0,
+                                      bottom: 0,
+                                      child: ColoredBox(
+                                        color: const Color(0xdd0f172a),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8),
+                                          child: Text(
+                                            photo.caption,
+                                            maxLines: widget.compact ? 1 : 2,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                              fontSize: 10,
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                           ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),

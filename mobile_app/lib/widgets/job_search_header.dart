@@ -17,7 +17,8 @@ class JobSearchHeader extends SliverPersistentHeaderDelegate {
     bool overlapsContent,
   ) => Material(
     color: Theme.of(context).scaffoldBackgroundColor,
-    elevation: 0,
+    elevation: overlapsContent ? 3 : 0,
+    shadowColor: const Color(0x100F172A),
     shape: Border(
       bottom: BorderSide(
         color: overlapsContent
@@ -58,6 +59,20 @@ class JobSearchFilters extends StatelessWidget {
         onChanged: onSearch,
         decoration: InputDecoration(
           hintText: 'Tìm tên công trình, địa điểm…',
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(24),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(24),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(24),
+            borderSide: BorderSide(
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
           prefixIcon: const Icon(Icons.search),
           suffixIcon: Row(
             mainAxisSize: MainAxisSize.min,

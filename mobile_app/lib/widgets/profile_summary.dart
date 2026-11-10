@@ -1,3 +1,5 @@
+import 'modern_controls.dart';
+
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -17,8 +19,10 @@ class ProfileSummary extends StatelessWidget {
     required this.completed,
     required this.tier,
     required this.verified,
+    this.phone,
   });
   final String name, tier;
+  final String? phone;
   final bool worker, verified;
   final double rating;
   final int score, completed;
@@ -46,7 +50,7 @@ class ProfileSummary extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  PresenceAvatar(name: name, size: 56),
+                  PresenceAvatar(name: name, size: 64),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -67,6 +71,17 @@ class ProfileSummary extends StatelessWidget {
                             color: Color(0xffcbd5e1),
                           ),
                         ),
+                        if (phone != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Text(
+                              phone!,
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
                         if (verified)
                           const Padding(
                             padding: EdgeInsets.only(top: 6),
@@ -131,11 +146,7 @@ class ProfileSummary extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 12),
-                LinearProgressIndicator(
-                  value: (score / 100).clamp(0.0, 1.0),
-                  minHeight: 6,
-                  borderRadius: BorderRadius.circular(6),
-                ),
+                GradientProgress(value: (score / 100).clamp(0.0, 1.0)),
                 const SizedBox(height: 12),
                 TierBadge(tier: tier),
                 const SizedBox(height: 8),
@@ -149,12 +160,9 @@ class ProfileSummary extends StatelessWidget {
                 Semantics(
                   label: 'Tiến độ đạt tiêu chí lên hạng',
                   value: '${(progress * 100).round()}%',
-                  child: LinearProgressIndicator(
+                  child: GradientProgress(
                     value: progress,
-                    minHeight: 4,
-                    borderRadius: BorderRadius.circular(4),
                     color: palette.successStrong,
-                    backgroundColor: palette.border,
                   ),
                 ),
                 if (!diamond)

@@ -201,28 +201,36 @@ abstract final class AppTheme {
       ),
       cardTheme: CardThemeData(
         color: palette.surface,
-        elevation: 0,
-        shadowColor: palette.ink,
+        elevation: outdoor ? 0 : 1,
+        shadowColor: const Color(0x100f172a),
         margin: const EdgeInsets.only(bottom: 16),
         shape: rounded,
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: palette.soft,
+        constraints: const BoxConstraints(minHeight: 52),
+        prefixIconColor: WidgetStateColor.resolveWith(
+          (states) =>
+              states.contains(WidgetState.focused) ? accent : palette.muted,
+        ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
-          vertical: 16,
+          vertical: 14,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide(color: palette.border, width: outdoor ? 2 : 1),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: palette.border, width: outdoor ? 2 : 1),
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(
+            color: outdoor ? palette.border : Colors.transparent,
+            width: outdoor ? 2 : 1,
+          ),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide(color: accent, width: 2),
         ),
         floatingLabelStyle: TextStyle(
@@ -294,7 +302,7 @@ abstract final class AppTheme {
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: palette.surface,
-        indicatorColor: Colors.transparent,
+        indicatorColor: accent.withValues(alpha: outdoor ? .20 : .12),
         elevation: 0,
         height: 72,
         labelTextStyle: WidgetStatePropertyAll(

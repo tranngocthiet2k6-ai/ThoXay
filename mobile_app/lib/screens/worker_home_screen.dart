@@ -1,4 +1,5 @@
 import '../widgets/bouncing_button.dart';
+import '../widgets/modern_controls.dart';
 import '../widgets/brand_logo.dart';
 import '../widgets/job_application_actions.dart';
 import '../widgets/wage_offer_sheet.dart';
@@ -61,6 +62,17 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
   }
 
   int _tab = 0;
+  int _workStatus = 0;
+  List<JobApplication> get _filteredApplications => _applications
+      .where(
+        (a) => switch (_workStatus) {
+          0 => a.status == 'ACCEPTED' && a.job.status != 'COMPLETED',
+          1 => a.status == 'PENDING',
+          2 => a.job.status == 'COMPLETED',
+          _ => true,
+        },
+      )
+      .toList();
   int? _applying;
   bool _cancelling = false;
   bool? _available;
@@ -241,6 +253,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
       if (reason == null || !mounted) return;
       final result = await widget.api.cancelApplication(application.id, reason);
       if (!mounted) return;
+      setState(() => _workStatus = 3);
       ScaffoldMessenger.of(context).showSnackBar(
         AppSnackBar(
           content: Text(
@@ -590,6 +603,28 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                             ],
                           ),
                       ] else ...[
+                        PillTabs(
+                          labels: const [
+                            'Đang làm',
+                            'Chờ duyệt',
+                            'Hoàn thành',
+                            'Tất cả',
+                          ],
+                          selected: _workStatus,
+                          onChanged: (index) =>
+                              setState(() => _workStatus = index),
+                        ),
+                        const SizedBox(height: 16),
+                        if (_applications.isNotEmpty &&
+                            _filteredApplications.isEmpty)
+                          EmptyState(
+                            title: 'Chưa có việc ở trạng thái này',
+                            message: 'Các đơn và công trình của bạn sẽ được cập nhật tại đây.',
+                            action: TextButton(
+                              onPressed: () => setState(() => _workStatus = 3),
+                              child: const Text('Xem tất cả việc'),
+                            ),
+                          ),
                         if (_applications.isEmpty && _error == null)
                           EmptyState(
                             title: 'Hành trình mới bắt đầu',
@@ -601,7 +636,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                               ),
                             ),
                           ),
-                        for (final application in _applications)
+                        for (final application in _filteredApplications)
                           JobCard(
                             api: widget.api,
                             job: application.job,

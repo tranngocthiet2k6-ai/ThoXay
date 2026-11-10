@@ -1,3 +1,4 @@
+import 'bouncing_button.dart';
 import '../services/location_service.dart';
 import 'figma_job_map.dart';
 
@@ -62,144 +63,156 @@ class JobCard extends StatelessWidget {
     );
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: DesignReveal(
-        child: InkWell(
-          onTap: previewOnly ? open : null,
-          borderRadius: BorderRadius.circular(16),
-          child: DesignSurface(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        job.title,
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    if (job.distanceKm != null)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: palette.soft,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
+      child: BouncingButton(
+        enabled: previewOnly,
+        child: DesignReveal(
+          child: InkWell(
+            onTap: previewOnly ? open : null,
+            borderRadius: BorderRadius.circular(16),
+            child: DesignSurface(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
                         child: Text(
-                          '${job.distanceKm!.toStringAsFixed(1)} km',
-                          style: TextStyle(fontSize: 11, color: palette.muted),
-                        ),
-                      )
-                    else
-                      JobStatusBadge(status: job.status),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    Text(
-                      job.contractorName,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: palette.successStrong,
-                      ),
-                    ),
-                    if (job.contractorVerified) const KycBadge(),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  previewOnly
-                      ? job.address
-                      : '${job.address} · ${job.jobType} · ${job.requiredWorkers} thợ',
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 11, color: palette.muted),
-                ),
-                if (previewOnly)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: color.withValues(alpha: .08),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        job.jobType,
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: color,
-                          fontWeight: FontWeight.w600,
+                          job.title,
+                          style: Theme.of(context).textTheme.titleMedium,
                         ),
                       ),
-                    ),
-                  ),
-                if (job.startsOn != null && !previewOnly)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      '${MaterialLocalizations.of(context).formatShortDate(job.startsOn!)}${job.endsOn == null ? "" : " – ${MaterialLocalizations.of(context).formatShortDate(job.endsOn!)}"}',
-                      style: TextStyle(fontSize: 11, color: palette.muted),
-                    ),
-                  ),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  alignment: WrapAlignment.spaceBetween,
-                  children: [
-                    Text.rich(
-                      TextSpan(
-                        children: [
-                          TextSpan(
-                            text: money(job.salaryPerDay),
-                            style: TextStyle(
-                              fontSize: 23,
-                              fontWeight: FontWeight.w800,
-                              color: color,
-                              letterSpacing: -.6,
-                            ),
+                      const SizedBox(width: 8),
+                      if (job.distanceKm != null)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 4,
                           ),
-                          TextSpan(
-                            text: '/ngày',
+                          decoration: BoxDecoration(
+                            color: palette.soft,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            '${job.distanceKm!.toStringAsFixed(1)} km',
                             style: TextStyle(
                               fontSize: 11,
                               color: palette.muted,
                             ),
                           ),
-                        ],
+                        )
+                      else
+                        JobStatusBadge(status: job.status),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(
+                        job.contractorName,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: palette.successStrong,
+                        ),
+                      ),
+                      if (job.contractorVerified) const KycBadge(),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    previewOnly
+                        ? job.address
+                        : '${job.address} · ${job.jobType} · ${job.requiredWorkers} thợ',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 11, color: palette.muted),
+                  ),
+                  if (previewOnly)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: color.withValues(alpha: .08),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          job.jobType,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: color,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
                     ),
-                    if (previewOnly) detailsLink() else primaryAction ?? action,
-                  ],
-                ),
-                if (primaryAction != null)
-                  ExpansionTile(
-                    tilePadding: EdgeInsets.zero,
-                    childrenPadding: const EdgeInsets.only(bottom: 12),
-                    title: const Text(
-                      'Quản lý công trình',
-                      style: TextStyle(fontSize: 12),
+                  if (job.startsOn != null && !previewOnly)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        '${MaterialLocalizations.of(context).formatShortDate(job.startsOn!)}${job.endsOn == null ? "" : " – ${MaterialLocalizations.of(context).formatShortDate(job.endsOn!)}"}',
+                        style: TextStyle(fontSize: 11, color: palette.muted),
+                      ),
                     ),
-                    children: [action],
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    alignment: WrapAlignment.spaceBetween,
+                    children: [
+                      Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: money(job.salaryPerDay),
+                              style: TextStyle(
+                                fontSize: 23,
+                                fontWeight: FontWeight.w800,
+                                color: color,
+                                letterSpacing: -.6,
+                              ),
+                            ),
+                            TextSpan(
+                              text: '/ngày',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: palette.muted,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (previewOnly)
+                        detailsLink()
+                      else
+                        primaryAction ?? action,
+                    ],
                   ),
-                if (!previewOnly)
-                  Align(alignment: Alignment.centerLeft, child: detailsLink()),
-              ],
+                  if (primaryAction != null)
+                    ExpansionTile(
+                      tilePadding: EdgeInsets.zero,
+                      childrenPadding: const EdgeInsets.only(bottom: 12),
+                      title: const Text(
+                        'Quản lý công trình',
+                        style: TextStyle(fontSize: 12),
+                      ),
+                      children: [action],
+                    ),
+                  if (!previewOnly)
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: detailsLink(),
+                    ),
+                ],
+              ),
             ),
           ),
         ),

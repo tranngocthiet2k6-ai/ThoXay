@@ -1,3 +1,5 @@
+import 'bouncing_button.dart';
+
 import 'package:flutter/material.dart';
 
 import 'loading_jobs.dart';
@@ -35,49 +37,53 @@ class PortfolioGallery extends StatelessWidget {
                   width: (constraints.maxWidth - 20) / 3,
                   height: 105,
                   child: Material(
+                    elevation: 1,
+                    shadowColor: const Color(0x140F172A),
                     color: Theme.of(context).colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(16),
                     clipBehavior: Clip.antiAlias,
-                    child: InkWell(
-                      onTap: () => showDialog<void>(
-                        context: context,
-                        builder: (context) => Dialog(
-                          child: SizedBox(
-                            height: MediaQuery.sizeOf(context).height * .7,
-                            child: Column(
-                              children: [
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(16),
-                                        child: Text('Ảnh dự án ${i + 1}'),
+                    child: BouncingButton(
+                      child: InkWell(
+                        onTap: () => showDialog<void>(
+                          context: context,
+                          builder: (context) => Dialog(
+                            child: SizedBox(
+                              height: MediaQuery.sizeOf(context).height * .7,
+                              child: Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(16),
+                                          child: Text('Ảnh dự án ${i + 1}'),
+                                        ),
+                                      ),
+                                      IconButton(
+                                        tooltip: 'Đóng ảnh',
+                                        onPressed: () => Navigator.pop(context),
+                                        icon: const Icon(Icons.close),
+                                      ),
+                                    ],
+                                  ),
+                                  Expanded(
+                                    child: InteractiveViewer(
+                                      child: _image(
+                                        images[i],
+                                        fit: BoxFit.contain,
                                       ),
                                     ),
-                                    IconButton(
-                                      tooltip: 'Đóng ảnh',
-                                      onPressed: () => Navigator.pop(context),
-                                      icon: const Icon(Icons.close),
-                                    ),
-                                  ],
-                                ),
-                                Expanded(
-                                  child: InteractiveViewer(
-                                    child: _image(
-                                      images[i],
-                                      fit: BoxFit.contain,
-                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      child: Semantics(
-                        label: 'Xem ảnh dự án ${i + 1}',
-                        button: true,
-                        child: _image(images[i]),
+                        child: Semantics(
+                          label: 'Xem ảnh dự án ${i + 1}',
+                          button: true,
+                          child: _image(images[i]),
+                        ),
                       ),
                     ),
                   ),

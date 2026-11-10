@@ -133,7 +133,7 @@ class SectionIntro extends StatelessWidget {
   );
 }
 
-/// Flat bordered card. Hover changes its border without painting a gradient.
+/// Shared lifted surface with a quiet shadow and visible keyboard/touch content.
 class DesignSurface extends StatefulWidget {
   const DesignSurface({
     super.key,
@@ -163,6 +163,15 @@ class _DesignSurfaceState extends State<DesignSurface> {
       decoration: BoxDecoration(
         color: AppPalette.of(context).surface,
         borderRadius: BorderRadius.circular(16),
+        boxShadow: AppPalette.of(context).outdoor
+            ? null
+            : const [
+                BoxShadow(
+                  color: Color(0x090F172A),
+                  blurRadius: 18,
+                  offset: Offset(0, 5),
+                ),
+              ],
         border: Border.all(
           width: AppPalette.of(context).outdoor ? 2 : 1,
           color: _hover

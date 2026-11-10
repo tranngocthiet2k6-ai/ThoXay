@@ -18,20 +18,37 @@ class TierBadge extends StatelessWidget {
       'GOLD' => AppPalette.of(context).chartGold,
       _ => AppPalette.of(context).silverInk,
     };
-    return Chip(
-      avatar: Icon(
-        tier == 'DIAMOND'
-            ? Icons.diamond_outlined
-            : Icons.workspace_premium_outlined,
-        color: color,
-        size: 20,
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          gradient: LinearGradient(
+            colors: [
+              color.withValues(alpha: .14),
+              AppPalette.of(context).surface,
+              color.withValues(alpha: .08),
+            ],
+          ),
+        ),
+        child: Chip(
+          avatar: Icon(
+            tier == 'DIAMOND'
+                ? Icons.diamond_outlined
+                : Icons.workspace_premium_outlined,
+            color: color,
+            size: 20,
+          ),
+          label: Text(
+            'Bậc ${tierName(tier)}',
+            style: TextStyle(color: color, fontWeight: FontWeight.w700),
+          ),
+          backgroundColor: Colors.transparent,
+          visualDensity: VisualDensity.compact,
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          side: BorderSide(color: color.withValues(alpha: .2)),
+        ),
       ),
-      label: Text(
-        'Bậc ${tierName(tier)}',
-        style: TextStyle(color: color, fontWeight: FontWeight.w700),
-      ),
-      backgroundColor: color.withValues(alpha: .08),
-      side: BorderSide(color: color.withValues(alpha: .2)),
     );
   }
 }

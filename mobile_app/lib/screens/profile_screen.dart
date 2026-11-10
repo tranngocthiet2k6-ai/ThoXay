@@ -1,4 +1,5 @@
 import '../widgets/bouncing_button.dart';
+import '../widgets/profile_settings.dart';
 import '../widgets/saved_workers_preview.dart';
 import '../widgets/home_navigation.dart';
 import 'incidents_screen.dart';
@@ -214,6 +215,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               if (_profile != null) ...[
                 ProfileSummary(
                   name: _profile!.fullName,
+                  phone: _profile!.phoneNumber,
                   worker: _profile!.role == 'ROLE_WORKER',
                   rating: _profile!.rating,
                   score: _profile!.reputationScore,
@@ -222,121 +224,145 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   verified: _profile!.verified,
                 ),
                 const SizedBox(height: 16),
-                Text(_profile!.phoneNumber),
-                const SizedBox(height: 12),
-                ExpansionTile(
-                  title: const Text('Thông tin và tiện ích hồ sơ'),
-                  tilePadding: EdgeInsets.zero,
-                  children: [
-                    TextButton.icon(
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => IncidentsScreen(api: widget.api),
+                Card(
+                  clipBehavior: Clip.antiAlias,
+                  child: ExpansionTile(
+                    title: const Text('Tài khoản & KYC'),
+                    tilePadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 4,
+                    ),
+                    children: [
+                      BouncingButton(
+                        child: ListTile(
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => IncidentsScreen(api: widget.api),
+                            ),
+                          ),
+                          leading: const Icon(Icons.health_and_safety_outlined),
+                          title: const Text('Sự cố đã gửi'),
+                          trailing: const Icon(Icons.chevron_right, size: 18),
                         ),
                       ),
-                      icon: const Icon(Icons.health_and_safety_outlined),
-                      label: const Text('Sự cố đã gửi'),
-                    ),
-                    if (_profile!.role == 'ROLE_WORKER')
-                      TextButton.icon(
-                        onPressed: () => Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder: (_) => CrewScreen(api: widget.api),
+                      if (_profile!.role == 'ROLE_WORKER')
+                        BouncingButton(
+                          child: ListTile(
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (_) => CrewScreen(api: widget.api),
+                              ),
+                            ),
+                            leading: const Icon(Icons.groups_outlined),
+                            title: const Text('Tổ đội của tôi'),
+                            trailing: const Icon(Icons.chevron_right, size: 18),
                           ),
                         ),
-                        icon: const Icon(Icons.groups_outlined),
-                        label: const Text('Tổ đội của tôi'),
+                      BouncingButton(
+                        child: ListTile(
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => SavedScreen(
+                                api: widget.api,
+                                worker: _profile!.role == 'ROLE_WORKER',
+                              ),
+                            ),
+                          ),
+                          leading: const Icon(Icons.bookmarks_outlined),
+                          title: Text(
+                            _profile!.role == 'ROLE_WORKER'
+                                ? 'Công trình yêu thích'
+                                : 'Thợ quen',
+                          ),
+                          trailing: const Icon(Icons.chevron_right, size: 18),
+                        ),
                       ),
-                    TextButton.icon(
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => SavedScreen(
-                            api: widget.api,
-                            worker: _profile!.role == 'ROLE_WORKER',
+                      if (_profile!.role == 'ROLE_WORKER')
+                        BouncingButton(
+                          child: ListTile(
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (_) => CalendarScreen(api: widget.api),
+                              ),
+                            ),
+                            leading: const Icon(Icons.calendar_month_outlined),
+                            title: const Text('Lịch làm việc'),
+                            trailing: const Icon(Icons.chevron_right, size: 18),
+                          ),
+                        ),
+                      if (_profile!.role == 'ROLE_WORKER')
+                        BouncingButton(
+                          child: ListTile(
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (_) =>
+                                    ReputationScreen(api: widget.api),
+                              ),
+                            ),
+                            leading: const Icon(Icons.history),
+                            title: const Text('Lịch sử uy tín'),
+                            trailing: const Icon(Icons.chevron_right, size: 18),
+                          ),
+                        ),
+                      BouncingButton(
+                        child: ListTile(
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) =>
+                                  LeaderboardScreen(api: widget.api),
+                            ),
+                          ),
+                          leading: const Icon(Icons.leaderboard_outlined),
+                          title: const Text('Bảng xếp hạng thợ'),
+                          trailing: const Icon(Icons.chevron_right, size: 18),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      if (_profile!.role == 'ROLE_WORKER')
+                        Text(
+                          _profile!.completedJobs == 0
+                              ? 'Chưa có đánh giá công trình'
+                              : 'Đánh giá trung bình: ${_profile!.rating.toStringAsFixed(1)}/5',
+                        ),
+                      const SizedBox(height: 12),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Chip(
+                          avatar: Icon(
+                            _profile!.verified
+                                ? Icons.verified
+                                : Icons.hourglass_empty,
+                          ),
+                          label: Text(
+                            _profile!.verified
+                                ? 'Đã xác thực CCCD'
+                                : 'Chưa xác thực CCCD',
                           ),
                         ),
                       ),
-                      icon: const Icon(Icons.bookmarks_outlined),
-                      label: Text(
-                        _profile!.role == 'ROLE_WORKER'
-                            ? 'Công trình yêu thích'
-                            : 'Thợ quen',
-                      ),
-                    ),
-                    if (_profile!.role == 'ROLE_WORKER')
-                      TextButton.icon(
-                        onPressed: () => Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder: (_) => CalendarScreen(api: widget.api),
-                          ),
-                        ),
-                        icon: const Icon(Icons.calendar_month_outlined),
-                        label: const Text('Lịch làm việc'),
-                      ),
-                    if (_profile!.role == 'ROLE_WORKER')
-                      TextButton.icon(
-                        onPressed: () => Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder: (_) => ReputationScreen(api: widget.api),
-                          ),
-                        ),
-                        icon: const Icon(Icons.history),
-                        label: const Text('Lịch sử uy tín'),
-                      ),
-                    TextButton.icon(
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => LeaderboardScreen(api: widget.api),
+                      const SizedBox(height: 24),
+                      Card(
+                        child: ExpansionTile(
+                          maintainState: true,
+                          enabled: !_loading,
+                          title: const Text('Thông tin cá nhân & kinh nghiệm'),
+                          leading: const Icon(Icons.edit_outlined),
+                          childrenPadding: const EdgeInsets.all(16),
+                          children: [
+                            ProfileEditor(
+                              api: widget.api,
+                              profile: _profile!,
+                              onBusy: (busy) {
+                                if (mounted) setState(() => _loading = busy);
+                              },
+                              onSaved: (person) =>
+                                  setState(() => _profile = person),
+                            ),
+                          ],
                         ),
                       ),
-                      icon: const Icon(Icons.leaderboard_outlined),
-                      label: const Text('Bảng xếp hạng thợ'),
-                    ),
-                    const SizedBox(height: 8),
-                    if (_profile!.role == 'ROLE_WORKER')
-                      Text(
-                        _profile!.completedJobs == 0
-                            ? 'Chưa có đánh giá công trình'
-                            : 'Đánh giá trung bình: ${_profile!.rating.toStringAsFixed(1)}/5',
-                      ),
-                    const SizedBox(height: 12),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Chip(
-                        avatar: Icon(
-                          _profile!.verified
-                              ? Icons.verified
-                              : Icons.hourglass_empty,
-                        ),
-                        label: Text(
-                          _profile!.verified
-                              ? 'Đã xác thực CCCD'
-                              : 'Chưa xác thực CCCD',
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    Card(
-                      child: ExpansionTile(
-                        maintainState: true,
-                        enabled: !_loading,
-                        title: const Text('Thông tin cá nhân & kinh nghiệm'),
-                        leading: const Icon(Icons.edit_outlined),
-                        childrenPadding: const EdgeInsets.all(16),
-                        children: [
-                          ProfileEditor(
-                            api: widget.api,
-                            profile: _profile!,
-                            onBusy: (busy) {
-                              if (mounted) setState(() => _loading = busy);
-                            },
-                            onSaved: (person) =>
-                                setState(() => _profile = person),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
                 PortfolioUploads(
                   api: widget.api,
@@ -413,6 +439,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ],
               ],
+              ProfileSettings(api: widget.api),
               if (_error != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 16),

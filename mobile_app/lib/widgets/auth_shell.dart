@@ -48,30 +48,21 @@ class AuthShell extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Row(
-                    children: [
-                      BrandLogo(
-                        height: 52,
-                        onDark: Theme.of(context).brightness == Brightness.dark,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Kết nối tay nghề, dựng xây uy tín',
-                              style: TextStyle(
-                                fontSize: 13,
-                                height: 1.5,
-                                color: palette.muted,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const AppearanceButton(),
-                    ],
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: const AppearanceButton(),
+                  ),
+                  const SizedBox(height: 16),
+                  Center(child: BrandLogo(height: 82, onDark: palette.dark)),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Kết nối tay nghề, dựng xây uy tín',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: palette.muted,
+                      height: 1.5,
+                    ),
                   ),
                   const SizedBox(height: 32),
                   Text(

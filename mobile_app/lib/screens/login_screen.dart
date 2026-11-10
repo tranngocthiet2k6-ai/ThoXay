@@ -1,3 +1,4 @@
+import '../widgets/modern_controls.dart';
 import '../widgets/bouncing_button.dart';
 
 import 'package:flutter/material.dart';
@@ -119,20 +120,18 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               const SizedBox(height: 24),
-              BouncingButton(
-                child: FilledButton(
-                  onPressed: _busy ? null : _submit,
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.all(16),
-                  ),
-                  child: _busy
-                      ? const SizedBox(
-                          width: 22,
-                          height: 22,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('Đăng nhập'),
-                ),
+              GradientPrimaryButton(
+                onPressed: _busy ? null : _submit,
+                child: _busy
+                    ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text('Đăng nhập'),
               ),
               const SizedBox(height: 12),
               TextButton(

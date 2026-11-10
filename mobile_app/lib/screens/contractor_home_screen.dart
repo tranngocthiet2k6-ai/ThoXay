@@ -1,3 +1,4 @@
+import '../widgets/dashboard_stats.dart';
 import '../widgets/bouncing_button.dart';
 import '../widgets/brand_logo.dart';
 import '../widgets/applicant_evidence.dart';
@@ -185,27 +186,24 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        FigmaCard(
-                          child: FigmaMetrics(
-                            accent: true,
-                            values: [
-                              (
-                                value:
-                                    '${_jobs.where((j) => j.status == "OPEN").length}',
-                                label: 'Đang tuyển',
-                              ),
-                              (
-                                value:
-                                    '${_jobs.where((j) => j.status == "IN_PROGRESS").length}',
-                                label: 'Đang thực hiện',
-                              ),
-                              (
-                                value:
-                                    '${_jobs.where((j) => j.status == "COMPLETED").length}',
-                                label: 'Hoàn thành',
-                              ),
-                            ],
-                          ),
+                        DashboardStats(
+                          values: [
+                            (
+                              value:
+                                  '${_jobs.where((j) => j.status == "OPEN").length}',
+                              label: 'Đang tuyển',
+                            ),
+                            (
+                              value:
+                                  '${_jobs.where((j) => j.status == "IN_PROGRESS").length}',
+                              label: 'Đang thực hiện',
+                            ),
+                            (
+                              value:
+                                  '${_jobs.where((j) => j.status == "COMPLETED").length}',
+                              label: 'Hoàn thành',
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 16),
                         BouncingButton(

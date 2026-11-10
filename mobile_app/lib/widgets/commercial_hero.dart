@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// A high-contrast anchor shared by home, account and balance surfaces.
+/// Layered fintech surface shared by balance and account detail cards.
 class CommercialHero extends StatelessWidget {
   const CommercialHero({
     super.key,
@@ -16,9 +16,17 @@ class CommercialHero extends StatelessWidget {
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: const Color(0xff0f172a),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xff334155)),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            const Color(0xff0f172a),
+            Color.lerp(const Color(0xff183147), accent, .22)!,
+            const Color(0xff111e32),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xff475569)),
         boxShadow: const [
           BoxShadow(
             color: Color(0x180f172a),
@@ -28,7 +36,7 @@ class CommercialHero extends StatelessWidget {
         ],
       ),
       child: CustomPaint(
-        painter: _GridPainter(accent),
+        painter: _GlowPainter(accent),
         child: Theme(
           data: base.copyWith(
             textTheme: base.textTheme.apply(
@@ -48,20 +56,11 @@ class CommercialHero extends StatelessWidget {
   }
 }
 
-class _GridPainter extends CustomPainter {
-  const _GridPainter(this.accent);
+class _GlowPainter extends CustomPainter {
+  const _GlowPainter(this.accent);
   final Color accent;
   @override
   void paint(Canvas canvas, Size size) {
-    final p = Paint()
-      ..color = Colors.white.withValues(alpha: .035)
-      ..strokeWidth = 1;
-    for (double x = 0; x < size.width; x += 28) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), p);
-    }
-    for (double y = 0; y < size.height; y += 28) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), p);
-    }
     canvas.drawCircle(
       Offset(size.width - 12, 18),
       112,
@@ -78,7 +77,7 @@ class _GridPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _GridPainter oldDelegate) =>
+  bool shouldRepaint(covariant _GlowPainter oldDelegate) =>
       oldDelegate.accent != accent;
 }
 

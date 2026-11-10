@@ -1,3 +1,4 @@
+import '../widgets/wallet_surfaces.dart';
 import '../widgets/bouncing_button.dart';
 import '../widgets/commercial_hero.dart';
 import '../widgets/home_navigation.dart';
@@ -240,29 +241,33 @@ class _WalletScreenState extends State<WalletScreen> {
                         label: const Text('Xem thu nhập chi tiết'),
                       ),
                     const SizedBox(height: 16),
+                    WalletCompartments(balance: balance, hidden: _hideBalance),
+                    const SizedBox(height: 16),
                     Row(
                       children: [
                         Expanded(
                           child: BouncingButton(
                             child: FilledButton.icon(
+                              onPressed: _busy ? null : () => _deposit(),
+                              icon: const Icon(Icons.qr_code_2, size: 18),
+                              label: const Text('Nạp VietQR'),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: BouncingButton(
+                            child: OutlinedButton.icon(
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: Colors.white,
+                                side: const BorderSide(color: Colors.white54),
+                              ),
                               onPressed: _busy || balance.main < 1000
                                   ? null
                                   : () => _operate('WITHDRAW'),
                               icon: const Icon(Icons.north_east, size: 18),
                               label: const Text('Rút tiền'),
                             ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.white,
-                              side: const BorderSide(color: Color(0xff64748b)),
-                            ),
-                            onPressed: _busy ? null : () => _deposit(),
-                            icon: const Icon(Icons.qr_code_2, size: 18),
-                            label: const Text('Nạp VietQR'),
                           ),
                         ),
                       ],
@@ -401,52 +406,7 @@ class _WalletScreenState extends State<WalletScreen> {
                   title: 'Chưa có giao dịch',
                   message: 'Mọi biến động số dư sẽ được ghi lại tại đây.',
                 ),
-              for (final e in _entries)
-                Card(
-                  child: ListTile(
-                    isThreeLine: true,
-                    leading: CircleAvatar(
-                      backgroundColor: walletEntrySign(e.kind) == '− '
-                          ? AppPalette.of(context).errorSoft
-                          : walletEntrySign(e.kind) == '+ '
-                          ? AppColors.successSoft
-                          : AppPalette.of(context).warningPale,
-                      child: Icon(
-                        walletEntrySign(e.kind) == '− '
-                            ? Icons.north_east
-                            : walletEntrySign(e.kind) == '+ '
-                            ? Icons.south_west
-                            : Icons.swap_horiz,
-                        color: walletEntrySign(e.kind) == '− '
-                            ? AppPalette.of(context).errorStrong
-                            : walletEntrySign(e.kind) == '+ '
-                            ? AppPalette.of(context).successStrong
-                            : AppPalette.of(context).warning,
-                      ),
-                    ),
-                    title: Text(walletKind(e.kind)),
-                    subtitle: Text(
-                      '${e.description}\n${MaterialLocalizations.of(context).formatShortDate(e.createdAt.toLocal())}',
-                    ),
-                    trailing: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 125),
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          '${walletEntrySign(e.kind)}${money(e.amount.toDouble())}',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            color: walletEntrySign(e.kind) == '− '
-                                ? Colors.red.shade700
-                                : walletEntrySign(e.kind) == '+ '
-                                ? AppPalette.of(context).successStrong
-                                : AppPalette.of(context).warning,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+              for (final e in _entries) WalletTransactionTile(entry: e),
               if (_entryMore)
                 TextButton(
                   onPressed: _busy ? null : () => _load(more: true),

@@ -400,9 +400,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
   Widget _messages(BuildContext context) {
     if (_chat.loading) {
       return const SingleChildScrollView(
-        physics: BouncingScrollPhysics(
-          parent: AlwaysScrollableScrollPhysics(),
-        ),
+        physics: BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
         child: ContentSkeleton(chat: true),
       );
     }

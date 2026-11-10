@@ -1,3 +1,4 @@
+import '../widgets/modern_controls.dart';
 import '../widgets/bouncing_button.dart';
 
 import 'dart:async';
@@ -199,9 +200,11 @@ class _AttendanceRadarScreenState extends State<AttendanceRadarScreen> {
                 markers: [
                   Marker(
                     point: LatLng(_site.latitude, _site.longitude),
-                    width: 48,
-                    height: 48,
-                    child: Icon(Icons.location_on, size: 44, color: accent),
+                    width: 80,
+                    height: 80,
+                    child: RadarPulse(
+                      child: Icon(Icons.location_on, size: 44, color: accent),
+                    ),
                   ),
                   if (point != null)
                     Marker(

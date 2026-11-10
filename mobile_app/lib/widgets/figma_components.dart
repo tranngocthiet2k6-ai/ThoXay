@@ -1,3 +1,5 @@
+import 'bouncing_button.dart';
+
 import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
@@ -33,7 +35,7 @@ class KycBadge extends StatelessWidget {
     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
     decoration: BoxDecoration(
       color: AppPalette.of(context).successSoft,
-      borderRadius: BorderRadius.circular(4),
+      borderRadius: BorderRadius.circular(24),
     ),
     child: Row(
       mainAxisSize: MainAxisSize.min,
@@ -149,57 +151,100 @@ class _RoleCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = AppPalette.of(context);
     final color = worker ? AppTheme.workerOrange : AppTheme.contractorEmerald;
-    return Semantics(
-      selected: selected,
-      button: true,
-      child: Material(
-        color: selected
-            ? color.withValues(alpha: palette.dark ? .18 : .05)
-            : palette.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: selected ? color : palette.border),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(14),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      worker
-                          ? Icons.engineering_outlined
-                          : Icons.apartment_outlined,
-                      color: color,
-                      size: 28,
+    return BouncingButton(
+      enabled: onTap != null,
+      child: Semantics(
+        selected: selected,
+        button: true,
+        child: AnimatedContainer(
+          duration: MediaQuery.disableAnimationsOf(context)
+              ? Duration.zero
+              : const Duration(milliseconds: 180),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            color: selected
+                ? color.withValues(alpha: palette.dark ? .18 : .06)
+                : palette.surface,
+            border: Border.all(
+              color: selected ? color : palette.border,
+              width: selected ? 1.5 : 1,
+            ),
+            boxShadow: palette.outdoor
+                ? null
+                : const [
+                    BoxShadow(
+                      color: Color(0x0A000000),
+                      blurRadius: 16,
+                      offset: Offset(0, 4),
                     ),
-                    const Spacer(),
-                    Icon(
-                      selected
-                          ? Icons.radio_button_checked
-                          : Icons.radio_button_unchecked,
-                      size: 18,
-                      color: selected ? color : palette.border,
+                  ],
+          ),
+          child: Material(
+            type: MaterialType.transparency,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: onTap == null
+                  ? null
+                  : () {
+                      AppHaptics.light();
+                      onTap!();
+                    },
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          worker
+                              ? Icons.engineering_outlined
+                              : Icons.apartment_outlined,
+                          size: 28,
+                          color: color,
+                        ),
+                        const Spacer(),
+                        AnimatedSwitcher(
+                          duration: MediaQuery.disableAnimationsOf(context)
+                              ? Duration.zero
+                              : const Duration(milliseconds: 180),
+                          transitionBuilder: (child, animation) =>
+                              ScaleTransition(
+                                scale: animation,
+                                child: FadeTransition(
+                                  opacity: animation,
+                                  child: child,
+                                ),
+                              ),
+                          child: Icon(
+                            selected
+                                ? Icons.check_circle_rounded
+                                : Icons.circle_outlined,
+                            key: ValueKey(selected),
+                            size: 22,
+                            color: selected ? color : palette.border,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      worker ? 'Tôi là thợ' : 'Tôi là chủ thầu',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        color: color,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      worker
+                          ? 'Tìm việc, nhận tiền công'
+                          : 'Tìm thợ giỏi, quản lý đội',
+                      style: TextStyle(fontSize: 11, color: palette.muted),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  worker ? 'Tôi là thợ' : 'Tôi là chủ thầu',
-                  style: TextStyle(fontWeight: FontWeight.w700, color: color),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  worker
-                      ? 'Tìm việc, nhận tiền công'
-                      : 'Tìm thợ giỏi, quản lý đội',
-                  style: TextStyle(fontSize: 11, color: palette.muted),
-                ),
-              ],
+              ),
             ),
           ),
         ),

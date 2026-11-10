@@ -116,7 +116,7 @@ void main() {
       await tester.tap(find.byTooltip('Ẩn số dư'));
       await tester.pumpAndSettle();
       expect(find.text('500.000 đ'), findsNothing);
-      expect(find.text('••••••'), findsNWidgets(3));
+      expect(find.text('••••••'), findsNWidgets(6));
       expect(api.main, 500000);
       expect(
         find.textContaining('Thu nhập tuần này: +350.000 đ'),
@@ -124,7 +124,7 @@ void main() {
       );
       await tester.tap(find.byTooltip('Hiện số dư'));
       await tester.pumpAndSettle();
-      expect(find.text('500.000 đ'), findsOneWidget);
+      expect(find.text('500.000 đ'), findsNWidgets(2));
       expect(api.submitted, isEmpty);
       await tester.pumpWidget(const SizedBox());
       api.dispose();
@@ -136,7 +136,7 @@ void main() {
     final api = WalletApi();
     await tester.pumpWidget(MaterialApp(home: WalletScreen(api: api)));
     await tester.pumpAndSettle();
-    expect(find.text('500.000 đ'), findsOneWidget);
+    expect(find.text('500.000 đ'), findsNWidgets(2));
     expect(find.textContaining('Ký quỹ thấp hơn'), findsOneWidget);
     await tester.scrollUntilVisible(find.text('Tải giao dịch cũ'), 180);
     await tester.pumpAndSettle();
@@ -191,8 +191,9 @@ void main() {
         api.submitted[1]['clientRequestId'],
       );
       expect(api.submitted[1]['amount'], 5000);
-      await tester.scrollUntilVisible(find.text('500.000 đ'), -180);
-      expect(find.text('500.000 đ'), findsOneWidget);
+      await tester.scrollUntilVisible(find.text('Số dư khả dụng'), -180);
+      await tester.pumpAndSettle();
+      expect(find.text('500.000 đ'), findsNWidgets(2));
       api.dispose();
     },
   );

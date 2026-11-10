@@ -5,6 +5,8 @@ import '../services/api_service.dart';
 import 'server_connection_notice.dart';
 import 'tier_badge.dart';
 import 'commercial_hero.dart';
+import 'bouncing_button.dart';
+import '../theme/app_theme.dart';
 
 class HeroGreeting extends StatefulWidget {
   const HeroGreeting({
@@ -47,99 +49,81 @@ class _HeroGreetingState extends State<HeroGreeting> {
         widget.api.session?.role == 'ROLE_WORKER' ||
         widget.availability != null;
     final name = _profile?.fullName ?? widget.api.session?.fullName ?? 'bạn';
+    final palette = AppPalette.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ServerConnectionNotice(api: widget.api),
-        CommercialHero(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  PresenceAvatar(
-                    name: name,
-                    online: worker ? widget.availability : null,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          worker
-                              ? 'THỢ XÂY • DÀNH CHO THỢ'
-                              : 'THỢ XÂY • DÀNH CHO CHỦ THẦU',
-                          style: const TextStyle(
-                            fontSize: 10,
-                            color: Color(0xffcbd5e1),
-                            letterSpacing: 1.2,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          worker
-                              ? (widget.title.contains('ứng tuyển')
-                                    ? 'Việc của tôi'
-                                    : 'Chào ${name.trim().split(" ").last}!')
-                              : widget.title,
-                          style: const TextStyle(
-                            fontSize: 26,
-                            fontWeight: FontWeight.w800,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+              PresenceAvatar(
+                name: name,
+                online: worker ? widget.availability : null,
+                size: 48,
               ),
-              if (worker) ...[
-                const SizedBox(height: 16),
-                Wrap(
-                  spacing: 12,
-                  runSpacing: 8,
-                  crossAxisAlignment: WrapCrossAlignment.center,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (_profile?.workerTier != null)
-                      TierBadge(tier: _profile!.workerTier!),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: const Color(0xff1e293b),
-                        borderRadius: BorderRadius.circular(24),
-                        border: Border.all(color: const Color(0xff475569)),
+                    Text(
+                      worker
+                          ? 'THỢ XÂY • DÀNH CHO THỢ'
+                          : 'THỢ XÂY • DÀNH CHO CHỦ THẦU',
+                      style: TextStyle(
+                        fontSize: 9,
+                        letterSpacing: .6,
+                        color: palette.muted,
                       ),
-                      padding: const EdgeInsets.only(left: 12, right: 4),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Flexible(
-                            child: Text(
-                              widget.availability == true
-                                  ? 'Đang nhận việc'
-                                  : widget.availability == false
-                                  ? 'Tạm ngưng nhận việc'
-                                  : 'Đang đồng bộ trạng thái',
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          Switch(
-                            key: const ValueKey('availability-switch'),
-                            value: widget.availability == true,
-                            onChanged: widget.onAvailabilityChanged,
-                          ),
-                        ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Chào ${name.trim().split(' ').last}!',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.titleLarge
+                          ?.copyWith(fontSize: 22),
+                    ),
+                    if (worker && _profile?.workerTier != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: TierBadge(tier: _profile!.workerTier!),
                       ),
+                    if (!worker)
+                      Text(
+                        widget.title,
+                        style: TextStyle(fontSize: 12, color: palette.muted),
+                      ),
+                  ],
+                ),
+              ),
+              if (worker)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Switch(
+                      key: const ValueKey('availability-switch'),
+                      value: widget.availability == true,
+                      onChanged: widget.onAvailabilityChanged == null
+                          ? null
+                          : (value) {
+                              AppHaptics.light();
+                              widget.onAvailabilityChanged!(value);
+                            },
+                    ),
+                    Text(
+                      widget.availability == true
+                          ? 'Đang nhận việc'
+                          : widget.availability == false
+                          ? 'Tạm ngưng'
+                          : 'Đang đồng bộ',
+                      style: TextStyle(fontSize: 10, color: palette.muted),
                     ),
                   ],
                 ),
-              ],
             ],
           ),
         ),
