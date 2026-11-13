@@ -1,4 +1,5 @@
 import '../widgets/bouncing_button.dart';
+import '../theme/app_theme.dart';
 
 import 'package:flutter/material.dart';
 
@@ -236,8 +237,8 @@ class _SupportCenterScreenState extends State<SupportCenterScreen> {
                         ? Icons.north_east
                         : Icons.south_west,
                     color: walletEntrySign(e.kind) == '− '
-                        ? const Color(0xffea580c)
-                        : const Color(0xff059669),
+                        ? AppTheme.workerAmber
+                        : AppTheme.contractorBlue,
                   ),
                   title: Text(walletKind(e.kind)),
                   subtitle: Text(incidentTime(e.createdAt)),

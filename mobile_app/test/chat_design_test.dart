@@ -321,7 +321,7 @@ void main() {
         );
         expect(
           (container.decoration! as BoxDecoration).color,
-          contractor ? const Color(0xFF059669) : const Color(0xFFEA580C),
+          contractor ? const Color(0xFF1D4ED8) : const Color(0xFFD97706),
         );
         await tester.tap(find.bySemanticsLabel('Phóng to ảnh công trường'));
         await tester.pumpAndSettle();

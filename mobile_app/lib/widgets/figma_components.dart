@@ -150,7 +150,7 @@ class _RoleCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = AppPalette.of(context);
-    final color = worker ? AppTheme.workerOrange : AppTheme.contractorEmerald;
+    final color = worker ? AppTheme.workerAmber : AppTheme.contractorBlue;
     return BouncingButton(
       enabled: onTap != null,
       child: Semantics(

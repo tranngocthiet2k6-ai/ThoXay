@@ -15,6 +15,8 @@ class GradientPrimaryButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = AppPalette.of(context);
     final enabled = onPressed != null;
+    final blue =
+        Theme.of(context).colorScheme.primary == AppTheme.contractorBlue;
     return BouncingButton(
       enabled: enabled,
       child: DecoratedBox(
@@ -25,12 +27,16 @@ class GradientPrimaryButton extends StatelessWidget {
                 ? [palette.border, palette.border]
                 : palette.outdoor
                 ? [Colors.black, Colors.black]
-                : const [Color(0xFFEA580C), Color(0xFFF97316)],
+                : blue
+                ? const [AppTheme.contractorBlue, Color(0xff1e40af)]
+                : const [AppTheme.workerAmber, Color(0xfff59e0b)],
           ),
           boxShadow: enabled && !palette.outdoor
-              ? const [
+              ? [
                   BoxShadow(
-                    color: Color(0x40EA580C),
+                    color:
+                        (blue ? AppTheme.contractorBlue : AppTheme.workerAmber)
+                            .withValues(alpha: .20),
                     blurRadius: 16,
                     offset: Offset(0, 6),
                   ),
@@ -44,7 +50,9 @@ class GradientPrimaryButton extends StatelessWidget {
             disabledBackgroundColor: Colors.transparent,
             shadowColor: Colors.transparent,
             elevation: 0,
-            foregroundColor: Colors.white,
+            foregroundColor: palette.outdoor || blue
+                ? Colors.white
+                : const Color(0xff241400),
             minimumSize: const Size(double.infinity, 52),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(14),

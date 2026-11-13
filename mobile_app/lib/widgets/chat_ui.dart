@@ -119,10 +119,15 @@ class ChatMessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = AppPalette.of(context);
-    final foreground = mine ? Colors.white : palette.ink;
+    final blue = api.session?.role == 'ROLE_CONTRACTOR';
+    final foreground = mine
+        ? blue
+              ? Colors.white
+              : const Color(0xff241400)
+        : palette.ink;
     final accent = api.session?.role == 'ROLE_CONTRACTOR'
-        ? const Color(0xFF059669)
-        : const Color(0xFFEA580C);
+        ? AppTheme.contractorBlue
+        : AppTheme.workerAmber;
     final seen =
         peerLastReadMessageId != null && message.id <= peerLastReadMessageId!;
     return LayoutBuilder(
@@ -217,7 +222,7 @@ class ChatMessageBubble extends StatelessWidget {
                       '${chatTime(message.createdAt)}${mine ? ' · ${seen ? 'Đã xem' : 'Đã gửi'}' : ''}',
                       style: TextStyle(
                         fontSize: 10,
-                        color: mine ? Colors.white70 : palette.muted,
+                        color: mine ? foreground : palette.muted,
                       ),
                     ),
                   ],

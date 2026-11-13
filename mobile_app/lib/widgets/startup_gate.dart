@@ -144,7 +144,7 @@ class SplashScreen extends StatelessWidget {
                                   value: reduceMotion ? .5 : null,
                                   minHeight: 3,
                                   borderRadius: BorderRadius.circular(8),
-                                  color: AppTheme.workerOrange,
+                                  color: AppTheme.workerAmber,
                                   semanticsLabel: 'Đang khởi động Thợ Xây',
                                 ),
                               )

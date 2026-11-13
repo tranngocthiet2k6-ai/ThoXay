@@ -107,8 +107,11 @@ abstract final class AppTheme {
     return const [AppColors.ink, Color(0xff293c52)];
   }
 
-  static const workerOrange = Color(0xffea580c);
-  static const contractorEmerald = Color(0xff059669);
+  static const workerAmber = Color(0xffd97706);
+  static const contractorBlue = Color(0xff1d4ed8);
+  // Keep source compatibility for clients of the earlier theme names.
+  static const workerOrange = workerAmber;
+  static const contractorEmerald = contractorBlue;
   static ThemeData get light => forRole(null);
   static ThemeData forRole(
     String? role, {
@@ -129,14 +132,14 @@ abstract final class AppTheme {
     final background = palette.canvas;
     final container = brightness == Brightness.dark
         ? (worker
-              ? const Color(0xff5c2c15)
+              ? const Color(0xff493014)
               : contractor
-              ? const Color(0xff064e3b)
+              ? const Color(0xff172e61)
               : const Color(0xff1e3a5f))
         : worker
-        ? const Color(0xfffff7ed)
+        ? const Color(0xfffff7e6)
         : contractor
-        ? const Color(0xffecfdf5)
+        ? const Color(0xffeff6ff)
         : const Color(0xffdbeafe);
     final colors =
         ColorScheme.fromSeed(
@@ -148,7 +151,7 @@ abstract final class AppTheme {
           onPrimary: worker || role == null
               ? const Color(0xff1c0a00)
               : contractor
-              ? const Color(0xff011b12)
+              ? Colors.white
               : Colors.white,
           primaryContainer: container,
           onPrimaryContainer: palette.ink,
@@ -245,9 +248,9 @@ abstract final class AppTheme {
               : brightness == Brightness.dark
               ? accent
               : worker || role == null
-              ? const Color(0xff9a3412)
+              ? const Color(0xff92400e)
               : contractor
-              ? const Color(0xff065f46)
+              ? const Color(0xff1e40af)
               : accent,
           minimumSize: const Size(48, 48),
         ),
@@ -262,13 +265,15 @@ abstract final class AppTheme {
               : brightness == Brightness.dark
               ? null
               : worker || role == null
-              ? const Color(0xffc2410c)
+              ? workerAmber
               : contractor
-              ? const Color(0xff047857)
+              ? contractorBlue
               : accent,
-          foregroundColor: outdoor || brightness == Brightness.light
+          foregroundColor: outdoor
               ? Colors.white
-              : null,
+              : worker || role == null
+              ? const Color(0xff241400)
+              : Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -287,9 +292,9 @@ abstract final class AppTheme {
               : brightness == Brightness.dark
               ? accent
               : worker || role == null
-              ? const Color(0xff9a3412)
+              ? const Color(0xff92400e)
               : contractor
-              ? const Color(0xff065f46)
+              ? const Color(0xff1e40af)
               : accent,
           side: BorderSide(
             color: outdoor ? palette.ink : palette.border,
