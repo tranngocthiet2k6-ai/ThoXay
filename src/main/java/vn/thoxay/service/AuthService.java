@@ -31,6 +31,8 @@ public class AuthService {
         user.setPassword(encoder.encode(request.password())); user.setFullName(request.fullName().trim());
         user.setRole(Role.valueOf(request.role()));
         user.setAvailable(false);
+        // Legacy tokens have version 0; a recycled phone must never inherit one.
+        user.setSecurityVersion(1);
         user.setCccdFrontImage(request.cccdFrontImage());
         user.setCccdBackImage(request.cccdBackImage());
         users.saveAndFlush(user);
@@ -50,6 +52,6 @@ public class AuthService {
         return response(user);
     }
     private AuthResponse response(User user) {
-        return AuthResponse.of(jwt.generateToken(user.getPhoneNumber()), jwt.expiresInSeconds(), user);
+        return AuthResponse.of(jwt.generateToken(user.getPhoneNumber(), user.getSecurityVersion(), user.getId()), jwt.expiresInSeconds(), user);
     }
 }

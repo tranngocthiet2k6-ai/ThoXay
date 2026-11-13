@@ -1,0 +1,4 @@
+-- Re-runnable; the same upgrade is applied automatically by Flyway V24.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS security_version BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS job_push_enabled BOOLEAN NOT NULL DEFAULT TRUE;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS chat_push_enabled BOOLEAN NOT NULL DEFAULT TRUE;

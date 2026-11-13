@@ -18,11 +18,25 @@ public class JwtUtil {
         this.expirationMs = expirationMs;
     }
     public String generateToken(String phone) {
-        return Jwts.builder().subject(phone).issuedAt(new Date())
+        return generateToken(phone, 0);
+    }
+    public String generateToken(String phone, long version) {
+        return generateToken(phone, version, null);
+    }
+    public String generateToken(String phone, long version, Long userId) {
+        return Jwts.builder().subject(phone).claim("sv", version).claim("uid", userId).issuedAt(new Date())
             .expiration(new Date(System.currentTimeMillis() + expirationMs)).signWith(key).compact();
     }
     public String extractPhone(String token) {
         return Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload().getSubject();
     }
     public long expiresInSeconds() { return expirationMs / 1000; }
+    public long securityVersion(String token) {
+        Number version = Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload().get("sv", Number.class);
+        return version == null ? 0 : version.longValue();
+    }
+    public boolean belongsTo(String token, Long userId) {
+        Number id = Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload().get("uid", Number.class);
+        return id == null || id.longValue() == userId;
+    }
 }

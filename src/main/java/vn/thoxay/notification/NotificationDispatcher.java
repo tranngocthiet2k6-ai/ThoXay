@@ -20,6 +20,7 @@ public class NotificationDispatcher {
         if (n == null || !"PENDING".equals(n.getPushStatus()) || n.getNextAttemptAt().isAfter(Instant.now())) return;
         if (!push.enabled()) return;
         if (!n.getRecipient().isActive() || n.getReadAt() != null) { n.setPushStatus("SKIPPED"); return; }
+        if (!allows(n.getType(), n.getRecipient())) { n.setPushStatus("SKIPPED"); return; }
         var targets = devices.findByUserIdAndLastSeenAtAfter(n.getRecipient().getId(), Instant.now().minus(60, ChronoUnit.DAYS));
         if (targets.isEmpty()) { n.setPushStatus("SKIPPED"); return; }
         n.setPushAttempts(n.getPushAttempts() + 1);
@@ -37,5 +38,10 @@ public class NotificationDispatcher {
         }
         if (retry && n.getPushAttempts() < 3) { n.setNextAttemptAt(Instant.now().plusSeconds(10L * n.getPushAttempts())); }
         else n.setPushStatus(retry || failed ? "FAILED" : accepted ? "ACCEPTED" : "SKIPPED");
+    }
+    public static boolean allows(String type, vn.thoxay.entity.User user) {
+        if ("CHAT_MESSAGE".equals(type)) return user.isChatPushEnabled();
+        if (type.startsWith("JOB_") || type.startsWith("APPLICATION_") || "WORKER_CANCELLED".equals(type)) return user.isJobPushEnabled();
+        return true; // Safety, KYC and financial notices remain available.
     }
 }

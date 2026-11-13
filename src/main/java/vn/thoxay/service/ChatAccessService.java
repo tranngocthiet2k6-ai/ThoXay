@@ -28,6 +28,8 @@ public class ChatAccessService {
         catch (JwtException | IllegalArgumentException e) { throw new ApiException(HttpStatus.UNAUTHORIZED, "Phiên đăng nhập đã hết hạn"); }
         User actor = users.findByPhoneNumber(phone)
             .orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "Không tìm thấy tài khoản"));
+        if (actor.getSecurityVersion() != jwt.securityVersion(token) || !jwt.belongsTo(token, actor.getId()))
+            throw new ApiException(HttpStatus.UNAUTHORIZED, "Phiên đăng nhập đã bị thu hồi");
         Job job = jobs.findById(jobId).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Công trình không tồn tại"));
         return new Subscription(actor.getId(), peerId, authorize(actor, job, peerId));
     }

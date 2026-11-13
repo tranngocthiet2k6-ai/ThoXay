@@ -20,6 +20,12 @@ public class User {
     private String phoneNumber;
     @Column(nullable = false, length = 255)
     private String password;
+    @Column(name = "security_version", nullable = false) @org.hibernate.annotations.ColumnDefault("0")
+    private long securityVersion;
+    @Column(name = "job_push_enabled", nullable = false) @org.hibernate.annotations.ColumnDefault("true")
+    private boolean jobPushEnabled = true;
+    @Column(name = "chat_push_enabled", nullable = false) @org.hibernate.annotations.ColumnDefault("true")
+    private boolean chatPushEnabled = true;
     @Column(name = "full_name", nullable = false, length = 100)
     private String fullName;
     @Column(name = "date_of_birth") private LocalDate dateOfBirth;
