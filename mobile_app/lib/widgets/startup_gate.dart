@@ -41,7 +41,7 @@ class _StartupGateState extends State<StartupGate> {
     final duration =
         widget.minimumDuration ??
         StartupGate.testMinimumDuration ??
-        const Duration(milliseconds: 1500);
+        Duration.zero;
     _elapsed = duration == Duration.zero;
     if (!_elapsed) {
       _timer = Timer(duration, () {
@@ -70,6 +70,7 @@ class _StartupGateState extends State<StartupGate> {
 
   @override
   Widget build(BuildContext context) {
+    Widget child;
     if (_elapsed && _ready) {
       if (!_announced) {
         _announced = true;
@@ -77,15 +78,52 @@ class _StartupGateState extends State<StartupGate> {
           if (mounted) widget.onReady?.call();
         });
       }
-      return widget.builder(context);
+      child = KeyedSubtree(
+        key: const ValueKey('startup-ready'),
+        child: widget.builder(context),
+      );
+    } else if (_failed) {
+      child = Scaffold(
+        key: const ValueKey('startup-error'),
+        body: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.cloud_off_outlined, size: 48),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Chưa thể khởi động ứng dụng. Vui lòng thử lại.',
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  OutlinedButton.icon(
+                    onPressed: _initialize,
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Thử lại'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    } else {
+      child = const SplashScreen(key: ValueKey('startup-loading'));
     }
-    return SplashScreen(onRetry: _failed ? _initialize : null);
+    return AnimatedSwitcher(
+      duration: MediaQuery.disableAnimationsOf(context)
+          ? Duration.zero
+          : const Duration(milliseconds: 220),
+      child: child,
+    );
   }
 }
 
 class SplashScreen extends StatelessWidget {
-  const SplashScreen({super.key, this.onRetry});
-  final VoidCallback? onRetry;
+  const SplashScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -137,29 +175,16 @@ class SplashScreen extends StatelessWidget {
                                   ?.copyWith(color: palette.ink, height: 1.5),
                             ),
                             const SizedBox(height: 32),
-                            if (onRetry == null)
-                              SizedBox(
-                                width: 160,
-                                child: LinearProgressIndicator(
-                                  value: reduceMotion ? .5 : null,
-                                  minHeight: 3,
-                                  borderRadius: BorderRadius.circular(8),
-                                  color: AppTheme.workerAmber,
-                                  semanticsLabel: 'Đang khởi động Thợ Xây',
-                                ),
-                              )
-                            else ...[
-                              const Text(
-                                'Chưa thể khởi động ứng dụng. Vui lòng thử lại.',
-                                textAlign: TextAlign.center,
+                            SizedBox(
+                              width: 160,
+                              child: LinearProgressIndicator(
+                                value: reduceMotion ? .5 : null,
+                                minHeight: 3,
+                                borderRadius: BorderRadius.circular(8),
+                                color: AppTheme.workerAmber,
+                                semanticsLabel: 'Đang khởi động Thợ Xây',
                               ),
-                              const SizedBox(height: 16),
-                              OutlinedButton.icon(
-                                onPressed: onRetry,
-                                icon: const Icon(Icons.refresh),
-                                label: const Text('Thử lại'),
-                              ),
-                            ],
+                            ),
                           ],
                         ),
                       ),

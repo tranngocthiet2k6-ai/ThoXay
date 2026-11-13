@@ -7,6 +7,7 @@ import '../theme/appearance_controller.dart';
 import '../theme/app_theme.dart';
 import 'app_snack_bar.dart';
 import 'bouncing_button.dart';
+import 'app_information.dart';
 
 class ProfileSettings extends StatelessWidget {
   const ProfileSettings({super.key, required this.api});
@@ -170,6 +171,19 @@ class ProfileSettings extends StatelessWidget {
             },
             icon: const Icon(Icons.logout, size: 20),
             label: const Text('Đăng xuất'),
+          ),
+        ),
+        TextButton.icon(
+          onPressed: () => showDataInformation(context),
+          icon: const Icon(Icons.privacy_tip_outlined, size: 18),
+          label: const Text('Quyền truy cập & dữ liệu'),
+        ),
+        const Padding(
+          padding: EdgeInsets.only(top: 8),
+          child: SelectableText(
+            'Thợ Xây · Phiên bản ${AppRelease.label}',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 12),
           ),
         ),
         const SizedBox(height: 24),

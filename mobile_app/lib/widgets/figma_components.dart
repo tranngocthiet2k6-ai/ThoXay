@@ -232,7 +232,13 @@ class _RoleCard extends StatelessWidget {
                       worker ? 'Tôi là thợ' : 'Tôi là chủ thầu',
                       style: TextStyle(
                         fontWeight: FontWeight.w800,
-                        color: color,
+                        color: palette.dark
+                            ? worker
+                                  ? const Color(0xfffbbf24)
+                                  : const Color(0xff93c5fd)
+                            : worker
+                            ? const Color(0xff92400e)
+                            : color,
                       ),
                     ),
                     const SizedBox(height: 6),

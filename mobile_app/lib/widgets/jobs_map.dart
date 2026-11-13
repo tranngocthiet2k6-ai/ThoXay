@@ -20,6 +20,46 @@ class JobsMap extends StatelessWidget {
   final ValueChanged<Job> onJobTap;
   final TileProvider? tileProvider;
   final bool interactive;
+  List<List<Job>> get _groups {
+    final groups = <String, List<Job>>{};
+    for (final job in jobs) {
+      final key =
+          '${job.latitude.toStringAsFixed(4)}:${job.longitude.toStringAsFixed(4)}';
+      (groups[key] ??= []).add(job);
+    }
+    return groups.values.toList();
+  }
+
+  Future<void> _chooseCluster(BuildContext context, List<Job> group) async {
+    final chosen = await showModalBottomSheet<Job>(
+      context: context,
+      showDragHandle: true,
+      useSafeArea: true,
+      builder: (context) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                '${group.length} công trình gần nhau',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ),
+            for (final job in group)
+              ListTile(
+                title: Text(job.title),
+                subtitle: Text('${money(job.salaryPerDay)}/ngày'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.pop(context, job),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (chosen != null && context.mounted) onJobTap(chosen);
+  }
+
   @override
   Widget build(BuildContext context) => OsmMapView(
     center: center,
@@ -54,61 +94,78 @@ class JobsMap extends StatelessWidget {
           ),
         ),
       ),
-      for (final job in jobs)
-        Marker(
-          point: LatLng(job.latitude, job.longitude),
-          width: 112,
-          height: 56,
-          alignment: Alignment.topCenter,
-          child: Tooltip(
-            message: '${job.title} · ${money(job.salaryPerDay)}/ngày',
+      for (final group in _groups)
+        if (group.length > 1)
+          Marker(
+            point: LatLng(group.first.latitude, group.first.longitude),
+            width: 116,
+            height: 52,
             child: Semantics(
               button: true,
-              label: 'Công trình ${job.title}',
-              child: GestureDetector(
-                key: ValueKey('job-marker-${job.id}'),
-                onTap: () => onJobTap(job),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.white, width: 2),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color(0x22000000),
-                            blurRadius: 8,
-                            offset: Offset(0, 3),
+              label: '${group.length} công trình gần nhau',
+              child: FilledButton.tonal(
+                key: ValueKey('job-cluster-${group.first.id}'),
+                onPressed: () => _chooseCluster(context, group),
+                child: Text('${group.length} công trình', maxLines: 1),
+              ),
+            ),
+          )
+        else
+          for (final job in group)
+            Marker(
+              point: LatLng(job.latitude, job.longitude),
+              width: 112,
+              height: 56,
+              alignment: Alignment.topCenter,
+              child: Tooltip(
+                message: '${job.title} · ${money(job.salaryPerDay)}/ngày',
+                child: Semantics(
+                  button: true,
+                  label: 'Công trình ${job.title}',
+                  child: GestureDetector(
+                    key: ValueKey('job-marker-${job.id}'),
+                    onTap: () => onJobTap(job),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
                           ),
-                        ],
-                      ),
-                      child: Text(
-                        '${(job.salaryPerDay / 1000).toStringAsFixed(job.salaryPerDay % 1000 == 0 ? 0 : 1)}k',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onPrimary,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 12,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.primary,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: Colors.white, width: 2),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Color(0x22000000),
+                                blurRadius: 8,
+                                offset: Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: Text(
+                            '${(job.salaryPerDay / 1000).toStringAsFixed(job.salaryPerDay % 1000 == 0 ? 0 : 1)}k',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onPrimary,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 12,
+                            ),
+                            maxLines: 1,
+                          ),
                         ),
-                        maxLines: 1,
-                      ),
+                        Icon(
+                          Icons.arrow_drop_down,
+                          color: Theme.of(context).colorScheme.primary,
+                          size: 18,
+                        ),
+                      ],
                     ),
-                    Icon(
-                      Icons.arrow_drop_down,
-                      color: Theme.of(context).colorScheme.primary,
-                      size: 18,
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ),
     ],
   );
 }

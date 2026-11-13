@@ -22,27 +22,39 @@ class HomeNavigation extends StatelessWidget {
     this.worker = false,
     this.selectedIndex = 0,
     this.onSelected,
+    this.nested = false,
   });
   final ApiService api;
   final bool worker;
   final int selectedIndex;
   final ValueChanged<int>? onSelected;
+  final bool nested;
 
   void _select(BuildContext context, int index) {
     AppHaptics.light();
+    if (index == selectedIndex) return;
     if (index == 0 || (worker && index == 1)) {
+      if (nested) Navigator.of(context).pop();
       onSelected?.call(index);
       return;
     }
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => switch (index) {
-          1 => SavedScreen(api: api, worker: false),
-          2 => WalletScreen(api: api),
-          _ => ProfileScreen(api: api),
-        },
-      ),
+    final route = MaterialPageRoute<void>(
+      builder: (_) => switch (index) {
+        1 => SavedScreen(
+          api: api,
+          worker: false,
+          fromTab: true,
+          onHomeSelected: onSelected,
+        ),
+        2 => WalletScreen(api: api, fromTab: true, onHomeSelected: onSelected),
+        _ => ProfileScreen(api: api, fromTab: true, onHomeSelected: onSelected),
+      },
     );
+    if (nested) {
+      Navigator.of(context).pushReplacement(route);
+    } else {
+      Navigator.of(context).push(route);
+    }
   }
 
   @override

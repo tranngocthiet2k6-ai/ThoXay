@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../models/chat_message.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import 'private_image.dart';
+import 'app_snack_bar.dart';
 
 class ChatAvatar extends StatelessWidget {
   const ChatAvatar({
@@ -108,6 +110,7 @@ class ChatMessageBubble extends StatelessWidget {
     required this.peerName,
     required this.onLocation,
     this.peerLastReadMessageId,
+    this.onReply,
   });
   final ApiService api;
   final ChatMessage message;
@@ -115,6 +118,66 @@ class ChatMessageBubble extends StatelessWidget {
   final String peerName;
   final int? peerLastReadMessageId;
   final void Function(double, double) onLocation;
+  final VoidCallback? onReply;
+
+  Future<void> _actions(BuildContext context) async {
+    final action = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      useSafeArea: true,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: const Text('Tin nhắn'),
+              subtitle: Text(chatTime(message.createdAt)),
+            ),
+            ListTile(
+              leading: const Icon(Icons.copy_outlined),
+              title: const Text('Sao chép'),
+              onTap: () => Navigator.pop(context, 'copy'),
+            ),
+            if (onReply != null)
+              ListTile(
+                leading: const Icon(Icons.reply),
+                title: const Text('Trả lời bằng trích dẫn'),
+                onTap: () => Navigator.pop(context, 'reply'),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (!context.mounted) return;
+    if (action == 'reply') onReply?.call();
+    if (action == 'copy') {
+      final text = message.kind == 'LOCATION' && message.latitude != null
+          ? '${message.latitude}, ${message.longitude}'
+          : message.content;
+      try {
+        await Clipboard.setData(
+          ClipboardData(text: text.isEmpty ? '[Hình ảnh]' : text),
+        );
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            AppSnackBar(
+              content: const Text('Đã sao chép tin nhắn'),
+              kind: NoticeKind.info,
+            ),
+          );
+        }
+      } on Object {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            AppSnackBar(
+              content: const Text('Thiết bị chưa sao chép được nội dung'),
+              kind: NoticeKind.error,
+            ),
+          );
+        }
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -144,88 +207,104 @@ class ChatMessageBubble extends StatelessWidget {
               const SizedBox(width: 8),
             ],
             Flexible(
-              child: Container(
-                key: ValueKey('message-${message.id}'),
-                constraints: BoxConstraints(
-                  maxWidth: (bounds.maxWidth * .8).clamp(0, 480),
-                ),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: mine ? accent : palette.surface,
-                  border: mine ? null : Border.all(color: palette.border),
-                  borderRadius: BorderRadius.only(
-                    topLeft: const Radius.circular(20),
-                    topRight: const Radius.circular(20),
-                    bottomLeft: Radius.circular(mine ? 20 : 4),
-                    bottomRight: Radius.circular(mine ? 4 : 20),
-                  ),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (message.kind == 'IMAGE' &&
-                        message.imagePath != null) ...[
-                      Semantics(
-                        label: 'Phóng to ảnh công trường',
-                        button: true,
-                        child: InkWell(
-                          onTap: () => showPrivatePhoto(
-                            context,
-                            api,
-                            message.imagePath!,
-                            message.content,
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: SizedBox(
-                              width: 260,
-                              height: 180,
-                              child: PrivateImage(
-                                api: api,
-                                path: message.imagePath!,
+              child: Semantics(
+                container: true,
+                explicitChildNodes: true,
+                onLongPress: () => _actions(context),
+                child: GestureDetector(
+                  excludeFromSemantics: true,
+                  onLongPress: () => _actions(context),
+                  onHorizontalDragEnd: onReply == null
+                      ? null
+                      : (details) {
+                          if ((details.primaryVelocity ?? 0) > 250) onReply!();
+                        },
+                  child: Container(
+                    key: ValueKey('message-${message.id}'),
+                    constraints: BoxConstraints(
+                      maxWidth: (bounds.maxWidth * .8).clamp(0, 480),
+                    ),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: mine ? accent : palette.surface,
+                      border: mine ? null : Border.all(color: palette.border),
+                      borderRadius: BorderRadius.only(
+                        topLeft: const Radius.circular(20),
+                        topRight: const Radius.circular(20),
+                        bottomLeft: Radius.circular(mine ? 20 : 4),
+                        bottomRight: Radius.circular(mine ? 4 : 20),
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (message.kind == 'IMAGE' &&
+                            message.imagePath != null) ...[
+                          Semantics(
+                            label: 'Phóng to ảnh công trường',
+                            button: true,
+                            child: InkWell(
+                              onTap: () => showPrivatePhoto(
+                                context,
+                                api,
+                                message.imagePath!,
+                                message.content,
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: SizedBox(
+                                  width: 260,
+                                  height: 180,
+                                  child: PrivateImage(
+                                    api: api,
+                                    path: message.imagePath!,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                    ],
-                    if (message.kind == 'LOCATION' &&
-                        message.latitude != null &&
-                        message.longitude != null) ...[
-                      Icon(Icons.location_on, size: 32, color: foreground),
-                      Text(
-                        '${message.latitude!.toStringAsFixed(5)}, ${message.longitude!.toStringAsFixed(5)}',
-                        style: TextStyle(color: foreground, fontSize: 12),
-                      ),
-                      OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: foreground,
-                          side: BorderSide(
-                            color: foreground.withValues(alpha: .4),
+                          const SizedBox(height: 8),
+                        ],
+                        if (message.kind == 'LOCATION' &&
+                            message.latitude != null &&
+                            message.longitude != null) ...[
+                          Icon(Icons.location_on, size: 32, color: foreground),
+                          Text(
+                            '${message.latitude!.toStringAsFixed(5)}, ${message.longitude!.toStringAsFixed(5)}',
+                            style: TextStyle(color: foreground, fontSize: 12),
+                          ),
+                          OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: foreground,
+                              side: BorderSide(
+                                color: foreground.withValues(alpha: .4),
+                              ),
+                            ),
+                            onPressed: () => onLocation(
+                              message.latitude!,
+                              message.longitude!,
+                            ),
+                            icon: const Icon(Icons.map_outlined, size: 18),
+                            label: const Text('Mở vị trí trên bản đồ'),
+                          ),
+                        ],
+                        if (message.content.isNotEmpty)
+                          Text(
+                            message.content,
+                            style: TextStyle(color: foreground, height: 1.5),
+                          ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${chatTime(message.createdAt)}${mine ? ' · ${seen ? 'Đã xem' : 'Đã gửi'}' : ''}',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: mine ? foreground : palette.muted,
                           ),
                         ),
-                        onPressed: () =>
-                            onLocation(message.latitude!, message.longitude!),
-                        icon: const Icon(Icons.map_outlined, size: 18),
-                        label: const Text('Mở vị trí trên bản đồ'),
-                      ),
-                    ],
-                    if (message.content.isNotEmpty)
-                      Text(
-                        message.content,
-                        style: TextStyle(color: foreground, height: 1.5),
-                      ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${chatTime(message.createdAt)}${mine ? ' · ${seen ? 'Đã xem' : 'Đã gửi'}' : ''}',
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: mine ? foreground : palette.muted,
-                      ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),

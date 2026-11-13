@@ -27,8 +27,16 @@ import 'leaderboard_screen.dart';
 import 'reputation_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key, required this.api, this.camera});
+  const ProfileScreen({
+    super.key,
+    required this.api,
+    this.camera,
+    this.fromTab = false,
+    this.onHomeSelected,
+  });
   final ApiService api;
+  final bool fromTab;
+  final ValueChanged<int>? onHomeSelected;
   final KycCamera? camera;
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -186,6 +194,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
+    bottomNavigationBar: widget.fromTab
+        ? HomeNavigation(
+            api: widget.api,
+            worker: widget.api.session?.role == 'ROLE_WORKER',
+            selectedIndex: 3,
+            nested: true,
+            onSelected: widget.onHomeSelected,
+          )
+        : null,
     appBar: AppBar(
       title: Text(
         widget.api.session?.role == 'ROLE_CONTRACTOR'

@@ -147,7 +147,7 @@ class JobCard extends StatelessWidget {
                           job.jobType,
                           style: TextStyle(
                             fontSize: 11,
-                            color: color,
+                            color: AppTheme.brandInk(context),
                             fontWeight: FontWeight.w600,
                           ),
                         ),

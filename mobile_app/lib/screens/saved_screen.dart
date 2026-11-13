@@ -15,8 +15,16 @@ import 'shared_job_screen.dart';
 import 'worker_profile_screen.dart';
 
 class SavedScreen extends StatefulWidget {
-  const SavedScreen({super.key, required this.api, required this.worker});
+  const SavedScreen({
+    super.key,
+    required this.api,
+    required this.worker,
+    this.fromTab = false,
+    this.onHomeSelected,
+  });
   final ApiService api;
+  final bool fromTab;
+  final ValueChanged<int>? onHomeSelected;
   final bool worker;
   @override
   State<SavedScreen> createState() => _SavedScreenState();
@@ -61,6 +69,15 @@ class _SavedScreenState extends State<SavedScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
+    bottomNavigationBar: widget.fromTab
+        ? HomeNavigation(
+            api: widget.api,
+            worker: widget.worker,
+            selectedIndex: 1,
+            nested: true,
+            onSelected: widget.onHomeSelected,
+          )
+        : null,
     appBar: AppBar(
       title: Text(widget.worker ? 'Công trình yêu thích' : 'Thợ quen'),
       actions: [

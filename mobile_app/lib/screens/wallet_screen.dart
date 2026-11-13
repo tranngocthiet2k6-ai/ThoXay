@@ -20,8 +20,15 @@ import '../widgets/wallet_operation_dialog.dart';
 import '../widgets/deposit_dialog.dart';
 
 class WalletScreen extends StatefulWidget {
-  const WalletScreen({super.key, required this.api});
+  const WalletScreen({
+    super.key,
+    required this.api,
+    this.fromTab = false,
+    this.onHomeSelected,
+  });
   final ApiService api;
+  final bool fromTab;
+  final ValueChanged<int>? onHomeSelected;
   @override
   State<WalletScreen> createState() => _WalletScreenState();
 }
@@ -142,6 +149,15 @@ class _WalletScreenState extends State<WalletScreen> {
   );
   @override
   Widget build(BuildContext context) => Scaffold(
+    bottomNavigationBar: widget.fromTab
+        ? HomeNavigation(
+            api: widget.api,
+            worker: widget.api.session?.role == 'ROLE_WORKER',
+            selectedIndex: 2,
+            nested: true,
+            onSelected: widget.onHomeSelected,
+          )
+        : null,
     appBar: AppBar(
       title: Text(
         widget.api.session?.role == 'ROLE_CONTRACTOR'

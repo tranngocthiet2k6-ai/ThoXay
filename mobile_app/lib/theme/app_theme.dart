@@ -96,13 +96,26 @@ class AppPalette extends ThemeExtension<AppPalette> {
 }
 
 abstract final class AppTheme {
+  static Color brandInk(BuildContext context) {
+    final palette = AppPalette.of(context);
+    if (palette.outdoor) return palette.ink;
+    final blue = Theme.of(context).colorScheme.primary == contractorBlue;
+    return palette.dark
+        ? blue
+              ? const Color(0xff93c5fd)
+              : const Color(0xfffbbf24)
+        : blue
+        ? contractorBlue
+        : const Color(0xff92400e);
+  }
+
   static List<Color> brandGradient(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    if (primary == workerOrange) {
+    if (primary == workerAmber) {
       return const [AppColors.ink, Color(0xff413025)];
     }
-    if (primary == contractorEmerald) {
-      return const [AppColors.ink, Color(0xff133e36)];
+    if (primary == contractorBlue) {
+      return const [AppColors.ink, Color(0xff1e3a5f)];
     }
     return const [AppColors.ink, Color(0xff293c52)];
   }
@@ -123,11 +136,11 @@ abstract final class AppTheme {
     final worker = role == 'ROLE_WORKER';
     final contractor = role == 'ROLE_CONTRACTOR';
     final accent = worker
-        ? workerOrange
+        ? workerAmber
         : contractor
-        ? contractorEmerald
+        ? contractorBlue
         : role == null
-        ? workerOrange
+        ? workerAmber
         : const Color(0xff1d4ed8);
     final background = palette.canvas;
     final container = brightness == Brightness.dark

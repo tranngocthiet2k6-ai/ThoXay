@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../models/models.dart';
+import '../models/chat_message.dart';
 import '../services/api_service.dart';
 import '../services/chat_contact.dart';
 import '../services/chat_controller.dart';
@@ -52,6 +53,8 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
   ChatContact? _contact;
   int _lastMessageId = 0, _lastRead = 0;
   bool _reading = false, _foreground = true, _calling = false;
+  bool _away = false;
+  int _unseen = 0;
   static const _replies = [
     'Tôi đang tới công trình',
     'Đã có mặt tại công trường',
@@ -65,7 +68,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     _chat = ChatController(widget.api, widget.job.id, widget.peerId);
     _chat.addListener(_changed);
-    _scroll.addListener(_markVisible);
+    _scroll.addListener(_scrolled);
     _chat.start();
     _loadContact();
   }
@@ -91,6 +94,11 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
     final scrollDown =
         latest != _lastMessageId &&
         (!_scroll.hasClients || _scroll.offset < 100);
+    if (_lastMessageId > 0 && !scrollDown) {
+      _unseen += _chat.messages
+          .where((m) => m.id > _lastMessageId && m.senderId != _chat.userId)
+          .length;
+    }
     _lastMessageId = latest;
     setState(() {
       if (_chat.status == ChatStatus.stopped) _contact = null;
@@ -107,6 +115,36 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
         }
       });
     }
+  }
+
+  void _scrolled() {
+    if (!mounted || !_scroll.hasClients) return;
+    final away = _scroll.offset > 120;
+    if (away != _away || (_scroll.offset <= 8 && _unseen > 0)) {
+      setState(() {
+        _away = away;
+        if (_scroll.offset <= 8) _unseen = 0;
+      });
+    }
+    _markVisible();
+  }
+
+  void _reply(ChatMessage message) {
+    final preview = message.kind == 'IMAGE'
+        ? '[Hình ảnh]'
+        : message.kind == 'LOCATION'
+        ? '[Vị trí GPS]'
+        : message.content.replaceAll('\n', ' ');
+    final quote =
+        '> ${preview.length > 140 ? '${preview.substring(0, 140)}…' : preview}\n';
+    if (quote.length + _draft.text.length > 2000) {
+      _notice('Bản nháp quá dài để thêm trích dẫn. Hãy rút gọn trước.');
+      return;
+    }
+    _draft.text = '$quote${_draft.text}';
+    _draft.selection = TextSelection.collapsed(offset: _draft.text.length);
+    _focus.requestFocus();
+    setState(() {});
   }
 
   @override
@@ -252,7 +290,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
     _chat.dispose();
     _draft.dispose();
     _focus.dispose();
-    _scroll.removeListener(_markVisible);
+    _scroll.removeListener(_scrolled);
     _scroll.dispose();
     super.dispose();
   }
@@ -372,7 +410,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                           '${money(_contact?.dailyRate ?? widget.job.salaryPerDay)}/ngày',
                           style: TextStyle(
                             fontWeight: FontWeight.w800,
-                            color: theme.colorScheme.primary,
+                            color: AppTheme.brandInk(context),
                           ),
                         ),
                         Text(
@@ -463,6 +501,9 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
               mine: message.senderId == _chat.userId,
               peerName: widget.peerName,
               peerLastReadMessageId: _chat.peerLastReadMessageId,
+              onReply: _chat.status == ChatStatus.stopped
+                  ? null
+                  : () => _reply(message),
               onLocation: _openLocation,
             ),
           ],
@@ -608,7 +649,37 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
               ],
             ),
           ),
-        Expanded(child: _messages(context)),
+        Expanded(
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              _messages(context),
+              if (_away)
+                Positioned(
+                  right: 12,
+                  bottom: 12,
+                  child: FilledButton.tonalIcon(
+                    key: const ValueKey('chat-scroll-latest'),
+                    icon: const Icon(Icons.arrow_downward),
+                    label: Text(
+                      _unseen > 0 ? '$_unseen tin mới' : 'Về tin mới nhất',
+                    ),
+                    onPressed: () async {
+                      if (!_scroll.hasClients) return;
+                      await _scroll.animateTo(
+                        0,
+                        duration: MediaQuery.disableAnimationsOf(context)
+                            ? Duration.zero
+                            : const Duration(milliseconds: 220),
+                        curve: Curves.easeOutCubic,
+                      );
+                      if (mounted) _markVisible();
+                    },
+                  ),
+                ),
+            ],
+          ),
+        ),
         _composer(context),
       ],
     );

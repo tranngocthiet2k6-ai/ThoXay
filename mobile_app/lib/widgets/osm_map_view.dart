@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../theme/app_theme.dart';
 
 import 'package:flutter/material.dart';
@@ -47,6 +49,7 @@ class _OsmMapViewState extends State<OsmMapView> {
       OsmMapView.testTileProviderFactory?.call() ??
       NetworkTileProvider();
   bool _ready = false, _tileError = false;
+  final _tileReset = StreamController<void>.broadcast();
   LatLng _latLng(GeoPoint point) => LatLng(
     point.latitude.clamp(-85.05112878, 85.05112878).toDouble(),
     point.longitude,
@@ -110,6 +113,7 @@ class _OsmMapViewState extends State<OsmMapView> {
   @override
   void dispose() {
     _controller.dispose();
+    unawaited(_tileReset.close());
     super.dispose();
   }
 
@@ -144,6 +148,7 @@ class _OsmMapViewState extends State<OsmMapView> {
           ),
           children: [
             TileLayer(
+              reset: _tileReset.stream,
               urlTemplate: _tiles,
               tileProvider: _provider,
               userAgentPackageName: 'vn.thoxay.tho_xay_mobile',
@@ -221,6 +226,18 @@ class _OsmMapViewState extends State<OsmMapView> {
                     icon: const Icon(Icons.remove),
                   ),
                   IconButton(
+                    tooltip: 'Về vị trí đang dùng',
+                    onPressed: () {
+                      if (_ready) {
+                        _controller.move(
+                          _latLng(widget.center),
+                          widget.initialZoom,
+                        );
+                      }
+                    },
+                    icon: const Icon(Icons.my_location),
+                  ),
+                  IconButton(
                     tooltip: 'Về vùng đang tìm',
                     onPressed: _fit,
                     icon: const Icon(Icons.center_focus_strong),
@@ -237,9 +254,22 @@ class _OsmMapViewState extends State<OsmMapView> {
             child: Container(
               padding: const EdgeInsets.all(10),
               color: AppPalette.of(context).surface.withValues(alpha: .95),
-              child: const Text(
-                'Chưa tải được nền bản đồ. Kiểm tra mạng; bạn vẫn có thể chọn vị trí hoặc dùng danh sách.',
-                style: TextStyle(fontSize: 12),
+              child: Row(
+                children: [
+                  const Expanded(
+                    child: Text(
+                      'Chưa tải được nền bản đồ. Kiểm tra mạng; bạn vẫn có thể chọn vị trí hoặc dùng danh sách.',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      setState(() => _tileError = false);
+                      _tileReset.add(null);
+                    },
+                    child: const Text('Thử lại'),
+                  ),
+                ],
               ),
             ),
           ),

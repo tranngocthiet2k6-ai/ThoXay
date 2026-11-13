@@ -92,7 +92,7 @@ class _JobMapPreviewState extends State<JobMapPreview> {
                               Text(
                                 '${money(job.salaryPerDay)}/ngày',
                                 style: TextStyle(
-                                  color: Theme.of(context).colorScheme.primary,
+                                  color: AppTheme.brandInk(context),
                                   fontWeight: FontWeight.w800,
                                 ),
                               ),

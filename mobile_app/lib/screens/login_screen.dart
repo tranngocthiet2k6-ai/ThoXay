@@ -120,6 +120,29 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               const SizedBox(height: 24),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: _busy
+                      ? null
+                      : () => showDialog<void>(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Hỗ trợ lấy lại quyền truy cập'),
+                            content: const Text(
+                              'Ứng dụng chưa hỗ trợ đặt lại mật khẩu tự động. Hãy liên hệ quản trị viên đã cấp hoặc hỗ trợ tài khoản để được xác minh danh tính. Không gửi mật khẩu hay mã OTP cho người khác.',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('Đã hiểu'),
+                              ),
+                            ],
+                          ),
+                        ),
+                  child: const Text('Quên mật khẩu?'),
+                ),
+              ),
               GradientPrimaryButton(
                 onPressed: _busy ? null : _submit,
                 child: _busy
