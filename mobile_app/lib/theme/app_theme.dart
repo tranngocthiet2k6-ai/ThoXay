@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 abstract final class AppColors {
-  static const canvas = Color(0xfff8fafc);
+  static const canvas = Color(0xfff6f7f9);
   static const surface = Color(0xffffffff);
   static const ink = Color(0xff0f172a);
   static const muted = Color(0xff64748b);
@@ -175,7 +175,9 @@ abstract final class AppTheme {
         );
     final rounded = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(16),
-      side: BorderSide(color: palette.border, width: outdoor ? 2 : 1),
+      side: outdoor
+          ? BorderSide(color: palette.border, width: 2)
+          : BorderSide.none,
     );
     return ThemeData(
       useMaterial3: true,
@@ -184,22 +186,53 @@ abstract final class AppTheme {
       fontFamily: 'PlusJakartaSans',
       colorScheme: colors,
       scaffoldBackgroundColor: background,
-      textTheme: TextTheme(
-        headlineSmall: const TextStyle(
-          fontSize: 28,
-          fontWeight: FontWeight.w800,
-          letterSpacing: -.8,
-          height: 1.2,
-        ),
-        titleLarge: const TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.w800,
-          height: 1.3,
-        ),
-        titleMedium: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-        bodyLarge: const TextStyle(fontSize: 16, height: 1.5),
-        bodyMedium: TextStyle(fontSize: outdoor ? 16 : 14, height: 1.5),
-      ).apply(bodyColor: palette.ink, displayColor: palette.ink),
+      textTheme:
+          TextTheme(
+                headlineSmall: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -.3,
+                  height: 1.2,
+                ),
+                titleLarge: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  height: 1.3,
+                ),
+                titleMedium: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: palette.dark || outdoor
+                      ? palette.ink
+                      : const Color(0xff1e293b),
+                ),
+                titleSmall: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+                bodyLarge: const TextStyle(fontSize: 15, height: 1.5),
+                bodyMedium: TextStyle(fontSize: outdoor ? 15 : 13, height: 1.6),
+                bodySmall: TextStyle(
+                  fontSize: 13,
+                  height: 1.5,
+                  color: palette.muted,
+                ),
+              )
+              .apply(bodyColor: palette.ink, displayColor: palette.ink)
+              .copyWith(
+                titleMedium: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: palette.dark || outdoor
+                      ? palette.ink
+                      : const Color(0xff1e293b),
+                ),
+                bodySmall: TextStyle(
+                  fontSize: 13,
+                  height: 1.5,
+                  color: palette.muted,
+                ),
+              ),
       appBarTheme: AppBarTheme(
         backgroundColor: palette.surface,
         foregroundColor: palette.ink,
@@ -210,17 +243,41 @@ abstract final class AppTheme {
         scrolledUnderElevation: 0,
         titleTextStyle: TextStyle(
           fontFamily: 'PlusJakartaSans',
-          fontSize: 18,
-          fontWeight: FontWeight.w800,
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
           color: palette.ink,
         ),
       ),
       cardTheme: CardThemeData(
         color: palette.surface,
-        elevation: outdoor ? 0 : 1,
+        elevation: 0,
         shadowColor: const Color(0x100f172a),
         margin: const EdgeInsets.only(bottom: 16),
         shape: rounded,
+      ),
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.disabled)) return palette.muted;
+          if (states.contains(WidgetState.selected) &&
+              (worker || role == null) &&
+              !outdoor) {
+            return const Color(0xff241400);
+          }
+          return Colors.white;
+        }),
+        trackColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? outdoor
+                    ? Colors.black
+                    : accent
+              : palette.dark
+              ? const Color(0xff475569)
+              : const Color(0xffcbd5e1),
+        ),
+        trackOutlineColor: WidgetStatePropertyAll(
+          outdoor ? Colors.black : Colors.transparent,
+        ),
+        trackOutlineWidth: WidgetStatePropertyAll(outdoor ? 2 : 0),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
@@ -270,7 +327,7 @@ abstract final class AppTheme {
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          elevation: 2,
+          elevation: 0,
           shadowColor: Colors.black26,
           minimumSize: const Size(48, 48),
           backgroundColor: outdoor
@@ -338,7 +395,9 @@ abstract final class AppTheme {
       chipTheme: ChipThemeData(
         backgroundColor: palette.surface,
         selectedColor: container,
-        side: BorderSide(color: palette.border, width: outdoor ? 2 : 1),
+        side: outdoor
+            ? BorderSide(color: palette.border, width: 2)
+            : BorderSide.none,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         checkmarkColor: palette.ink,
         secondaryLabelStyle: TextStyle(

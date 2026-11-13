@@ -23,6 +23,7 @@ class AccountSettingsApiTest {
     @Autowired MockMvc mvc;
     @Autowired ObjectMapper json;
     @Autowired UserRepository users;
+    @Autowired vn.thoxay.repository.DeviceTokenRepository devices;
     @Autowired BCryptPasswordEncoder encoder;
     @Autowired JwtUtil jwt;
     @Autowired ChatAccessService chat;
@@ -38,16 +39,19 @@ class AccountSettingsApiTest {
             .contentType("application/json").content(json.writeValueAsString(body)));
     }
     @Test void passwordChangeHashesAndRevokesOldTokensWhileNewSessionWorks() throws Exception {
+        DeviceToken device = new DeviceToken(); device.setUser(user); device.setToken("old-device"); device.setTokenHash(vn.thoxay.service.NotificationService.hash("old-device")); devices.saveAndFlush(device);
         var response = putSettings("password", Map.of("currentPassword", "Oldpass123", "newPassword", "Newpass456"))
             .andExpect(status().isOk()).andReturn();
         String fresh = json.readTree(response.getResponse().getContentAsString()).get("token").asText();
         assertThat(encoder.matches("Newpass456", users.findById(user.getId()).orElseThrow().getPassword())).isTrue();
+        assertThat(devices.findByUserIdAndLastSeenAtAfter(user.getId(), java.time.Instant.EPOCH)).isEmpty();
         mvc.perform(get("/api/users/me").header("Authorization", "Bearer " + token)).andExpect(status().isUnauthorized());
         mvc.perform(get("/api/users/me").header("Authorization", "Bearer " + fresh)).andExpect(status().isOk());
     }
     @Test void wrongPasswordWeakPasswordAndIdenticalPasswordLeaveCredentialsIntact() throws Exception {
         String original = user.getPassword();
         putSettings("password", Map.of("currentPassword", "wrong", "newPassword", "Newpass456")).andExpect(status().isBadRequest());
+        putSettings("password", Map.of("currentPassword", "é".repeat(40), "newPassword", "Newpass456")).andExpect(status().isBadRequest());
         for (String candidate : new String[]{"short", "abcdefghijk", "1234567890", "Oldpass123", "é".repeat(36)+"1"})
             putSettings("password", Map.of("currentPassword", "Oldpass123", "newPassword", candidate)).andExpect(status().isBadRequest());
         assertThat(user.getPassword()).isEqualTo(original); assertThat(user.getSecurityVersion()).isZero();
@@ -85,5 +89,10 @@ class AccountSettingsApiTest {
     @Test void tokensCannotBeReusedByAnotherAccountWithTheSamePhoneAndVersion() throws Exception {
         String wrongIdentity = jwt.generateToken(user.getPhoneNumber(), user.getSecurityVersion(), user.getId() + 1000);
         mvc.perform(get("/api/users/me").header("Authorization", "Bearer " + wrongIdentity)).andExpect(status().isUnauthorized());
+    }
+    @Test void lockedAccountStillReturnsAccountLockedEvenAfterCredentialsWereRotated() throws Exception {
+        user.setActive(false); user.setSecurityVersion(1); users.saveAndFlush(user);
+        mvc.perform(get("/api/users/me").header("Authorization", "Bearer " + token))
+            .andExpect(status().isForbidden()).andExpect(jsonPath("$.code").value("ACCOUNT_LOCKED"));
     }
 }

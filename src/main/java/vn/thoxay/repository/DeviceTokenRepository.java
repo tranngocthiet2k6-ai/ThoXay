@@ -9,4 +9,5 @@ public interface DeviceTokenRepository extends JpaRepository<DeviceToken, Long> 
     Optional<DeviceToken> findByTokenHash(String hash);
     List<DeviceToken> findByUserIdAndLastSeenAtAfter(Long user, Instant after);
     void deleteByUserIdAndTokenHash(Long user, String hash);
+    void deleteByUserId(Long user);
 }

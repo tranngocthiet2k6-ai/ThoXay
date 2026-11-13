@@ -31,10 +31,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (header != null && header.startsWith("Bearer ")) {
             try {
                 var user = users.loadUserByUsername(jwt.extractPhone(header.substring(7)));
-                if (user instanceof CustomUserDetailsService.AccountDetails account &&
-                    (account.securityVersion() != jwt.securityVersion(header.substring(7)) || !jwt.belongsTo(header.substring(7), account.userId))) {
-                    throw new IllegalArgumentException("Phiên đăng nhập đã bị thu hồi");
-                }
                 if (!user.isEnabled()) {
                     SecurityContextHolder.clearContext();
                     response.setStatus(HttpServletResponse.SC_FORBIDDEN);
@@ -42,6 +38,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     json.writeValue(response.getWriter(), Map.of("status", 403,
                         "code", AccountLockedException.CODE, "message", AccountLockedException.MESSAGE));
                     return;
+                }
+                if (user instanceof CustomUserDetailsService.AccountDetails account &&
+                    (account.securityVersion() != jwt.securityVersion(header.substring(7)) || !jwt.belongsTo(header.substring(7), account.userId))) {
+                    throw new IllegalArgumentException("Phiên đăng nhập đã bị thu hồi");
                 }
                 var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

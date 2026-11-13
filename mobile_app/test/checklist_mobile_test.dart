@@ -257,10 +257,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(
-      find.text('Thợ Xây · Phiên bản ${AppRelease.label}'),
-      findsOneWidget,
-    );
+    expect(find.text('Thợ Xây v${AppRelease.name}'), findsOneWidget);
     await tester.ensureVisible(find.text('Quyền truy cập & dữ liệu'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Quyền truy cập & dữ liệu'));

@@ -18,10 +18,9 @@ class FigmaCard extends StatelessWidget {
     padding: padding,
     decoration: BoxDecoration(
       color: AppPalette.of(context).surface,
-      border: Border.all(
-        color: AppPalette.of(context).border,
-        width: AppPalette.of(context).outdoor ? 2 : 1,
-      ),
+      border: AppPalette.of(context).outdoor
+          ? Border.all(color: AppPalette.of(context).border, width: 2)
+          : null,
       borderRadius: BorderRadius.circular(16),
     ),
     child: Material(type: MaterialType.transparency, child: child),
@@ -166,18 +165,13 @@ class _RoleCard extends StatelessWidget {
                 ? color.withValues(alpha: palette.dark ? .18 : .06)
                 : palette.surface,
             border: Border.all(
-              color: selected ? color : palette.border,
+              color: selected
+                  ? color
+                  : palette.outdoor
+                  ? palette.border
+                  : Colors.transparent,
               width: selected ? 1.5 : 1,
             ),
-            boxShadow: palette.outdoor
-                ? null
-                : const [
-                    BoxShadow(
-                      color: Color(0x0A000000),
-                      blurRadius: 16,
-                      offset: Offset(0, 4),
-                    ),
-                  ],
           ),
           child: Material(
             type: MaterialType.transparency,

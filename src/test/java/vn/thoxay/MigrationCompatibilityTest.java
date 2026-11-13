@@ -53,9 +53,10 @@ class MigrationCompatibilityTest {
         }
         migrations().migrate();
         try (var c = connect(); var s = c.createStatement(); var r = s.executeQuery(
-                "SELECT role,rating,password FROM " + schema + ".users WHERE phone_number='0999999911'")) {
+                "SELECT role,rating,password,security_version,job_push_enabled,chat_push_enabled FROM " + schema + ".users WHERE phone_number='0999999911'")) {
             assertThat(r.next()).isTrue(); assertThat(r.getString(1)).isEqualTo("ROLE_WORKER");
             assertThat(r.getDouble(2)).isEqualTo(4.5); assertThat(r.getString(3)).isEqualTo("qa-bcrypt-placeholder");
+            assertThat(r.getLong(4)).isZero(); assertThat(r.getBoolean(5)).isTrue(); assertThat(r.getBoolean(6)).isTrue();
         }
         assertThat(migrations().migrate().migrationsExecuted).isZero();
         assertThat(migrations().validateWithResult().validationSuccessful).isTrue();

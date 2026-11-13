@@ -18,7 +18,9 @@ class FeatureBanner extends StatelessWidget {
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(16),
       color: AppPalette.of(context).surface,
-      border: Border.all(color: AppPalette.of(context).border),
+      border: AppPalette.of(context).outdoor
+          ? Border.all(color: AppPalette.of(context).border, width: 2)
+          : null,
     ),
     child: Row(
       children: [
@@ -38,8 +40,8 @@ class FeatureBanner extends StatelessWidget {
                 title,
                 style: TextStyle(
                   color: AppPalette.of(context).ink,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w800,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
                   height: 1.2,
                 ),
               ),

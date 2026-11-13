@@ -21,8 +21,10 @@ class EmptyState extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
       decoration: BoxDecoration(
         color: AppPalette.of(context).surface,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppPalette.of(context).border),
+        borderRadius: BorderRadius.circular(16),
+        border: AppPalette.of(context).outdoor
+            ? Border.all(color: AppPalette.of(context).border, width: 2)
+            : null,
       ),
       child: Column(
         children: [
@@ -30,13 +32,11 @@ class EmptyState extends StatelessWidget {
             child: icon != null
                 ? CircleAvatar(
                     radius: 48,
-                    backgroundColor: Theme.of(context)
-                        .colorScheme
-                        .primaryContainer,
+                    backgroundColor: AppPalette.of(context).soft,
                     child: Icon(
                       icon,
                       size: 48,
-                      color: Theme.of(context).colorScheme.primary,
+                      color: AppPalette.of(context).muted,
                     ),
                   )
                 : CustomPaint(

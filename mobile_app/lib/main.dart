@@ -17,6 +17,7 @@ import 'widgets/adaptive_viewport.dart';
 import 'theme/appearance_controller.dart';
 import 'widgets/startup_gate.dart';
 import 'widgets/bouncing_button.dart';
+import 'services/device_preferences.dart';
 
 final _navigator = GlobalKey<NavigatorState>();
 final _messenger = GlobalKey<ScaffoldMessengerState>();
@@ -61,6 +62,7 @@ Future<void> main() async {
       appearance: appearance,
       initialize: () async {
         await api.restoreSession();
+        await DevicePreferences.instance.restore();
         await KycCamera.instance.restoreLostPhoto();
         await push.initialize();
         push.attach(api);

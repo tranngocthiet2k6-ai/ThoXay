@@ -12,6 +12,11 @@ import 'package:tho_xay_mobile/widgets/commercial_hero.dart';
 import 'worker_home_test.dart' show WorkerApi;
 
 class WalletApi extends ApiService {
+  @override
+  Future<Map<String, bool>> notificationPreferences() async => {
+    'jobPushEnabled': true,
+    'chatPushEnabled': true,
+  };
   int main = 500000;
   bool failFirst = true;
   final submitted = <Map<String, dynamic>>[];

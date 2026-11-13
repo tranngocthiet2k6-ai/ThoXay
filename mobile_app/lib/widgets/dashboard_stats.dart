@@ -17,16 +17,9 @@ class DashboardStats extends StatelessWidget {
             decoration: BoxDecoration(
               color: AppPalette.of(context).surface,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppPalette.of(context).border),
-              boxShadow: AppPalette.of(context).outdoor
-                  ? null
-                  : const [
-                      BoxShadow(
-                        color: Color(0x090F172A),
-                        blurRadius: 16,
-                        offset: Offset(0, 4),
-                      ),
-                    ],
+              border: AppPalette.of(context).outdoor
+                  ? Border.all(color: AppPalette.of(context).border, width: 2)
+                  : null,
             ),
             child: Column(
               children: [
@@ -37,13 +30,13 @@ class DashboardStats extends StatelessWidget {
                     Icons.task_alt,
                   ][i % 3],
                   size: 20,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: AppPalette.of(context).muted,
                 ),
                 const SizedBox(height: 8),
                 Text(
                   values[i].value,
                   style: const TextStyle(
-                    fontSize: 26,
+                    fontSize: 20,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -52,7 +45,7 @@ class DashboardStats extends StatelessWidget {
                   values[i].label,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 10,
+                    fontSize: 13,
                     color: AppPalette.of(context).muted,
                   ),
                 ),

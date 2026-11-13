@@ -8,7 +8,6 @@ import '../models/incident.dart';
 import '../models/wallet.dart';
 import '../models/app_notification.dart';
 import '../services/api_service.dart';
-import '../widgets/commercial_hero.dart';
 import '../widgets/figma_components.dart';
 import '../widgets/design_motion.dart';
 import '../widgets/content_skeleton.dart';
@@ -98,28 +97,20 @@ class _SupportCenterScreenState extends State<SupportCenterScreen> {
           ),
           padding: const EdgeInsets.all(24),
           children: [
-            const CommercialHero(
+            const FigmaCard(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.support_agent_rounded, size: 32),
+                  Icon(Icons.support_agent_rounded, size: 24),
                   SizedBox(height: 16),
                   Text(
                     'An tâm mỗi ca làm',
-                    style: TextStyle(
-                      fontSize: 26,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w800,
-                    ),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
                   ),
                   SizedBox(height: 8),
                   Text(
-                    'Theo dõi giao dịch, gửi bằng chứng và nhận phản hồi từ Admin.',
-                    style: TextStyle(
-                      color: Color(0xffcbd5e1),
-                      fontSize: 12,
-                      height: 1.6,
-                    ),
+                    '1. Chọn công trình liên quan và mô tả vấn đề.\n2. Đính kèm ảnh, mã giao dịch hoặc thông tin ca làm.\n3. Gửi yêu cầu rồi theo dõi phản hồi trong Sự cố & khiếu nại.\n\nSOS ưu tiên chuyển cảnh báo an toàn tới Admin; không tự gọi cứu hộ.',
+                    style: TextStyle(fontSize: 13, height: 1.6),
                   ),
                 ],
               ),

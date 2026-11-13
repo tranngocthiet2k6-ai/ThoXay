@@ -17,6 +17,7 @@ import java.nio.charset.StandardCharsets;
 public class AccountSettingsService {
     private final CurrentUser current;
     private final UserRepository users;
+    private final vn.thoxay.repository.DeviceTokenRepository devices;
     private final BCryptPasswordEncoder encoder;
     private final JwtUtil jwt;
     private final jakarta.persistence.EntityManager em;
@@ -27,7 +28,8 @@ public class AccountSettingsService {
         return user;
     }
     private void confirm(User user, String password) {
-        if (!encoder.matches(password, user.getPassword())) throw new ApiException(HttpStatus.BAD_REQUEST, "Mật khẩu hiện tại không đúng");
+        if (password.getBytes(StandardCharsets.UTF_8).length > 72 || !encoder.matches(password, user.getPassword()))
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Mật khẩu hiện tại không đúng");
     }
     private AuthResponse session(User user) {
         users.saveAndFlush(user);
@@ -40,6 +42,7 @@ public class AccountSettingsService {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Mật khẩu cần ít nhất 8 ký tự, có chữ và số, tối đa 72 byte UTF-8");
         if (encoder.matches(password, user.getPassword())) throw new ApiException(HttpStatus.BAD_REQUEST, "Mật khẩu mới phải khác mật khẩu hiện tại");
         user.setPassword(encoder.encode(password)); user.setSecurityVersion(user.getSecurityVersion() + 1);
+        devices.deleteByUserId(user.getId());
         return session(user);
     }
     @Transactional public AuthResponse phone(PhoneRequest request) {
@@ -47,6 +50,7 @@ public class AccountSettingsService {
         if (request.phoneNumber().equals(user.getPhoneNumber())) return session(user);
         if (users.existsByPhoneNumber(request.phoneNumber())) throw new ApiException(HttpStatus.CONFLICT, "Số điện thoại đã được đăng ký");
         user.setPhoneNumber(request.phoneNumber()); user.setSecurityVersion(user.getSecurityVersion() + 1);
+        devices.deleteByUserId(user.getId());
         return session(user);
     }
     @Transactional(readOnly=true) public PushPreferences notifications() {

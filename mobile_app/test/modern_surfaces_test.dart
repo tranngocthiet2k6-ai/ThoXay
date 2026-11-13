@@ -254,6 +254,9 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Đăng xuất'));
       await tester.pumpAndSettle();
+      expect(api.logoutCalled, isFalse);
+      await tester.tap(find.widgetWithText(FilledButton, 'Đăng xuất'));
+      await tester.pumpAndSettle();
       expect(api.logoutCalled, isTrue);
       await tester.pumpWidget(const SizedBox());
       appearance.dispose();

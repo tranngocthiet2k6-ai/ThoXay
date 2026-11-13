@@ -1,4 +1,5 @@
 import '../widgets/bouncing_button.dart';
+import '../services/device_preferences.dart';
 import '../widgets/modern_controls.dart';
 import '../widgets/brand_logo.dart';
 import '../widgets/job_application_actions.dart';
@@ -44,7 +45,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
   List<Job> _jobs = [];
   List<JobApplication> _applications = [];
   GeoPoint? _position;
-  double _radius = 10;
+  double _radius = DevicePreferences.instance.radius;
   String _jobType = '', _sort = 'DISTANCE';
   final _search = TextEditingController();
   String _query = '';

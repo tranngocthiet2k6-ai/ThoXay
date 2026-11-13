@@ -681,6 +681,66 @@ class ApiService extends ChangeNotifier {
     await _request('PUT', '/api/notifications/devices', body: {'token': token});
   }
 
+  Future<Map<String, bool>> notificationPreferences() async {
+    final data = await _request(
+      'GET',
+      '/api/users/me/settings/notifications',
+    ) as Map<String, dynamic>;
+    return {
+      'jobPushEnabled': data['jobPushEnabled'] as bool,
+      'chatPushEnabled': data['chatPushEnabled'] as bool,
+    };
+  }
+
+  Future<void> setNotificationPreferences({
+    required bool jobs,
+    required bool chat,
+  }) async {
+    await _request(
+      'PUT',
+      '/api/users/me/settings/notifications',
+      body: {'jobPushEnabled': jobs, 'chatPushEnabled': chat},
+    );
+  }
+
+  Future<void> changePassword(String currentPassword, String newPassword) =>
+      _updateCredentials('password', {
+        'currentPassword': currentPassword,
+        'newPassword': newPassword,
+      });
+  Future<void> changePhone(String phone, String password) => _updateCredentials(
+    'phone',
+    {'phoneNumber': phone, 'currentPassword': password},
+  );
+  Future<void> _updateCredentials(
+    String path,
+    Map<String, dynamic> body,
+  ) async {
+    final previous = _session;
+    final data = await _request(
+      'PUT',
+      '/api/users/me/settings/$path',
+      body: body,
+    );
+    if (!identical(previous, _session) || previous == null || _loggingOut) {
+      throw const ApiException(
+        'Phiên đăng nhập đã thay đổi. Vui lòng đăng nhập lại.',
+      );
+    }
+    final fresh = AuthSession.fromJson(data as Map<String, dynamic>);
+    // The old token is revoked. Keep the replacement in memory if disk is full.
+    _session = fresh;
+    notifyListeners();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (identical(_session, fresh)) {
+        await prefs.setString(_storageKey, jsonEncode(fresh.toJson()));
+      }
+    } on Object {
+      /* Restore rejects a stale session on the next launch. */
+    }
+  }
+
   Future<void> unregisterDevice(String token) async {
     await _request(
       'POST',

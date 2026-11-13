@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 
+import '../services/device_preferences.dart';
+
 /// Observes pointer feedback without claiming gestures from buttons or scrolls.
 /// The child keeps keyboard focus, semantics, disabled state and its one action.
 class BouncingButton extends StatefulWidget {
@@ -80,6 +82,7 @@ abstract final class AppHaptics {
   /// A missing desktop/browser haptics implementation must not block an action.
   static void light() => unawaited(_light());
   static Future<void> _light() async {
+    if (!DevicePreferences.instance.haptics) return;
     try {
       await HapticFeedback.lightImpact();
     } on Object {

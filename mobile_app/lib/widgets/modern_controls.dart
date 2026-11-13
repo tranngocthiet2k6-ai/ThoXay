@@ -136,7 +136,9 @@ class PillTabs extends StatelessWidget {
         decoration: BoxDecoration(
           color: palette.soft,
           borderRadius: BorderRadius.circular(28),
-          border: Border.all(color: palette.border),
+          border: palette.outdoor
+              ? Border.all(color: palette.border, width: 2)
+              : null,
         ),
         child: Stack(
           children: [

@@ -4,12 +4,13 @@ import '../theme/app_theme.dart';
 
 /// Reading-width content for secondary routes on desktop, full width on mobile.
 class ContentFrame extends StatelessWidget {
-  const ContentFrame({super.key, required this.child});
+  const ContentFrame({super.key, required this.child, this.maxWidth = 840});
   final Widget child;
+  final double maxWidth;
   @override
   Widget build(BuildContext context) => Center(
     child: ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 840),
+      constraints: BoxConstraints(maxWidth: maxWidth),
       child: child,
     ),
   );
@@ -133,7 +134,7 @@ class SectionIntro extends StatelessWidget {
   );
 }
 
-/// Shared lifted surface with a quiet shadow and visible keyboard/touch content.
+/// Content separated by space and tonal layers; outdoor mode keeps a boundary.
 class DesignSurface extends StatefulWidget {
   const DesignSurface({
     super.key,
@@ -161,23 +162,13 @@ class _DesignSurfaceState extends State<DesignSurface> {
       clipBehavior: Clip.antiAlias,
       padding: widget.padding,
       decoration: BoxDecoration(
-        color: AppPalette.of(context).surface,
+        color: _hover
+            ? AppPalette.of(context).soft
+            : AppPalette.of(context).surface,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: AppPalette.of(context).outdoor
-            ? null
-            : const [
-                BoxShadow(
-                  color: Color(0x090F172A),
-                  blurRadius: 18,
-                  offset: Offset(0, 5),
-                ),
-              ],
-        border: Border.all(
-          width: AppPalette.of(context).outdoor ? 2 : 1,
-          color: _hover
-              ? Theme.of(context).colorScheme.primary
-              : AppPalette.of(context).border,
-        ),
+        border: AppPalette.of(context).outdoor
+            ? Border.all(width: 2, color: AppPalette.of(context).border)
+            : null,
       ),
       child: Material(type: MaterialType.transparency, child: widget.child),
     ),

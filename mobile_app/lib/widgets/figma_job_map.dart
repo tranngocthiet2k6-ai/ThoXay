@@ -36,7 +36,9 @@ class _JobMapPreviewState extends State<JobMapPreview> {
       decoration: BoxDecoration(
         color: AppPalette.of(context).surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppPalette.of(context).border),
+        border: AppPalette.of(context).outdoor
+            ? Border.all(color: AppPalette.of(context).border, width: 2)
+            : null,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

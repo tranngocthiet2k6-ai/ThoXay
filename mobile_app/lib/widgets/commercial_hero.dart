@@ -25,15 +25,7 @@ class CommercialHero extends StatelessWidget {
             const Color(0xff111e32),
           ],
         ),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xff475569)),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x180f172a),
-            blurRadius: 24,
-            offset: Offset(0, 10),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(16),
       ),
       child: CustomPaint(
         painter: _GlowPainter(accent),

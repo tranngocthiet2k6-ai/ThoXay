@@ -227,7 +227,9 @@ class ChatMessageBubble extends StatelessWidget {
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: mine ? accent : palette.surface,
-                      border: mine ? null : Border.all(color: palette.border),
+                      border: palette.outdoor
+                          ? Border.all(color: palette.border, width: 2)
+                          : null,
                       borderRadius: BorderRadius.only(
                         topLeft: const Radius.circular(20),
                         topRight: const Radius.circular(20),
