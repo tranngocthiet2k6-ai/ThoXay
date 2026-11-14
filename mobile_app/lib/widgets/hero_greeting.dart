@@ -4,9 +4,9 @@ import '../models/models.dart';
 import '../services/api_service.dart';
 import 'server_connection_notice.dart';
 import 'tier_badge.dart';
-import 'commercial_hero.dart';
 import 'bouncing_button.dart';
 import '../theme/app_theme.dart';
+import 'user_avatar.dart';
 
 class HeroGreeting extends StatefulWidget {
   const HeroGreeting({
@@ -30,7 +30,24 @@ class _HeroGreetingState extends State<HeroGreeting> {
   @override
   void initState() {
     super.initState();
+    widget.api.addListener(_load);
     _load();
+  }
+
+  @override
+  void dispose() {
+    widget.api.removeListener(_load);
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant HeroGreeting oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.api != widget.api) {
+      oldWidget.api.removeListener(_load);
+      widget.api.addListener(_load);
+      _load();
+    }
   }
 
   Future<void> _load() async {
@@ -59,7 +76,9 @@ class _HeroGreetingState extends State<HeroGreeting> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              PresenceAvatar(
+              UserAvatar(
+                api: widget.api,
+                path: _profile?.avatarUrl,
                 name: name,
                 online: worker ? widget.availability : null,
                 size: 48,

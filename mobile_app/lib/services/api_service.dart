@@ -187,11 +187,24 @@ class ApiService extends ChangeNotifier {
       fields: {'caption': caption},
     ),
   );
+  Future<UserProfile> uploadAvatar(Uint8List bytes) async {
+    final owner = _session?.userId;
+    final person = UserProfile.fromJson(
+      await uploadPhoto('/api/users/me/avatar', bytes, method: 'PUT'),
+    );
+    if (_session?.userId != owner) {
+      throw const ApiException('Phiên đăng nhập đã thay đổi.');
+    }
+    notifyListeners();
+    return person;
+  }
+
   Future<Map<String, dynamic>> uploadPhoto(
     String path,
     Uint8List bytes, {
     Map<String, String> fields = const {},
     Map<String, Uint8List> extraPhotos = const {},
+    String method = 'POST',
   }) async {
     if (!path.startsWith('/api/') || path.contains('://')) {
       throw const ApiException('Đường dẫn tải ảnh không hợp lệ');
@@ -205,7 +218,7 @@ class ApiService extends ChangeNotifier {
       throw const ApiException('Mỗi ảnh tối đa 5 MB');
     }
     await _ensureSessionServer(auth);
-    final request = http.MultipartRequest('POST', Uri.parse('$baseUrl$path'))
+    final request = http.MultipartRequest(method, Uri.parse('$baseUrl$path'))
       ..followRedirects = false
       ..headers['Authorization'] = 'Bearer ${auth.token}'
       ..fields.addAll(fields)

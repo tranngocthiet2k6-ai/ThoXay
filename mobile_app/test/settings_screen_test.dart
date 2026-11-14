@@ -213,7 +213,10 @@ void main() {
             .accountDetails,
         isTrue,
       );
+      await tapText(tester, 'Chỉnh sửa thông tin');
       expect(find.widgetWithText(TextFormField, 'Họ và tên'), findsOneWidget);
+      await tester.tap(find.byTooltip('Đóng'));
+      await tester.pumpAndSettle();
       expect(find.text('0900000003'), findsWidgets);
       expect(find.text('Định danh CCCD: Đã xác thực'), findsOneWidget);
       expect(find.byTooltip('Cài đặt'), findsNothing);

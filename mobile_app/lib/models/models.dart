@@ -176,6 +176,7 @@ class UserProfile {
     this.completedJobs = 0,
     this.cancelledJobs = 0,
     this.workerTier,
+    this.avatarUrl,
   });
   final int id;
   final String fullName, phoneNumber, role;
@@ -188,6 +189,7 @@ class UserProfile {
   final List<String> skills, projectImages;
   final int reputationScore, completedJobs, cancelledJobs;
   final String? workerTier;
+  final String? avatarUrl;
   factory UserProfile.fromJson(Map<String, dynamic> json) => UserProfile(
     id: (json['id'] as num).toInt(),
     fullName: json['fullName'] as String,
@@ -206,6 +208,7 @@ class UserProfile {
     completedJobs: (json['completedJobs'] as num?)?.toInt() ?? 0,
     cancelledJobs: (json['cancelledJobs'] as num?)?.toInt() ?? 0,
     workerTier: json['workerTier'] as String?,
+    avatarUrl: json['avatarUrl'] as String?,
   );
 }
 

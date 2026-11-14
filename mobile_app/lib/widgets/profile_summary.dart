@@ -20,9 +20,13 @@ class ProfileSummary extends StatelessWidget {
     required this.tier,
     required this.verified,
     this.phone,
+    this.avatar,
+    this.onAvatarTap,
   });
   final String name, tier;
   final String? phone;
+  final Widget? avatar;
+  final VoidCallback? onAvatarTap;
   final bool worker, verified;
   final double rating;
   final int score, completed;
@@ -50,7 +54,43 @@ class ProfileSummary extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  PresenceAvatar(name: name, size: 64),
+                  Semantics(
+                    button: onAvatarTap != null,
+                    label: onAvatarTap == null ? null : 'Đổi ảnh đại diện',
+                    child: InkWell(
+                      onTap: onAvatarTap,
+                      borderRadius: BorderRadius.circular(40),
+                      child: SizedBox.square(
+                        dimension: 72,
+                        child: Stack(
+                          children: [
+                            Center(
+                              child:
+                                  avatar ??
+                                  PresenceAvatar(name: name, size: 64),
+                            ),
+                            if (onAvatarTap != null)
+                              Positioned(
+                                right: 0,
+                                bottom: 0,
+                                child: Container(
+                                  padding: const EdgeInsets.all(6),
+                                  decoration: const BoxDecoration(
+                                    color: Colors.white,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.camera_alt_outlined,
+                                    size: 16,
+                                    color: Color(0xff0f172a),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
