@@ -4,10 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../screens/chat_inbox_screen.dart';
 import '../screens/notifications_screen.dart';
-import '../screens/profile_screen.dart';
-import '../screens/saved_screen.dart';
 import '../screens/support_center_screen.dart';
-import '../screens/wallet_screen.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import '../theme/appearance_controller.dart';
@@ -22,39 +19,16 @@ class HomeNavigation extends StatelessWidget {
     this.worker = false,
     this.selectedIndex = 0,
     this.onSelected,
-    this.nested = false,
   });
   final ApiService api;
   final bool worker;
   final int selectedIndex;
   final ValueChanged<int>? onSelected;
-  final bool nested;
 
   void _select(BuildContext context, int index) {
-    AppHaptics.light();
     if (index == selectedIndex) return;
-    if (index == 0 || (worker && index == 1)) {
-      if (nested) Navigator.of(context).pop();
-      onSelected?.call(index);
-      return;
-    }
-    final route = MaterialPageRoute<void>(
-      builder: (_) => switch (index) {
-        1 => SavedScreen(
-          api: api,
-          worker: false,
-          fromTab: true,
-          onHomeSelected: onSelected,
-        ),
-        2 => WalletScreen(api: api, fromTab: true, onHomeSelected: onSelected),
-        _ => ProfileScreen(api: api, fromTab: true, onHomeSelected: onSelected),
-      },
-    );
-    if (nested) {
-      Navigator.of(context).pushReplacement(route);
-    } else {
-      Navigator.of(context).push(route);
-    }
+    AppHaptics.light();
+    onSelected?.call(index);
   }
 
   @override

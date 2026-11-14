@@ -162,7 +162,7 @@ void main() {
 
   for (final role in ['ROLE_WORKER', 'ROLE_CONTRACTOR']) {
     testWidgets(
-      'core tabs persist and replace instead of stacking routes: $role',
+      'core tabs switch in place without any Navigator routes: $role',
       (tester) async {
         final api = _ChecklistApi(role), observer = _StackObserver();
         await tester.pumpWidget(
@@ -176,7 +176,12 @@ void main() {
         );
         await tester.pumpAndSettle();
         for (var i = 0; i < 3; i++) {
-          await tester.tap(find.text('Ví tiền'));
+          await tester.tap(
+            find.descendant(
+              of: find.byType(NavigationBar),
+              matching: find.text('Ví tiền'),
+            ),
+          );
           await tester.pumpAndSettle();
           expect(find.byType(WalletScreen), findsOneWidget);
           expect(
@@ -185,8 +190,14 @@ void main() {
                 .selectedIndex,
             2,
           );
-          expect(observer.routes.length, 2);
-          await tester.tap(find.text('Hồ sơ'));
+          expect(observer.routes.length, 1);
+          expect(find.byType(BackButton), findsNothing);
+          await tester.tap(
+            find.descendant(
+              of: find.byType(NavigationBar),
+              matching: find.text('Hồ sơ'),
+            ),
+          );
           await tester.pumpAndSettle();
           expect(find.byType(ProfileScreen), findsOneWidget);
           expect(
@@ -195,10 +206,16 @@ void main() {
                 .selectedIndex,
             3,
           );
-          expect(observer.routes.length, 2);
+          expect(observer.routes.length, 1);
+          expect(find.byType(BackButton), findsNothing);
         }
         await tester.tap(
-          find.text(role == 'ROLE_WORKER' ? 'Việc của tôi' : 'Đội thợ'),
+          find.descendant(
+            of: find.byType(NavigationBar),
+            matching: find.text(
+              role == 'ROLE_WORKER' ? 'Việc của tôi' : 'Đội thợ',
+            ),
+          ),
         );
         await tester.pumpAndSettle();
         expect(
@@ -207,12 +224,19 @@ void main() {
               .selectedIndex,
           1,
         );
-        expect(observer.routes.length, role == 'ROLE_WORKER' ? 1 : 2);
+        expect(observer.routes.length, 1);
+        expect(find.byType(BackButton), findsNothing);
         await tester.tap(
-          find.text(role == 'ROLE_WORKER' ? 'Tìm việc' : 'Công trình'),
+          find.descendant(
+            of: find.byType(NavigationBar),
+            matching: find.text(
+              role == 'ROLE_WORKER' ? 'Tìm việc' : 'Công trình',
+            ),
+          ),
         );
         await tester.pumpAndSettle();
         expect(observer.routes.length, 1);
+        expect(find.byType(BackButton), findsNothing);
         expect(tester.takeException(), isNull);
         await tester.pumpWidget(const SizedBox());
         api.dispose();

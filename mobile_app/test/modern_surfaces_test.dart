@@ -295,7 +295,12 @@ void main() {
       final api = _UiApi('ROLE_WORKER');
       await tester.pumpWidget(MaterialApp(home: WorkerHomeScreen(api: api)));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Việc của tôi'));
+      await tester.tap(
+        find.descendant(
+          of: find.byType(NavigationBar),
+          matching: find.text('Việc của tôi'),
+        ),
+      );
       await tester.pumpAndSettle();
       expect(find.byType(PillTabs), findsOneWidget);
       await tester.ensureVisible(find.byType(PillTabs));

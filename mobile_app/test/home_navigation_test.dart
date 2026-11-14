@@ -176,7 +176,7 @@ void main() {
           );
           expect(find.byTooltip('Tin nhắn'), findsOneWidget);
           expect(find.byTooltip('Thông báo'), findsOneWidget);
-          expect(find.byTooltip('Tùy chọn'), findsOneWidget);
+          expect(find.byTooltip('Cài đặt'), findsOneWidget);
           expect(find.byTooltip('Giao diện hiển thị'), findsNothing);
           expect(find.byTooltip('Thu nhập & Ví'), findsNothing);
           expect(
@@ -187,15 +187,13 @@ void main() {
             find.descendant(of: bar, matching: find.text('7')),
             findsOneWidget,
           );
-          await tester.tap(find.byTooltip('Tùy chọn'));
+          await tester.tap(find.byTooltip('Cài đặt'));
           await tester.pumpAndSettle();
           for (final label in [
-            'Chế độ Sáng',
-            'Chế độ Tối',
-            'Tương phản cao (Ngoài trời)',
-            'Trung tâm hỗ trợ & SOS',
-            'Làm mới dữ liệu',
-            'Đăng xuất',
+            'Tài khoản & Bảo mật',
+            'Hiển thị & Trải nghiệm công trường',
+            'Thông báo & Khu vực',
+            'Hỗ trợ & Pháp lý',
           ]) {
             expect(find.text(label), findsOneWidget);
           }
@@ -214,14 +212,24 @@ void main() {
       final api = _NavigationApi('ROLE_WORKER');
       await tester.pumpWidget(MaterialApp(home: WorkerHomeScreen(api: api)));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Việc của tôi'));
+      await tester.tap(
+        find.descendant(
+          of: find.byType(NavigationBar),
+          matching: find.text('Việc của tôi'),
+        ),
+      );
       await tester.pumpAndSettle();
       expect(
         tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
         1,
       );
       expect(find.text('Lịch làm việc'), findsWidgets);
-      await tester.tap(find.text('Ví tiền'));
+      await tester.tap(
+        find.descendant(
+          of: find.byType(NavigationBar),
+          matching: find.text('Ví tiền'),
+        ),
+      );
       await tester.pumpAndSettle();
       expect(find.byType(WalletScreen), findsOneWidget);
       await tester.tap(find.text('Xem thu nhập chi tiết'));
@@ -229,9 +237,12 @@ void main() {
       expect(find.byType(EarningsScreen), findsOneWidget);
       Navigator.of(tester.element(find.byType(EarningsScreen))).pop();
       await tester.pumpAndSettle();
-      Navigator.of(tester.element(find.byType(WalletScreen))).pop();
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Hồ sơ'));
+      await tester.tap(
+        find.descendant(
+          of: find.byType(NavigationBar),
+          matching: find.text('Hồ sơ'),
+        ),
+      );
       await tester.pumpAndSettle();
       expect(find.byType(ProfileScreen), findsOneWidget);
       expect(tester.takeException(), isNull);
@@ -248,10 +259,19 @@ void main() {
         MaterialApp(home: ContractorHomeScreen(api: api)),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Đội thợ'));
+      await tester.tap(
+        find.descendant(
+          of: find.byType(NavigationBar),
+          matching: find.text('Đội thợ'),
+        ),
+      );
       await tester.pumpAndSettle();
       expect(find.byType(SavedScreen), findsOneWidget);
-      expect(find.text('Thợ quen'), findsOneWidget);
+      expect(
+        tester.widget<SavedScreen>(find.byType(SavedScreen)).worker,
+        isFalse,
+      );
+      expect(find.text('+ Đăng công trình mới'), findsNothing);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());
       api.dispose();
@@ -274,7 +294,18 @@ void main() {
                 brightness: appearance.brightness,
                 outdoor: appearance.mode == DisplayMode.outdoor,
               ),
-              home: WorkerHomeScreen(api: api),
+              home: Scaffold(
+                appBar: AppBar(
+                  actions: [
+                    HomeAppMenu(
+                      api: api,
+                      onRefresh: () async {
+                        await api.availability();
+                      },
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ),

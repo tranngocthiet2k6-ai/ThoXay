@@ -267,7 +267,10 @@ void main() {
         scrollable: find.byType(Scrollable).first,
       );
       expect(find.text('Xây nhà phố'), findsOneWidget);
-      await Scrollable.ensureVisible(tester.element(find.text('Xây nhà phố')), alignment: .4);
+      await Scrollable.ensureVisible(
+        tester.element(find.text('Xây nhà phố')),
+        alignment: .4,
+      );
       await tester.pumpAndSettle();
       await tester.tap(find.text('Xây nhà phố'));
       await tester.pumpAndSettle();
@@ -297,9 +300,12 @@ void main() {
         180,
         scrollable: find.byType(Scrollable).first,
       );
-    await Scrollable.ensureVisible(tester.element(find.text('Công trình có lịch')), alignment: .4);
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Công trình có lịch'));
+      await Scrollable.ensureVisible(
+        tester.element(find.text('Công trình có lịch')),
+        alignment: .4,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Công trình có lịch'));
       await tester.pumpAndSettle();
       expect(find.byKey(const ValueKey('offer-rate')), findsNothing);
       final bar = tester.widget<JobApplicationActions>(

@@ -20,15 +20,9 @@ import '../widgets/wallet_operation_dialog.dart';
 import '../widgets/deposit_dialog.dart';
 
 class WalletScreen extends StatefulWidget {
-  const WalletScreen({
-    super.key,
-    required this.api,
-    this.fromTab = false,
-    this.onHomeSelected,
-  });
+  const WalletScreen({super.key, required this.api, this.embedded = false});
   final ApiService api;
-  final bool fromTab;
-  final ValueChanged<int>? onHomeSelected;
+  final bool embedded;
   @override
   State<WalletScreen> createState() => _WalletScreenState();
 }
@@ -149,26 +143,19 @@ class _WalletScreenState extends State<WalletScreen> {
   );
   @override
   Widget build(BuildContext context) => Scaffold(
-    bottomNavigationBar: widget.fromTab
-        ? HomeNavigation(
-            api: widget.api,
-            worker: widget.api.session?.role == 'ROLE_WORKER',
-            selectedIndex: 2,
-            nested: true,
-            onSelected: widget.onHomeSelected,
-          )
-        : null,
-    appBar: AppBar(
-      title: Text(
-        widget.api.session?.role == 'ROLE_CONTRACTOR'
-            ? 'Ví Chủ thầu'
-            : 'Ví Thợ Xây',
-      ),
-      actions: [
-        HomeInboxActions(api: widget.api),
-        HomeAppMenu(api: widget.api, onRefresh: _load, refreshing: _busy),
-      ],
-    ),
+    appBar: widget.embedded
+        ? null
+        : AppBar(
+            title: Text(
+              widget.api.session?.role == 'ROLE_CONTRACTOR'
+                  ? 'Ví Chủ thầu'
+                  : 'Ví Thợ Xây',
+            ),
+            actions: [
+              HomeInboxActions(api: widget.api),
+              HomeAppMenu(api: widget.api, onRefresh: _load, refreshing: _busy),
+            ],
+          ),
     body: ContentFrame(
       child: RefreshIndicator(
         onRefresh: () => _load(),
@@ -276,13 +263,35 @@ class _WalletScreenState extends State<WalletScreen> {
                             child: OutlinedButton.icon(
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: Colors.white,
-                                side: const BorderSide(color: Colors.white54),
+                                backgroundColor: Colors.white.withValues(
+                                  alpha: .14,
+                                ),
+                                disabledForegroundColor: Colors.white70,
+                                disabledBackgroundColor: Colors.white
+                                    .withValues(alpha: .08),
+                                textStyle: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                side: const BorderSide(
+                                  color: Colors.white54,
+                                  width: 1.2,
+                                ),
                               ),
                               onPressed: _busy || balance.main < 1000
                                   ? null
                                   : () => _operate('WITHDRAW'),
-                              icon: const Icon(Icons.north_east, size: 18),
-                              label: const Text('Rút tiền'),
+                              icon: const Icon(
+                                Icons.north_east,
+                                size: 18,
+                                color: Colors.white,
+                              ),
+                              label: const Text(
+                                'Rút tiền',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                             ),
                           ),
                         ),

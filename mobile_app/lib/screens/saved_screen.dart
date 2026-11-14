@@ -19,12 +19,10 @@ class SavedScreen extends StatefulWidget {
     super.key,
     required this.api,
     required this.worker,
-    this.fromTab = false,
-    this.onHomeSelected,
+    this.embedded = false,
   });
   final ApiService api;
-  final bool fromTab;
-  final ValueChanged<int>? onHomeSelected;
+  final bool embedded;
   final bool worker;
   @override
   State<SavedScreen> createState() => _SavedScreenState();
@@ -69,22 +67,19 @@ class _SavedScreenState extends State<SavedScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    bottomNavigationBar: widget.fromTab
-        ? HomeNavigation(
-            api: widget.api,
-            worker: widget.worker,
-            selectedIndex: 1,
-            nested: true,
-            onSelected: widget.onHomeSelected,
-          )
-        : null,
-    appBar: AppBar(
-      title: Text(widget.worker ? 'Công trình yêu thích' : 'Thợ quen'),
-      actions: [
-        HomeInboxActions(api: widget.api),
-        HomeAppMenu(api: widget.api, onRefresh: _load, refreshing: _loading),
-      ],
-    ),
+    appBar: widget.embedded
+        ? null
+        : AppBar(
+            title: Text(widget.worker ? 'Công trình yêu thích' : 'Thợ quen'),
+            actions: [
+              HomeInboxActions(api: widget.api),
+              HomeAppMenu(
+                api: widget.api,
+                onRefresh: _load,
+                refreshing: _loading,
+              ),
+            ],
+          ),
     body: ContentFrame(
       child: RefreshIndicator(
         onRefresh: _load,

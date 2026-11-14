@@ -32,14 +32,12 @@ class ProfileScreen extends StatefulWidget {
     super.key,
     required this.api,
     this.camera,
-    this.fromTab = false,
-    this.onHomeSelected,
+    this.embedded = false,
     this.accountDetails = false,
   });
   final ApiService api;
   final bool accountDetails;
-  final bool fromTab;
-  final ValueChanged<int>? onHomeSelected;
+  final bool embedded;
   final KycCamera? camera;
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -197,41 +195,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    bottomNavigationBar: widget.fromTab
-        ? HomeNavigation(
-            api: widget.api,
-            worker: widget.api.session?.role == 'ROLE_WORKER',
-            selectedIndex: 3,
-            nested: true,
-            onSelected: widget.onHomeSelected,
-          )
-        : null,
-    appBar: AppBar(
-      title: Text(
-        widget.accountDetails
-            ? 'Thông tin cá nhân & KYC'
-            : widget.api.session?.role == 'ROLE_CONTRACTOR'
-            ? 'Hồ sơ & Thợ ruột'
-            : 'Hồ sơ của tôi',
-      ),
-      actions: [
-        if (!widget.accountDetails) ...[
-          HomeInboxActions(api: widget.api),
-          IconButton(
-            tooltip: 'Cài đặt',
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () async {
-              await Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => SettingsScreen(api: widget.api),
+    appBar: widget.embedded
+        ? null
+        : AppBar(
+            title: Text(
+              widget.accountDetails
+                  ? 'Thông tin cá nhân & KYC'
+                  : widget.api.session?.role == 'ROLE_CONTRACTOR'
+                  ? 'Hồ sơ & Thợ ruột'
+                  : 'Hồ sơ của tôi',
+            ),
+            actions: [
+              if (!widget.accountDetails) ...[
+                HomeInboxActions(api: widget.api),
+                IconButton(
+                  tooltip: 'Cài đặt',
+                  icon: const Icon(Icons.settings_outlined),
+                  onPressed: () async {
+                    await Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => SettingsScreen(api: widget.api),
+                      ),
+                    );
+                    if (mounted && widget.api.session != null) _load();
+                  },
                 ),
-              );
-              if (mounted && widget.api.session != null) _load();
-            },
+              ],
+            ],
           ),
-        ],
-      ],
-    ),
     body: ContentFrame(
       child: RefreshIndicator(
         onRefresh: () async {

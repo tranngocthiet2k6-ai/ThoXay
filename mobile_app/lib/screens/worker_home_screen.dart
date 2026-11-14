@@ -1,7 +1,7 @@
+import 'main_shell.dart';
 import '../widgets/bouncing_button.dart';
 import '../services/device_preferences.dart';
 import '../widgets/modern_controls.dart';
-import '../widgets/brand_logo.dart';
 import '../widgets/job_application_actions.dart';
 import '../widgets/wage_offer_sheet.dart';
 import 'chat_screen.dart';
@@ -31,17 +31,33 @@ import '../widgets/empty_state.dart';
 import '../widgets/hero_greeting.dart';
 import '../widgets/job_search_header.dart';
 import '../widgets/cancel_work_dialog.dart';
-import '../widgets/home_navigation.dart';
 
-class WorkerHomeScreen extends StatefulWidget {
+class WorkerHomeScreen extends StatelessWidget {
   const WorkerHomeScreen({super.key, required this.api, this.location});
   final ApiService api;
   final LocationService? location;
   @override
-  State<WorkerHomeScreen> createState() => _WorkerHomeScreenState();
+  Widget build(BuildContext context) =>
+      MainShell(api: api, worker: true, location: location);
 }
 
-class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
+class WorkerHomeContent extends StatefulWidget {
+  const WorkerHomeContent({
+    super.key,
+    required this.api,
+    this.location,
+    required this.tab,
+    required this.onTabChanged,
+  });
+  final ApiService api;
+  final LocationService? location;
+  final int tab;
+  final ValueChanged<int> onTabChanged;
+  @override
+  State<WorkerHomeContent> createState() => _WorkerHomeContentState();
+}
+
+class _WorkerHomeContentState extends State<WorkerHomeContent> {
   List<Job> _jobs = [];
   List<JobApplication> _applications = [];
   GeoPoint? _position;
@@ -62,7 +78,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
     super.dispose();
   }
 
-  int _tab = 0;
+  int get _tab => widget.tab;
   int _workStatus = 0;
   List<JobApplication> get _filteredApplications => _applications
       .where(
@@ -334,17 +350,6 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(
-      title: const BrandHeader(title: 'Thợ Xây'),
-      actions: [
-        HomeInboxActions(api: widget.api),
-        HomeAppMenu(
-          api: widget.api,
-          onRefresh: _refresh,
-          refreshing: _loading || _cancelling,
-        ),
-      ],
-    ),
     body: Column(
       children: [
         Expanded(
@@ -632,7 +637,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                             message: 'Bạn chưa ứng tuyển công trình nào. Khám phá công việc gần bạn và gửi đơn đầu tiên nhé!',
                             action: BouncingButton(
                               child: FilledButton(
-                                onPressed: () => setState(() => _tab = 0),
+                                onPressed: () => widget.onTabChanged(0),
                                 child: const Text('Khám phá công trình'),
                               ),
                             ),
@@ -771,12 +776,6 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
           ),
         ),
       ],
-    ),
-    bottomNavigationBar: HomeNavigation(
-      api: widget.api,
-      worker: true,
-      selectedIndex: _tab,
-      onSelected: (index) => setState(() => _tab = index),
     ),
   );
 }

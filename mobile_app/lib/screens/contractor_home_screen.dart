@@ -1,6 +1,6 @@
+import 'main_shell.dart';
 import '../widgets/dashboard_stats.dart';
 import '../widgets/bouncing_button.dart';
-import '../widgets/brand_logo.dart';
 import '../widgets/applicant_evidence.dart';
 import '../widgets/figma_components.dart';
 import '../widgets/figma_job_map.dart';
@@ -30,16 +30,23 @@ import '../widgets/hero_greeting.dart';
 import '../widgets/job_search_header.dart';
 import 'worker_profile_screen.dart';
 import 'job_payments_screen.dart';
-import '../widgets/home_navigation.dart';
 
-class ContractorHomeScreen extends StatefulWidget {
+class ContractorHomeScreen extends StatelessWidget {
   const ContractorHomeScreen({super.key, required this.api});
   final ApiService api;
+
   @override
-  State<ContractorHomeScreen> createState() => _ContractorHomeScreenState();
+  Widget build(BuildContext context) => MainShell(api: api, worker: false);
 }
 
-class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
+class ContractorHomeContent extends StatefulWidget {
+  const ContractorHomeContent({super.key, required this.api});
+  final ApiService api;
+  @override
+  State<ContractorHomeContent> createState() => _ContractorHomeContentState();
+}
+
+class _ContractorHomeContentState extends State<ContractorHomeContent> {
   List<Job> _jobs = [];
   final _search = TextEditingController();
   String _query = '', _status = '';
@@ -151,13 +158,6 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(
-      title: const BrandHeader(title: 'Chủ thầu'),
-      actions: [
-        HomeInboxActions(api: widget.api),
-        HomeAppMenu(api: widget.api, onRefresh: _refresh, refreshing: _loading),
-      ],
-    ),
     body: Column(
       children: [
         Expanded(
@@ -463,7 +463,6 @@ class _ContractorHomeScreenState extends State<ContractorHomeScreen> {
         ),
       ],
     ),
-    bottomNavigationBar: HomeNavigation(api: widget.api),
   );
 }
 
