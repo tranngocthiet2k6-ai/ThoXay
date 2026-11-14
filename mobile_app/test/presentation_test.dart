@@ -50,7 +50,11 @@ void main() {
       api.result.complete([]);
       await tester.pumpAndSettle();
       expect(find.byType(LoadingJobs), findsNothing);
-      await tester.ensureVisible(find.byType(EmptyState));
+      await tester.scrollUntilVisible(
+        find.byType(EmptyState),
+        180,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.pumpAndSettle();
       expect(find.text('Không tìm thấy công trình quanh đây'), findsOneWidget);
       expect(find.text('Đổi vị trí tìm kiếm'), findsOneWidget);

@@ -47,10 +47,16 @@ void main() {
         await tester.pumpAndSettle();
         final exit = find.byKey(const ValueKey('exit-job-map'));
         expect(exit.hitTestable(), findsOneWidget);
-        expect(find.byType(JobMapPreview), findsNothing);
+        expect(
+          tester.widget<JobMapPreview>(find.byType(JobMapPreview)).expanded,
+          isTrue,
+        );
         await tester.tap(exit);
         await tester.pumpAndSettle();
-        expect(find.byType(JobMapPreview), findsOneWidget);
+        expect(
+          tester.widget<JobMapPreview>(find.byType(JobMapPreview)).expanded,
+          isFalse,
+        );
         expect(tester.widget<TextField>(search).controller!.text, 'nhà phố');
         expect(api.searches, 1);
         expect(

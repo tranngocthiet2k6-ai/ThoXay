@@ -15,11 +15,17 @@ class JobMapPreview extends StatefulWidget {
     required this.jobs,
     required this.onJobTap,
     this.onExpand,
+    this.onCollapse,
+    this.onMarkerTap,
+    this.expanded = false,
   });
   final GeoPoint center;
   final List<Job> jobs;
   final ValueChanged<Job> onJobTap;
   final VoidCallback? onExpand;
+  final VoidCallback? onCollapse;
+  final ValueChanged<Job>? onMarkerTap;
+  final bool expanded;
   @override
   State<JobMapPreview> createState() => _JobMapPreviewState();
 }
@@ -43,13 +49,29 @@ class _JobMapPreviewState extends State<JobMapPreview> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (widget.expanded && widget.onCollapse != null)
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: FilledButton.tonalIcon(
+                key: const ValueKey('exit-job-map'),
+                onPressed: widget.onCollapse,
+                icon: const Icon(Icons.arrow_back_rounded, size: 20),
+                label: const Text(
+                  'Thu gọn bản đồ / Xem danh sách công trình',
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
           SizedBox(
-            height: 232,
+            height: widget.expanded ? 380 : 232,
             child: JobsMap(
               center: widget.center,
-              jobs: widget.jobs.take(3).toList(),
-              onJobTap: (job) => setState(() => _selected = job.id),
-              interactive: false,
+              jobs: widget.jobs,
+              onJobTap: (job) {
+                setState(() => _selected = job.id);
+                widget.onMarkerTap?.call(job);
+              },
+              interactive: widget.expanded,
             ),
           ),
           if (job != null)
@@ -118,7 +140,7 @@ class _JobMapPreviewState extends State<JobMapPreview> {
                     style: TextStyle(fontSize: 10, color: Color(0xff64748b)),
                   ),
                 ),
-                if (widget.onExpand != null)
+                if (!widget.expanded && widget.onExpand != null)
                   TextButton.icon(
                     onPressed: widget.onExpand,
                     icon: const Icon(Icons.map_outlined, size: 16),

@@ -4,6 +4,7 @@ import '../widgets/bouncing_button.dart';
 import '../widgets/applicant_evidence.dart';
 import '../widgets/figma_components.dart';
 import '../widgets/figma_job_map.dart';
+import '../widgets/job_map_summary.dart';
 import '../widgets/incident_actions.dart';
 import '../widgets/weather_card.dart';
 import 'attendance_screen.dart';
@@ -85,6 +86,41 @@ class _ContractorHomeContentState extends State<ContractorHomeContent> {
   }
 
   bool _loading = false;
+  bool _mapExpanded = false;
+  final _mapKey = GlobalKey();
+  final _jobListKey = GlobalKey();
+
+  void _collapseMap() {
+    setState(() => _mapExpanded = false);
+    revealMapJobList(
+      _mapKey,
+      _jobListKey,
+      pinnedHeaderHeight: 128 * MediaQuery.textScalerOf(context).scale(14) / 14,
+    );
+  }
+
+  Future<void> _mapJobDetails(Job job) => showJobDetails<void>(
+    context,
+    job,
+    api: widget.api,
+    actionBuilder: (sheetContext) => FilledButton(
+      onPressed: () {
+        Navigator.pop(sheetContext);
+        _applicants(job);
+      },
+      child: const Text('Duyệt thợ'),
+    ),
+  );
+
+  Future<void> _mapSummary(Job job) => showJobMapSummary(
+    context,
+    job: job,
+    onDetails: () => _mapJobDetails(job),
+    onCloseMap: _collapseMap,
+    primaryLabel: 'Duyệt thợ',
+    onPrimary: () => _applicants(job),
+  );
+
   String? _error;
   @override
   void initState() {
@@ -215,28 +251,20 @@ class _ContractorHomeContentState extends State<ContractorHomeContent> {
                         ),
                         if (_weatherJob != null) ...[
                           const SizedBox(height: 16),
-                          JobMapPreview(
-                            center: GeoPoint(
-                              _weatherJob!.latitude,
-                              _weatherJob!.longitude,
-                            ),
-                            jobs: _jobs
-                                .where(
-                                  (j) =>
-                                      j.status == 'OPEN' ||
-                                      j.status == 'IN_PROGRESS',
-                                )
-                                .toList(),
-                            onJobTap: (j) => showJobDetails<void>(
-                              context,
-                              j,
-                              api: widget.api,
-                              action: BouncingButton(
-                                child: FilledButton(
-                                  onPressed: () => _applicants(j),
-                                  child: const Text('Duyệt thợ'),
-                                ),
+                          SizedBox(
+                            key: _mapKey,
+                            child: JobMapPreview(
+                              center: GeoPoint(
+                                _weatherJob!.latitude,
+                                _weatherJob!.longitude,
                               ),
+                              jobs: _visibleJobs,
+                              onJobTap: _mapJobDetails,
+                              onMarkerTap: _mapSummary,
+                              expanded: _mapExpanded,
+                              onExpand: () =>
+                                  setState(() => _mapExpanded = true),
+                              onCollapse: _collapseMap,
                             ),
                           ),
                         ],
@@ -360,6 +388,12 @@ class _ContractorHomeContentState extends State<ContractorHomeContent> {
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
                   sliver: SliverList.list(
                     children: [
+                      Text(
+                        'Danh sách công trình',
+                        key: _jobListKey,
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      const SizedBox(height: 12),
                       if (_error != null)
                         Card(
                           color: Theme.of(context).colorScheme.errorContainer,

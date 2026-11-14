@@ -25,7 +25,7 @@ import '../widgets/coordinates_dialog.dart';
 import '../widgets/job_card.dart';
 import '../widgets/call_button.dart';
 import '../widgets/chat_button.dart';
-import '../widgets/jobs_map.dart';
+import '../widgets/job_map_summary.dart';
 import '../widgets/loading_jobs.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/hero_greeting.dart';
@@ -96,6 +96,8 @@ class _WorkerHomeContentState extends State<WorkerHomeContent> {
   bool _availabilityBusy = false;
   bool _loading = false;
   bool _showMap = false, _advancedFilters = false;
+  final _mapKey = GlobalKey();
+  final _jobListKey = GlobalKey();
   bool _proposalOpen = false;
   String? _error;
   @override
@@ -218,6 +220,35 @@ class _WorkerHomeContentState extends State<WorkerHomeContent> {
     } finally {
       if (mounted) setState(() => _applying = null);
     }
+  }
+
+  void _collapseMap() {
+    AppHaptics.light();
+    setState(() => _showMap = false);
+    revealMapJobList(
+      _mapKey,
+      _jobListKey,
+      pinnedHeaderHeight: 128 * MediaQuery.textScalerOf(context).scale(14) / 14,
+    );
+  }
+
+  Future<void> _showMapSummary(Job job) {
+    final applied = _applications.any((a) => a.job.id == job.id);
+    return showJobMapSummary(
+      context,
+      job: job,
+      onDetails: () => _showMapJob(job),
+      onCloseMap: _collapseMap,
+      primaryLabel: applied ? 'Đã ứng tuyển' : 'Nhận việc',
+      onPrimary:
+          applied ||
+              _loading ||
+              _applying != null ||
+              _proposalOpen ||
+              _cancelling
+          ? null
+          : () => _apply(job),
+    );
   }
 
   Future<void> _showMapJob(Job job) async {
@@ -466,8 +497,9 @@ class _WorkerHomeContentState extends State<WorkerHomeContent> {
                                 tooltip: _showMap
                                     ? 'Xem danh sách'
                                     : 'Xem bản đồ',
-                                onPressed: () =>
-                                    setState(() => _showMap = !_showMap),
+                                onPressed: _showMap
+                                    ? _collapseMap
+                                    : () => setState(() => _showMap = true),
                                 icon: Icon(
                                   _showMap
                                       ? Icons.view_list_outlined
@@ -486,9 +518,7 @@ class _WorkerHomeContentState extends State<WorkerHomeContent> {
                     pinned: true,
                     delegate: JobSearchHeader(
                       height:
-                          (_showMap ? 176 : 128) *
-                          MediaQuery.textScalerOf(context).scale(14) /
-                          14,
+                          128 * MediaQuery.textScalerOf(context).scale(14) / 14,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 16,
@@ -519,34 +549,6 @@ class _WorkerHomeContentState extends State<WorkerHomeContent> {
                                 },
                               ),
                             ),
-                            if (_showMap)
-                              SizedBox(
-                                height: 48,
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        'Đang xem bản đồ',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodySmall,
-                                      ),
-                                    ),
-                                    TextButton.icon(
-                                      key: const ValueKey('exit-job-map'),
-                                      onPressed: () {
-                                        AppHaptics.light();
-                                        setState(() => _showMap = false);
-                                      },
-                                      icon: const Icon(
-                                        Icons.view_list_outlined,
-                                        size: 20,
-                                      ),
-                                      label: const Text('Về danh sách'),
-                                    ),
-                                  ],
-                                ),
-                              ),
                           ],
                         ),
                       ),
@@ -567,19 +569,25 @@ class _WorkerHomeContentState extends State<WorkerHomeContent> {
                       if (_loading)
                         LoadingJobs(mapMode: _tab == 0 && _showMap)
                       else if (_tab == 0) ...[
-                        if (!_showMap &&
-                            _position != null &&
-                            _available == true &&
-                            _visibleJobs.isNotEmpty) ...[
-                          JobMapPreview(
-                            center: _position!,
-                            jobs: _visibleJobs,
-                            onJobTap: _showMapJob,
-                            onExpand: () => setState(() => _showMap = true),
+                        if (_position != null && _available == true) ...[
+                          SizedBox(
+                            key: _mapKey,
+                            child: JobMapPreview(
+                              center: _position!,
+                              jobs: _visibleJobs,
+                              onJobTap: _showMapJob,
+                              onMarkerTap: _showMapSummary,
+                              expanded: _showMap,
+                              onExpand: () => setState(() => _showMap = true),
+                              onCollapse: _collapseMap,
+                            ),
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 16),
+                        ],
+                        if (_available == true) ...[
                           Text(
                             'Việc gần anh',
+                            key: _jobListKey,
                             style: Theme.of(context).textTheme.titleLarge,
                           ),
                           const SizedBox(height: 12),
@@ -604,35 +612,7 @@ class _WorkerHomeContentState extends State<WorkerHomeContent> {
                             ),
                           ),
                         if (_visibleJobs.isEmpty) const SizedBox(height: 16),
-                        if (_showMap &&
-                            _position != null &&
-                            _available == true) ...[
-                          SizedBox(
-                            height: 360,
-                            child: JobsMap(
-                              center: _position!,
-                              jobs: _visibleJobs,
-                              onJobTap: _showMapJob,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          Text(
-                            '${_visibleJobs.length} công trình · Chạm ghim để xem và nhận việc',
-                          ),
-                          const SizedBox(height: 16),
-                        ],
-                        if (_showMap &&
-                            _position == null &&
-                            !_loading &&
-                            _available == true)
-                          TextButton.icon(
-                            onPressed: _selectPosition,
-                            icon: const Icon(Icons.edit_location_alt_outlined),
-                            label: const Text(
-                              'Chọn vị trí tìm kiếm để xem bản đồ',
-                            ),
-                          ),
-                        if (!_showMap)
+                        if (_available == true)
                           ResponsiveJobGrid(
                             children: [
                               for (final job in _visibleJobs)
