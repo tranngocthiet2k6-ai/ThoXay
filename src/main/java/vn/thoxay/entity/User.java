@@ -28,6 +28,8 @@ public class User {
     private boolean chatPushEnabled = true;
     @Column(name = "full_name", nullable = false, length = 100)
     private String fullName;
+    @Column(name = "avatar_version") private java.util.UUID avatarVersion;
+    public String avatarUrl() { return avatarVersion == null ? null : "/api/users/" + id + "/avatar?v=" + avatarVersion; }
     @Column(name = "date_of_birth") private LocalDate dateOfBirth;
     @Column(name = "experience_years", nullable = false) @org.hibernate.annotations.ColumnDefault("0")
     private int experienceYears;

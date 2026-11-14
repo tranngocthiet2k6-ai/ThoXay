@@ -14,6 +14,7 @@ import java.io.*;
 public class ImageSanitizer {
  public byte[] kyc(MultipartFile file){return sanitize(file,200,320,6000,5*1024*1024);}
  public byte[] project(MultipartFile file){return sanitize(file,160,240,1800,2*1024*1024);}
+ public byte[] avatar(MultipartFile file){return sanitize(file,128,128,640,1024*1024);}
  private byte[] sanitize(MultipartFile file,int minShort,int minLong,int resize,int maxOutput){
   if(file==null||file.isEmpty())throw bad("Cần chọn ảnh JPEG hoặc PNG");
   if(file.getSize()>5*1024*1024)throw new ApiException(HttpStatus.PAYLOAD_TOO_LARGE,"Mỗi ảnh tải lên tối đa 5 MB");

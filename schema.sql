@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS users (
   job_push_enabled BOOLEAN NOT NULL DEFAULT TRUE,
   chat_push_enabled BOOLEAN NOT NULL DEFAULT TRUE,
   full_name VARCHAR(100) NOT NULL,
+  avatar_version UUID,
   date_of_birth DATE,
   experience_years INTEGER NOT NULL DEFAULT 0,
   experience_summary VARCHAR(2000),
@@ -299,6 +300,12 @@ CREATE TABLE IF NOT EXISTS incident_evidence (
  incident_id BIGINT PRIMARY KEY REFERENCES incidents(id) ON DELETE CASCADE,
  content BYTEA NOT NULL CHECK(octet_length(content) <= 2097152),
  created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS user_avatars (
+  id UUID PRIMARY KEY,
+  user_id BIGINT NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+  content BYTEA NOT NULL
 );
 
 -- Demo-only password for all three accounts: password
