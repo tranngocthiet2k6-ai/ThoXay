@@ -486,31 +486,68 @@ class _WorkerHomeContentState extends State<WorkerHomeContent> {
                     pinned: true,
                     delegate: JobSearchHeader(
                       height:
-                          128 * MediaQuery.textScalerOf(context).scale(14) / 14,
+                          (_showMap ? 176 : 128) *
+                          MediaQuery.textScalerOf(context).scale(14) /
+                          14,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 16,
                           vertical: 8,
                         ),
-                        child: JobSearchFilters(
-                          controller: _search,
-                          onAdvanced: () => setState(
-                            () => _advancedFilters = !_advancedFilters,
-                          ),
-                          jobType: _jobType,
-                          salaryFirst: _sort == 'SALARY_DESC',
-                          enabled: !_loading,
-                          onSearch: (q) => setState(() => _query = q),
-                          onType: (type) {
-                            setState(() => _jobType = type);
-                            _refresh();
-                          },
-                          onSalary: (v) {
-                            setState(
-                              () => _sort = v ? 'SALARY_DESC' : 'DISTANCE',
-                            );
-                            _refresh();
-                          },
+                        child: Column(
+                          children: [
+                            Expanded(
+                              child: JobSearchFilters(
+                                controller: _search,
+                                onAdvanced: () => setState(
+                                  () => _advancedFilters = !_advancedFilters,
+                                ),
+                                jobType: _jobType,
+                                salaryFirst: _sort == 'SALARY_DESC',
+                                enabled: !_loading,
+                                onSearch: (q) => setState(() => _query = q),
+                                onType: (type) {
+                                  setState(() => _jobType = type);
+                                  _refresh();
+                                },
+                                onSalary: (v) {
+                                  setState(
+                                    () =>
+                                        _sort = v ? 'SALARY_DESC' : 'DISTANCE',
+                                  );
+                                  _refresh();
+                                },
+                              ),
+                            ),
+                            if (_showMap)
+                              SizedBox(
+                                height: 48,
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        'Đang xem bản đồ',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall,
+                                      ),
+                                    ),
+                                    TextButton.icon(
+                                      key: const ValueKey('exit-job-map'),
+                                      onPressed: () {
+                                        AppHaptics.light();
+                                        setState(() => _showMap = false);
+                                      },
+                                      icon: const Icon(
+                                        Icons.view_list_outlined,
+                                        size: 20,
+                                      ),
+                                      label: const Text('Về danh sách'),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
                         ),
                       ),
                     ),
