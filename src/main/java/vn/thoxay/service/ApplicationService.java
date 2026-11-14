@@ -28,6 +28,8 @@ public class ApplicationService {
         Job job = lockedJob(request.jobId());
         requireRecruitingDate(job);
         worker = workerLocks.lockWorkers(List.of(worker.getId())).get(0);
+        if (!worker.isActive()) throw new vn.thoxay.exception.AccountLockedException();
+        if (worker.getRole() != Role.ROLE_WORKER) throw new org.springframework.security.access.AccessDeniedException("Vai trò đã thay đổi");
         if (!worker.isAvailable()) throw new ApiException(HttpStatus.CONFLICT, "Bạn đang Offline. Bật trạng thái nhận việc để ứng tuyển.");
         if (applications.existsByJobIdAndWorkerId(job.getId(), worker.getId()))
             throw new ApiException(HttpStatus.CONFLICT, "Bạn đã ứng tuyển công trình này");
@@ -52,7 +54,7 @@ public class ApplicationService {
     @Transactional(readOnly = true)
     public List<ApplicationResponse> byJob(Long id) {
         Job job = jobs.findById(id).orElseThrow(() -> notFound("Công trình"));
-        current.requireOwner(job.getContractor().getId(), Role.ROLE_CONTRACTOR);
+        requireHistoryOwner(job.getContractor().getId());
         return applications.findByJobIdOrderByAppliedAtDesc(id).stream()
             .sorted(java.util.Comparator.comparingInt((JobApplication a) -> WorkerTier.of(a.getWorker()).ordinal()).reversed()
                 .thenComparing(JobApplication::getAppliedAt, java.util.Comparator.reverseOrder()))
@@ -61,8 +63,13 @@ public class ApplicationService {
 
     @Transactional(readOnly = true)
     public List<ApplicationResponse> byWorker(Long id) {
-        current.requireOwner(id, Role.ROLE_WORKER);
+        requireHistoryOwner(id);
         return applications.findByWorkerIdOrderByAppliedAtDesc(id).stream().map(ApplicationResponse::of).toList();
+    }
+    private void requireHistoryOwner(Long id) {
+        var actor = current.get();
+        if (actor.getRole() == Role.ROLE_ADMIN || !actor.getId().equals(id))
+            throw new org.springframework.security.access.AccessDeniedException("Chỉ được xem lịch sử của chính mình");
     }
 
     @Transactional
@@ -97,6 +104,7 @@ public class ApplicationService {
         if (status == ApplicationStatus.ACCEPTED) {
             requireRecruitingDate(job);
             User worker = workerLocks.lockWorkers(List.of(application.getWorker().getId())).get(0);
+            if (worker.getRole() != Role.ROLE_WORKER) throw new ApiException(HttpStatus.CONFLICT, "Tài khoản không còn ở vai trò Thợ");
             if (!worker.isAvailable()) throw new ApiException(HttpStatus.CONFLICT, "Thợ đã tạm ngưng nhận việc mới");
             if (!application.getWorker().isActive())
                 throw new ApiException(HttpStatus.CONFLICT, "Tài khoản thợ đã bị khóa");

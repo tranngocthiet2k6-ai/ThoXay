@@ -8,11 +8,11 @@ import org.springframework.data.repository.query.Param;
 import vn.thoxay.entity.Message;
 
 public interface MessageRepository extends JpaRepository<Message, Long> {
-    // Identical ACL for inbox and badge: accepted pair, active accounts, actual worker role.
+    // Participation survives a public role switch after the work is settled.
     String ACTIVE_PAIR = " FROM messages m JOIN jobs j ON j.id=m.job_id "
         + "JOIN job_applications a ON a.job_id=m.job_id AND a.worker_id=CASE WHEN m.sender_id=j.contractor_id THEN m.recipient_id ELSE m.sender_id END AND a.status='ACCEPTED' "
-        + "JOIN users w ON w.id=a.worker_id AND w.is_active=TRUE AND w.role='ROLE_WORKER' "
-        + "JOIN users c ON c.id=j.contractor_id AND c.is_active=TRUE "
+        + "JOIN users w ON w.id=a.worker_id AND w.is_active=TRUE AND w.role IN ('ROLE_WORKER','ROLE_CONTRACTOR') "
+        + "JOIN users c ON c.id=j.contractor_id AND c.is_active=TRUE AND c.role IN ('ROLE_WORKER','ROLE_CONTRACTOR') "
         + "LEFT JOIN chat_read_states r ON r.job_id=m.job_id AND r.user_id=:actor AND r.peer_id=CASE WHEN m.sender_id=:actor THEN m.recipient_id ELSE m.sender_id END "
         + "WHERE (m.sender_id=:actor OR m.recipient_id=:actor) AND (m.sender_id=j.contractor_id OR m.recipient_id=j.contractor_id) ";
     interface InboxRow { Long getLatestId(); Long getUnreadCount(); }

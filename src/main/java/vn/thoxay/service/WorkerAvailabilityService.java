@@ -18,6 +18,8 @@ public class WorkerAvailabilityService {
     public State update(boolean value) {
         var worker=current.require(Role.ROLE_WORKER);
         em.refresh(worker, LockModeType.PESSIMISTIC_WRITE);
+        if (!worker.isActive()) throw new vn.thoxay.exception.AccountLockedException();
+        if (worker.getRole() != Role.ROLE_WORKER) throw new org.springframework.security.access.AccessDeniedException("Vai trò đã thay đổi");
         worker.setAvailable(value);
         return new State(value);
     }

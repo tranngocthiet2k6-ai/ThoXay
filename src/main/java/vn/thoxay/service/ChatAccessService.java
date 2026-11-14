@@ -36,17 +36,18 @@ public class ChatAccessService {
 
     public Conversation authorize(User actor, Job job, Long peerId) {
         if (!actor.isActive()) throw new AccountLockedException();
+        if (actor.getRole() == Role.ROLE_ADMIN || job.getContractor().getRole() == Role.ROLE_ADMIN) throw forbidden();
         if (peerId == null || peerId.equals(actor.getId())) throw forbidden();
         Long workerId;
-        if (actor.getRole() == Role.ROLE_CONTRACTOR && actor.getId().equals(job.getContractor().getId())) {
+        if (actor.getId().equals(job.getContractor().getId())) {
             workerId = peerId;
-        } else if (actor.getRole() == Role.ROLE_WORKER && peerId.equals(job.getContractor().getId())) {
+        } else if (peerId.equals(job.getContractor().getId())) {
             workerId = actor.getId();
         } else throw forbidden();
         if (!job.getContractor().isActive()
             || !applications.existsByJobIdAndWorkerIdAndStatus(job.getId(), workerId, ApplicationStatus.ACCEPTED)) throw forbidden();
         User worker = users.findById(workerId).orElseThrow(this::forbidden);
-        if (worker.getRole() != Role.ROLE_WORKER || !worker.isActive()) throw forbidden();
+        if (worker.getRole() == Role.ROLE_ADMIN || !worker.isActive()) throw forbidden();
         return new Conversation(job.getId(), job.getContractor().getId(), workerId);
     }
     private ApiException forbidden() {

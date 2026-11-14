@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import vn.thoxay.controller.AccountSettingsController.*;
 import vn.thoxay.dto.AuthResponse;
 import vn.thoxay.entity.User;
+import vn.thoxay.entity.Role;
 import vn.thoxay.exception.ApiException;
 import vn.thoxay.repository.UserRepository;
 import vn.thoxay.security.*;
@@ -55,6 +56,24 @@ public class AccountSettingsService {
     }
     @Transactional(readOnly=true) public PushPreferences notifications() {
         User user = current.get(); return new PushPreferences(user.isJobPushEnabled(), user.isChatPushEnabled());
+    }
+    @Transactional public AuthResponse role(RoleRequest request) {
+        User user = locked();
+        if (user.getRole() == Role.ROLE_ADMIN) throw new ApiException(HttpStatus.FORBIDDEN, "Admin không thể chuyển sang vai trò công khai");
+        Role target = Role.valueOf(request.role());
+        if (target == user.getRole()) return session(user);
+        long openJobs = em.createQuery("select count(j) from Job j where j.contractor.id=:id and j.status in (vn.thoxay.entity.JobStatus.OPEN,vn.thoxay.entity.JobStatus.IN_PROGRESS)", Long.class)
+            .setParameter("id", user.getId()).getSingleResult();
+        long openApplications = em.createQuery("select count(a) from JobApplication a where a.worker.id=:id and a.status in (vn.thoxay.entity.ApplicationStatus.PENDING,vn.thoxay.entity.ApplicationStatus.ACCEPTED) and a.job.status in (vn.thoxay.entity.JobStatus.OPEN,vn.thoxay.entity.JobStatus.IN_PROGRESS)", Long.class)
+            .setParameter("id", user.getId()).getSingleResult();
+        long unpaid = em.createQuery("select count(a) from JobApplication a where (a.worker.id=:id or a.job.contractor.id=:id) and a.status=vn.thoxay.entity.ApplicationStatus.ACCEPTED and a.job.status=vn.thoxay.entity.JobStatus.COMPLETED and not exists (select p.id from JobPayment p where p.application.id=a.id)", Long.class)
+            .setParameter("id", user.getId()).getSingleResult();
+        if (openJobs > 0) throw new ApiException(HttpStatus.CONFLICT, "Bạn còn công trình đang tuyển hoặc thi công. Hãy hoàn tất công việc hoặc liên hệ Admin xử lý trước khi chuyển vai trò.");
+        if (openApplications > 0) throw new ApiException(HttpStatus.CONFLICT, "Bạn còn đơn ứng tuyển hoặc công việc đang xử lý. Hãy hoàn tất hoặc nhờ chủ thầu xử lý đơn trước khi chuyển vai trò.");
+        if (unpaid > 0) throw new ApiException(HttpStatus.CONFLICT, "Còn công trình hoàn thành chưa chốt thanh toán. Hãy đối soát thanh toán trước khi chuyển vai trò.");
+        user.setRole(target); user.setAvailable(false); user.setSecurityVersion(user.getSecurityVersion() + 1);
+        devices.deleteByUserId(user.getId());
+        return session(user);
     }
     @Transactional public PushPreferences notifications(PushPreferences request) {
         User user = locked(); user.setJobPushEnabled(request.jobPushEnabled()); user.setChatPushEnabled(request.chatPushEnabled());

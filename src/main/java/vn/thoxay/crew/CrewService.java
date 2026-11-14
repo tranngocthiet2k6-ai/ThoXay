@@ -52,7 +52,7 @@ public class CrewService {
   if(roster.size()<2)throw conflict("Cần ít nhất 2 thành viên đã xác nhận tham gia tổ");
   var workers=locks.lockWorkers(roster.stream().map(m->m.getWorker().getId()).toList());
   if(applications.countByJobIdAndStatus(job.getId(),ApplicationStatus.ACCEPTED)+workers.size()>job.getRequiredWorkers())throw conflict("Công trình không đủ chỗ cho toàn bộ tổ");
-  for(var w:workers){if(!w.isActive()||!w.isAvailable())throw conflict("Mọi thành viên phải đang hoạt động và Online");if(applications.existsByJobIdAndWorkerId(job.getId(),w.getId()))throw conflict("Một thành viên đã có đơn cho công trình này");}
+  for(var w:workers){if(w.getRole()!=Role.ROLE_WORKER||!w.isActive()||!w.isAvailable())throw conflict("Mọi thành viên phải ở vai trò Thợ, đang hoạt động và Online");if(applications.existsByJobIdAndWorkerId(job.getId(),w.getId()))throw conflict("Một thành viên đã có đơn cho công trình này");}
   var batch=new CrewBatch();batch.setCrew(c);batch.setJob(job);batches.saveAndFlush(batch);
   for(var w:workers){var a=new JobApplication();a.setJob(job);a.setWorker(w);a.setCrewBatch(batch);a.setProposedDailyRate(request.proposedDailyRate());a.setWageNote(request.wageNote());
    if(w.getId().equals(leader.getId())){a.setConsentVersion(job.getTermsVersion());a.setAcceptedTermsAt(clock.instant());}

@@ -17,10 +17,14 @@ public class JobService {
     private final vn.thoxay.repository.JobApplicationRepository applications;
     private final java.time.Clock clock;
     private final NotificationService notifications;
+    private final jakarta.persistence.EntityManager em;
 
     @Transactional
     public JobResponse create(JobRequest request) {
         User contractor = current.require(Role.ROLE_CONTRACTOR);
+        em.refresh(contractor, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+        if (!contractor.isActive()) throw new vn.thoxay.exception.AccountLockedException();
+        if (contractor.getRole() != Role.ROLE_CONTRACTOR) throw new org.springframework.security.access.AccessDeniedException("Vai trò đã thay đổi");
         validateDates(request);
         Job job = new Job(); job.setAttendanceRequired(true); job.setContractor(contractor); job.setTitle(request.title().trim());
         job.setDescription(request.description()); job.setJobType(request.jobType());
