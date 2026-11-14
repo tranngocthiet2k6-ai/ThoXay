@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -11,12 +12,11 @@ import 'package:tho_xay_mobile/screens/profile_screen.dart';
 import 'package:tho_xay_mobile/services/api_service.dart';
 import 'package:tho_xay_mobile/services/device_photo_picker.dart';
 import 'package:tho_xay_mobile/widgets/user_avatar.dart';
+import 'package:tho_xay_mobile/widgets/photo_preview_dialog.dart';
 
 import 'settings_screen_test.dart' show SettingsApi;
 
-final pixel = base64Decode(
-  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a2ioAAAAASUVORK5CYII=',
-);
+final pixel = TileProvider.transparentImage;
 
 class _Picker extends DevicePhotoPicker {
   bool cancelled = false;
@@ -93,6 +93,29 @@ class _UploadClient extends http.BaseClient {
 }
 
 void main() {
+  testWidgets(
+    'invalid avatar preview shows a readable error and disables upload without crashing',
+    (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: PhotoPreviewDialog(
+              bytes: Uint8List.fromList([1, 2, 3]),
+              showCaption: false,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Không đọc được ảnh.'), findsOneWidget);
+      expect(
+        tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
+        isNull,
+      );
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
   setUp(() => SharedPreferences.setMockInitialValues({}));
   test('avatar upload uses authenticated current-user multipart PUT', () async {
     final client = _UploadClient();

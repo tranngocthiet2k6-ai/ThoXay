@@ -10,7 +10,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tho_xay_mobile/services/api_service.dart';
 import 'package:tho_xay_mobile/services/device_photo_picker.dart';
-import 'package:tho_xay_mobile/screens/login_screen.dart';
+import 'package:tho_xay_mobile/screens/register_screen.dart';
 import 'package:tho_xay_mobile/theme/app_theme.dart';
 import 'package:tho_xay_mobile/widgets/work_photo_report_dialog.dart';
 
@@ -126,13 +126,13 @@ void main() {
     api.dispose();
   });
   testWidgets(
-    'login role cards preview contractor palette without changing authentication permissions',
+    'registration role cards preview contractor palette without changing authentication permissions',
     (tester) async {
       final api = ApiService();
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.light,
-          home: LoginScreen(api: api),
+          home: RegisterScreen(api: api),
         ),
       );
       await tester.tap(find.text('Tôi là chủ thầu'));

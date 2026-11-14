@@ -7,6 +7,7 @@ import 'tier_badge.dart';
 import 'bouncing_button.dart';
 import '../theme/app_theme.dart';
 import 'user_avatar.dart';
+import '../screens/tier_details_screen.dart';
 
 class HeroGreeting extends StatefulWidget {
   const HeroGreeting({
@@ -109,7 +110,15 @@ class _HeroGreetingState extends State<HeroGreeting> {
                     if (worker && _profile?.workerTier != null)
                       Padding(
                         padding: const EdgeInsets.only(top: 8),
-                        child: TierBadge(tier: _profile!.workerTier!),
+                        child: TierBadge(
+                          tier: _profile!.workerTier!,
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) =>
+                                  TierDetailsScreen(api: widget.api),
+                            ),
+                          ),
+                        ),
                       ),
                     if (!worker)
                       Text(

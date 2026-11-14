@@ -18,10 +18,9 @@ Future<ChatContact?> loadChatContact(
 ) async {
   final session = api.session;
   if (session == null || session.userId == peerId) return null;
-  final contractor = session.role == 'ROLE_CONTRACTOR';
-  if (contractor
-      ? session.userId != job.contractorId
-      : session.role != 'ROLE_WORKER' || peerId != job.contractorId) {
+  final contractor = session.userId == job.contractorId;
+  if (!const {'ROLE_WORKER', 'ROLE_CONTRACTOR'}.contains(session.role) ||
+      (!contractor && peerId != job.contractorId)) {
     return null;
   }
   final rows = contractor

@@ -3,6 +3,8 @@ import 'package:image_picker/image_picker.dart';
 import '../services/device_photo_picker.dart';
 import '../widgets/user_avatar.dart';
 import '../widgets/photo_preview_dialog.dart';
+import '../widgets/role_switch_tile.dart';
+import 'tier_details_screen.dart';
 import '../widgets/bouncing_button.dart';
 import 'settings_screen.dart';
 import '../widgets/account_security_sheet.dart';
@@ -58,6 +60,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _editingKyc = false;
   bool _avatarBusy = false;
   bool _avatarUploading = false;
+  bool _roleBusy = false;
   String? _error;
   @override
   void initState() {
@@ -94,6 +97,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _save() async {
+    if (_roleBusy || _avatarBusy) return;
     if (_frontImage == null || _backImage == null) {
       setState(
         () => _error = 'Hãy chụp đủ mặt trước và mặt sau CCCD trước khi gửi.',
@@ -128,7 +132,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _capture(String face) async {
-    if (_profile == null || _loading) return;
+    if (_profile == null || _loading || _avatarBusy || _roleBusy) return;
     setState(() {
       _loading = true;
       _error = null;
@@ -203,7 +207,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   );
 
   Future<void> _avatar() async {
-    if (_avatarBusy || _loading) return;
+    if (_avatarBusy || _loading || _roleBusy) return;
     setState(() => _avatarBusy = true);
     try {
       final source = await showModalBottomSheet<ImageSource>(
@@ -271,7 +275,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _edit() async {
-    if (_profile == null || _loading || _avatarBusy) return;
+    if (_profile == null || _loading || _avatarBusy || _roleBusy) return;
     bool busy = false;
     final profile = await showModalBottomSheet<UserProfile>(
       context: context,
@@ -421,12 +425,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           const SizedBox(height: 12),
           OutlinedButton.icon(
-            onPressed: _loading || _avatarBusy ? null : _edit,
+            onPressed: _loading || _avatarBusy || _roleBusy ? null : _edit,
             icon: const Icon(Icons.edit_outlined, size: 18),
             label: const Text('Chỉnh sửa thông tin'),
           ),
           TextButton.icon(
-            onPressed: _loading || _avatarBusy
+            onPressed: _loading || _avatarBusy || _roleBusy
                 ? null
                 : () async {
                     await showAccountSecuritySheet(
@@ -564,15 +568,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   completed: _profile!.completedJobs,
                   tier: _profile!.workerTier ?? 'SILVER',
                   verified: _profile!.verified,
+                  onTierTap: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => TierDetailsScreen(api: widget.api),
+                    ),
+                  ),
                   avatar: UserAvatar(
                     api: widget.api,
                     name: _profile!.fullName,
                     path: _profile!.avatarUrl,
                   ),
-                  onAvatarTap: _loading || _avatarBusy ? null : _avatar,
+                  onAvatarTap: _loading || _avatarBusy || _roleBusy
+                      ? null
+                      : _avatar,
                 ),
                 TextButton.icon(
-                  onPressed: _loading || _avatarBusy ? null : _avatar,
+                  onPressed: _loading || _avatarBusy || _roleBusy
+                      ? null
+                      : _avatar,
                   icon: const Icon(Icons.camera_alt_outlined, size: 18),
                   label: Text(
                     _avatarUploading
@@ -583,10 +596,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 if (_loading || _avatarUploading)
                   const LinearProgressIndicator(),
                 const SizedBox(height: 16),
+                if (!widget.accountDetails)
+                  RoleSwitchTile(
+                    api: widget.api,
+                    enabled: !_loading && !_avatarBusy,
+                    onBusy: (busy) {
+                      if (mounted) setState(() => _roleBusy = busy);
+                    },
+                  ),
                 if (!widget.accountDetails) ...[
                   _utilities(),
                   const SizedBox(height: 16),
                 ],
+                if (_profile!.role != 'ROLE_WORKER')
+                  OutlinedButton.icon(
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => TierDetailsScreen(api: widget.api),
+                      ),
+                    ),
+                    icon: const Icon(Icons.workspace_premium_outlined),
+                    label: const Text('Hệ thống cấp bậc & quyền lợi'),
+                  ),
+                const SizedBox(height: 16),
                 _personal(),
                 const SizedBox(height: 16),
                 _kyc(),

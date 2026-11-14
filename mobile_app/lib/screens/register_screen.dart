@@ -1,3 +1,4 @@
+import '../widgets/figma_components.dart';
 import '../widgets/bouncing_button.dart';
 import '../theme/app_theme.dart';
 
@@ -32,6 +33,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _submit() async {
+    AppHaptics.light();
     if (!_form.currentState!.validate()) return;
     FocusScope.of(context).unfocus();
     setState(() {
@@ -66,30 +68,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
         title: 'Bắt đầu kết nối',
         subtitle: 'Bạn muốn tìm việc hay tìm người thợ phù hợp?',
         canGoBack: true,
+        roleSelection: RoleCards(
+          role: _role,
+          onChanged: _busy ? null : (role) => setState(() => _role = role),
+        ),
         child: Form(
           key: _form,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              SegmentedButton<String>(
-                segments: const [
-                  ButtonSegment(
-                    value: 'ROLE_WORKER',
-                    label: Text('Tôi là thợ'),
-                    icon: Icon(Icons.construction),
-                  ),
-                  ButtonSegment(
-                    value: 'ROLE_CONTRACTOR',
-                    label: Text('Tôi là chủ thầu'),
-                    icon: Icon(Icons.apartment),
-                  ),
-                ],
-                selected: {_role},
-                onSelectionChanged: _busy
-                    ? null
-                    : (value) => setState(() => _role = value.first),
-              ),
-              const SizedBox(height: 24),
               TextFormField(
                 controller: _name,
                 enabled: !_busy,

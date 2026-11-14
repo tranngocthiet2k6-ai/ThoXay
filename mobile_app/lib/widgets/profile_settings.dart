@@ -14,6 +14,7 @@ import 'app_snack_bar.dart';
 import 'bouncing_button.dart';
 import 'app_information.dart';
 import 'legal_information.dart';
+import 'role_switch_tile.dart';
 
 class ProfileSettings extends StatefulWidget {
   const ProfileSettings({super.key, required this.api, this.push});
@@ -222,6 +223,14 @@ class _ProfileSettingsState extends State<ProfileSettings> {
               onTap: () => showAccountSecuritySheet(context, widget.api),
             ),
           ]),
+          const SizedBox(height: 12),
+          RoleSwitchTile(
+            api: widget.api,
+            enabled: !_busy,
+            onBusy: (value) {
+              if (mounted) setState(() => _busy = value);
+            },
+          ),
           _group('Hiển thị & Trải nghiệm công trường', [
             _row(
               Icons.dark_mode_outlined,

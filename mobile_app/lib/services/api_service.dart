@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../models/models.dart';
+import '../models/tier_guide.dart';
 import '../models/chat_message.dart';
 import '../models/chat_inbox.dart';
 import '../models/weather.dart';
@@ -239,6 +240,9 @@ class ApiService extends ChangeNotifier {
           .send(request)
           .then(http.Response.fromStream)
           .timeout(const Duration(seconds: 60));
+      if (_session?.token != auth.token) {
+        throw const ApiException('Phiên đăng nhập đã thay đổi.', 409);
+      }
       final data = jsonDecode(utf8.decode(response.bodyBytes));
       if (response.statusCode == 401 ||
           (response.statusCode == 403 &&
@@ -283,6 +287,9 @@ class ApiService extends ChangeNotifier {
           .send(request)
           .then(http.Response.fromStream)
           .timeout(const Duration(seconds: 30));
+      if (_session?.token != auth.token) {
+        throw const ApiException('Phiên đăng nhập đã thay đổi.', 409);
+      }
       if (response.statusCode == 200 &&
           response.headers['content-type']?.startsWith('image/') == true) {
         return response.bodyBytes;
@@ -721,6 +728,11 @@ class ApiService extends ChangeNotifier {
         'currentPassword': currentPassword,
         'newPassword': newPassword,
       });
+  Future<void> switchRole(String role) =>
+      _updateCredentials('role', {'role': role});
+  Future<TierGuide> tierGuide() async => TierGuide.fromJson(
+    await _request('GET', '/api/reputation/tiers') as Map<String, dynamic>,
+  );
   Future<void> changePhone(String phone, String password) => _updateCredentials(
     'phone',
     {'phoneNumber': phone, 'currentPassword': password},
@@ -1046,6 +1058,9 @@ class ApiService extends ChangeNotifier {
           .send(request)
           .then(http.Response.fromStream)
           .timeout(const Duration(seconds: 60));
+      if (_session?.token != session.token) {
+        throw const ApiException('Phiên đăng nhập đã thay đổi.', 409);
+      }
       final data = jsonDecode(utf8.decode(response.bodyBytes));
       if (response.statusCode == 401 ||
           (response.statusCode == 403 &&

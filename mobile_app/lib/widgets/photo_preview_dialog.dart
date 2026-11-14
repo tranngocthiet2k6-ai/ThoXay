@@ -23,6 +23,7 @@ class PhotoPreviewDialog extends StatefulWidget {
 
 class _PhotoPreviewDialogState extends State<PhotoPreviewDialog> {
   final _caption = TextEditingController();
+  bool _imageError = false;
   @override
   void dispose() {
     _caption.dispose();
@@ -42,7 +43,23 @@ class _PhotoPreviewDialogState extends State<PhotoPreviewDialog> {
             height: 240,
             child: InteractiveViewer(
               maxScale: 5,
-              child: Image.memory(widget.bytes, fit: BoxFit.contain),
+              child: Image.memory(
+                widget.bytes,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stack) {
+                  if (!_imageError) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted) setState(() => _imageError = true);
+                    });
+                  }
+                  return const Center(
+                    child: Text(
+                      'Không đọc được ảnh. Hãy chọn ảnh JPEG hoặc PNG hợp lệ.',
+                      textAlign: TextAlign.center,
+                    ),
+                  );
+                },
+              ),
             ),
           ),
           const SizedBox(height: 16),
@@ -65,7 +82,9 @@ class _PhotoPreviewDialogState extends State<PhotoPreviewDialog> {
       ),
       BouncingButton(
         child: FilledButton.icon(
-          onPressed: () => Navigator.pop(context, _caption.text.trim()),
+          onPressed: _imageError
+              ? null
+              : () => Navigator.pop(context, _caption.text.trim()),
           icon: const Icon(Icons.cloud_upload_outlined),
           label: Text(widget.confirmLabel),
         ),

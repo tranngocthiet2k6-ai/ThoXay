@@ -7,7 +7,6 @@ import '../services/api_service.dart';
 import 'register_screen.dart';
 import '../widgets/auth_shell.dart';
 import '../theme/app_theme.dart';
-import '../widgets/figma_components.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key, required this.api});
@@ -20,7 +19,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final _form = GlobalKey<FormState>();
   final _phone = TextEditingController(), _password = TextEditingController();
   bool _busy = false, _obscure = true;
-  String _role = 'ROLE_WORKER';
   String? _error;
   @override
   void dispose() {
@@ -50,18 +48,14 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) => Theme(
     data: AppTheme.forRole(
-      _role,
+      null,
       brightness: Theme.of(context).brightness,
       outdoor: AppPalette.of(context).outdoor,
     ),
     child: AuthShell(
       api: widget.api,
       title: 'Chào mừng bạn trở lại!',
-      subtitle: 'Chọn vai trò để bắt đầu cùng Thợ Xây.',
-      roleSelection: RoleCards(
-        role: _role,
-        onChanged: _busy ? null : (role) => setState(() => _role = role),
-      ),
+      subtitle: 'Đăng nhập bằng số điện thoại của bạn.',
       child: AutofillGroup(
         child: Form(
           key: _form,

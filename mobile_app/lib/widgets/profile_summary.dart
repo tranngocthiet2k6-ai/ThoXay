@@ -22,11 +22,13 @@ class ProfileSummary extends StatelessWidget {
     this.phone,
     this.avatar,
     this.onAvatarTap,
+    this.onTierTap,
   });
   final String name, tier;
   final String? phone;
   final Widget? avatar;
   final VoidCallback? onAvatarTap;
+  final VoidCallback? onTierTap;
   final bool worker, verified;
   final double rating;
   final int score, completed;
@@ -34,12 +36,27 @@ class ProfileSummary extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = AppPalette.of(context),
         color = Theme.of(context).colorScheme.primary;
-    final diamond = tier == 'DIAMOND', gold = tier == 'GOLD';
-    final targetScore = gold ? 95 : 80, targetJobs = gold ? 20 : 5;
-    final targetStars = gold ? 4.7 : 4.0;
+    final diamond = tier == 'DIAMOND',
+        gold = tier == 'GOLD',
+        bronze = tier == 'BRONZE';
+    final targetScore = bronze
+            ? 60
+            : gold
+            ? 95
+            : 80,
+        targetJobs = bronze
+            ? 1
+            : gold
+            ? 20
+            : 5;
+    final targetStars = bronze
+        ? 3.0
+        : gold
+        ? 4.7
+        : 4.0;
     final criteria = [
       math.min(score / targetScore, 1.0),
-      math.min(rating / targetStars, 1.0),
+      completed == 0 ? 0.0 : math.min(rating / targetStars, 1.0),
       math.min(completed / targetJobs, 1.0),
       if (gold) verified ? 1.0 : 0.0,
     ];
@@ -188,12 +205,16 @@ class ProfileSummary extends StatelessWidget {
                 const SizedBox(height: 12),
                 GradientProgress(value: (score / 100).clamp(0.0, 1.0)),
                 const SizedBox(height: 12),
-                TierBadge(tier: tier),
+                TierBadge(tier: tier, onTap: onTierTap),
                 const SizedBox(height: 8),
                 Text(
                   diamond
                       ? 'Bạn đã đạt bậc Kim Cương'
-                      : 'Hành trình đến bậc ${gold ? "Kim Cương" : "Vàng"}',
+                      : 'Hành trình đến bậc ${bronze
+                            ? "Bạc"
+                            : gold
+                            ? "Kim Cương"
+                            : "Vàng"}',
                   style: TextStyle(fontSize: 12, color: palette.muted),
                 ),
                 const SizedBox(height: 8),

@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tho_xay_mobile/models/models.dart';
 import 'package:tho_xay_mobile/models/wallet.dart';
-import 'package:tho_xay_mobile/screens/login_screen.dart';
+import 'package:tho_xay_mobile/screens/register_screen.dart';
 import 'package:tho_xay_mobile/screens/worker_home_screen.dart';
 import 'package:tho_xay_mobile/theme/app_theme.dart';
 import 'package:tho_xay_mobile/theme/appearance_controller.dart';
@@ -160,62 +160,62 @@ void main() {
     }
   }
 
-  testWidgets('login cards animate selection and focus follows role accent', (
-    tester,
-  ) async {
-    tester.view.physicalSize = const Size(390, 1000);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-    final calls = <MethodCall>[];
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
-      SystemChannels.platform,
-      (call) async {
-        calls.add(call);
-        return null;
-      },
-    );
-    addTearDown(
-      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+  testWidgets(
+    'registration cards animate selection and focus follows role accent',
+    (tester) async {
+      tester.view.physicalSize = const Size(390, 1000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final calls = <MethodCall>[];
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
         SystemChannels.platform,
-        null,
-      ),
-    );
-    final api = _UiApi('ROLE_WORKER');
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: AppTheme.light,
-        home: LoginScreen(api: api),
-      ),
-    );
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Tôi là chủ thầu'));
-    await tester.pumpAndSettle();
-    final field = find.widgetWithText(TextFormField, 'Số điện thoại');
-    final theme = Theme.of(tester.element(field));
-    expect(theme.colorScheme.primary, AppTheme.contractorEmerald);
-    expect(
-      (theme.inputDecorationTheme.prefixIconColor! as WidgetStateColor).resolve(
-        {WidgetState.focused},
-      ),
-      AppTheme.contractorEmerald,
-    );
-    expect(find.byIcon(Icons.check_circle_rounded), findsOneWidget);
-    await tester.ensureVisible(find.text('Đăng nhập'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Đăng nhập'));
-    await tester.pumpAndSettle();
-    expect(find.text('Nhập số điện thoại hợp lệ'), findsOneWidget);
-    expect(
-      calls.where((c) => c.method == 'HapticFeedback.vibrate'),
-      hasLength(2),
-    );
-    final button = find.byType(GradientPrimaryButton);
-    expect(tester.getSize(button).height, 52);
-    expect(tester.takeException(), isNull);
-    await tester.pumpWidget(const SizedBox());
-    api.dispose();
-  });
+        (call) async {
+          calls.add(call);
+          return null;
+        },
+      );
+      addTearDown(
+        () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        ),
+      );
+      final api = _UiApi('ROLE_WORKER');
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: RegisterScreen(api: api),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Tôi là chủ thầu'));
+      await tester.pumpAndSettle();
+      final field = find.widgetWithText(TextFormField, 'Số điện thoại');
+      final theme = Theme.of(tester.element(field));
+      expect(theme.colorScheme.primary, AppTheme.contractorEmerald);
+      expect(
+        (theme.inputDecorationTheme.prefixIconColor! as WidgetStateColor)
+            .resolve({WidgetState.focused}),
+        AppTheme.contractorEmerald,
+      );
+      expect(find.byIcon(Icons.check_circle_rounded), findsOneWidget);
+      await tester.ensureVisible(find.text('Tạo tài khoản'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Tạo tài khoản'));
+      await tester.pumpAndSettle();
+      expect(find.text('Nhập số điện thoại hợp lệ'), findsOneWidget);
+      expect(
+        calls.where((c) => c.method == 'HapticFeedback.vibrate'),
+        hasLength(2),
+      );
+      final button = find.widgetWithText(FilledButton, 'Tạo tài khoản');
+      expect(tester.getSize(button).height, greaterThanOrEqualTo(48));
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+      api.dispose();
+    },
+  );
 
   testWidgets(
     'grouped appearance settings persist dark/outdoor modes and logout',
