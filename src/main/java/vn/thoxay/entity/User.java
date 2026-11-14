@@ -61,8 +61,8 @@ public class User {
     private int completedJobs;
     @Column(name = "cancelled_jobs", nullable = false) @org.hibernate.annotations.ColumnDefault("0")
     private int cancelledJobs;
-    @Enumerated(EnumType.STRING) @Column(name = "worker_tier", nullable = false, length = 12) @org.hibernate.annotations.ColumnDefault("'SILVER'")
-    private WorkerTier workerTier = WorkerTier.SILVER;
+    @Enumerated(EnumType.STRING) @Column(name = "worker_tier", nullable = false, length = 12) @org.hibernate.annotations.ColumnDefault("'BRONZE'")
+    private WorkerTier workerTier = WorkerTier.BRONZE;
     @Column(name = "is_active", nullable = false)
     private boolean active = true;
     @Column(name = "is_available", nullable = false) @org.hibernate.annotations.ColumnDefault("true")

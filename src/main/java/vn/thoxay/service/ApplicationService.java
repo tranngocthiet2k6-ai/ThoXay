@@ -53,7 +53,10 @@ public class ApplicationService {
     public List<ApplicationResponse> byJob(Long id) {
         Job job = jobs.findById(id).orElseThrow(() -> notFound("Công trình"));
         current.requireOwner(job.getContractor().getId(), Role.ROLE_CONTRACTOR);
-        return applications.findByJobIdOrderByAppliedAtDesc(id).stream().map(ApplicationResponse::of).toList();
+        return applications.findByJobIdOrderByAppliedAtDesc(id).stream()
+            .sorted(java.util.Comparator.comparingInt((JobApplication a) -> WorkerTier.of(a.getWorker()).ordinal()).reversed()
+                .thenComparing(JobApplication::getAppliedAt, java.util.Comparator.reverseOrder()))
+            .map(ApplicationResponse::of).toList();
     }
 
     @Transactional(readOnly = true)

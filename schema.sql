@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS users (
   reputation_score INTEGER NOT NULL DEFAULT 100 CHECK (reputation_score BETWEEN 0 AND 100),
   completed_jobs INTEGER NOT NULL DEFAULT 0,
   cancelled_jobs INTEGER NOT NULL DEFAULT 0,
-  worker_tier VARCHAR(12) NOT NULL DEFAULT 'SILVER',
+  worker_tier VARCHAR(12) NOT NULL DEFAULT 'BRONZE',
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT chk_users_verified_cccd_faces CHECK (NOT is_verified OR
