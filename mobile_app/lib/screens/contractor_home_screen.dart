@@ -18,7 +18,6 @@ import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../services/api_service.dart';
 import '../services/location_service.dart';
-import '../widgets/coordinates_dialog.dart';
 import '../widgets/job_card.dart';
 import '../widgets/call_button.dart';
 import '../widgets/chat_button.dart';
@@ -569,16 +568,6 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
     }
   }
 
-  Future<void> _choosePosition() async {
-    final point = await showCoordinatesDialog(context, current: _position);
-    if (point != null && mounted) {
-      setState(() {
-        _position = point;
-        _error = null;
-      });
-    }
-  }
-
   Future<void> _chooseOnMap() async {
     final point = await Navigator.of(context).push<GeoPoint>(
       MaterialPageRoute(
@@ -597,7 +586,7 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
     if (!_form.currentState!.validate()) return;
     if (_position == null) {
       setState(
-        () => _error = 'Chọn vị trí công trình bằng GPS hoặc nhập tọa độ.',
+        () => _error = 'Chọn vị trí công trình bằng GPS hoặc chạm trên bản đồ.',
       );
       return;
     }
@@ -772,10 +761,6 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
                       onPressed: _busy || _gps ? null : _locate,
                       icon: const Icon(Icons.my_location),
                       label: Text(_gps ? 'Đang lấy GPS…' : 'Lấy GPS'),
-                    ),
-                    TextButton(
-                      onPressed: _busy || _gps ? null : _choosePosition,
-                      child: const Text('Nhập vị trí'),
                     ),
                   ],
                 ),

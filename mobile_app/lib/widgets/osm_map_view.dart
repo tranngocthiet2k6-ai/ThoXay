@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../services/location_service.dart';
 import 'loading_jobs.dart';
+import 'app_snack_bar.dart';
 
 class OsmMapView extends StatefulWidget {
   @visibleForTesting
@@ -24,6 +25,7 @@ class OsmMapView extends StatefulWidget {
     this.interactive = true,
     this.circles = const [],
     this.initialZoom = 13,
+    this.onLocate,
   });
   final GeoPoint center;
   final List<Marker> markers;
@@ -34,6 +36,7 @@ class OsmMapView extends StatefulWidget {
   final bool interactive;
   final List<CircleMarker> circles;
   final double initialZoom;
+  final Future<void> Function()? onLocate;
   @override
   State<OsmMapView> createState() => _OsmMapViewState();
 }
@@ -49,6 +52,30 @@ class _OsmMapViewState extends State<OsmMapView> {
       OsmMapView.testTileProviderFactory?.call() ??
       NetworkTileProvider();
   bool _ready = false, _tileError = false;
+  bool _locating = false;
+  Future<void> _locate() async {
+    if (_locating) return;
+    setState(() => _locating = true);
+    try {
+      if (widget.onLocate != null) {
+        await widget.onLocate!();
+      } else {
+        final point = await LocationService().currentPosition();
+        if (mounted && _ready) {
+          _controller.move(_latLng(point), _controller.camera.zoom);
+        }
+      }
+    } on LocationFailure catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          AppSnackBar(content: Text(e.message), kind: NoticeKind.error),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _locating = false);
+    }
+  }
+
   final _tileReset = StreamController<void>.broadcast();
   LatLng _latLng(GeoPoint point) => LatLng(
     point.latitude.clamp(-85.05112878, 85.05112878).toDouble(),
@@ -226,15 +253,8 @@ class _OsmMapViewState extends State<OsmMapView> {
                     icon: const Icon(Icons.remove),
                   ),
                   IconButton(
-                    tooltip: 'Về vị trí đang dùng',
-                    onPressed: () {
-                      if (_ready) {
-                        _controller.move(
-                          _latLng(widget.center),
-                          widget.initialZoom,
-                        );
-                      }
-                    },
+                    tooltip: 'Vị trí GPS hiện tại',
+                    onPressed: _locating ? null : _locate,
                     icon: const Icon(Icons.my_location),
                   ),
                   IconButton(

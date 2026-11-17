@@ -21,7 +21,7 @@ import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../services/api_service.dart';
 import '../services/location_service.dart';
-import '../widgets/coordinates_dialog.dart';
+import 'location_picker_screen.dart';
 import '../widgets/job_card.dart';
 import '../widgets/call_button.dart';
 import '../widgets/chat_button.dart';
@@ -145,7 +145,14 @@ class _WorkerHomeContentState extends State<WorkerHomeContent> {
   }
 
   Future<void> _selectPosition() async {
-    final point = await showCoordinatesDialog(context, current: _position);
+    final point = await Navigator.of(context).push<GeoPoint>(
+      MaterialPageRoute(
+        builder: (_) => LocationPickerScreen(
+          initialPosition: _position,
+          location: widget.location,
+        ),
+      ),
+    );
     if (point == null || !mounted) return;
     setState(() => _position = point);
     await _refresh();

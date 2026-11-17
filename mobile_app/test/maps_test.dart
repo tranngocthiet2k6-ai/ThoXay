@@ -13,6 +13,12 @@ class MemoryTiles extends TileProvider {
       MemoryImage(TileProvider.transparentImage);
 }
 
+class UnavailableLocation extends LocationService {
+  @override
+  Future<GeoPoint> currentPosition() async =>
+      throw const LocationFailure('GPS chưa được cấp quyền.');
+}
+
 // Decode the in-memory image on the real event loop before waiting for loading
 // animations. A continuous shimmer is expected while the codec is still pending.
 Future<void> settleMap(WidgetTester tester) async {
@@ -68,8 +74,10 @@ void main() {
               onPressed: () async {
                 selected = await Navigator.of(context).push<GeoPoint>(
                   MaterialPageRoute(
-                    builder: (_) =>
-                        LocationPickerScreen(tileProvider: MemoryTiles()),
+                    builder: (_) => LocationPickerScreen(
+                      tileProvider: MemoryTiles(),
+                      location: UnavailableLocation(),
+                    ),
                   ),
                 );
               },
