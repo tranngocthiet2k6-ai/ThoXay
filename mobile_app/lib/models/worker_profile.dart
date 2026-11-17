@@ -11,6 +11,7 @@ class WorkerProfile {
     this.reputationScore = 100,
     this.completedJobs = 0,
     this.workerTier = 'SILVER',
+    this.avatarUrl,
   });
   final int id, experienceYears;
   final String fullName, experienceSummary;
@@ -19,6 +20,7 @@ class WorkerProfile {
   final List<String> skills, projectImages;
   final int reputationScore, completedJobs;
   final String workerTier;
+  final String? avatarUrl;
   factory WorkerProfile.fromJson(Map<String, dynamic> json) => WorkerProfile(
     id: (json['id'] as num).toInt(),
     fullName: json['fullName'] as String,
@@ -31,5 +33,6 @@ class WorkerProfile {
     reputationScore: (json['reputationScore'] as num?)?.toInt() ?? 100,
     completedJobs: (json['completedJobs'] as num?)?.toInt() ?? 0,
     workerTier: json['workerTier'] as String? ?? 'SILVER',
+    avatarUrl: json['avatarUrl'] as String?,
   );
 }

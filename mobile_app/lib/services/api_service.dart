@@ -17,6 +17,7 @@ import '../models/reputation.dart';
 import '../models/wallet.dart';
 import '../models/scheduling.dart';
 import '../models/crew.dart';
+import '../models/contractor_team.dart';
 import '../models/portfolio_photo.dart';
 import '../models/attendance.dart';
 import '../models/deposit.dart';
@@ -312,6 +313,41 @@ class ApiService extends ChangeNotifier {
     } on http.ClientException {
       throw const ApiException('Không tải được ảnh. Kiểm tra kết nối mạng.');
     }
+  }
+
+  Future<List<ContractorGroup>> contractorGroups() async =>
+      (await _request('GET', '/api/users/me/team/groups') as List)
+          .map((j) => ContractorGroup.fromJson(j as Map<String, dynamic>))
+          .toList();
+  Future<void> createContractorGroup(String name) async {
+    await _request('POST', '/api/users/me/team/groups', body: {'name': name});
+  }
+
+  Future<void> deleteContractorGroup(int id) async {
+    await _request('DELETE', '/api/users/me/team/groups/$id');
+  }
+
+  Future<void> contractorGroupMember(
+    int groupId,
+    int workerId,
+    bool add,
+  ) async {
+    await _request(
+      add ? 'PUT' : 'DELETE',
+      '/api/users/me/team/groups/$groupId/members/$workerId',
+    );
+  }
+
+  Future<List<TeamContact>> teamContacts() async =>
+      (await _request('GET', '/api/users/me/team/contacts') as List)
+          .map((j) => TeamContact.fromJson(j as Map<String, dynamic>))
+          .toList();
+  Future<void> inviteTeamToJob(int jobId, List<int> workerIds) async {
+    await _request(
+      'POST',
+      '/api/users/me/team/invitations',
+      body: {'jobId': jobId, 'workerIds': workerIds},
+    );
   }
 
   Future<List<Crew>> crews() async =>

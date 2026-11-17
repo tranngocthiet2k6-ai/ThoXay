@@ -11,6 +11,7 @@ import '../services/api_service.dart';
 import '../services/push_notifications.dart';
 import '../widgets/empty_state.dart';
 import 'support_center_screen.dart';
+import 'shared_job_screen.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key, required this.api, this.push});
@@ -287,7 +288,21 @@ class _NotificationsScreenState extends State<NotificationsScreen>
                   trailing: item.isRead
                       ? null
                       : const Icon(Icons.circle, size: 9),
-                  onTap: () => _read(item),
+                  onTap: () async {
+                    await _read(item);
+                    if (context.mounted &&
+                        item.type == 'JOB_INVITATION' &&
+                        item.jobId != null) {
+                      await Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => SharedJobScreen(
+                            api: widget.api,
+                            jobId: item.jobId!,
+                          ),
+                        ),
+                      );
+                    }
+                  },
                 ),
               ),
             if (_hasMore)

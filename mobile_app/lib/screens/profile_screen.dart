@@ -365,12 +365,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               'Lịch sử uy tín',
               ReputationScreen(api: widget.api),
             ),
-          ] else
-            (
-              Icons.groups_outlined,
-              'Thợ quen',
-              SavedScreen(api: widget.api, worker: false),
-            ),
+          ],
           (
             Icons.leaderboard_outlined,
             'Bảng xếp hạng thợ',

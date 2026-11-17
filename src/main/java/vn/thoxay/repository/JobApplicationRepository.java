@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface JobApplicationRepository extends JpaRepository<JobApplication, Long> {
+    List<JobApplication> findByJobContractorIdAndStatusOrderByAppliedAtDesc(Long contractorId, ApplicationStatus status);
     java.util.List<vn.thoxay.entity.JobApplication> findByCrewBatchIdOrderByWorkerIdAsc(Long id);
 
     @Query("select a from JobApplication a join fetch a.job j where a.worker.id=:workerId "

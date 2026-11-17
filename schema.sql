@@ -322,4 +322,17 @@ WHERE phone_number='0900000002' AND NOT EXISTS (SELECT 1 FROM jobs WHERE title='
 INSERT INTO job_applications(job_id,worker_id)
 SELECT j.id,u.id FROM jobs j CROSS JOIN users u WHERE j.title='Cần thợ xây nhà phố'
 AND u.phone_number='0900000003' ON CONFLICT(job_id,worker_id) DO NOTHING;
+CREATE TABLE IF NOT EXISTS contractor_groups (
+    id BIGSERIAL PRIMARY KEY,
+    owner_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    name VARCHAR(80) NOT NULL CHECK (length(trim(name)) BETWEEN 1 AND 80),
+    UNIQUE(owner_id, name)
+);
+CREATE TABLE IF NOT EXISTS contractor_group_members (
+    id BIGSERIAL PRIMARY KEY,
+    group_id BIGINT NOT NULL REFERENCES contractor_groups(id) ON DELETE CASCADE,
+    saved_worker_id BIGINT NOT NULL REFERENCES saved_workers(id) ON DELETE CASCADE,
+    UNIQUE(group_id, saved_worker_id)
+);
+
 COMMIT;

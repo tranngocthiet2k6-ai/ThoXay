@@ -6,7 +6,7 @@ import '../widgets/brand_logo.dart';
 import '../widgets/home_navigation.dart';
 import 'worker_home_screen.dart';
 import 'contractor_home_screen.dart';
-import 'saved_screen.dart';
+import 'contractor_team_screen.dart';
 import 'wallet_screen.dart';
 import 'profile_screen.dart';
 import 'settings_screen.dart';
@@ -109,10 +109,9 @@ class _MainShellState extends State<MainShell> {
                 ),
                 _tab(
                   1,
-                  () => SavedScreen(
+                  () => ContractorTeamScreen(
                     api: widget.api,
-                    worker: false,
-                    embedded: true,
+                    onDiscover: () => _select(0),
                   ),
                 ),
                 wallet,
