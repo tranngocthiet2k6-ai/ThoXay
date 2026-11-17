@@ -27,12 +27,6 @@ class AuthShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = AppPalette.of(context);
     return Scaffold(
-      appBar: canGoBack
-          ? AppBar(
-              title: const Text('Đăng ký'),
-              actions: const [AppearanceButton()],
-            )
-          : null,
       body: SafeArea(
         child: Align(
           alignment: MediaQuery.sizeOf(context).width < 600
@@ -48,9 +42,23 @@ class AuthShell extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: const AppearanceButton(),
+                  Row(
+                    children: [
+                      if (canGoBack)
+                        Expanded(
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: TextButton.icon(
+                              onPressed: () => Navigator.maybePop(context),
+                              icon: const Icon(Icons.arrow_back_rounded),
+                              label: const Text('Quay lại đăng nhập'),
+                            ),
+                          ),
+                        )
+                      else
+                        const Spacer(),
+                      const AppearanceButton(),
+                    ],
                   ),
                   const SizedBox(height: 16),
                   Center(child: BrandLogo(height: 82, onDark: palette.dark)),
