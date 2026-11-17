@@ -11,7 +11,7 @@ import '../theme/appearance_controller.dart';
 import 'app_snack_bar.dart';
 import 'bouncing_button.dart';
 
-/// Four destinations at every breakpoint; inbox badges live on the AppBar.
+/// Five destinations at every breakpoint; QR is always the central destination.
 class HomeNavigation extends StatelessWidget {
   const HomeNavigation({
     super.key,
@@ -61,6 +61,20 @@ class HomeNavigation extends StatelessWidget {
                 ),
                 selectedIcon: Icon(worker ? Icons.work_history : Icons.groups),
                 label: worker ? 'Việc của tôi' : 'Đội thợ',
+              ),
+              NavigationDestination(
+                icon: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Icon(
+                    Icons.qr_code_scanner_rounded,
+                    color: Theme.of(context).colorScheme.onPrimary,
+                  ),
+                ),
+                label: 'Quét QR',
               ),
               const NavigationDestination(
                 icon: Icon(Icons.account_balance_wallet_outlined),

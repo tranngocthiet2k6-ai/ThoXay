@@ -252,7 +252,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(
         tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
-        3,
+        4,
       );
       await tester.pumpWidget(const SizedBox());
     },

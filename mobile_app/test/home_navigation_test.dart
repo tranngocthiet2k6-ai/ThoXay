@@ -8,7 +8,8 @@ import 'package:tho_xay_mobile/models/worker_profile.dart';
 import 'package:tho_xay_mobile/screens/contractor_home_screen.dart';
 import 'package:tho_xay_mobile/screens/earnings_screen.dart';
 import 'package:tho_xay_mobile/screens/profile_screen.dart';
-import 'package:tho_xay_mobile/screens/saved_screen.dart';
+import 'package:tho_xay_mobile/screens/contractor_team_screen.dart';
+import 'package:tho_xay_mobile/models/contractor_team.dart';
 import 'package:tho_xay_mobile/screens/support_center_screen.dart';
 import 'package:tho_xay_mobile/screens/wallet_screen.dart';
 import 'package:tho_xay_mobile/screens/worker_home_screen.dart';
@@ -54,6 +55,10 @@ class _NavigationApi extends WalletApi {
   Future<List<JobApplication>> workerApplications() async => [];
   @override
   Future<List<WorkerProfile>> savedWorkers() async => [];
+  @override
+  Future<List<ContractorGroup>> contractorGroups() async => [];
+  @override
+  Future<List<TeamContact>> teamContacts() async => [];
   @override
   Future<int> unreadMessages() async {
     if (badgeFailure) throw const ApiException('Mất kết nối');
@@ -126,7 +131,7 @@ void main() {
   for (final worker in [true, false]) {
     for (final width in [320.0, 768.0, 1440.0]) {
       testWidgets(
-        'four core tabs and three AppBar actions: worker=$worker width=$width',
+        'five core tabs and three AppBar actions: worker=$worker width=$width',
         (tester) async {
           tester.view.physicalSize = Size(width, 1000);
           tester.view.devicePixelRatio = 1;
@@ -161,8 +166,8 @@ void main() {
           expect(
             labels,
             worker
-                ? ['Tìm việc', 'Việc của tôi', 'Ví tiền', 'Hồ sơ']
-                : ['Công trình', 'Đội thợ', 'Ví tiền', 'Hồ sơ'],
+                ? ['Tìm việc', 'Việc của tôi', 'Quét QR', 'Ví tiền', 'Hồ sơ']
+                : ['Công trình', 'Đội thợ', 'Quét QR', 'Ví tiền', 'Hồ sơ'],
           );
           expect(
             find.descendant(of: nav, matching: find.byType(BrandLogo)),
@@ -266,11 +271,9 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.byType(SavedScreen), findsOneWidget);
-      expect(
-        tester.widget<SavedScreen>(find.byType(SavedScreen)).worker,
-        isFalse,
-      );
+      expect(find.byType(ContractorTeamScreen), findsOneWidget);
+      expect(find.text('Thợ đã lưu'), findsOneWidget);
+      expect(find.text('Nhóm thợ của tôi'), findsOneWidget);
       expect(find.text('+ Đăng công trình mới'), findsNothing);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());

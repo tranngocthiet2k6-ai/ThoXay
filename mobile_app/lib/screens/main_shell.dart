@@ -10,6 +10,7 @@ import 'contractor_team_screen.dart';
 import 'wallet_screen.dart';
 import 'profile_screen.dart';
 import 'settings_screen.dart';
+import 'qr_hub_screen.dart';
 
 /// One route, one AppBar, one NavigationBar. Tab state survives tab changes.
 class MainShell extends StatefulWidget {
@@ -27,7 +28,7 @@ class MainShell extends StatefulWidget {
 }
 
 class _MainShellState extends State<MainShell> {
-  int _index = 0, _workerTab = 0, _profileRevision = 0;
+  int _index = 0, _workerTab = 0, _profileRevision = 0, _teamRevision = 0;
   final _visited = <int>{0};
   void _select(int index) => setState(() {
     _index = index;
@@ -49,17 +50,26 @@ class _MainShellState extends State<MainShell> {
   @override
   Widget build(BuildContext context) {
     final titles = widget.worker
-        ? ['Tìm việc', 'Việc của tôi', 'Ví tiền', 'Hồ sơ']
-        : ['Công trình', 'Đội thợ', 'Ví tiền', 'Hồ sơ'];
+        ? ['Tìm việc', 'Việc của tôi', 'Quét QR', 'Ví tiền', 'Hồ sơ']
+        : ['Công trình', 'Đội thợ', 'Quét QR', 'Ví tiền', 'Hồ sơ'];
     final profile = _tab(
-      3,
+      4,
       () => ProfileScreen(
         key: ValueKey('profile-$_profileRevision'),
         api: widget.api,
         embedded: true,
       ),
     );
-    final wallet = _tab(2, () => WalletScreen(api: widget.api, embedded: true));
+    final wallet = _tab(3, () => WalletScreen(api: widget.api, embedded: true));
+    final qr = _tab(
+      2,
+      () => QrHubScreen(
+        api: widget.api,
+        worker: widget.worker,
+        active: _index == 2,
+        onWorkerSaved: () => setState(() => _teamRevision++),
+      ),
+    );
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -99,6 +109,7 @@ class _MainShellState extends State<MainShell> {
                     onTabChanged: _select,
                   ),
                 ),
+                qr,
                 wallet,
                 profile,
               ]
@@ -110,10 +121,12 @@ class _MainShellState extends State<MainShell> {
                 _tab(
                   1,
                   () => ContractorTeamScreen(
+                    key: ValueKey('team-$_teamRevision'),
                     api: widget.api,
                     onDiscover: () => _select(0),
                   ),
                 ),
+                qr,
                 wallet,
                 profile,
               ],

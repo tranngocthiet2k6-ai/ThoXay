@@ -57,6 +57,7 @@ class _ShiftCodeDialogState extends State<ShiftCodeDialog> {
   Widget build(BuildContext context) {
     final remaining =
         _code?.expiresAt.difference(DateTime.now()).inSeconds ?? 0;
+    final qrSize = (MediaQuery.sizeOf(context).width - 128).clamp(160.0, 260.0);
     return AlertDialog(
       title: const Text('QR ca làm tại công trường'),
       scrollable: true,
@@ -68,10 +69,13 @@ class _ShiftCodeDialogState extends State<ShiftCodeDialog> {
             if (_loading) const LinearProgressIndicator(),
             if (_error != null) Text(_error!),
             if (_code != null && remaining > 0) ...[
-              QrImageView(
-                data: _code!.qr,
-                size: 260,
-                backgroundColor: Colors.white,
+              SizedBox.square(
+                dimension: qrSize,
+                child: QrImageView(
+                  data: _code!.qr,
+                  size: qrSize,
+                  backgroundColor: Colors.white,
+                ),
               ),
               Text(
                 'Còn ${remaining ~/ 60} phút ${remaining % 60} giây',

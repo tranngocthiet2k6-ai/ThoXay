@@ -8,7 +8,6 @@ import 'tier_details_screen.dart';
 import '../widgets/bouncing_button.dart';
 import 'settings_screen.dart';
 import '../widgets/account_security_sheet.dart';
-import '../widgets/saved_workers_preview.dart';
 import '../widgets/home_navigation.dart';
 import 'incidents_screen.dart';
 import '../widgets/portfolio_uploads.dart';
@@ -628,8 +627,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     const SizedBox(height: 16),
                     PortfolioGallery(images: _profile!.projectImages),
                   ],
-                  if (_profile!.role == 'ROLE_CONTRACTOR')
-                    SavedWorkersPreview(api: widget.api),
                 ],
               ],
               if (_error != null)

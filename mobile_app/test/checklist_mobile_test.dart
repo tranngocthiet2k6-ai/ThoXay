@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tho_xay_mobile/models/models.dart';
 import 'package:tho_xay_mobile/models/chat_message.dart';
 import 'package:tho_xay_mobile/models/worker_profile.dart';
+import 'package:tho_xay_mobile/models/contractor_team.dart';
 import 'package:tho_xay_mobile/models/app_notification.dart';
 import 'package:tho_xay_mobile/models/portfolio_photo.dart';
 import 'package:tho_xay_mobile/screens/worker_home_screen.dart';
@@ -54,6 +55,10 @@ class _ChecklistApi extends WalletApi {
   Future<List<Job>> contractorJobs() async => [];
   @override
   Future<List<WorkerProfile>> savedWorkers() async => [];
+  @override
+  Future<List<ContractorGroup>> contractorGroups() async => [];
+  @override
+  Future<List<TeamContact>> teamContacts() async => [];
   @override
   Future<List<PortfolioPhoto>> portfolio(int userId) async => [];
   @override
@@ -188,7 +193,7 @@ void main() {
             tester
                 .widget<NavigationBar>(find.byType(NavigationBar))
                 .selectedIndex,
-            2,
+            3,
           );
           expect(observer.routes.length, 1);
           expect(find.byType(BackButton), findsNothing);
@@ -204,7 +209,7 @@ void main() {
             tester
                 .widget<NavigationBar>(find.byType(NavigationBar))
                 .selectedIndex,
-            3,
+            4,
           );
           expect(observer.routes.length, 1);
           expect(find.byType(BackButton), findsNothing);
@@ -346,7 +351,7 @@ void main() {
       await settleMap(tester);
       await tester.drag(find.byType(JobsMap), const Offset(70, 80));
       await settleMap(tester);
-      await tester.tap(find.byTooltip('Về vị trí đang dùng'));
+      await tester.tap(find.byTooltip('Về vùng đang tìm'));
       await settleMap(tester);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());
