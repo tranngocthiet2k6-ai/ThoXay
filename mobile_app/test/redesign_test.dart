@@ -59,8 +59,9 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.ensureVisible(find.text('Đăng nhập'));
-      await tester.tap(find.text('Đăng nhập'));
+      final submit = find.widgetWithText(FilledButton, 'Đăng nhập');
+      await tester.ensureVisible(submit);
+      await tester.tap(submit);
       await tester.pumpAndSettle();
       expect(find.text('Nhập số điện thoại hợp lệ'), findsOneWidget);
       expect(tester.takeException(), isNull);

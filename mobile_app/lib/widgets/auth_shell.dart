@@ -1,11 +1,10 @@
-import 'brand_logo.dart';
-
 import 'package:flutter/material.dart';
 
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import 'appearance_button.dart';
-import 'design_motion.dart';
+import 'brand_logo.dart';
+import 'figma_design.dart';
 import 'server_connection_notice.dart';
 
 class AuthShell extends StatelessWidget {
@@ -17,112 +16,111 @@ class AuthShell extends StatelessWidget {
     this.canGoBack = false,
     this.api,
     this.roleSelection,
+    this.onRegister,
   });
   final String title, subtitle;
   final Widget child;
   final bool canGoBack;
   final ApiService? api;
   final Widget? roleSelection;
+  final VoidCallback? onRegister;
   @override
   Widget build(BuildContext context) {
-    final palette = AppPalette.of(context);
-    return Scaffold(
-      body: SafeArea(
-        child: Align(
-          alignment: MediaQuery.sizeOf(context).width < 600
-              ? Alignment.topCenter
-              : Alignment.center,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 520),
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(
-                parent: AlwaysScrollableScrollPhysics(),
-              ),
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    children: [
-                      if (canGoBack)
-                        Expanded(
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: TextButton.icon(
-                              onPressed: () => Navigator.maybePop(context),
-                              icon: const Icon(Icons.arrow_back_rounded),
-                              label: const Text('Quay lại đăng nhập'),
-                            ),
-                          ),
-                        )
-                      else
-                        const Spacer(),
-                      const AppearanceButton(),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Center(child: BrandLogo(height: 82, onDark: palette.dark)),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Kết nối tay nghề, dựng xây uy tín',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: palette.muted,
-                      height: 1.5,
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  Text(
-                    title,
-                    style: Theme.of(context).textTheme.headlineSmall
-                        ?.copyWith(fontSize: 26),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(subtitle, style: TextStyle(color: palette.muted)),
-                  if (roleSelection != null) ...[
-                    const SizedBox(height: 24),
-                    roleSelection!,
-                  ],
-                  const SizedBox(height: 24),
-                  DesignSurface(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+    final p = AppPalette.of(context);
+    return FigmaScreenTheme(
+      child: Scaffold(
+        body: SafeArea(
+          child: Align(
+            alignment: MediaQuery.sizeOf(context).width < 600
+                ? Alignment.topCenter
+                : Alignment.center,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 460),
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(
+                  parent: AlwaysScrollableScrollPhysics(),
+                ),
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
                       children: [
-                        Text(
-                          canGoBack
-                              ? 'Thông tin đăng ký'
-                              : 'Thông tin đăng nhập',
-                          style: Theme.of(context).textTheme.titleMedium,
+                        Container(
+                          width: 44,
+                          height: 44,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: p.dark ? p.soft : const Color(0xfffff0da),
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: const BrandLogo(height: 27, figma: true),
                         ),
-                        const SizedBox(height: 16),
-                        if (api != null) ServerConnectionNotice(api: api!),
-                        child,
+                        const Spacer(),
+                        const AppearanceButton(),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: 32),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.verified_user_outlined,
-                        size: 16,
-                        color: palette.muted,
-                      ),
-                      const SizedBox(width: 8),
-                      Flexible(
-                        child: Text(
-                          'Thông tin được bảo vệ bằng kết nối an toàn',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 11, color: palette.muted),
+                    if (canGoBack)
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton.icon(
+                          onPressed: () => Navigator.maybePop(context),
+                          icon: const Icon(Icons.arrow_back_rounded, size: 18),
+                          label: const Text('Quay lại đăng nhập'),
                         ),
                       ),
+                    const SizedBox(height: 24),
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        color: p.ink,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 21,
+                        height: 1.3,
+                        letterSpacing: -.4,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 14,
+                        color: p.muted,
+                      ),
+                    ),
+                    const SizedBox(height: 28),
+                    FigmaSegments(
+                      labels: const ['Đăng nhập', 'Đăng ký'],
+                      selected: canGoBack ? 1 : 0,
+                      onChanged: (index) {
+                        if (canGoBack && index == 0) {
+                          Navigator.maybePop(context);
+                        }
+                        if (!canGoBack && index == 1) onRegister?.call();
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                    if (roleSelection != null) ...[
+                      roleSelection!,
+                      const SizedBox(height: 20),
                     ],
-                  ),
-                  const SizedBox(height: 24),
-                ],
+                    if (api != null) ServerConnectionNotice(api: api!),
+                    child,
+                    const SizedBox(height: 24),
+                    Text(
+                      'Tiếp tục là bạn đồng ý với Điều khoản & Bảo mật.',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 11,
+                        color: p.muted,
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                ),
               ),
             ),
           ),

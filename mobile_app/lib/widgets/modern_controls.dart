@@ -8,9 +8,11 @@ class GradientPrimaryButton extends StatelessWidget {
     super.key,
     required this.onPressed,
     required this.child,
+    this.flat = false,
   });
   final VoidCallback? onPressed;
   final Widget child;
+  final bool flat;
   @override
   Widget build(BuildContext context) {
     final palette = AppPalette.of(context);
@@ -27,11 +29,16 @@ class GradientPrimaryButton extends StatelessWidget {
                 ? [palette.border, palette.border]
                 : palette.outdoor
                 ? [Colors.black, Colors.black]
+                : flat
+                ? [
+                    Theme.of(context).colorScheme.primary,
+                    Theme.of(context).colorScheme.primary,
+                  ]
                 : blue
                 ? const [AppTheme.contractorBlue, Color(0xff1e40af)]
                 : const [AppTheme.workerAmber, Color(0xfff59e0b)],
           ),
-          boxShadow: enabled && !palette.outdoor
+          boxShadow: enabled && !palette.outdoor && !flat
               ? [
                   BoxShadow(
                     color:
@@ -50,7 +57,7 @@ class GradientPrimaryButton extends StatelessWidget {
             disabledBackgroundColor: Colors.transparent,
             shadowColor: Colors.transparent,
             elevation: 0,
-            foregroundColor: palette.outdoor || blue
+            foregroundColor: palette.outdoor || blue || flat
                 ? Colors.white
                 : const Color(0xff241400),
             minimumSize: const Size(double.infinity, 52),

@@ -11,6 +11,7 @@ import 'wallet_screen.dart';
 import 'profile_screen.dart';
 import 'settings_screen.dart';
 import 'qr_hub_screen.dart';
+import '../widgets/figma_design.dart';
 
 /// One route, one AppBar, one NavigationBar. Tab state survives tab changes.
 class MainShell extends StatefulWidget {
@@ -70,72 +71,74 @@ class _MainShellState extends State<MainShell> {
         onWorkerSaved: () => setState(() => _teamRevision++),
       ),
     );
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        titleSpacing: 16,
-        title: Row(
-          children: [
-            const BrandLogo(height: 26),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                titles[_index],
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+    return FigmaScreenTheme(
+      child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          titleSpacing: 16,
+          title: Row(
+            children: [
+              const BrandLogo(height: 26),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  titles[_index],
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
+            ],
+          ),
+          actions: [
+            HomeInboxActions(api: widget.api),
+            IconButton(
+              tooltip: 'Cài đặt',
+              onPressed: _settings,
+              icon: const Icon(Icons.settings_outlined),
             ),
           ],
         ),
-        actions: [
-          HomeInboxActions(api: widget.api),
-          IconButton(
-            tooltip: 'Cài đặt',
-            onPressed: _settings,
-            icon: const Icon(Icons.settings_outlined),
-          ),
-        ],
-      ),
-      body: IndexedStack(
-        index: widget.worker ? (_index < 2 ? 0 : _index - 1) : _index,
-        children: widget.worker
-            ? [
-                TickerMode(
-                  enabled: _index < 2,
-                  child: WorkerHomeContent(
-                    api: widget.api,
-                    location: widget.location,
-                    tab: _workerTab,
-                    onTabChanged: _select,
+        body: IndexedStack(
+          index: widget.worker ? (_index < 2 ? 0 : _index - 1) : _index,
+          children: widget.worker
+              ? [
+                  TickerMode(
+                    enabled: _index < 2,
+                    child: WorkerHomeContent(
+                      api: widget.api,
+                      location: widget.location,
+                      tab: _workerTab,
+                      onTabChanged: _select,
+                    ),
                   ),
-                ),
-                qr,
-                wallet,
-                profile,
-              ]
-            : [
-                TickerMode(
-                  enabled: _index == 0,
-                  child: ContractorHomeContent(api: widget.api),
-                ),
-                _tab(
-                  1,
-                  () => ContractorTeamScreen(
-                    key: ValueKey('team-$_teamRevision'),
-                    api: widget.api,
-                    onDiscover: () => _select(0),
+                  qr,
+                  wallet,
+                  profile,
+                ]
+              : [
+                  TickerMode(
+                    enabled: _index == 0,
+                    child: ContractorHomeContent(api: widget.api),
                   ),
-                ),
-                qr,
-                wallet,
-                profile,
-              ],
-      ),
-      bottomNavigationBar: HomeNavigation(
-        api: widget.api,
-        worker: widget.worker,
-        selectedIndex: _index,
-        onSelected: _select,
+                  _tab(
+                    1,
+                    () => ContractorTeamScreen(
+                      key: ValueKey('team-$_teamRevision'),
+                      api: widget.api,
+                      onDiscover: () => _select(0),
+                    ),
+                  ),
+                  qr,
+                  wallet,
+                  profile,
+                ],
+        ),
+        bottomNavigationBar: HomeNavigation(
+          api: widget.api,
+          worker: widget.worker,
+          selectedIndex: _index,
+          onSelected: _select,
+        ),
       ),
     );
   }

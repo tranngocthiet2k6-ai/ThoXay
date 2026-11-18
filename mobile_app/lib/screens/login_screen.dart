@@ -7,6 +7,7 @@ import '../services/api_service.dart';
 import 'register_screen.dart';
 import '../widgets/auth_shell.dart';
 import '../theme/app_theme.dart';
+import '../widgets/figma_design.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key, required this.api});
@@ -54,8 +55,15 @@ class _LoginScreenState extends State<LoginScreen> {
     ),
     child: AuthShell(
       api: widget.api,
-      title: 'Chào mừng bạn trở lại!',
-      subtitle: 'Đăng nhập bằng số điện thoại của bạn.',
+      title: 'Vững tay nghề. Vững tương lai.',
+      subtitle: 'Việc gần nhà, thu nhập an tâm.',
+      onRegister: _busy
+          ? null
+          : () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => RegisterScreen(api: widget.api),
+              ),
+            ),
       child: AutofillGroup(
         child: Form(
           key: _form,
@@ -71,7 +79,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 decoration: const InputDecoration(
                   labelText: 'Số điện thoại',
                   counterText: '',
-                  prefixIcon: Icon(Icons.phone_outlined),
+                  prefixIcon: Center(
+                    widthFactor: 1,
+                    heightFactor: 1,
+                    child: FigmaIcon('ca52f', size: 19),
+                  ),
                 ),
                 validator: (v) =>
                     RegExp(r'^0[0-9]{9,14}$').hasMatch(v?.trim() ?? '')
@@ -89,15 +101,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 },
                 decoration: InputDecoration(
                   labelText: 'Mật khẩu',
-                  prefixIcon: const Icon(Icons.lock_outline),
+                  prefixIcon: const Center(
+                    widthFactor: 1,
+                    heightFactor: 1,
+                    child: FigmaIcon('3bdfd', size: 19),
+                  ),
                   suffixIcon: IconButton(
                     tooltip: _obscure ? 'Hiện mật khẩu' : 'Ẩn mật khẩu',
                     onPressed: () => setState(() => _obscure = !_obscure),
-                    icon: Icon(
-                      _obscure
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
-                    ),
+                    icon: const FigmaIcon('17efc', size: 19),
                   ),
                 ),
                 validator: (v) =>
@@ -138,6 +150,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               GradientPrimaryButton(
+                flat: true,
                 onPressed: _busy ? null : _submit,
                 child: _busy
                     ? const SizedBox(
@@ -148,7 +161,14 @@ class _LoginScreenState extends State<LoginScreen> {
                           color: Colors.white,
                         ),
                       )
-                    : const Text('Đăng nhập'),
+                    : const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('Đăng nhập'),
+                          SizedBox(width: 10),
+                          FigmaIcon('ad551', size: 18),
+                        ],
+                      ),
               ),
               const SizedBox(height: 12),
               TextButton(

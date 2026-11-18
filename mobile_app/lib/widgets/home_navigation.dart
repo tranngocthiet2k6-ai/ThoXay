@@ -10,6 +10,7 @@ import '../theme/app_theme.dart';
 import '../theme/appearance_controller.dart';
 import 'app_snack_bar.dart';
 import 'bouncing_button.dart';
+import 'figma_design.dart';
 
 /// Five destinations at every breakpoint; QR is always the central destination.
 class HomeNavigation extends StatelessWidget {
@@ -44,46 +45,94 @@ class HomeNavigation extends StatelessWidget {
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 840),
           child: NavigationBar(
+            height: 86,
+            indicatorColor: Colors.transparent,
+            labelTextStyle: WidgetStateProperty.resolveWith(
+              (states) => TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 11,
+                fontWeight: states.contains(WidgetState.selected)
+                    ? FontWeight.w600
+                    : FontWeight.w500,
+                color: states.contains(WidgetState.selected)
+                    ? AppTheme.brandInk(context)
+                    : AppPalette.of(context).muted,
+              ),
+            ),
             selectedIndex: selectedIndex,
             onDestinationSelected: (index) => _select(context, index),
             labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
             destinations: [
               NavigationDestination(
-                icon: Icon(
-                  worker ? Icons.near_me_outlined : Icons.apartment_outlined,
-                ),
-                selectedIcon: Icon(worker ? Icons.near_me : Icons.apartment),
+                icon: worker
+                    ? const FigmaIcon('a98b9', size: 23)
+                    : const Icon(Icons.apartment_outlined),
+                selectedIcon: worker
+                    ? FigmaIcon(
+                        'c7c29',
+                        size: 23,
+                        color: AppTheme.brandInk(context),
+                      )
+                    : Icon(Icons.apartment, color: AppTheme.brandInk(context)),
                 label: worker ? 'Tìm việc' : 'Công trình',
               ),
               NavigationDestination(
-                icon: Icon(
-                  worker ? Icons.work_history_outlined : Icons.groups_outlined,
-                ),
-                selectedIcon: Icon(worker ? Icons.work_history : Icons.groups),
+                icon: worker
+                    ? const FigmaIcon('21a78', size: 23)
+                    : const Icon(Icons.groups_outlined),
+                selectedIcon: worker
+                    ? FigmaIcon(
+                        '21a78',
+                        size: 23,
+                        color: AppTheme.brandInk(context),
+                      )
+                    : Icon(Icons.groups, color: AppTheme.brandInk(context)),
                 label: worker ? 'Việc của tôi' : 'Đội thợ',
               ),
               NavigationDestination(
-                icon: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Icon(
-                    Icons.qr_code_scanner_rounded,
-                    color: Theme.of(context).colorScheme.onPrimary,
+                icon: Transform.translate(
+                  offset: const Offset(0, -12),
+                  child: Container(
+                    width: 54,
+                    height: 54,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary,
+                      borderRadius: BorderRadius.circular(19),
+                      border: Border.all(
+                        color: AppPalette.of(context).surface,
+                        width: 4,
+                      ),
+                    ),
+                    child: const FigmaIcon('80a82', size: 25),
                   ),
                 ),
                 label: 'Quét QR',
               ),
-              const NavigationDestination(
-                icon: Icon(Icons.account_balance_wallet_outlined),
-                selectedIcon: Icon(Icons.account_balance_wallet),
+              NavigationDestination(
+                icon: FigmaIcon(
+                  'd2697',
+                  size: 23,
+                  color: AppPalette.of(context).muted,
+                ),
+                selectedIcon: FigmaIcon(
+                  'c725a',
+                  size: 23,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
                 label: 'Ví tiền',
               ),
-              const NavigationDestination(
-                icon: Icon(Icons.person_outline),
-                selectedIcon: Icon(Icons.person),
+              NavigationDestination(
+                icon: FigmaIcon(
+                  '7c86e',
+                  size: 23,
+                  color: AppPalette.of(context).muted,
+                ),
+                selectedIcon: FigmaIcon(
+                  '087db',
+                  size: 23,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
                 label: 'Hồ sơ',
               ),
             ],

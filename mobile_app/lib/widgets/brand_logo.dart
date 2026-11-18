@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
+import 'figma_design.dart';
 
 /// Vector helmet only. No wordmark; stays crisp at splash and toolbar sizes.
 class BrandLogo extends StatelessWidget {
-  const BrandLogo({super.key, this.height = 40, this.onDark = false});
+  const BrandLogo({
+    super.key,
+    this.height = 40,
+    this.onDark = false,
+    this.figma = false,
+  });
   final double height;
   final bool onDark;
+  final bool figma;
 
   @override
   Widget build(BuildContext context) => Semantics(
@@ -14,8 +21,10 @@ class BrandLogo extends StatelessWidget {
     image: true,
     child: SizedBox(
       height: height,
-      width: height * 1.6,
-      child: const CustomPaint(painter: _HelmetPainter()),
+      width: figma ? height : height * 1.6,
+      child: figma
+          ? FigmaIcon('05b7d', size: height, color: AppTheme.workerAmber)
+          : const CustomPaint(painter: _HelmetPainter()),
     ),
   );
 }

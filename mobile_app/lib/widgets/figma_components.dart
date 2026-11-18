@@ -3,6 +3,7 @@ import 'bouncing_button.dart';
 import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
+import 'figma_design.dart';
 
 /// Shared flat surfaces from the supplied 390px design references.
 class FigmaCard extends StatelessWidget {
@@ -184,20 +185,28 @@ class _RoleCard extends StatelessWidget {
                       onTap!();
                     },
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(13),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        Icon(
-                          worker
-                              ? Icons.engineering_outlined
-                              : Icons.apartment_outlined,
-                          size: 28,
+                        FigmaIcon(
+                          worker ? '7d17e' : '3ce73',
+                          size: 20,
                           color: color,
                         ),
-                        const Spacer(),
+                        const SizedBox(width: 7),
+                        Expanded(
+                          child: Text(
+                            worker ? 'Tôi là thợ' : 'Tôi là chủ thầu',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: palette.dark ? palette.ink : color,
+                            ),
+                          ),
+                        ),
                         AnimatedSwitcher(
                           duration: MediaQuery.disableAnimationsOf(context)
                               ? Duration.zero
@@ -215,25 +224,11 @@ class _RoleCard extends StatelessWidget {
                                 ? Icons.check_circle_rounded
                                 : Icons.circle_outlined,
                             key: ValueKey(selected),
-                            size: 22,
+                            size: 18,
                             color: selected ? color : palette.border,
                           ),
                         ),
                       ],
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      worker ? 'Tôi là thợ' : 'Tôi là chủ thầu',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w800,
-                        color: palette.dark
-                            ? worker
-                                  ? const Color(0xfffbbf24)
-                                  : const Color(0xff93c5fd)
-                            : worker
-                            ? const Color(0xff92400e)
-                            : color,
-                      ),
                     ),
                     const SizedBox(height: 6),
                     Text(

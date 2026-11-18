@@ -21,6 +21,8 @@ dependencies:
   flutter_map: ^8.3.2
   qr_flutter: ^4.1.0
   mobile_scanner: ^7.4.2
+  flutter_svg: ^2.4.0
+  zxing2: ^0.2.4
   latlong2: ^0.9.1
   web_socket_channel: ^3.0.3
   firebase_core: ^5.1.0
@@ -35,7 +37,20 @@ flutter:
   uses-material-design: true
   assets:
     - assets/branding/
+    - assets/figma/
   fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter.ttf
+          weight: 400
+        - asset: assets/fonts/Inter.ttf
+          weight: 500
+        - asset: assets/fonts/Inter.ttf
+          weight: 600
+        - asset: assets/fonts/Inter.ttf
+          weight: 700
+        - asset: assets/fonts/Inter.ttf
+          weight: 800
     - family: PlusJakartaSans
       fonts:
         - asset: assets/fonts/PlusJakartaSans.ttf
