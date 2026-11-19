@@ -382,25 +382,25 @@ class _QrHubScreenState extends State<QrHubScreen> {
               widget.scannerBuilder?.call(_scan) ??
                   QrCamera(onCode: _scan, onGallery: _gallery)
             else
-              QrScanSurface(onGallery: _busy ? null : _gallery),
-            const SizedBox(height: 16),
-            FilledButton.icon(
-              onPressed: _busy
-                  ? null
-                  : () => setState(() => _camera = !_camera),
-              icon: Icon(
-                _camera
-                    ? Icons.videocam_off_outlined
-                    : Icons.camera_alt_outlined,
+              QrScanSurface(
+                onGallery: _busy ? null : _gallery,
+                onOpenCamera: _busy
+                    ? null
+                    : () => setState(() => _camera = true),
               ),
-              label: Text(_camera ? 'Tắt camera' : 'Mở camera quét QR'),
-            ),
-            TextButton.icon(
-              onPressed: _busy ? null : _paste,
-              icon: const Icon(Icons.content_paste),
-              label: const Text('Dán nội dung mã QR'),
-            ),
             const SizedBox(height: 16),
+            if (_camera)
+              TextButton.icon(
+                onPressed: _busy
+                    ? null
+                    : () => setState(() => _camera = !_camera),
+                icon: Icon(
+                  _camera
+                      ? Icons.videocam_off_outlined
+                      : Icons.camera_alt_outlined,
+                ),
+                label: Text(_camera ? 'Tắt camera' : 'Mở camera quét QR'),
+              ),
             const Text(
               'Quét mã. Bắt đầu ngày làm.',
               textAlign: TextAlign.center,
@@ -414,6 +414,15 @@ class _QrHubScreenState extends State<QrHubScreen> {
             ),
             const SizedBox(height: 20),
             const QrGpsStatus(),
+            const SizedBox(height: 8),
+            TextButton.icon(
+              onPressed: _busy ? null : _paste,
+              icon: const Icon(Icons.content_paste, size: 16),
+              label: const Text(
+                'Dán nội dung mã QR',
+                style: TextStyle(fontSize: 12),
+              ),
+            ),
           ] else if (widget.worker) ...[
             if (widget.api.session case final session?)
               Card(

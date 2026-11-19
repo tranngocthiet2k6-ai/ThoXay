@@ -115,6 +115,15 @@ class _HeroGreetingState extends State<HeroGreeting> {
                     Switch(
                       key: const ValueKey('availability-switch'),
                       value: widget.availability == true,
+                      thumbColor: const WidgetStatePropertyAll(Colors.white),
+                      trackColor: WidgetStateProperty.resolveWith(
+                        (states) => states.contains(WidgetState.selected)
+                            ? const Color(0xff22c55e)
+                            : palette.border,
+                      ),
+                      trackOutlineColor: const WidgetStatePropertyAll(
+                        Colors.transparent,
+                      ),
                       onChanged: widget.onAvailabilityChanged == null
                           ? null
                           : (value) {

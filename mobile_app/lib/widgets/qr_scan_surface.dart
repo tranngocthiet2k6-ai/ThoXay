@@ -9,10 +9,12 @@ class QrScanSurface extends StatelessWidget {
     this.onTorch,
     this.onGallery,
     this.torchOn = false,
+    this.onOpenCamera,
   });
   final Widget? camera;
   final VoidCallback? onTorch, onGallery;
   final bool torchOn;
+  final VoidCallback? onOpenCamera;
   @override
   Widget build(BuildContext context) => ClipRRect(
     borderRadius: BorderRadius.circular(20),
@@ -52,6 +54,14 @@ class QrScanSurface extends StatelessWidget {
               ),
             ),
           ),
+          if (onOpenCamera != null)
+            Center(
+              child: FilledButton.icon(
+                onPressed: onOpenCamera,
+                icon: const Icon(Icons.camera_alt_outlined, size: 18),
+                label: const Text('Mở camera quét QR'),
+              ),
+            ),
           Positioned(
             left: 20,
             right: 20,
