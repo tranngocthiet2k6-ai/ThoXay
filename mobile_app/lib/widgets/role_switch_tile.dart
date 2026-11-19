@@ -4,6 +4,7 @@ import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import 'app_snack_bar.dart';
 import 'bouncing_button.dart';
+import 'figma_design.dart';
 
 class RoleSwitchTile extends StatefulWidget {
   const RoleSwitchTile({
@@ -97,23 +98,27 @@ class _RoleSwitchTileState extends State<RoleSwitchTile> {
           BouncingButton(
             enabled: widget.enabled && !_busy,
             child: ListTile(
-              leading: Icon(
-                Icons.swap_horiz_rounded,
-                color: AppPalette.of(context).ink,
-              ),
+              leading: FigmaIcon('f5897', size: 22, color: color),
               title: Text(
                 worker
                     ? 'Chuyển sang vai trò Chủ thầu'
                     : 'Chuyển sang vai trò Thợ xây',
-                style: Theme.of(context).textTheme.titleMedium,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: color,
+                ),
               ),
               subtitle: Text(
                 _busy
                     ? 'Đang chuyển giao diện…'
                     : 'Giữ nguyên tài khoản, hồ sơ và ví',
-                style: Theme.of(context).textTheme.bodySmall,
+                style: TextStyle(
+                  fontSize: 10,
+                  color: AppPalette.of(context).muted,
+                ),
               ),
-              trailing: const Icon(Icons.chevron_right),
+              trailing: FigmaIcon('c851e', size: 17, color: color),
               onTap: widget.enabled && !_busy ? () => _switch(worker) : null,
             ),
           ),

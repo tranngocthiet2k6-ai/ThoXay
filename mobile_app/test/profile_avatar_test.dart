@@ -151,7 +151,7 @@ void main() {
   }
 
   Future<void> choose(WidgetTester tester) async {
-    await tester.tap(find.text('Đổi ảnh đại diện'));
+    await tester.tap(find.byKey(const ValueKey('profile-avatar-change')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Chọn từ thư viện'));
     await tester.pumpAndSettle();

@@ -32,6 +32,9 @@ import '../widgets/profile_summary.dart';
 import '../widgets/kyc_scanner_frame.dart';
 import 'leaderboard_screen.dart';
 import 'reputation_screen.dart';
+import 'wallet_screen.dart';
+import 'support_center_screen.dart';
+import '../widgets/figma_design.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({
@@ -41,12 +44,14 @@ class ProfileScreen extends StatefulWidget {
     this.photoPicker,
     this.embedded = false,
     this.accountDetails = false,
+    this.onNavigateTab,
   });
   final ApiService api;
   final bool accountDetails;
   final bool embedded;
   final KycCamera? camera;
   final DevicePhotoPicker? photoPicker;
+  final ValueChanged<int>? onNavigateTab;
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
@@ -61,6 +66,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _avatarUploading = false;
   bool _roleBusy = false;
   String? _error;
+  final _portfolioKey = GlobalKey();
   @override
   void initState() {
     super.initState();
@@ -331,6 +337,159 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (profile != null && mounted) setState(() => _profile = profile);
   }
 
+  void _open(Widget screen) =>
+      Navigator.of(context)
+          .push(MaterialPageRoute<void>(builder: (_) => screen));
+  Widget _quickUtilities() => LayoutBuilder(
+    builder: (context, bounds) => Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        for (final item in <(String, String, VoidCallback)>[
+          (
+            'Tay nghề',
+            '6fdd2',
+            () {
+              final target = _portfolioKey.currentContext;
+              if (target != null) {
+                Scrollable.ensureVisible(
+                  target,
+                  duration: const Duration(milliseconds: 250),
+                );
+              }
+            },
+          ),
+          (
+            'Chứng chỉ',
+            'f62a3',
+            () => showModalBottomSheet<void>(
+              context: context,
+              isScrollControlled: true,
+              useSafeArea: true,
+              builder: (context) => FractionallySizedBox(
+                heightFactor: .85,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        children: [
+                          const Expanded(
+                            child: Text(
+                              'Chứng chỉ & minh chứng tay nghề',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            tooltip: 'Đóng',
+                            onPressed: () => Navigator.pop(context),
+                            icon: const Icon(Icons.close),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'Bạn có thể bổ sung ảnh chứng chỉ và ghi rõ nội dung trong minh chứng tay nghề. Hệ thống chưa xác thực giá trị pháp lý của chứng chỉ.',
+                      ),
+                      const SizedBox(height: 16),
+                      PortfolioUploads(
+                        api: widget.api,
+                        ownerId: _profile!.id,
+                        editable: true,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          (
+            'Đã lưu',
+            'c123d',
+            () {
+              if (_profile!.role == 'ROLE_CONTRACTOR' &&
+                  widget.onNavigateTab != null) {
+                widget.onNavigateTab!(1);
+              } else {
+                _open(
+                  SavedScreen(
+                    api: widget.api,
+                    worker: _profile!.role == 'ROLE_WORKER',
+                  ),
+                );
+              }
+            },
+          ),
+          (
+            'Ngân hàng',
+            '34ce5',
+            () {
+              if (widget.onNavigateTab != null) {
+                widget.onNavigateTab!(3);
+              } else {
+                _open(WalletScreen(api: widget.api));
+              }
+            },
+          ),
+          (
+            'Trợ giúp',
+            '03eb9',
+            () => _open(SupportCenterScreen(api: widget.api)),
+          ),
+          (
+            'Cài đặt',
+            '9c75e',
+            () async {
+              await Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => SettingsScreen(api: widget.api),
+                ),
+              );
+              if (mounted && widget.api.session != null) {
+                _load();
+              }
+            },
+          ),
+        ])
+          SizedBox(
+            width: (bounds.maxWidth - 16) / 3,
+            child: Material(
+              color: AppPalette.of(context).surface,
+              borderRadius: BorderRadius.circular(16),
+              child: InkWell(
+                onTap: item.$3,
+                borderRadius: BorderRadius.circular(16),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Column(
+                    children: [
+                      FigmaIcon(
+                        item.$2,
+                        size: 23,
+                        color: AppPalette.of(context).muted,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        item.$1,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
+    ),
+  );
+
   Widget _utilities() => Card(
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -547,13 +706,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
           physics: const BouncingScrollPhysics(
             parent: AlwaysScrollableScrollPhysics(),
           ),
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               if (_loading && _profile == null) const ContentSkeleton(),
               if (_profile != null) ...[
                 ProfileSummary(
+                  figma: !widget.accountDetails,
+                  profession:
+                      "${_profile!.skills.firstOrNull ?? (_profile!.role == 'ROLE_WORKER' ? 'Thợ xây' : 'Chủ thầu')} · ${_profile!.experienceYears} năm kinh nghiệm",
                   name: _profile!.fullName,
                   phone: _profile!.phoneNumber,
                   worker: _profile!.role == 'ROLE_WORKER',
@@ -576,20 +738,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ? null
                       : _avatar,
                 ),
-                TextButton.icon(
-                  onPressed: _loading || _avatarBusy || _roleBusy
-                      ? null
-                      : _avatar,
-                  icon: const Icon(Icons.camera_alt_outlined, size: 18),
-                  label: Text(
-                    _avatarUploading
-                        ? 'Đang cập nhật ảnh…'
-                        : 'Đổi ảnh đại diện',
+                if (widget.accountDetails)
+                  TextButton.icon(
+                    onPressed: _loading || _avatarBusy || _roleBusy
+                        ? null
+                        : _avatar,
+                    icon: const Icon(Icons.camera_alt_outlined, size: 18),
+                    label: Text(
+                      _avatarUploading
+                          ? 'Đang cập nhật ảnh…'
+                          : 'Đổi ảnh đại diện',
+                    ),
                   ),
-                ),
                 if (_loading || _avatarUploading)
                   const LinearProgressIndicator(),
                 const SizedBox(height: 16),
+                if (!widget.accountDetails) ...[
+                  _quickUtilities(),
+                  const SizedBox(height: 16),
+                ],
                 if (!widget.accountDetails)
                   RoleSwitchTile(
                     api: widget.api,
@@ -598,10 +765,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       if (mounted) setState(() => _roleBusy = busy);
                     },
                   ),
-                if (!widget.accountDetails) ...[
-                  _utilities(),
-                  const SizedBox(height: 16),
-                ],
+
                 if (_profile!.role != 'ROLE_WORKER')
                   OutlinedButton.icon(
                     onPressed: () => Navigator.of(context).push(
@@ -619,10 +783,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 if (!widget.accountDetails) ...[
                   const SizedBox(height: 24),
                   PortfolioUploads(
+                    key: _portfolioKey,
                     api: widget.api,
                     ownerId: _profile!.id,
                     editable: true,
                   ),
+                  const SizedBox(height: 16),
+                  _utilities(),
                   if (_profile!.projectImages.isNotEmpty) ...[
                     const SizedBox(height: 16),
                     PortfolioGallery(images: _profile!.projectImages),

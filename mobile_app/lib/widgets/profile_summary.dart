@@ -8,6 +8,7 @@ import '../theme/app_theme.dart';
 import 'figma_components.dart';
 import 'tier_badge.dart';
 import 'commercial_hero.dart';
+import 'figma_design.dart';
 
 class ProfileSummary extends StatelessWidget {
   const ProfileSummary({
@@ -23,9 +24,13 @@ class ProfileSummary extends StatelessWidget {
     this.avatar,
     this.onAvatarTap,
     this.onTierTap,
+    this.figma = false,
+    this.profession,
   });
   final String name, tier;
   final String? phone;
+  final bool figma;
+  final String? profession;
   final Widget? avatar;
   final VoidCallback? onAvatarTap;
   final VoidCallback? onTierTap;
@@ -63,6 +68,222 @@ class ProfileSummary extends StatelessWidget {
     final progress = diamond
         ? 1.0
         : criteria.reduce((a, b) => a + b) / criteria.length;
+    if (figma) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Semantics(
+                button: onAvatarTap != null,
+                label: 'Đổi ảnh đại diện',
+                child: InkWell(
+                  key: const ValueKey('profile-avatar-change'),
+                  onTap: onAvatarTap,
+                  borderRadius: BorderRadius.circular(40),
+                  child: SizedBox.square(
+                    dimension: 76,
+                    child: Stack(
+                      children: [
+                        Center(
+                          child: avatar ?? PresenceAvatar(name: name, size: 70),
+                        ),
+                        Positioned(
+                          right: 0,
+                          bottom: 0,
+                          child: Container(
+                            padding: const EdgeInsets.all(5),
+                            decoration: BoxDecoration(
+                              color: palette.surface,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: palette.border),
+                            ),
+                            child: Icon(
+                              Icons.camera_alt_outlined,
+                              size: 15,
+                              color: palette.ink,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      profession ?? (worker ? 'Thợ xây' : 'Chủ thầu'),
+                      style: TextStyle(fontSize: 11, color: palette.muted),
+                    ),
+                    if (phone != null) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        phone!,
+                        style: TextStyle(fontSize: 11, color: palette.muted),
+                      ),
+                    ],
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        FigmaIcon(
+                          '4cf24',
+                          size: 13,
+                          color: verified
+                              ? palette.successStrong
+                              : palette.muted,
+                        ),
+                        const SizedBox(width: 4),
+                        Flexible(
+                          child: Text(
+                            verified
+                                ? 'Đã xác minh danh tính'
+                                : 'Chưa xác minh danh tính',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: verified
+                                  ? palette.successStrong
+                                  : palette.muted,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              for (final item in [
+                (value: '$completed', label: 'Việc hoàn thành'),
+                (
+                  value: completed == 0 ? '—' : rating.toStringAsFixed(1),
+                  label: 'Đánh giá',
+                ),
+                (value: '—', label: 'Đúng giờ'),
+              ])
+                Expanded(
+                  child: Tooltip(
+                    message: item.label == 'Đúng giờ'
+                        ? 'Chưa có thống kê tỷ lệ đúng giờ từ hệ thống chấm công.'
+                        : item.label,
+                    child: Column(
+                      children: [
+                        Text(
+                          item.value,
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        Text(
+                          item.label,
+                          style: TextStyle(fontSize: 10, color: palette.muted),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          if (worker && completed == 0) ...[
+            const SizedBox(height: 10),
+            Text(
+              'Chưa có đánh giá công trình',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 11, color: palette.muted),
+            ),
+          ],
+          const SizedBox(height: 22),
+          FigmaCard(
+            child: InkWell(
+              onTap: onTierTap,
+              borderRadius: BorderRadius.circular(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      FigmaIcon('65dcf', size: 22, color: color),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: worker
+                            ? TierBadge(tier: tier, onTap: onTierTap)
+                            : const Text(
+                                'Hệ thống cấp bậc thợ',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                      ),
+                      const FigmaIcon('af1cb', size: 17),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      for (final label in ['Đồng', 'Bạc', 'Vàng', 'Kim Cương'])
+                        Text(
+                          label,
+                          style: TextStyle(fontSize: 10, color: palette.muted),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  if (worker)
+                    Semantics(
+                      label: 'Tiến độ đạt tiêu chí lên hạng',
+                      value: '${(progress * 100).round()}%',
+                      child: LinearProgressIndicator(
+                        value: progress,
+                        minHeight: 5,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  const SizedBox(height: 12),
+                  Text(
+                    !worker
+                        ? 'Tìm hiểu tiêu chí và huy hiệu uy tín của đội thợ.'
+                        : diamond
+                        ? 'Bạn đã đạt bậc Kim Cương'
+                        : 'Hành trình đến bậc ${bronze
+                              ? 'Bạc'
+                              : gold
+                              ? 'Kim Cương'
+                              : 'Vàng'}',
+                    style: TextStyle(fontSize: 11, color: palette.muted),
+                  ),
+                  if (worker) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      'Uy tín: $score/100${diamond ? '' : ' · Mục tiêu: $targetScore điểm · $targetStars sao · $targetJobs công trình${gold ? ' · đã KYC' : ''}'}',
+                      style: TextStyle(fontSize: 10, color: palette.muted),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ],
+      );
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [

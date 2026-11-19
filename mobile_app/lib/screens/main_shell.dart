@@ -59,6 +59,7 @@ class _MainShellState extends State<MainShell> {
         key: ValueKey('profile-$_profileRevision'),
         api: widget.api,
         embedded: true,
+        onNavigateTab: _select,
       ),
     );
     final wallet = _tab(3, () => WalletScreen(api: widget.api, embedded: true));
@@ -78,7 +79,7 @@ class _MainShellState extends State<MainShell> {
           titleSpacing: 16,
           title: Row(
             children: [
-              const BrandLogo(height: 26),
+              const BrandLogo(height: 27, figma: true),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
