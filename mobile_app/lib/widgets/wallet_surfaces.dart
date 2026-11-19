@@ -4,6 +4,7 @@ import '../models/models.dart';
 import '../models/wallet.dart';
 import '../theme/app_theme.dart';
 import 'bouncing_button.dart';
+import 'figma_design.dart';
 
 class WalletCompartments extends StatelessWidget {
   const WalletCompartments({
@@ -87,7 +88,7 @@ class WalletTransactionTile extends StatelessWidget {
     final color = locked
         ? palette.warning
         : sign == '− '
-        ? palette.errorStrong
+        ? palette.ink
         : sign == '+ '
         ? palette.successStrong
         : palette.warning;
@@ -96,6 +97,10 @@ class WalletTransactionTile extends StatelessWidget {
         child: ListTile(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 14,
+            vertical: 6,
           ),
           onTap: () => showDialog<void>(
             context: context,
@@ -129,33 +134,43 @@ class WalletTransactionTile extends StatelessWidget {
               ],
             ),
           ),
-          leading: CircleAvatar(
-            backgroundColor: color.withValues(alpha: .10),
-            child: Icon(
-              locked
-                  ? Icons.shield_outlined
-                  : sign == '+ '
-                  ? Icons.south_west
-                  : Icons.north_east,
-              color: color,
+          leading: Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: .08),
+              borderRadius: BorderRadius.circular(11),
             ),
+            alignment: Alignment.center,
+            child: locked
+                ? Icon(Icons.shield_outlined, size: 18, color: color)
+                : FigmaIcon(
+                    sign == '+ ' ? '14fc7' : '19259',
+                    size: 18,
+                    color: color,
+                  ),
           ),
           title: Text(
             walletKind(entry.kind),
-            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
           ),
           subtitle: Text(
-            '${entry.description}\n${_time(context)} · #${entry.id}',
-            style: TextStyle(fontSize: 11, color: palette.muted),
+            '${entry.description} · ${_time(context)} · #${entry.id}',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontSize: 10, color: palette.muted),
           ),
-          isThreeLine: true,
           trailing: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 110),
             child: FittedBox(
               fit: BoxFit.scaleDown,
               child: Text(
                 '$sign${money(entry.amount.toDouble())}',
-                style: TextStyle(fontWeight: FontWeight.w800, color: color),
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: color,
+                ),
               ),
             ),
           ),

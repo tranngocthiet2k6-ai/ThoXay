@@ -1,10 +1,10 @@
 import '../widgets/wallet_surfaces.dart';
 import '../widgets/bouncing_button.dart';
-import '../widgets/commercial_hero.dart';
 import '../widgets/home_navigation.dart';
 import 'earnings_screen.dart';
 import '../widgets/figma_components.dart';
-import '../widgets/wallet_weekly_summary.dart';
+import '../widgets/wallet_monthly_summary.dart';
+import '../widgets/figma_design.dart';
 import '../widgets/design_motion.dart';
 import '../widgets/content_skeleton.dart';
 import '../widgets/app_snack_bar.dart';
@@ -141,6 +141,107 @@ class _WalletScreenState extends State<WalletScreen> {
       ),
     ),
   );
+  Widget _escrowTools(WalletBalance balance) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      FigmaCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.shield_outlined,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                const Expanded(
+                  child: Text(
+                    'Đang ký quỹ',
+                    style: TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                ),
+                Text(
+                  _hideBalance ? '••••••' : money(balance.escrow.toDouble()),
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            LinearProgressIndicator(
+              value: balance.minimum <= 0
+                  ? 1
+                  : (balance.escrow / balance.minimum).clamp(0.0, 1.0),
+              minHeight: 4,
+              borderRadius: BorderRadius.circular(4),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              balance.lowEscrow
+                  ? 'Ký quỹ thấp hơn ${money(balance.minimum.toDouble())}. Cảnh báo này chưa chặn nhận việc.'
+                  : 'Ký quỹ tài khoản được quản lý tách biệt với số dư khả dụng.',
+              style: TextStyle(
+                fontSize: 11,
+                color: balance.lowEscrow
+                    ? AppPalette.of(context).warning
+                    : AppPalette.of(context).muted,
+              ),
+            ),
+          ],
+        ),
+      ),
+      const SizedBox(height: 12),
+      ExpansionTile(
+        title: const Text(
+          'Thao tác ký quỹ & đối soát',
+          style: TextStyle(fontSize: 12),
+        ),
+        children: [
+          Row(
+            children: [
+              _smallBalance('Đang giữ rút', balance.held, Icons.hourglass_top),
+            ],
+          ),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              OutlinedButton.icon(
+                onPressed: _busy ? null : () => _operate('TOP_UP'),
+                icon: const Icon(Icons.add),
+                label: const Text('Nạp tiền chờ đối soát'),
+              ),
+              OutlinedButton.icon(
+                onPressed: _busy || balance.main < 1000
+                    ? null
+                    : () => _operate('LOCK'),
+                icon: const Icon(Icons.shield_outlined),
+                label: const Text('Nạp ký quỹ'),
+              ),
+              OutlinedButton.icon(
+                onPressed: _busy || balance.escrow < 1000
+                    ? null
+                    : () => _operate('RELEASE'),
+                icon: const Icon(Icons.swap_horiz),
+                label: const Text('Hoàn ký quỹ'),
+              ),
+            ],
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 12),
+            child: Text(
+              'Nạp/rút do Admin đối soát. Tiền đang giữ rút không thuộc số dư khả dụng. Chưa có chuyển tiền ngân hàng tự động.',
+              style: TextStyle(fontSize: 11),
+            ),
+          ),
+        ],
+      ),
+    ],
+  );
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: widget.embedded
@@ -160,7 +261,7 @@ class _WalletScreenState extends State<WalletScreen> {
       child: RefreshIndicator(
         onRefresh: () => _load(),
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20),
           physics: const BouncingScrollPhysics(
             parent: AlwaysScrollableScrollPhysics(),
           ),
@@ -177,7 +278,12 @@ class _WalletScreenState extends State<WalletScreen> {
               ),
             ],
             if (_balance case final balance?) ...[
-              CommercialHero(
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: const Color(0xff19242e),
+                  borderRadius: BorderRadius.circular(16),
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -186,23 +292,14 @@ class _WalletScreenState extends State<WalletScreen> {
                         Expanded(
                           child: Text(
                             'Số dư khả dụng',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 1,
-                            ),
+                            style: TextStyle(color: Colors.white, fontSize: 12),
                           ),
                         ),
                         IconButton(
                           tooltip: _hideBalance ? 'Hiện số dư' : 'Ẩn số dư',
                           onPressed: () =>
                               setState(() => _hideBalance = !_hideBalance),
-                          icon: Icon(
-                            _hideBalance
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
-                            color: Colors.white,
-                          ),
+                          icon: const FigmaIcon('5e914', size: 19),
                         ),
                       ],
                     ),
@@ -223,12 +320,20 @@ class _WalletScreenState extends State<WalletScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    WalletWeeklySummary(
-                      api: widget.api,
-                      entries: List.of(_entries),
-                      hasMore: _entryMore,
-                      worker: widget.api.session?.role != 'ROLE_CONTRACTOR',
-                      hidden: _hideBalance,
+                    const Row(
+                      children: [
+                        FigmaIcon('31c71', size: 13),
+                        SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            'Số dư được đối soát bởi Thợ Xây',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: Colors.white70,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     if (widget.api.session?.role == 'ROLE_WORKER')
                       TextButton.icon(
@@ -244,15 +349,20 @@ class _WalletScreenState extends State<WalletScreen> {
                         label: const Text('Xem thu nhập chi tiết'),
                       ),
                     const SizedBox(height: 16),
-                    WalletCompartments(balance: balance, hidden: _hideBalance),
-                    const SizedBox(height: 16),
                     Row(
                       children: [
                         Expanded(
                           child: BouncingButton(
                             child: FilledButton.icon(
+                              style: FilledButton.styleFrom(
+                                foregroundColor: Colors.white,
+                                textStyle: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                               onPressed: _busy ? null : () => _deposit(),
-                              icon: const Icon(Icons.qr_code_2, size: 18),
+                              icon: const FigmaIcon('d8b3d', size: 19),
                               label: const Text('Nạp VietQR'),
                             ),
                           ),
@@ -280,11 +390,7 @@ class _WalletScreenState extends State<WalletScreen> {
                               onPressed: _busy || balance.main < 1000
                                   ? null
                                   : () => _operate('WITHDRAW'),
-                              icon: const Icon(
-                                Icons.north_east,
-                                size: 18,
-                                color: Colors.white,
-                              ),
+                              icon: const FigmaIcon('60b33', size: 19),
                               label: const Text(
                                 'Rút tiền',
                                 style: TextStyle(
@@ -301,108 +407,13 @@ class _WalletScreenState extends State<WalletScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              FigmaCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.shield_outlined,
-                          color: Theme.of(context).colorScheme.primary,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        const Expanded(
-                          child: Text(
-                            'Đang ký quỹ',
-                            style: TextStyle(fontWeight: FontWeight.w700),
-                          ),
-                        ),
-                        Text(
-                          _hideBalance
-                              ? '••••••'
-                              : money(balance.escrow.toDouble()),
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    LinearProgressIndicator(
-                      value: balance.minimum <= 0
-                          ? 1
-                          : (balance.escrow / balance.minimum).clamp(0.0, 1.0),
-                      minHeight: 4,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      balance.lowEscrow
-                          ? 'Ký quỹ thấp hơn ${money(balance.minimum.toDouble())}. Cảnh báo này chưa chặn nhận việc.'
-                          : 'Ký quỹ tài khoản được quản lý tách biệt với số dư khả dụng.',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: balance.lowEscrow
-                            ? AppPalette.of(context).warning
-                            : AppPalette.of(context).muted,
-                      ),
-                    ),
-                  ],
-                ),
+              WalletMonthlySummary(
+                api: widget.api,
+                entries: List.of(_entries),
+                hasMore: _entryMore,
+                hidden: _hideBalance,
               ),
-              const SizedBox(height: 12),
-              ExpansionTile(
-                title: const Text(
-                  'Thao tác ký quỹ & đối soát',
-                  style: TextStyle(fontSize: 12),
-                ),
-                children: [
-                  Row(
-                    children: [
-                      _smallBalance(
-                        'Đang giữ rút',
-                        balance.held,
-                        Icons.hourglass_top,
-                      ),
-                    ],
-                  ),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      OutlinedButton.icon(
-                        onPressed: _busy ? null : () => _operate('TOP_UP'),
-                        icon: const Icon(Icons.add),
-                        label: const Text('Nạp tiền chờ đối soát'),
-                      ),
-                      OutlinedButton.icon(
-                        onPressed: _busy || balance.main < 1000
-                            ? null
-                            : () => _operate('LOCK'),
-                        icon: const Icon(Icons.shield_outlined),
-                        label: const Text('Nạp ký quỹ'),
-                      ),
-                      OutlinedButton.icon(
-                        onPressed: _busy || balance.escrow < 1000
-                            ? null
-                            : () => _operate('RELEASE'),
-                        icon: const Icon(Icons.swap_horiz),
-                        label: const Text('Hoàn ký quỹ'),
-                      ),
-                    ],
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 12),
-                    child: Text(
-                      'Nạp/rút do Admin đối soát. Tiền đang giữ rút không thuộc số dư khả dụng. Chưa có chuyển tiền ngân hàng tự động.',
-                      style: TextStyle(fontSize: 11),
-                    ),
-                  ),
-                ],
-              ),
+              const SizedBox(height: 16),
             ],
             const SizedBox(height: 24),
             Text(
@@ -489,6 +500,10 @@ class _WalletScreenState extends State<WalletScreen> {
                   onPressed: _busy ? null : () => _load(more: true),
                   child: const Text('Tải yêu cầu cũ'),
                 ),
+            ],
+            if (_balance case final balance?) ...[
+              const SizedBox(height: 20),
+              _escrowTools(balance),
             ],
           ],
         ),

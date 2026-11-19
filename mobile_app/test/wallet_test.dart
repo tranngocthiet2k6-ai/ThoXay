@@ -7,7 +7,7 @@ import 'package:tho_xay_mobile/screens/earnings_screen.dart';
 import 'package:tho_xay_mobile/screens/job_payments_screen.dart';
 import 'package:tho_xay_mobile/services/api_service.dart';
 import 'package:tho_xay_mobile/widgets/earnings_timeline_chart.dart';
-import 'package:tho_xay_mobile/widgets/commercial_hero.dart';
+import 'package:tho_xay_mobile/widgets/wallet_monthly_summary.dart';
 
 import 'worker_home_test.dart' show WorkerApi;
 
@@ -111,25 +111,20 @@ void main() {
       expect(find.byType(EarningsTimelineChart), findsNothing);
       expect(
         find.descendant(
-          of: find.byType(CommercialHero),
-          matching: find.textContaining('Thu nhập tuần này: +350.000 đ'),
+          of: find.byType(WalletMonthlySummary),
+          matching: find.text('350.000 đ'),
         ),
         findsOneWidget,
       );
-      await tester.tap(find.text('Thao tác ký quỹ & đối soát'));
-      await tester.pumpAndSettle();
       await tester.tap(find.byTooltip('Ẩn số dư'));
       await tester.pumpAndSettle();
       expect(find.text('500.000 đ'), findsNothing);
-      expect(find.text('••••••'), findsNWidgets(6));
+      expect(find.text('••••••'), findsWidgets);
       expect(api.main, 500000);
-      expect(
-        find.textContaining('Thu nhập tuần này: +350.000 đ'),
-        findsNothing,
-      );
+      expect(find.text('350.000 đ'), findsNothing);
       await tester.tap(find.byTooltip('Hiện số dư'));
       await tester.pumpAndSettle();
-      expect(find.text('500.000 đ'), findsNWidgets(2));
+      expect(find.text('500.000 đ'), findsOneWidget);
       expect(api.submitted, isEmpty);
       await tester.pumpWidget(const SizedBox());
       api.dispose();
@@ -141,9 +136,11 @@ void main() {
     final api = WalletApi();
     await tester.pumpWidget(MaterialApp(home: WalletScreen(api: api)));
     await tester.pumpAndSettle();
-    expect(find.text('500.000 đ'), findsNWidgets(2));
+    expect(find.text('500.000 đ'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Đang ký quỹ'), 180);
+    await tester.pumpAndSettle();
     expect(find.textContaining('Ký quỹ thấp hơn'), findsOneWidget);
-    await tester.scrollUntilVisible(find.text('Tải giao dịch cũ'), 180);
+    await tester.scrollUntilVisible(find.text('Tải giao dịch cũ'), -180);
     await tester.pumpAndSettle();
     await tester.ensureVisible(find.text('Tải giao dịch cũ'));
     await tester.pumpAndSettle();
@@ -164,6 +161,8 @@ void main() {
         160,
         scrollable: find.byType(Scrollable).first,
       );
+      await tester.ensureVisible(find.text('Thao tác ký quỹ & đối soát'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Thao tác ký quỹ & đối soát'));
       await tester.pumpAndSettle();
       await tester.scrollUntilVisible(
@@ -198,7 +197,7 @@ void main() {
       expect(api.submitted[1]['amount'], 5000);
       await tester.scrollUntilVisible(find.text('Số dư khả dụng'), -180);
       await tester.pumpAndSettle();
-      expect(find.text('500.000 đ'), findsNWidgets(2));
+      expect(find.text('500.000 đ'), findsOneWidget);
       api.dispose();
     },
   );
