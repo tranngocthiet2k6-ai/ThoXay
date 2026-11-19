@@ -125,6 +125,8 @@ Future<void> mountHub(
 }
 
 Future<void> scan(WidgetTester tester) async {
+  await tester.ensureVisible(find.text('Mở camera quét QR'));
+  await tester.pumpAndSettle();
   await tester.tap(find.text('Mở camera quét QR'));
   await tester.pumpAndSettle();
   await tester.tap(find.text('Phát hiện mã'));

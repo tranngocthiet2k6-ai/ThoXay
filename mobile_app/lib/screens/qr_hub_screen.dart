@@ -1,4 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+
+import '../services/device_photo_picker.dart';
+import '../services/qr_image_decoder.dart';
+import '../widgets/figma_design.dart';
+import '../widgets/qr_scan_surface.dart';
+import '../widgets/qr_gps_status.dart';
+
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../models/models.dart';
@@ -22,11 +30,13 @@ class QrHubScreen extends StatefulWidget {
     required this.active,
     this.scannerBuilder,
     this.onWorkerSaved,
+    this.photoPicker,
   });
   final ApiService api;
   final bool worker, active;
   final Widget Function(ValueChanged<String>)? scannerBuilder;
   final VoidCallback? onWorkerSaved;
+  final DevicePhotoPicker? photoPicker;
   @override
   State<QrHubScreen> createState() => _QrHubScreenState();
 }
@@ -242,6 +252,40 @@ class _QrHubScreenState extends State<QrHubScreen> {
     }
   }
 
+  Future<void> _gallery() async {
+    if (_busy) {
+      return;
+    }
+    setState(() => _camera = false);
+    try {
+      final bytes = await (widget.photoPicker ?? DevicePhotoPicker()).pick(
+        ImageSource.gallery,
+      );
+      if (bytes == null || !mounted || !widget.active) {
+        return;
+      }
+      final raw = await decodeQrImage(bytes);
+      if (!mounted || !widget.active) {
+        return;
+      }
+      if (raw == null) {
+        setState(
+          () => _error =
+              'Không tìm thấy mã QR trong ảnh. Chọn ảnh rõ nét, đủ bốn góc mã.',
+        );
+        return;
+      }
+      await _scan(raw);
+    } catch (_) {
+      if (mounted) {
+        setState(
+          () => _error =
+              'Chưa đọc được ảnh QR. Hãy chọn ảnh khác hoặc dán nội dung mã.',
+        );
+      }
+    }
+  }
+
   Future<void> _paste() async {
     setState(() => _camera = false);
     final text = TextEditingController();
@@ -301,25 +345,21 @@ class _QrHubScreenState extends State<QrHubScreen> {
         physics: const BouncingScrollPhysics(
           parent: AlwaysScrollableScrollPhysics(),
         ),
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         children: [
-          SegmentedButton<int>(
-            segments: [
-              const ButtonSegment(
-                value: 0,
-                icon: Icon(Icons.qr_code_scanner_rounded),
-                label: Text('Quét mã QR'),
-              ),
-              ButtonSegment(
-                value: 1,
-                icon: const Icon(Icons.qr_code_rounded),
-                label: Text(widget.worker ? 'Mã QR của tôi' : 'QR công trình'),
-              ),
+          FigmaSegments(
+            labels: [
+              'Quét mã QR',
+              widget.worker ? 'Mã QR của tôi' : 'QR công trình',
             ],
-            selected: {_mode},
-            onSelectionChanged: _busy ? null : (s) => _modeChanged(s.first),
+            selected: _mode,
+            onChanged: (mode) {
+              if (!_busy) {
+                _modeChanged(mode);
+              }
+            },
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 18),
           if (_loading) const ContentSkeleton(compact: true),
           if (_busy)
             const Padding(
@@ -339,24 +379,10 @@ class _QrHubScreenState extends State<QrHubScreen> {
                 widget.active &&
                 !_busy &&
                 (ModalRoute.of(context)?.isCurrent ?? true))
-              widget.scannerBuilder?.call(_scan) ?? QrCamera(onCode: _scan)
+              widget.scannerBuilder?.call(_scan) ??
+                  QrCamera(onCode: _scan, onGallery: _gallery)
             else
-              Container(
-                height: 260,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.qr_code_scanner_rounded, size: 96),
-                    SizedBox(height: 16),
-                    Text('Đưa mã QR vào khung để quét'),
-                  ],
-                ),
-              ),
+              QrScanSurface(onGallery: _busy ? null : _gallery),
             const SizedBox(height: 16),
             FilledButton.icon(
               onPressed: _busy
@@ -376,8 +402,18 @@ class _QrHubScreenState extends State<QrHubScreen> {
             ),
             const SizedBox(height: 16),
             const Text(
-              'Điểm danh công trình · Lưu thợ bằng mã cá nhân · Mở công trình được chia sẻ · Đối chiếu thanh toán VietQR. Camera chỉ hoạt động khi bạn bật chế độ quét.',
+              'Quét mã. Bắt đầu ngày làm.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 19, fontWeight: FontWeight.w700),
             ),
+            const SizedBox(height: 8),
+            const Text(
+              'Điểm danh công trình, lưu thợ hoặc đối chiếu VietQR.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 11),
+            ),
+            const SizedBox(height: 20),
+            const QrGpsStatus(),
           ] else if (widget.worker) ...[
             if (widget.api.session case final session?)
               Card(
