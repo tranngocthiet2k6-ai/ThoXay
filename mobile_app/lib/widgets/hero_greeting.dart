@@ -6,7 +6,6 @@ import 'server_connection_notice.dart';
 import 'tier_badge.dart';
 import 'bouncing_button.dart';
 import '../theme/app_theme.dart';
-import 'user_avatar.dart';
 import '../screens/tier_details_screen.dart';
 
 class HeroGreeting extends StatefulWidget {
@@ -77,39 +76,20 @@ class _HeroGreetingState extends State<HeroGreeting> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              UserAvatar(
-                api: widget.api,
-                path: _profile?.avatarUrl,
-                name: name,
-                online: worker ? widget.availability : null,
-                size: 48,
-              ),
-              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      worker
-                          ? 'THỢ XÂY • DÀNH CHO THỢ'
-                          : 'THỢ XÂY • DÀNH CHO CHỦ THẦU',
-                      style: TextStyle(
-                        fontSize: 9,
-                        letterSpacing: .6,
-                        color: palette.muted,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
                       'Chào ${name.trim().split(' ').last}!',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.titleLarge
-                          ?.copyWith(fontSize: 22),
+                          ?.copyWith(fontSize: 26, fontWeight: FontWeight.w700),
                     ),
                     if (worker && _profile?.workerTier != null)
                       Padding(
-                        padding: const EdgeInsets.only(top: 8),
+                        padding: const EdgeInsets.only(top: 6),
                         child: TierBadge(
                           tier: _profile!.workerTier!,
                           onTap: () => Navigator.of(context).push(

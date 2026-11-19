@@ -580,6 +580,7 @@ class _WorkerHomeContentState extends State<WorkerHomeContent> {
                           SizedBox(
                             key: _mapKey,
                             child: JobMapPreview(
+                              compact: true,
                               center: _position!,
                               jobs: _visibleJobs,
                               onJobTap: _showMapJob,
@@ -593,7 +594,7 @@ class _WorkerHomeContentState extends State<WorkerHomeContent> {
                         ],
                         if (_available == true) ...[
                           Text(
-                            'Việc gần anh',
+                            'Việc gần bạn',
                             key: _jobListKey,
                             style: Theme.of(context).textTheme.titleLarge,
                           ),

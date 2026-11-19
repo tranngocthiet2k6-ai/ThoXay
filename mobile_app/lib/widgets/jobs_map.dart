@@ -134,9 +134,11 @@ class JobsMap extends StatelessWidget {
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary,
+                            color: Theme.of(context).colorScheme.surface,
                             borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.white, width: 2),
+                            border: Border.all(
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
                             boxShadow: const [
                               BoxShadow(
                                 color: Color(0x22000000),
@@ -148,8 +150,8 @@ class JobsMap extends StatelessWidget {
                           child: Text(
                             '${(job.salaryPerDay / 1000).toStringAsFixed(job.salaryPerDay % 1000 == 0 ? 0 : 1)}k',
                             style: TextStyle(
-                              color: Theme.of(context).colorScheme.onPrimary,
-                              fontWeight: FontWeight.w800,
+                              color: Theme.of(context).colorScheme.primary,
+                              fontWeight: FontWeight.w600,
                               fontSize: 12,
                             ),
                             maxLines: 1,

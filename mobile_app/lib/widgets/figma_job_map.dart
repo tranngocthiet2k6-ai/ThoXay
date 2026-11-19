@@ -18,6 +18,7 @@ class JobMapPreview extends StatefulWidget {
     this.onCollapse,
     this.onMarkerTap,
     this.expanded = false,
+    this.compact = false,
   });
   final GeoPoint center;
   final List<Job> jobs;
@@ -26,6 +27,7 @@ class JobMapPreview extends StatefulWidget {
   final VoidCallback? onCollapse;
   final ValueChanged<Job>? onMarkerTap;
   final bool expanded;
+  final bool compact;
   @override
   State<JobMapPreview> createState() => _JobMapPreviewState();
 }
@@ -63,7 +65,11 @@ class _JobMapPreviewState extends State<JobMapPreview> {
               ),
             ),
           SizedBox(
-            height: widget.expanded ? 380 : 232,
+            height: widget.expanded
+                ? 380
+                : widget.compact
+                ? 148
+                : 232,
             child: JobsMap(
               center: widget.center,
               jobs: widget.jobs,
@@ -74,7 +80,7 @@ class _JobMapPreviewState extends State<JobMapPreview> {
               interactive: widget.expanded,
             ),
           ),
-          if (job != null)
+          if (job != null && (!widget.compact || widget.expanded))
             Padding(
               padding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
               child: Material(

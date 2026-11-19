@@ -61,6 +61,134 @@ class JobCard extends StatelessWidget {
       icon: const Icon(Icons.arrow_outward_rounded, size: 14),
       label: const Text('Xem chi tiết'),
     );
+    if (previewOnly) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 10),
+        child: BouncingButton(
+          child: Material(
+            color: palette.surface,
+            borderRadius: BorderRadius.circular(16),
+            child: InkWell(
+              onTap: open,
+              borderRadius: BorderRadius.circular(16),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            job.title,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              money(job.salaryPerDay),
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: color,
+                              ),
+                            ),
+                            Text(
+                              '/ngày',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: palette.muted,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            job.contractorName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: palette.muted,
+                            ),
+                          ),
+                        ),
+                        if (job.contractorVerified) ...[
+                          const SizedBox(width: 4),
+                          Icon(
+                            Icons.verified,
+                            size: 13,
+                            color: palette.successStrong,
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      '${job.address}${job.distanceKm == null ? '' : ' · ${job.distanceKm!.toStringAsFixed(1)} km'}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 10, color: palette.muted),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 6,
+                      alignment: WrapAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 7,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: color.withValues(alpha: .08),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            '${job.jobType} · Cần ${job.requiredWorkers} thợ',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: AppTheme.brandInk(context),
+                            ),
+                          ),
+                        ),
+                        Text(
+                          'Xem chi tiết',
+                          style: TextStyle(fontSize: 10, color: palette.muted),
+                        ),
+                        Icon(
+                          Icons.chevron_right,
+                          size: 14,
+                          color: palette.muted,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: BouncingButton(

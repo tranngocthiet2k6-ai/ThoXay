@@ -2,6 +2,8 @@ import '../theme/app_theme.dart';
 
 import 'package:flutter/material.dart';
 
+import 'figma_design.dart';
+
 class JobSearchHeader extends SliverPersistentHeaderDelegate {
   JobSearchHeader({required this.height, required this.child});
   final double height;
@@ -60,20 +62,32 @@ class JobSearchFilters extends StatelessWidget {
         decoration: InputDecoration(
           hintText: 'Tìm tên công trình, địa điểm…',
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(13),
             borderSide: BorderSide.none,
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(13),
             borderSide: BorderSide.none,
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(13),
             borderSide: BorderSide(
               color: Theme.of(context).colorScheme.primary,
             ),
           ),
-          prefixIcon: const Icon(Icons.search),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 14,
+            vertical: 12,
+          ),
+          hintStyle: TextStyle(
+            fontSize: 12,
+            color: AppPalette.of(context).muted,
+          ),
+          prefixIcon: const Center(
+            widthFactor: 1,
+            heightFactor: 1,
+            child: FigmaIcon('7237e', size: 20),
+          ),
           suffixIcon: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -81,7 +95,7 @@ class JobSearchFilters extends StatelessWidget {
                 IconButton(
                   tooltip: 'Bộ lọc vị trí',
                   onPressed: onAdvanced,
-                  icon: const Icon(Icons.tune),
+                  icon: const FigmaIcon('d2b73', size: 20),
                 ),
               if (controller.text.isNotEmpty)
                 IconButton(
@@ -106,6 +120,13 @@ class JobSearchFilters extends StatelessWidget {
           children: [
             for (final type in ['', 'Thợ chính', 'Phụ hồ']) ...[
               ChoiceChip(
+                labelStyle: TextStyle(
+                  fontSize: 11,
+                  color: jobType == type
+                      ? AppTheme.brandInk(context)
+                      : AppPalette.of(context).ink,
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 4),
                 label: Text(type.isEmpty ? 'Tất cả' : type),
                 selected: jobType == type,
                 onSelected: enabled ? (_) => onType(type) : null,
@@ -113,6 +134,10 @@ class JobSearchFilters extends StatelessWidget {
               const SizedBox(width: 8),
             ],
             FilterChip(
+              labelStyle: TextStyle(
+                fontSize: 11,
+                color: AppPalette.of(context).ink,
+              ),
               label: const Text('Lương cao nhất'),
               avatar: const Icon(Icons.sort, size: 18),
               selected: salaryFirst,

@@ -253,6 +253,7 @@ class _ContractorHomeContentState extends State<ContractorHomeContent> {
                           SizedBox(
                             key: _mapKey,
                             child: JobMapPreview(
+                              compact: true,
                               center: GeoPoint(
                                 _weatherJob!.latitude,
                                 _weatherJob!.longitude,
