@@ -46,16 +46,7 @@ class AuthShell extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Container(
-                          width: 44,
-                          height: 44,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: p.dark ? p.soft : const Color(0xfffff0da),
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          child: const BrandLogo(height: 27, figma: true),
-                        ),
+                        const BrandLogo(height: 76),
                         const Spacer(),
                         const AppearanceButton(),
                       ],

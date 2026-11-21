@@ -114,31 +114,33 @@ void main() {
     }
   });
 
-  testWidgets(
-    'brand is a transparent vector helmet without a wordmark image or text',
-    (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: BrandLogo(height: 80, onDark: true)),
-        ),
-      );
-      final logo = find.byType(BrandLogo);
-      expect(
-        find.descendant(of: logo, matching: find.byType(Image)),
-        findsNothing,
-      );
-      expect(
-        find.descendant(of: logo, matching: find.byType(Text)),
-        findsNothing,
-      );
-      expect(
-        find.descendant(of: logo, matching: find.byType(CustomPaint)),
-        findsOneWidget,
-      );
-      expect(tester.getSize(logo), const Size(128, 80));
-      expect(find.bySemanticsLabel('Thợ Xây · Mũ bảo hộ'), findsOneWidget);
-    },
-  );
+  testWidgets('brand displays the supplied Tho Xay artwork without tinting', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: Scaffold(body: BrandLogo(height: 80))),
+    );
+    final logo = find.byType(BrandLogo);
+    expect(
+      find.descendant(of: logo, matching: find.byType(Image)),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: logo, matching: find.byType(Text)),
+      findsNothing,
+    );
+    expect(
+      find.descendant(of: logo, matching: find.byType(CustomPaint)),
+      findsNothing,
+    );
+    final image = tester.widget<Image>(
+      find.descendant(of: logo, matching: find.byType(Image)),
+    );
+    expect((image.image as AssetImage).assetName, BrandLogo.assetPath);
+    expect(image.color, isNull);
+    expect(tester.getSize(logo), const Size(80, 80));
+    expect(find.bySemanticsLabel('Logo Thợ Xây'), findsOneWidget);
+  });
 
   testWidgets(
     'startup finishes on real readiness without decorative wait and fades to content',

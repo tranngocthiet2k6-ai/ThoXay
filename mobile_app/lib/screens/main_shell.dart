@@ -79,7 +79,7 @@ class _MainShellState extends State<MainShell> {
           titleSpacing: 16,
           title: Row(
             children: [
-              const BrandLogo(height: 27, figma: true),
+              const BrandLogo(height: 40),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(

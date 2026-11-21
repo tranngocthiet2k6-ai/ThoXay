@@ -166,7 +166,7 @@ class SplashScreen extends StatelessWidget {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            BrandLogo(height: 104, onDark: dark),
+                            const BrandLogo(height: 144),
                             const SizedBox(height: 24),
                             Text(
                               'Kết nối tay nghề, dựng xây uy tín',
