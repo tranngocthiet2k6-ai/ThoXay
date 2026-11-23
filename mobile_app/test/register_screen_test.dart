@@ -3,10 +3,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tho_xay_mobile/screens/register_screen.dart';
 import 'package:tho_xay_mobile/services/api_service.dart';
 import 'package:tho_xay_mobile/widgets/appearance_button.dart';
+import 'package:tho_xay_mobile/widgets/auth_shell.dart';
+import 'package:tho_xay_mobile/widgets/auth_forms.dart';
 
 void main() {
   testWidgets(
-    'registration has one appearance button and an inline back action',
+    'legacy registration entry has one header and switches login in place',
     (tester) async {
       final api = ApiService();
       await tester.pumpWidget(
@@ -28,7 +30,17 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(AppBar), findsNothing);
       expect(find.byType(AppearanceButton), findsOneWidget);
-      await tester.tap(find.text('Quay lại đăng nhập'));
+      expect(find.text('Quay lại đăng nhập'), findsNothing);
+      await tester.tap(
+        find.descendant(
+          of: find.byType(AuthTabs),
+          matching: find.text('Đăng nhập'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(LoginForm), findsOneWidget);
+      expect(find.text('Open register'), findsNothing);
+      Navigator.of(tester.element(find.byType(LoginForm))).pop();
       await tester.pumpAndSettle();
       expect(find.text('Open register'), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
