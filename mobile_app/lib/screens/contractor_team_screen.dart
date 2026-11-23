@@ -42,18 +42,20 @@ class _ContractorTeamScreenState extends State<ContractorTeamScreen> {
       _error = null;
     });
     try {
-      final (workers, groups, contacts, jobs) = await (
+      // Record.wait wraps API failures in ParallelWaitError. Future.wait keeps
+      // the original ApiException so the retry state below can handle it.
+      final results = await Future.wait<Object>([
         widget.api.savedWorkers(),
         widget.api.contractorGroups(),
         widget.api.teamContacts(),
         widget.api.contractorJobs(),
-      ).wait;
+      ]);
       if (mounted) {
         setState(() {
-          _workers = workers;
-          _groups = groups;
-          _contacts = contacts;
-          _jobs = jobs;
+          _workers = results[0] as List<WorkerProfile>;
+          _groups = results[1] as List<ContractorGroup>;
+          _contacts = results[2] as List<TeamContact>;
+          _jobs = results[3] as List<Job>;
         });
       }
     } on ApiException catch (e) {

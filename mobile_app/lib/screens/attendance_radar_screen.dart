@@ -34,6 +34,8 @@ double attendanceDistance(GeoPoint worker, GeoPoint job) {
 bool validAttendancePosition(GeoPoint worker, GeoPoint job) =>
     attendanceDistance(worker, job) <= 200 &&
     worker.accuracyMeters != null &&
+    worker.accuracyMeters!.isFinite &&
+    worker.accuracyMeters! > 0 &&
     worker.accuracyMeters! <= 100;
 
 class AttendanceRadarScreen extends StatefulWidget {
