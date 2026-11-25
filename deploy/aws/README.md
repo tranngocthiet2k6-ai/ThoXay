@@ -6,6 +6,19 @@ systemd, heap tối đa 768 MB; Nginx phục vụ HTTPS và WebSocket. PostgreSQ
 dùng image chính thức `postgres:17-alpine`, volume bền vững và giới hạn RAM
 384 MB. Java và database chỉ lắng nghe cổng loopback. Không build trên VPS.
 
+Máy đang chạy tại Sydney (`ap-southeast-2`), IP `52.62.110.176`, API
+`https://thoxay-api-52-62-110-176.sslip.io`; web giữ `https://thoxay.vercel.app`.
+Hostname API dùng DNS công khai theo IP để không cần mua tên miền cho đợt nộp.
+Nếu stop/start EC2 làm đổi IPv4, cần cập nhật hostname, chứng chỉ và API_BASE_URL;
+reboot trong hệ điều hành không đổi IPv4 của máy đang chạy. Có thể dùng tên miền
+riêng và địa chỉ IP cố định khi triển khai lâu dài.
+
+Dữ liệu đã chuyển từ Render, giữ JWT secret và đối chiếu số bản ghi 70 bảng.
+Backend Render được tạm dừng; database cũ không tiếp nhận dữ liệu nghiệp vụ mới.
+Không resume backend cũ để phục vụ người dùng nếu chưa đồng bộ dữ liệu lại.
+Chứng chỉ HTTPS tự gia hạn qua `certbot.timer`. Sau mỗi lần nâng cấp, kiểm tra
+health, dữ liệu và bản sao lưu ngoài VPS trước khi chuyển ứng dụng.
+
 ## Trước khi triển khai
 
 - Security group: TCP 22 chỉ từ IP quản trị; TCP 80 và 443 cho khách truy cập.

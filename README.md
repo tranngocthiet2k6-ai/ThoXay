@@ -8,17 +8,17 @@ Flutter có giao diện tiếng Việt cho thợ và chủ thầu, chạy trên 
 
 ## Triển khai online
 
-Đã triển khai ngày **28/10/2026**: **Flutter Web → Vercel**,
-**Backend/Admin → Render Docker**, PostgreSQL online và profile `prod`.
+Chuyển backend và dữ liệu sang AWS ngày **25/11/2026**: **Flutter Web → Vercel**,
+**Backend/Admin → EC2 Ubuntu 24.04 tại Sydney**, PostgreSQL 17 cùng VPS và profile `prod`.
 
 - Ứng dụng Thợ/Chủ thầu: https://thoxay.vercel.app.
-- Trang đăng nhập Admin: https://thoxay-api.onrender.com/admin/login.
-- Kiểm tra Backend/database: https://thoxay-api.onrender.com/health.
+- Trang đăng nhập Admin: https://thoxay-api-52-62-110-176.sslip.io/admin/login.
+- Kiểm tra Backend/database: https://thoxay-api-52-62-110-176.sslip.io/health.
 
-Database cloud mới không có tài khoản mẫu; cần tạo tài khoản riêng trước khi dùng.
-Database Render Free hiện hết hạn **27/11/2026**: cần xuất dữ liệu và chọn phương án
-duy trì trước ngày này. Backend Free có thể khởi động chậm sau thời gian không sử dụng.
-Xem [hướng dẫn Import Project, database và biến môi trường](docs/DEPLOY_VERCEL.md).
+Database hiện hành đã được sao lưu và chuyển từ Render sang PostgreSQL trên AWS,
+đối chiếu số bản ghi của toàn bộ 70 bảng. Backend Render được tạm dừng để tránh
+ghi dữ liệu vào database cũ; tài khoản và JWT secret được giữ khi chuyển.
+Xem [cấu hình và vận hành Ubuntu AWS](deploy/aws/README.md).
 Vercel cần `API_BASE_URL` là origin HTTPS của Backend, không có `/api` ở cuối.
 
 ## Khởi chạy nhanh trên PowerShell
@@ -138,7 +138,7 @@ flutter pub get
 flutter run -d chrome --web-port=3000
 ```
 
-API mặc định của Flutter và APK từ GitHub Actions là `https://thoxay-api.onrender.com`.
+API mặc định của Flutter và APK từ GitHub Actions là `https://thoxay-api-52-62-110-176.sslip.io`.
 Các endpoint đã có tiền tố `/api`, nên không thêm `/api` vào Base URL.
 Điện thoại chỉ cần có Internet để gọi Backend online.
 Có thể thay địa chỉ lúc chạy hoặc build:
@@ -327,7 +327,7 @@ tin đã lưu; dùng mã đó cho nội dung hoặc người nhận khác trả 
 người gửi từ JWT. Lịch sử trả `{messages, hasMore}`, hỗ trợ `limit=1..100`,
 `beforeId` để tải tin cũ hoặc `afterId` để đồng bộ tin bỏ lỡ (không dùng cùng lúc).
 
-WebSocket ở `/ws/chat`, ví dụ `wss://thoxay-api.onrender.com/ws/chat`. Sau khi kết nối,
+WebSocket ở `/ws/chat`, ví dụ `wss://thoxay-api-52-62-110-176.sslip.io/ws/chat`. Sau khi kết nối,
 gửi frame JSON đầu tiên:
 
 ```json
@@ -489,7 +489,7 @@ Xem [phạm vi, API và bằng chứng kiểm thử](docs/ADVANCED_UPGRADE.md),
 [migration an toàn](docs/DATABASE_MIGRATIONS.md) và
 [hệ thiết kế Sáng/Tối/Outdoor](docs/UI_UX_DESIGN_SYSTEM.md).
 
-Ứng dụng chờ health sẵn sàng khi Backend Render vừa ngủ, hiển thị tiến trình
+Ứng dụng chờ health sẵn sàng khi backend khởi động lại, hiển thị tiến trình
 trước khi gửi yêu cầu nghiệp vụ. Chờ tối đa 4 phút; không tự gửi lại thao tác ghi.
 `GET /api/auth/health` hỗ trợ kiểm tra từ Web với CORS đã cấu hình, không cần JWT.
 VietQR chỉ bật sau khi Admin cấu hình/xác nhận tài khoản nhận tiền thật ở trang Ví.

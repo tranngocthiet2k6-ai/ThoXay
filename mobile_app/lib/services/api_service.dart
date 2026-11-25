@@ -588,7 +588,7 @@ class ApiService extends ChangeNotifier {
       baseUrl = (baseUrl ?? _defaultBaseUrl).replaceFirst(RegExp(r'/+$'), '');
   static const _defaultBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'https://thoxay-api.onrender.com',
+    defaultValue: 'https://thoxay-api-52-62-110-176.sslip.io',
   );
   static const _storageKey = 'thoxay.session';
   final http.Client _client;
