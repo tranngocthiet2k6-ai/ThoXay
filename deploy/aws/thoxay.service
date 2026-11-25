@@ -1,0 +1,32 @@
+[Unit]
+Description=Tho Xay backend
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=thoxay
+Group=thoxay
+WorkingDirectory=/opt/thoxay
+EnvironmentFile=/etc/thoxay/backend.env
+Environment=SPRING_PROFILES_ACTIVE=prod
+Environment=SERVER_ADDRESS=127.0.0.1
+Environment=PORT=8080
+ExecStart=/usr/bin/java -Xms256m -Xmx768m -Djava.awt.headless=true -jar /opt/thoxay/current.jar
+Restart=on-failure
+RestartSec=10
+TimeoutStopSec=45
+SuccessExitStatus=143
+MemoryHigh=1G
+MemoryMax=1152M
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/thoxay
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target
