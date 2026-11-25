@@ -24,5 +24,6 @@ body{background:#f3f6fb;color:#0f172a}
 @media(max-width:991px){.control-priorities{grid-template-columns:1fr}.page-heading h1{font-size:28px}}
 @media(prefers-contrast:more){.card,.stat-card,.priority-link{border-color:#0f172a}.text-secondary{color:#334155!important}}
 
-/* Brand plaque preserves the charcoal wordmark on the Navy sidebar. */
-.xay-brand-logo{width:64px;height:48px;object-fit:contain;background:#fff;border-radius:10px;padding:4px;flex-shrink:0}.xay-login-logo{width:132px;height:auto;object-fit:contain}
+/* Share the application's square brand artwork across admin surfaces. */
+.xay-brand-logo{width:44px;height:44px;object-fit:contain;border-radius:10px;flex-shrink:0}.xay-login-logo{width:96px;height:96px;object-fit:contain;border-radius:16px}
+.login-card{color:var(--ink);color-scheme:light}.login-card .btn-primary{--bs-btn-color:#fff;--bs-btn-hover-color:#fff;--bs-btn-active-color:#fff}

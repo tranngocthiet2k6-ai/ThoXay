@@ -5,7 +5,7 @@
   <title>Tổng quan quản trị · Thợ Xây</title>
   <link th:href="@{/vendor/bootstrap/bootstrap.min.css}" rel="stylesheet">
   <link th:href="@{/css/admin.css}" rel="stylesheet">
-<link th:href="@{/css/admin-commercial.css}" rel="stylesheet"><link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}"></head>
+<link th:href="@{/css/admin-commercial.css}" rel="stylesheet"><link rel="icon" type="image/x-icon" th:href="@{/favicon.ico(v='brand-b01dd3b1d1d3')}"></head>
 <body>
 <svg xmlns="http://www.w3.org/2000/svg" class="icon-definitions" aria-hidden="true"><defs>
   <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></symbol>
@@ -18,7 +18,7 @@
   <symbol id="i-exit" viewBox="0 0 24 24"><path d="M9 4H4v16h5M13 7l5 5-5 5M8 12h13"/></symbol>
 </defs></svg>
 <aside class="admin-sidebar" aria-label="Điều hướng quản trị">
-  <a class="sidebar-brand" th:href="@{/admin/dashboard}"><img class="xay-brand-logo" th:src="@{/branding/logo_thoxay_transparent.png}" alt="Thợ Xây"><span>Thợ Xây<small>KẾT NỐI &amp; KIẾN TẠO</small></span></a>
+  <a class="sidebar-brand" th:href="@{/admin/dashboard}"><img class="xay-brand-logo" th:src="@{/branding/app_icon.png}" alt="Thợ Xây"><span>Thợ Xây<small>KẾT NỐI &amp; KIẾN TẠO</small></span></a>
   <p class="sidebar-label">KHÔNG GIAN LÀM VIỆC</p>
   <nav class="sidebar-nav">
     <a th:href="@{/admin/incidents}">SOS &amp; Sự cố <span class="badge bg-danger ms-auto" data-incident-count data-hide-zero th:text="${incidentCounts.open}" th:hidden="${incidentCounts.open == 0}"></span></a>
@@ -30,7 +30,7 @@
   <div class="sidebar-note"><svg class="ui-icon" aria-hidden="true"><use href="#i-shield"/></svg><strong>Kết nối từ niềm tin</strong><p>Kiểm tra danh tính để xây dựng cộng đồng lao động an toàn.</p></div>
 </aside>
 <header class="admin-topbar">
-  <a class="mobile-brand" th:href="@{/admin/dashboard}"><img class="xay-brand-logo" th:src="@{/branding/logo_thoxay_transparent.png}" alt="Thợ Xây">Thợ Xây</a>
+  <a class="mobile-brand" th:href="@{/admin/dashboard}"><img class="xay-brand-logo" th:src="@{/branding/app_icon.png}" alt="Thợ Xây">Thợ Xây</a>
   <span class="topbar-label">Hệ thống quản trị <span>/ Tổng quan</span></span>
   <div class="d-flex align-items-center gap-3"><span class="admin-identity"><span class="admin-avatar">QT</span>Quản trị viên</span>
     <form th:action="@{/admin/logout}" method="post"><button class="btn btn-outline-secondary btn-sm"><svg class="ui-icon" aria-hidden="true"><use href="#i-exit"/></svg>Đăng xuất</button></form>
