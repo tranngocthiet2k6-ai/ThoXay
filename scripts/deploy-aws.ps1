@@ -27,16 +27,16 @@ try {
     $staging = Join-Path $repoRoot ".local/aws/$deployId"
     New-Item -ItemType Directory -Path $staging -Force | Out-Null
     Copy-Item -LiteralPath (Join-Path $repoRoot 'target/tho-xay-1.0.0.jar') -Destination (Join-Path $staging 'backend.jar')
-    foreach ($name in @('install.sh', 'thoxay.service', 'nginx.conf.template')) {
+    foreach ($name in @('install.sh', 'configure-nginx.sh', 'thoxay.service', 'nginx.conf.template')) {
         Copy-Item -LiteralPath (Join-Path $repoRoot "deploy/aws/$name") -Destination (Join-Path $staging $name)
     }
     # Ensure Linux line endings even when the checkout was created on Windows.
-    foreach ($name in @('install.sh', 'thoxay.service', 'nginx.conf.template')) {
+    foreach ($name in @('install.sh', 'configure-nginx.sh', 'thoxay.service', 'nginx.conf.template')) {
         $filePath = Join-Path $staging $name
         [IO.File]::WriteAllText($filePath, [IO.File]::ReadAllText($filePath).Replace("`r`n", "`n"), [Text.UTF8Encoding]::new($false))
     }
     $archive = Join-Path $staging 'thoxay.tar.gz'
-    & tar -czf $archive -C $staging backend.jar install.sh thoxay.service nginx.conf.template
+    & tar -czf $archive -C $staging backend.jar install.sh configure-nginx.sh thoxay.service nginx.conf.template
     if ($LASTEXITCODE -ne 0) { throw 'Cannot package the deployment.' }
     Write-Host "Verified deployment package: $archive"
     if ($PrepareOnly) { return }

@@ -19,6 +19,19 @@ Không resume backend cũ để phục vụ người dùng nếu chưa đồng b
 Chứng chỉ HTTPS tự gia hạn qua `certbot.timer`. Sau mỗi lần nâng cấp, kiểm tra
 health, dữ liệu và bản sao lưu ngoài VPS trước khi chuyển ứng dụng.
 
+Nginx bật HTTP/2 trên HTTPS và giữ tối đa 8 kết nối rảnh tới Java cho mỗi worker.
+Hai file Bootstrap công khai được gzip và cache trình duyệt một giờ, có hỗ trợ
+revalidate 304. Đo trên VPS: tổng 312.607 byte giảm còn 55.852 byte (82,1%).
+API, trang admin và ảnh CCCD tiếp tục dùng cache policy của backend. Cấu hình
+này không tăng cấu hình hoặc thêm dịch vụ AWS.
+
+`configure-nginx.sh` cập nhật proxy từ template, giữ đường dẫn chứng chỉ hiện có,
+kiểm tra `nginx -t` trước khi reload và lưu bản cấu hình cũ trong
+`/etc/nginx/thoxay.previous.*`. Installer gọi helper trước và sau bước Certbot
+để hỗ trợ cả cài mới và cập nhật. Có thể áp dụng riêng cấu hình Nginx bằng cách
+đưa `configure-nginx.sh` cùng `nginx.conf.template` lên VPS và chạy helper với
+hostname API; không cần khởi động lại Java hoặc PostgreSQL.
+
 ## Trước khi triển khai
 
 - Security group: TCP 22 chỉ từ IP quản trị; TCP 80 và 443 cho khách truy cập.

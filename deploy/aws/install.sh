@@ -104,18 +104,10 @@ for ((attempt=0; attempt<90; attempt++)); do
 done
 [[ $backend_ready == true ]] || fail 'Backend health failed. Inspect: sudo journalctl -u thoxay -n 100. Do not switch the web API yet.'
 
-# Preserve Certbot's existing HTTPS configuration on repeated deployments.
-if [[ ! -e /etc/nginx/sites-available/thoxay ]]; then
-    sed "s/__API_DOMAIN__/$api_domain/g" "$bundle/nginx.conf.template" > /etc/nginx/sites-available/thoxay
-else
-    grep -qF "server_name $api_domain;" /etc/nginx/sites-available/thoxay || fail 'Existing Nginx hostname differs; review it before continuing.'
-fi
-chmod 644 /etc/nginx/sites-available/thoxay
-ln -sfn /etc/nginx/sites-available/thoxay /etc/nginx/sites-enabled/thoxay
-nginx -t
-systemctl enable --now nginx
-systemctl reload nginx
+# Refresh the owned proxy configuration while retaining existing TLS paths.
+bash "$bundle/configure-nginx.sh" "$api_domain"
 certbot --nginx --non-interactive --agree-tos --register-unsafely-without-email --redirect --keep-until-expiring -d "$api_domain"
+bash "$bundle/configure-nginx.sh" "$api_domain"
 systemctl enable --now certbot.timer
 curl --fail --silent --show-error --max-time 15 "https://$api_domain/health" | grep -q '"UP"' || fail 'Public HTTPS health check failed.'
 printf '\nBackend is healthy: https://%s/health\nAdmin: https://%s/admin/login\n' "$api_domain" "$api_domain"
