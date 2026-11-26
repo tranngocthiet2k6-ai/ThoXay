@@ -199,7 +199,7 @@ class _ContractorTeamScreenState extends State<ContractorTeamScreen> {
     if (workers.isEmpty || _busy) return;
     final job = await _choose(
       'Mời tham gia công trình',
-      _jobs.where((j) => ['OPEN', 'IN_PROGRESS'].contains(j.status)).toList(),
+      _jobs.where((j) => j.canRecruit).toList(),
       (j) => j.title,
     );
     if (job == null || !mounted) return;

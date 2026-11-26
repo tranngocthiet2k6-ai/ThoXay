@@ -8,6 +8,55 @@ import 'package:tho_xay_mobile/services/api_service.dart';
 
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
+  test(
+    'stop recruiting sends authenticated PUT and parses closed recruitment',
+    () async {
+      final api = ApiService(
+        client: MockClient((request) async {
+          if (request.url.path == '/api/auth/login') {
+            return http.Response(
+              jsonEncode({
+                'token': 'jwt',
+                'userId': 2,
+                'fullName': 'Contractor',
+                'phoneNumber': '0900000002',
+                'role': 'ROLE_CONTRACTOR',
+                'expiresIn': 3600,
+              }),
+              200,
+            );
+          }
+          expect(request.method, 'PUT');
+          expect(request.url.path, '/api/jobs/41/stop-recruiting');
+          expect(request.headers['Authorization'], 'Bearer jwt');
+          return http.Response(
+            jsonEncode({
+              'id': 41,
+              'contractorId': 2,
+              'contractorName': 'Contractor',
+              'title': 'Job',
+              'jobType': 'Worker',
+              'salaryPerDay': 500000,
+              'address': 'Address',
+              'latitude': 10,
+              'longitude': 106,
+              'requiredWorkers': 3,
+              'status': 'OPEN',
+              'recruitmentClosed': true,
+            }),
+            200,
+          );
+        }),
+      );
+      await api.login('0900000002', 'password');
+      final job = await api.stopRecruiting(41);
+      expect(job.recruitmentClosed, isTrue);
+      expect(job.canRecruit, isFalse);
+      expect(job.displayStatus, 'RECRUITMENT_CLOSED');
+      expect(job.requiredWorkers, 3);
+      api.dispose();
+    },
+  );
   test('extended profile update uses current user endpoint and refreshes cached display name only', () async {
     final api = ApiService(
       client: MockClient((request) async {

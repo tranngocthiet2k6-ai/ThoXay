@@ -128,6 +128,8 @@ public class ApplicationService {
     }
 
     private void requireRecruitingDate(Job job) {
+        if (job.isRecruitmentClosed())
+            throw new ApiException(HttpStatus.CONFLICT, "Chủ thầu đã dừng tuyển thợ cho công trình này");
         if (job.getEndsOn() != null && job.getEndsOn().isBefore(java.time.LocalDate.now(clock)))
             throw new ApiException(HttpStatus.CONFLICT, "Công trình đã hết thời gian tuyển");
     }

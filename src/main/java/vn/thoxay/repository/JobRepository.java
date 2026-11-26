@@ -17,6 +17,7 @@ public interface JobRepository extends JpaRepository<Job, Long> {
     @Query(value = """
         SELECT j.* FROM jobs j JOIN users u ON u.id = j.contractor_id
         WHERE j.status IN ('OPEN', 'IN_PROGRESS') AND u.is_active = TRUE
+        AND j.recruitment_closed = FALSE
         AND (SELECT count(*) FROM job_applications a WHERE a.job_id=j.id AND a.status='ACCEPTED') < j.required_workers
         AND 6371.0 * 2 * ASIN(SQRT(LEAST(1.0, GREATEST(0.0,
           POWER(SIN(RADIANS(j.latitude - :lat) / 2), 2)

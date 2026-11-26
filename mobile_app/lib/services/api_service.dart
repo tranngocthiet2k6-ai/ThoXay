@@ -1137,6 +1137,10 @@ class ApiService extends ChangeNotifier {
       body: {'cccdFrontImage': frontImageUrl, 'cccdBackImage': backImageUrl},
     ) as Map<String, dynamic>,
   );
+  Future<Job> stopRecruiting(int jobId) async => Job.fromJson(
+    await _request('PUT', '/api/jobs/$jobId/stop-recruiting')
+        as Map<String, dynamic>,
+  );
   Future<Job> completeJob(int jobId, Map<int, int> ratings) async =>
       Job.fromJson(
         await _request(

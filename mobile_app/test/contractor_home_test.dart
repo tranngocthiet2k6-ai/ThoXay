@@ -6,7 +6,9 @@ import 'package:tho_xay_mobile/services/api_service.dart';
 
 class ContractorApi extends ApiService {
   String decision = 'PENDING';
-  final job = const Job(
+  bool closed = false, failStop = false;
+  int stopCalls = 0;
+  Job get job => Job(
     id: 1,
     contractorId: 2,
     contractorName: 'Chủ thầu',
@@ -19,7 +21,8 @@ class ContractorApi extends ApiService {
     latitude: 10,
     longitude: 106,
     requiredWorkers: 1,
-    status: 'OPEN',
+    status: closed && decision == 'ACCEPTED' ? 'IN_PROGRESS' : 'OPEN',
+    recruitmentClosed: closed,
   );
   JobApplication get application => JobApplication(
     id: 1,
@@ -43,9 +46,121 @@ class ContractorApi extends ApiService {
     decision = status;
     return application;
   }
+
+  @override
+  Future<Job> stopRecruiting(int jobId) async {
+    stopCalls++;
+    if (failStop) throw const ApiException('Không kết nối được máy chủ');
+    closed = true;
+    if (decision == 'PENDING') decision = 'REJECTED';
+    return job;
+  }
 }
 
 void main() {
+  Future<void> openManagement(WidgetTester tester) async {
+    await tester.scrollUntilVisible(
+      find.text('Quản lý công trình'),
+      180,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Quản lý công trình'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Dừng tuyển'));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets(
+    'stopping recruitment requires confirmation and updates the job',
+    (tester) async {
+      final api = ContractorApi();
+      await tester.pumpWidget(
+        MaterialApp(home: ContractorHomeScreen(api: api)),
+      );
+      await tester.pumpAndSettle();
+      await openManagement(tester);
+      await tester.tap(find.text('Dừng tuyển'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Quay lại'));
+      await tester.pumpAndSettle();
+      expect(api.stopCalls, 0);
+      await tester.tap(find.text('Dừng tuyển'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Xác nhận dừng tuyển'));
+      await tester.pumpAndSettle();
+      expect(api.stopCalls, 1);
+      expect(api.decision, 'REJECTED');
+      expect(find.text('Dừng tuyển'), findsNothing);
+      expect(find.text('Sửa công trình'), findsNothing);
+      expect(find.text('Đã dừng tuyển'), findsWidgets);
+      await tester.pumpWidget(const SizedBox());
+      api.dispose();
+    },
+  );
+
+  testWidgets(
+    'accepted workers retain completion action after stopping recruitment',
+    (tester) async {
+      final api = ContractorApi()..decision = 'ACCEPTED';
+      await tester.pumpWidget(
+        MaterialApp(home: ContractorHomeScreen(api: api)),
+      );
+      await tester.pumpAndSettle();
+      await openManagement(tester);
+      await tester.tap(find.text('Dừng tuyển'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Xác nhận dừng tuyển'));
+      await tester.pumpAndSettle();
+      expect(api.decision, 'ACCEPTED');
+      expect(find.text('Hoàn thành công trình'), findsOneWidget);
+      expect(find.text('Dừng tuyển'), findsNothing);
+      await tester.pumpWidget(const SizedBox());
+      api.dispose();
+    },
+  );
+
+  testWidgets('stopping from job details closes stale actions', (tester) async {
+    final api = ContractorApi();
+    await tester.pumpWidget(MaterialApp(home: ContractorHomeScreen(api: api)));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Xem chi tiết'),
+      180,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Xem chi tiết'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Dừng tuyển'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Xác nhận dừng tuyển'));
+    await tester.pumpAndSettle();
+    expect(api.stopCalls, 1);
+    expect(find.text('Dừng tuyển'), findsNothing);
+    expect(find.text('Đã dừng tuyển'), findsWidgets);
+    await tester.pumpWidget(const SizedBox());
+    api.dispose();
+  });
+
+  testWidgets('failed stop keeps recruitment action available for retry', (
+    tester,
+  ) async {
+    final api = ContractorApi()..failStop = true;
+    await tester.pumpWidget(MaterialApp(home: ContractorHomeScreen(api: api)));
+    await tester.pumpAndSettle();
+    await openManagement(tester);
+    await tester.tap(find.text('Dừng tuyển'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Xác nhận dừng tuyển'));
+    await tester.pumpAndSettle();
+    expect(api.closed, isFalse);
+    expect(find.text('Không kết nối được máy chủ'), findsOneWidget);
+    expect(find.text('Dừng tuyển'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+    api.dispose();
+  });
+
   testWidgets(
     'payroll preview stays finite while invalid salary input is being edited',
     (tester) async {

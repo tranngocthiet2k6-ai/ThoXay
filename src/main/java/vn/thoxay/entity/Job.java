@@ -30,6 +30,8 @@ public class Job {
     private int requiredWorkers;
     @Enumerated(EnumType.STRING) @Column(nullable = false, length = 30)
     private JobStatus status = JobStatus.OPEN;
+    @Column(name = "recruitment_closed", nullable = false) @org.hibernate.annotations.ColumnDefault("false")
+    private boolean recruitmentClosed;
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
     @Column(name = "starts_on") private java.time.LocalDate startsOn;

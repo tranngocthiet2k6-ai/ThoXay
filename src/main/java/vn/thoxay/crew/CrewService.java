@@ -45,6 +45,7 @@ public class CrewService {
  }
  @Transactional public Batch apply(Long id,ApplicationRequest request){var leader=current.require(Role.ROLE_WORKER);var job=jobs.findLockedById(request.jobId()).orElseThrow(()->missing("Công trình không tồn tại"));var c=owned(id);
   if(job.getStartsOn()==null)throw conflict("Ứng tuyển tổ đội cần công trình có lịch cụ thể");
+  if(job.isRecruitmentClosed())throw conflict("Chủ thầu đã dừng tuyển thợ cho công trình này");
   if(job.getEndsOn().isBefore(LocalDate.now(clock))||!job.getContractor().isActive()||!List.of(JobStatus.OPEN,JobStatus.IN_PROGRESS).contains(job.getStatus()))throw conflict("Công trình đã ngừng tuyển");
   if(!Boolean.TRUE.equals(request.acceptedTerms())||!Objects.equals(request.termsVersion(),job.getTermsVersion()))throw conflict("Tổ trưởng cần đọc và xác nhận điều khoản hiện tại");
   if(batches.existsByCrewIdAndJobId(id,job.getId()))throw conflict("Tổ đã ứng tuyển công trình này");

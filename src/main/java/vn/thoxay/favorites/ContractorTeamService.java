@@ -75,7 +75,7 @@ public class ContractorTeamService {
         var owner = current.require(Role.ROLE_CONTRACTOR);
         var job = jobs.findLockedById(jobId).orElseThrow(this::missing);
         current.requireOwner(job.getContractor().getId(), Role.ROLE_CONTRACTOR);
-        if (!List.of(JobStatus.OPEN, JobStatus.IN_PROGRESS).contains(job.getStatus())
+        if (job.isRecruitmentClosed() || !List.of(JobStatus.OPEN, JobStatus.IN_PROGRESS).contains(job.getStatus())
             || (job.getEndsOn() != null && job.getEndsOn().isBefore(LocalDate.now(clock)))
             || applications.countByJobIdAndStatus(jobId, ApplicationStatus.ACCEPTED) >= job.getRequiredWorkers()) {
             throw conflict("Công trình không còn nhận ứng tuyển");

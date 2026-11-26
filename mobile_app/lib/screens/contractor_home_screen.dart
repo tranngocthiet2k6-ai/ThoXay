@@ -62,7 +62,10 @@ class _ContractorHomeContentState extends State<ContractorHomeContent> {
       _jobs
           .where(
             (j) =>
-                (_status.isEmpty || j.status == _status) &&
+                (_status.isEmpty ||
+                    (_status == 'RECRUITMENT_CLOSED'
+                        ? j.recruitmentClosed
+                        : j.displayStatus == _status)) &&
                 '${j.title} ${j.address}'.toLowerCase().contains(
                   _query.toLowerCase().trim(),
                 ),
@@ -85,6 +88,7 @@ class _ContractorHomeContentState extends State<ContractorHomeContent> {
   }
 
   bool _loading = false;
+  int? _stoppingJobId;
   bool _mapExpanded = false;
   final _mapKey = GlobalKey();
   final _jobListKey = GlobalKey();
@@ -191,6 +195,103 @@ class _ContractorHomeContentState extends State<ContractorHomeContent> {
     }
   }
 
+  Widget _jobActions(Job job, {VoidCallback? closeDetails}) => Wrap(
+    spacing: 12,
+    runSpacing: 8,
+    children: [
+      OutlinedButton.icon(
+        onPressed: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => AttendanceScreen(api: widget.api, job: job),
+          ),
+        ),
+        icon: const Icon(Icons.fact_check_outlined),
+        label: const Text('Chấm công & nghiệm thu'),
+      ),
+      IncidentActions(api: widget.api, job: job),
+      if (job.canRecruit)
+        OutlinedButton.icon(
+          onPressed: _stoppingJobId != null
+              ? null
+              : () {
+                  closeDetails?.call();
+                  _stopRecruiting(job);
+                },
+          icon: const Icon(Icons.person_off_outlined),
+          label: Text(
+            _stoppingJobId == job.id ? 'Đang dừng tuyển…' : 'Dừng tuyển',
+          ),
+        ),
+      if (job.status == 'OPEN' && !job.recruitmentClosed)
+        OutlinedButton.icon(
+          onPressed: () => _edit(job),
+          icon: const Icon(Icons.edit_location_alt_outlined),
+          label: const Text('Sửa công trình'),
+        ),
+      if (job.status == 'COMPLETED')
+        OutlinedButton.icon(
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => JobPaymentsScreen(api: widget.api, job: job),
+            ),
+          ),
+          icon: const Icon(Icons.payments_outlined),
+          label: const Text('Thanh toán thu nhập'),
+        ),
+      if (job.status == 'IN_PROGRESS')
+        OutlinedButton.icon(
+          onPressed: () => _complete(job),
+          icon: const Icon(Icons.task_alt),
+          label: const Text('Hoàn thành công trình'),
+        ),
+    ],
+  );
+
+  Future<void> _stopRecruiting(Job job) async {
+    if (_stoppingJobId != null) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Dừng tuyển thợ?'),
+        content: Text(
+          'Dừng nhận đơn mới cho “${job.title}”. Thợ đã duyệt vẫn tiếp tục làm việc. '
+          'Các đơn đang chờ, kể cả tổ đội, sẽ bị từ chối. Không thể mở tuyển lại.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Quay lại'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Xác nhận dừng tuyển'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted || _stoppingJobId != null) return;
+    setState(() => _stoppingJobId = job.id);
+    try {
+      final updated = await widget.api.stopRecruiting(job.id);
+      if (!mounted) return;
+      setState(
+        () => _jobs = [for (final j in _jobs) j.id == updated.id ? updated : j],
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        AppSnackBar(
+          content: const Text('Đã dừng tuyển. Thợ đã duyệt được giữ nguyên.'),
+        ),
+      );
+    } on ApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(AppSnackBar(content: Text(e.message)));
+      }
+    } finally {
+      if (mounted) setState(() => _stoppingJobId = null);
+    }
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
     body: Column(
@@ -211,7 +312,7 @@ class _ContractorHomeContentState extends State<ContractorHomeContent> {
                       title: 'Công trình của tôi',
                       subtitle: _loading
                           ? 'Đang cập nhật công trình của bạn…'
-                          : '${_jobs.length} công trình · ${_jobs.where((j) => j.status == 'OPEN').length} đang tuyển',
+                          : '${_jobs.length} công trình · ${_jobs.where((j) => j.status == 'OPEN' && !j.recruitmentClosed).length} đang tuyển',
                     ),
                   ),
                 ),
@@ -225,7 +326,7 @@ class _ContractorHomeContentState extends State<ContractorHomeContent> {
                           values: [
                             (
                               value:
-                                  '${_jobs.where((j) => j.status == "OPEN").length}',
+                                  '${_jobs.where((j) => j.status == "OPEN" && !j.recruitmentClosed).length}',
                               label: 'Đang tuyển',
                             ),
                             (
@@ -359,6 +460,7 @@ class _ContractorHomeContentState extends State<ContractorHomeContent> {
                                 for (final status in [
                                   '',
                                   'OPEN',
+                                  'RECRUITMENT_CLOSED',
                                   'IN_PROGRESS',
                                   'COMPLETED',
                                   'CANCELLED',
@@ -426,65 +528,13 @@ class _ContractorHomeContentState extends State<ContractorHomeContent> {
                                   onPressed: () => _applicants(job),
                                   child: const Text('Duyệt thợ'),
                                 ),
-                                action: Wrap(
-                                  spacing: 12,
-                                  runSpacing: 8,
-                                  children: [
-                                    OutlinedButton.icon(
-                                      onPressed: () => Navigator.of(context)
-                                          .push(
-                                            MaterialPageRoute<void>(
-                                              builder: (_) => AttendanceScreen(
-                                                api: widget.api,
-                                                job: job,
-                                              ),
-                                            ),
-                                          ),
-                                      icon: const Icon(
-                                        Icons.fact_check_outlined,
-                                      ),
-                                      label: const Text(
-                                        'Chấm công & nghiệm thu',
-                                      ),
+                                action: _jobActions(job),
+                                detailsActionBuilder: (sheetContext) =>
+                                    _jobActions(
+                                      job,
+                                      closeDetails: () =>
+                                          Navigator.pop(sheetContext),
                                     ),
-                                    IncidentActions(api: widget.api, job: job),
-                                    if (job.status == 'OPEN')
-                                      OutlinedButton.icon(
-                                        onPressed: () => _edit(job),
-                                        icon: const Icon(
-                                          Icons.edit_location_alt_outlined,
-                                        ),
-                                        label: const Text('Sửa công trình'),
-                                      ),
-                                    if (job.status == 'COMPLETED')
-                                      OutlinedButton.icon(
-                                        onPressed: () =>
-                                            Navigator.of(context).push(
-                                              MaterialPageRoute<void>(
-                                                builder: (_) =>
-                                                    JobPaymentsScreen(
-                                                      api: widget.api,
-                                                      job: job,
-                                                    ),
-                                              ),
-                                            ),
-                                        icon: const Icon(
-                                          Icons.payments_outlined,
-                                        ),
-                                        label: const Text(
-                                          'Thanh toán thu nhập',
-                                        ),
-                                      ),
-                                    if (job.status == 'IN_PROGRESS')
-                                      OutlinedButton.icon(
-                                        onPressed: () => _complete(job),
-                                        icon: const Icon(Icons.task_alt),
-                                        label: const Text(
-                                          'Hoàn thành công trình',
-                                        ),
-                                      ),
-                                  ],
-                                ),
                               ),
                           ],
                         ),

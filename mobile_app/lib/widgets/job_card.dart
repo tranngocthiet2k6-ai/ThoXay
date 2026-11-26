@@ -231,7 +231,7 @@ class JobCard extends StatelessWidget {
                           ),
                         )
                       else
-                        JobStatusBadge(status: job.status),
+                        JobStatusBadge(status: job.displayStatus),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -248,6 +248,8 @@ class JobCard extends StatelessWidget {
                         ),
                       ),
                       if (job.contractorVerified) const KycBadge(),
+                      if (job.recruitmentClosed && job.status != 'OPEN')
+                        const Chip(label: Text('Đã dừng tuyển')),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -424,7 +426,9 @@ Future<T?> showJobDetails<T>(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                JobStatusBadge(status: job.status),
+                JobStatusBadge(status: job.displayStatus),
+                if (job.recruitmentClosed && job.status != 'OPEN')
+                  const Chip(label: Text('Đã dừng tuyển')),
                 const SizedBox(height: 16),
                 Text(
                   job.title,

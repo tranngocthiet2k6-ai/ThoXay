@@ -96,7 +96,7 @@ class _SharedJobScreenState extends State<SharedJobScreen> {
   }
 
   Future<void> _apply({bool negotiate = false}) async {
-    if (_busy) return;
+    if (_busy || _job?.canRecruit != true) return;
     setState(() => _busy = true);
     try {
       final j = _job!;
@@ -141,7 +141,7 @@ class _SharedJobScreenState extends State<SharedJobScreen> {
         ? null
         : (sheetContext) => JobApplicationActions(
             applied: _applied,
-            busy: _busy || _job!.status != 'OPEN',
+            busy: _busy || !_job!.canRecruit,
             onApply: () {
               Navigator.pop(sheetContext);
               _apply();

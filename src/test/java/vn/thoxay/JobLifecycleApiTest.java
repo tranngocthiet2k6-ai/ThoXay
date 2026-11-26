@@ -128,6 +128,44 @@ class JobLifecycleApiTest {
             .andExpect(status().isBadRequest());
     }
 
+    @Test void stoppingRecruitmentSerializesWithApprovalAndNewApplications() throws Exception {
+        Job job = openJob("Dừng tuyển đồng thời", "Thợ chính", 500000);
+        job.setRequiredWorkers(3); jobs.saveAndFlush(job);
+        JobApplication pending = new JobApplication(); pending.setJob(job); pending.setWorker(worker);
+        applications.saveAndFlush(pending);
+        User newcomer = user("0955555556", Role.ROLE_WORKER);
+        ExecutorService pool = Executors.newFixedThreadPool(3);
+        CountDownLatch start = new CountDownLatch(1);
+        try {
+            Future<Integer> stop = pool.submit(() -> {
+                start.await();
+                return mvc.perform(put("/api/jobs/" + job.getId() + "/stop-recruiting").header("Authorization", token(owner)))
+                    .andReturn().getResponse().getStatus();
+            });
+            Future<Integer> accept = pool.submit(() -> {
+                start.await();
+                return mvc.perform(put("/api/applications/" + pending.getId() + "/status").header("Authorization", token(owner))
+                    .contentType("application/json").content("{\"status\":\"ACCEPTED\"}"))
+                    .andReturn().getResponse().getStatus();
+            });
+            Future<Integer> apply = pool.submit(() -> {
+                start.await();
+                return mvc.perform(post("/api/applications/apply").header("Authorization", token(newcomer))
+                    .contentType("application/json").content("{\"jobId\":" + job.getId() + "}"))
+                    .andReturn().getResponse().getStatus();
+            });
+            start.countDown();
+            assertThat(stop.get(15, TimeUnit.SECONDS)).isEqualTo(200);
+            int approvalStatus = accept.get(15, TimeUnit.SECONDS);
+            assertThat(approvalStatus).isIn(200, 409);
+            assertThat(apply.get(15, TimeUnit.SECONDS)).isIn(201, 409);
+            assertThat(jobs.findById(job.getId()).orElseThrow().isRecruitmentClosed()).isTrue();
+            assertThat(applications.countByJobIdAndStatus(job.getId(), ApplicationStatus.PENDING)).isZero();
+            assertThat(applications.findById(pending.getId()).orElseThrow().getStatus())
+                .isEqualTo(approvalStatus == 200 ? ApplicationStatus.ACCEPTED : ApplicationStatus.REJECTED);
+        } finally { pool.shutdownNow(); }
+    }
+
     private String scores(int stars) { return "{\"ratings\":[{\"workerId\":" + worker.getId() + ",\"stars\":" + stars + "}]}"; }
     private int complete(Job job, int stars, User contractor) throws Exception {
         return mvc.perform(put("/api/jobs/" + job.getId() + "/complete").header("Authorization", token(contractor))

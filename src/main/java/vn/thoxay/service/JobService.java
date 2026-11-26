@@ -18,6 +18,30 @@ public class JobService {
     private final java.time.Clock clock;
     private final NotificationService notifications;
     private final jakarta.persistence.EntityManager em;
+    private final vn.thoxay.crew.CrewBatchRepository crewBatches;
+
+    @Transactional
+    public JobResponse stopRecruiting(Long id) {
+        Job job = jobs.findLockedById(id).orElseThrow(() -> new vn.thoxay.exception.ApiException(
+            org.springframework.http.HttpStatus.NOT_FOUND, "Công trình không tồn tại"));
+        current.requireOwner(job.getContractor().getId(), Role.ROLE_CONTRACTOR);
+        if (job.isRecruitmentClosed()) return JobResponse.of(job, null);
+        if (job.getStatus() != JobStatus.OPEN && job.getStatus() != JobStatus.IN_PROGRESS)
+            throw new vn.thoxay.exception.ApiException(org.springframework.http.HttpStatus.CONFLICT, "Công trình đã kết thúc");
+        job.setRecruitmentClosed(true);
+        if (applications.countByJobIdAndStatus(id, ApplicationStatus.ACCEPTED) > 0)
+            job.setStatus(JobStatus.IN_PROGRESS);
+        for (var application : applications.findByJobIdOrderByAppliedAtDesc(id)) {
+            if (application.getStatus() != ApplicationStatus.PENDING) continue;
+            application.setStatus(ApplicationStatus.REJECTED);
+            notifications.create(application.getWorker(), job, "recruitment-closed:" + application.getId(),
+                "APPLICATION_REJECTED", "Công trình đã dừng tuyển",
+                "Chủ thầu đã dừng tuyển cho công trình: " + job.getTitle() + ". Bạn có thể tìm công trình khác.");
+        }
+        for (var batch : crewBatches.findByJobIdOrderByIdDesc(id))
+            if ("PENDING".equals(batch.getStatus())) batch.setStatus("REJECTED");
+        return JobResponse.of(job, null);
+    }
 
     @Transactional
     public JobResponse create(JobRequest request) {
@@ -38,7 +62,7 @@ public class JobService {
     public JobResponse update(Long id,JobRequest request) {
         var job=jobs.findLockedById(id).orElseThrow(() -> new vn.thoxay.exception.ApiException(org.springframework.http.HttpStatus.NOT_FOUND,"Công trình không tồn tại"));
         current.requireOwner(job.getContractor().getId(),Role.ROLE_CONTRACTOR); validateDates(request);
-        if(job.getStatus()!=vn.thoxay.entity.JobStatus.OPEN || applications.countByJobIdAndStatus(id,ApplicationStatus.ACCEPTED)>0)
+        if(job.isRecruitmentClosed() || job.getStatus()!=vn.thoxay.entity.JobStatus.OPEN || applications.countByJobIdAndStatus(id,ApplicationStatus.ACCEPTED)>0)
             throw new vn.thoxay.exception.ApiException(org.springframework.http.HttpStatus.CONFLICT,"Chỉ sửa công trình chưa nhận thợ");
         job.setTitle(request.title().trim()); job.setDescription(request.description()); job.setJobType(request.jobType());
         job.setSalaryPerDay(request.salaryPerDay()); job.setAddress(request.address().trim());

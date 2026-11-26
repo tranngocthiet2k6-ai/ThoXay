@@ -178,6 +178,7 @@ class _WorkerHomeContentState extends State<WorkerHomeContent> {
 
   Future<void> _apply(Job job, {bool negotiate = false}) async {
     if (_proposalOpen ||
+        !job.canRecruit ||
         _applying != null ||
         _applications.any((a) => a.job.id == job.id)) {
       return;
@@ -249,6 +250,7 @@ class _WorkerHomeContentState extends State<WorkerHomeContent> {
       primaryLabel: applied ? 'Đã ứng tuyển' : 'Nhận việc',
       onPrimary:
           applied ||
+              !job.canRecruit ||
               _loading ||
               _applying != null ||
               _proposalOpen ||
@@ -270,7 +272,7 @@ class _WorkerHomeContentState extends State<WorkerHomeContent> {
       api: widget.api,
       actionBuilder: (sheetContext) => JobApplicationActions(
         applied: alreadyApplied,
-        busy: _applying != null || _proposalOpen || _loading,
+        busy: _applying != null || _proposalOpen || _loading || !job.canRecruit,
         onApply: () {
           Navigator.pop(sheetContext);
           _apply(job);

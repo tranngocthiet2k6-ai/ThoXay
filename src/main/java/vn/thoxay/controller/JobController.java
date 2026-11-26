@@ -31,6 +31,8 @@ public class JobController {
     public JobResponse complete(@PathVariable @Positive Long id, @Valid @RequestBody CompleteJobRequest request) {
         return completions.complete(id, request);
     }
+    @PutMapping("/{id}/stop-recruiting")
+    public JobResponse stopRecruiting(@PathVariable @Positive Long id) { return jobs.stopRecruiting(id); }
     @GetMapping("/contractor/{contractorId}")
     public List<JobResponse> byContractor(@PathVariable @Positive Long contractorId) { return jobs.byContractor(contractorId); }
 }

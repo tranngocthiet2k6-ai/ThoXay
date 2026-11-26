@@ -43,7 +43,9 @@ public class ApplicationCancellationService {
         application.setCancellationPenalty(before - worker.getReputationScore());
         applications.flush();
         notifications.create(job.getContractor(), job, "cancelled:owner:" + id, "WORKER_CANCELLED",
-            "Thợ đã hủy việc đang làm", "Công trình có vị trí trống. Bạn có thể tuyển người thay thế: " + job.getTitle());
+            "Thợ đã hủy việc đang làm", (job.isRecruitmentClosed()
+                ? "Công trình đã dừng tuyển có thợ hủy việc: "
+                : "Công trình có vị trí trống. Bạn có thể tuyển người thay thế: ") + job.getTitle());
         notifications.create(worker, job, "cancelled:worker:" + id, "APPLICATION_CANCELLED",
             "Đã hủy việc", "Uy tín bị trừ " + application.getCancellationPenalty() + " điểm. Bậc thợ đã được tính lại.");
         return ApplicationResponse.of(application);

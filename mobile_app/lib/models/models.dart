@@ -53,6 +53,7 @@ class Job {
     this.termsVersion = 1,
     this.contractorVerified = false,
     this.attendanceRequired = false,
+    this.recruitmentClosed = false,
   });
   final int id, contractorId, requiredWorkers;
   final String? contractorPhone;
@@ -62,6 +63,11 @@ class Job {
   final DateTime? startsOn, endsOn;
   final int termsVersion;
   final bool contractorVerified, attendanceRequired;
+  final bool recruitmentClosed;
+  bool get canRecruit =>
+      !recruitmentClosed && (status == 'OPEN' || status == 'IN_PROGRESS');
+  String get displayStatus =>
+      recruitmentClosed && status == 'OPEN' ? 'RECRUITMENT_CLOSED' : status;
   factory Job.fromJson(Map<String, dynamic> json) => Job(
     id: (json['id'] as num).toInt(),
     contractorId: (json['contractorId'] as num).toInt(),
@@ -86,6 +92,7 @@ class Job {
     termsVersion: (json['termsVersion'] as num?)?.toInt() ?? 1,
     contractorVerified: json['contractorVerified'] as bool? ?? false,
     attendanceRequired: json['attendanceRequired'] as bool? ?? false,
+    recruitmentClosed: json['recruitmentClosed'] as bool? ?? false,
   );
 }
 
@@ -214,6 +221,7 @@ class UserProfile {
 
 String statusLabel(String status) => switch (status) {
   'OPEN' => 'Đang tuyển',
+  'RECRUITMENT_CLOSED' => 'Đã dừng tuyển',
   'IN_PROGRESS' => 'Đang thi công',
   'COMPLETED' => 'Hoàn thành',
   'CANCELLED' => 'Đã hủy',
