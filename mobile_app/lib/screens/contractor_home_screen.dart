@@ -739,18 +739,6 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
-                  controller: _address,
-                  enabled: !_busy,
-                  maxLength: 255,
-                  decoration: const InputDecoration(
-                    labelText: 'Địa chỉ công trình',
-                  ),
-                  validator: (v) => (v?.trim().isEmpty ?? true)
-                      ? 'Nhập địa chỉ công trình'
-                      : null,
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
                   controller: _workers,
                   enabled: !_busy,
                   keyboardType: TextInputType.number,
@@ -765,6 +753,18 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
                   },
                 ),
                 const SizedBox(height: 16),
+                TextFormField(
+                  controller: _address,
+                  enabled: !_busy,
+                  maxLength: 255,
+                  decoration: const InputDecoration(
+                    labelText: 'Địa chỉ công trình',
+                  ),
+                  validator: (v) => (v?.trim().isEmpty ?? true)
+                      ? 'Nhập địa chỉ công trình'
+                      : null,
+                ),
+                const SizedBox(height: 12),
                 JobLocationPin(
                   center: _position ?? const GeoPoint(10.7769, 106.7009),
                   selected: _position,
@@ -778,15 +778,10 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
                       ? 'Chưa chọn vị trí công trình'
                       : 'Vị trí: ${_position!.latitude.toStringAsFixed(5)}, ${_position!.longitude.toStringAsFixed(5)}',
                 ),
-                const SizedBox(height: 12),
-                JobSchedulePicker(
-                  value: _schedule,
-                  enabled: !_busy,
-                  onChanged: (range) => setState(() => _schedule = range),
-                ),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
+                  runSpacing: 8,
                   children: [
                     OutlinedButton.icon(
                       onPressed: _busy || _gps ? null : _chooseOnMap,
@@ -799,6 +794,12 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
                       label: Text(_gps ? 'Đang lấy GPS…' : 'Lấy GPS'),
                     ),
                   ],
+                ),
+                const SizedBox(height: 24),
+                JobSchedulePicker(
+                  value: _schedule,
+                  enabled: !_busy,
+                  onChanged: (range) => setState(() => _schedule = range),
                 ),
                 const SizedBox(height: 16),
                 ValueListenableBuilder<TextEditingValue>(
