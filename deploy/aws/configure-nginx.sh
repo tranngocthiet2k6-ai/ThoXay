@@ -5,6 +5,7 @@ api_domain=${1:?Supply the public API hostname}
 [[ $EUID -eq 0 ]] || { echo 'Run with sudo.' >&2; exit 1; }
 [[ $api_domain =~ ^[a-zA-Z0-9]([a-zA-Z0-9.-]*[a-zA-Z0-9])?$ && $api_domain == *.* ]] || { echo 'Invalid API hostname.' >&2; exit 1; }
 bundle=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+install -d -o www-data -g www-data -m 750 /var/cache/nginx/thoxay-map-tiles
 site=/etc/nginx/sites-available/thoxay
 backup=''
 enabled_before=false

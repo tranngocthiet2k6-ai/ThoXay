@@ -1,7 +1,10 @@
 import 'dart:async';
 
 import '../theme/app_theme.dart';
+import '../services/map_tile_client.dart';
+import '../services/api_service.dart';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -41,18 +44,52 @@ class OsmMapView extends StatefulWidget {
   State<OsmMapView> createState() => _OsmMapViewState();
 }
 
-class _OsmMapViewState extends State<OsmMapView> {
-  static const _tiles = String.fromEnvironment(
-    'MAP_TILE_URL',
-    defaultValue: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-  );
+class _OsmMapViewState extends State<OsmMapView> with WidgetsBindingObserver {
+  static const _configuredTiles = String.fromEnvironment('MAP_TILE_URL');
+  static String get _tiles => _configuredTiles.isNotEmpty
+      ? _configuredTiles
+      : kIsWeb
+      ? 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
+      : '${ApiService.defaultBaseUrl.replaceFirst(RegExp(r'/+$'), '')}/map-tiles/{z}/{x}/{y}.png';
   final _controller = MapController();
-  late final TileProvider _provider =
-      widget.tileProvider ??
-      OsmMapView.testTileProviderFactory?.call() ??
-      NetworkTileProvider();
+  late final TileProvider _provider;
+  MapTileClient? _tileClient;
   bool _ready = false, _tileError = false;
+  String _tileErrorDetail = '';
   bool _locating = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final injected =
+        widget.tileProvider ?? OsmMapView.testTileProviderFactory?.call();
+    if (injected != null) {
+      _provider = injected;
+    } else {
+      _tileClient = MapTileClient();
+      _provider = NetworkTileProvider(
+        httpClient: _tileClient,
+        headers: kIsWeb
+            ? {}
+            : {
+                'User-Agent': 'ThoXay (vn.thoxay.tho_xay_mobile; https://thoxay.vercel.app)',
+              },
+        attemptDecodeOfHttpErrorResponses: false,
+      );
+    }
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && _tileError) _retryTiles();
+  }
+
+  void _retryTiles() {
+    setState(() => _tileError = false);
+    _tileReset.add(null);
+  }
+
   Future<void> _locate() async {
     if (_locating) return;
     setState(() => _locating = true);
@@ -130,15 +167,47 @@ class _OsmMapViewState extends State<OsmMapView> {
     }
   }
 
-  void _onTileError() {
+  String _describeTileError(Object error) {
+    if (error is NetworkImageLoadException) {
+      if (error.statusCode == 429) {
+        return 'Nguồn bản đồ đang giới hạn lượt tải. Vui lòng thử lại sau.';
+      }
+      return 'Nguồn bản đồ trả lỗi HTTP ${error.statusCode}. Vui lòng thử lại sau.';
+    }
+    final detail = error.toString().toLowerCase();
+    if (detail.contains('handshake') || detail.contains('certificate')) {
+      return 'Không xác minh được kết nối bảo mật tới nguồn bản đồ. Kiểm tra ngày giờ thiết bị.';
+    }
+    if (detail.contains('failed host lookup') ||
+        detail.contains('name resolution')) {
+      return 'Không tìm thấy máy chủ bản đồ. Thử kết nối Wi-Fi hoặc 4G khác.';
+    }
+    return 'Kiểm tra mạng; bạn vẫn có thể chọn vị trí hoặc dùng danh sách.';
+  }
+
+  void _onTileError(Object error) {
     if (_tileError) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && !_tileError) setState(() => _tileError = true);
+      if (mounted && !_tileError) {
+        setState(() {
+          _tileError = true;
+          _tileErrorDetail = _describeTileError(error);
+        });
+      }
+    });
+  }
+
+  void _onTileLoaded() {
+    if (!_tileError) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _tileError) setState(() => _tileError = false);
     });
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _tileClient?.close();
     _controller.dispose();
     unawaited(_tileReset.close());
     super.dispose();
@@ -182,23 +251,27 @@ class _OsmMapViewState extends State<OsmMapView> {
               maxNativeZoom: 19,
               panBuffer: 0,
               keepBuffer: 1,
-              tileBuilder: (context, image, tile) =>
-                  _provider is NetworkTileProvider &&
-                      tile.loadStarted != null &&
-                      tile.loadFinishedAt == null &&
-                      !tile.loadError &&
-                      !tile.cancelLoading.isCompleted
-                  ? Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        ShimmerSurface(
-                          child: ColoredBox(color: AppPalette.of(context).soft),
-                        ),
-                        image,
-                      ],
-                    )
-                  : image,
-              errorTileCallback: (_, error, stackTrace) => _onTileError(),
+              tileBuilder: (context, image, tile) {
+                if (!tile.loadError && tile.imageInfo != null) _onTileLoaded();
+                return _provider is NetworkTileProvider &&
+                        tile.loadStarted != null &&
+                        tile.loadFinishedAt == null &&
+                        !tile.loadError &&
+                        !tile.cancelLoading.isCompleted
+                    ? Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          ShimmerSurface(
+                            child: ColoredBox(
+                              color: AppPalette.of(context).soft,
+                            ),
+                          ),
+                          image,
+                        ],
+                      )
+                    : image;
+              },
+              errorTileCallback: (_, error, stackTrace) => _onTileError(error),
             ),
             if (widget.circles.isNotEmpty) CircleLayer(circles: widget.circles),
             MarkerLayer(markers: widget.markers),
@@ -270,23 +343,20 @@ class _OsmMapViewState extends State<OsmMapView> {
           Positioned(
             top: 8,
             left: 8,
-            right: 64,
+            right: widget.interactive ? 64 : 8,
             child: Container(
               padding: const EdgeInsets.all(10),
               color: AppPalette.of(context).surface.withValues(alpha: .95),
               child: Row(
                 children: [
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'Chưa tải được nền bản đồ. Kiểm tra mạng; bạn vẫn có thể chọn vị trí hoặc dùng danh sách.',
-                      style: TextStyle(fontSize: 12),
+                      'Chưa tải được nền bản đồ. $_tileErrorDetail',
+                      style: const TextStyle(fontSize: 12),
                     ),
                   ),
                   TextButton(
-                    onPressed: () {
-                      setState(() => _tileError = false);
-                      _tileReset.add(null);
-                    },
+                    onPressed: _retryTiles,
                     child: const Text('Thử lại'),
                   ),
                 ],

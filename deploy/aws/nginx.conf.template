@@ -1,3 +1,7 @@
+proxy_cache_path /var/cache/nginx/thoxay-map-tiles levels=1:2 keys_zone=thoxay_map_tiles:8m
+    max_size=128m inactive=7d use_temp_path=off;
+limit_req_zone $binary_remote_addr zone=thoxay_map_requests:8m rate=15r/s;
+
 upstream thoxay_backend {
     server 127.0.0.1:8080;
     keepalive 8;
@@ -13,7 +17,46 @@ server {
     server_name __API_DOMAIN__;
     client_max_body_size 12m;
 
-    # Only these public, bundled assets may be cached. API and KYC use the
+    # Only a fixed OSM tile host is proxied. Viewport tiles retain HTTP caching.
+    location ~ "^/map-tiles/([0-9]|1[0-9])/([0-9]{1,6})/([0-9]{1,6})[.]png$" {
+        limit_except GET HEAD { deny all; }
+        limit_req zone=thoxay_map_requests burst=60 nodelay;
+        limit_req_status 429;
+        rewrite ^/map-tiles/(.*)$ /$1? break;
+        proxy_pass https://tile.openstreetmap.org;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_set_header Host tile.openstreetmap.org;
+        proxy_set_header User-Agent "ThoXay (vn.thoxay.tho_xay_mobile; https://thoxay.vercel.app)";
+        proxy_set_header Referer $http_referer;
+        proxy_set_header Authorization "";
+        proxy_set_header Cookie "";
+        proxy_ssl_server_name on;
+        proxy_ssl_name tile.openstreetmap.org;
+        proxy_ssl_verify on;
+        proxy_ssl_verify_depth 3;
+        proxy_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
+        proxy_connect_timeout 8s;
+        proxy_read_timeout 15s;
+        proxy_cache thoxay_map_tiles;
+        proxy_cache_key "https://tile.openstreetmap.org$uri";
+        proxy_cache_valid 200 7d;
+        proxy_cache_lock on;
+        proxy_cache_revalidate on;
+        proxy_cache_background_update on;
+        proxy_cache_use_stale error timeout updating http_500 http_502 http_503 http_504;
+        proxy_hide_header Set-Cookie;
+        proxy_hide_header Access-Control-Allow-Origin;
+        add_header Access-Control-Allow-Origin "https://thoxay.vercel.app" always;
+        add_header X-Map-Cache $upstream_cache_status always;
+        access_log off;
+    }
+
+    location /map-tiles/ {
+        return 404;
+    }
+
+    # Public bundled assets may be cached. API and KYC use the
     # backend's original cache policy through the general proxy below.
     location ~ ^/vendor/bootstrap/(bootstrap\.min\.css|bootstrap\.bundle\.min\.js)$ {
         proxy_pass http://thoxay_backend;

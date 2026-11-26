@@ -586,8 +586,8 @@ class ApiService extends ChangeNotifier {
       );
   ApiService({http.Client? client, String? baseUrl, this.warmUpServer = false})
     : _client = client ?? http.Client(),
-      baseUrl = (baseUrl ?? _defaultBaseUrl).replaceFirst(RegExp(r'/+$'), '');
-  static const _defaultBaseUrl = String.fromEnvironment(
+      baseUrl = (baseUrl ?? defaultBaseUrl).replaceFirst(RegExp(r'/+$'), '');
+  static const defaultBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
     defaultValue: 'https://thoxay-api-52-62-110-176.sslip.io',
   );

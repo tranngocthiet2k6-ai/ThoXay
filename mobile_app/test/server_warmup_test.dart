@@ -148,6 +148,7 @@ void main() {
     final gate = Completer<http.Response>();
     var posts = 0, authChanges = 0;
     final api = ApiService(
+      baseUrl: _base.toString(),
       warmUpServer: true,
       client: MockClient((request) async {
         if (request.url.path.endsWith('/health')) return gate.future;
@@ -184,6 +185,7 @@ void main() {
       SharedPreferences.setMockInitialValues({});
       var posts = 0;
       final api = ApiService(
+        baseUrl: _base.toString(),
         warmUpServer: true,
         client: MockClient((request) async {
           if (request.method == 'GET') {
@@ -217,6 +219,7 @@ void main() {
     final gate = Completer<http.Response>();
     var profileCalls = 0;
     final api = ApiService(
+      baseUrl: _base.toString(),
       warmUpServer: true,
       client: MockClient((request) async {
         if (request.url.path.endsWith('/health')) return gate.future;
