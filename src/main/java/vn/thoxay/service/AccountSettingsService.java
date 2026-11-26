@@ -13,6 +13,10 @@ import vn.thoxay.exception.ApiException;
 import vn.thoxay.repository.UserRepository;
 import vn.thoxay.security.*;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import vn.thoxay.dto.JobResponse;
+import vn.thoxay.entity.Job;
 
 @Service @RequiredArgsConstructor
 public class AccountSettingsService {
@@ -62,18 +66,37 @@ public class AccountSettingsService {
         if (user.getRole() == Role.ROLE_ADMIN) throw new ApiException(HttpStatus.FORBIDDEN, "Admin không thể chuyển sang vai trò công khai");
         Role target = Role.valueOf(request.role());
         if (target == user.getRole()) return session(user);
-        long openJobs = em.createQuery("select count(j) from Job j where j.contractor.id=:id and j.status in (vn.thoxay.entity.JobStatus.OPEN,vn.thoxay.entity.JobStatus.IN_PROGRESS)", Long.class)
-            .setParameter("id", user.getId()).getSingleResult();
-        long openApplications = em.createQuery("select count(a) from JobApplication a where a.worker.id=:id and a.status in (vn.thoxay.entity.ApplicationStatus.PENDING,vn.thoxay.entity.ApplicationStatus.ACCEPTED) and a.job.status in (vn.thoxay.entity.JobStatus.OPEN,vn.thoxay.entity.JobStatus.IN_PROGRESS)", Long.class)
-            .setParameter("id", user.getId()).getSingleResult();
-        long unpaid = em.createQuery("select count(a) from JobApplication a where (a.worker.id=:id or a.job.contractor.id=:id) and a.status=vn.thoxay.entity.ApplicationStatus.ACCEPTED and a.job.status=vn.thoxay.entity.JobStatus.COMPLETED and not exists (select p.id from JobPayment p where p.application.id=a.id)", Long.class)
-            .setParameter("id", user.getId()).getSingleResult();
-        if (openJobs > 0) throw new ApiException(HttpStatus.CONFLICT, "Bạn còn công trình đang tuyển hoặc thi công. Hãy hoàn tất công việc hoặc liên hệ Admin xử lý trước khi chuyển vai trò.");
-        if (openApplications > 0) throw new ApiException(HttpStatus.CONFLICT, "Bạn còn đơn ứng tuyển hoặc công việc đang xử lý. Hãy hoàn tất hoặc nhờ chủ thầu xử lý đơn trước khi chuyển vai trò.");
-        if (unpaid > 0) throw new ApiException(HttpStatus.CONFLICT, "Còn công trình hoàn thành chưa chốt thanh toán. Hãy đối soát thanh toán trước khi chuyển vai trò.");
+        var blockers = blockers(user.getId());
+        if (!blockers.isEmpty()) throw new ApiException(HttpStatus.CONFLICT, switch (blockers.get(0).reason()) {
+            case "OPEN_JOB" -> "Bạn còn công trình đang tuyển hoặc thi công. Hãy dừng tuyển nếu không còn thợ, hoặc hoàn tất công việc trước khi chuyển vai trò.";
+            case "OPEN_APPLICATION" -> "Bạn còn đơn ứng tuyển hoặc công việc đang xử lý. Hãy hoàn tất hoặc nhờ chủ thầu xử lý đơn trước khi chuyển vai trò.";
+            default -> "Còn công trình hoàn thành chưa chốt thanh toán. Chủ thầu cần thanh toán tiền công trước khi chuyển vai trò.";
+        });
         user.setRole(target); user.setAvailable(false); user.setSecurityVersion(user.getSecurityVersion() + 1);
         devices.deleteByUserId(user.getId());
         return session(user);
+    }
+    public record RoleBlocker(String reason, JobResponse job, boolean owner) { }
+    @Transactional(readOnly=true) public List<RoleBlocker> roleBlockers() {
+        User user = current.get();
+        if (user.getRole() == Role.ROLE_ADMIN) throw new ApiException(HttpStatus.FORBIDDEN, "Admin không chuyển vai trò công khai");
+        return blockers(user.getId());
+    }
+    private List<RoleBlocker> blockers(Long id) {
+        List<RoleBlocker> result = new ArrayList<>();
+        var openJobs = em.createQuery("select j from Job j where j.contractor.id=:id and j.status in (vn.thoxay.entity.JobStatus.OPEN,vn.thoxay.entity.JobStatus.IN_PROGRESS) "
+            + "and (j.recruitmentClosed=false or exists (select a.id from JobApplication a where a.job=j and a.status=vn.thoxay.entity.ApplicationStatus.ACCEPTED)) order by j.id", Job.class)
+            .setParameter("id", id).getResultList();
+        for (Job job : openJobs) result.add(new RoleBlocker("OPEN_JOB", JobResponse.of(job,null,true), true));
+        var openApplications = em.createQuery("select a from JobApplication a join fetch a.job where a.worker.id=:id and a.status in (vn.thoxay.entity.ApplicationStatus.PENDING,vn.thoxay.entity.ApplicationStatus.ACCEPTED) "
+            + "and a.job.status in (vn.thoxay.entity.JobStatus.OPEN,vn.thoxay.entity.JobStatus.IN_PROGRESS) order by a.id", vn.thoxay.entity.JobApplication.class)
+            .setParameter("id", id).getResultList();
+        for (var application : openApplications) result.add(new RoleBlocker("OPEN_APPLICATION", JobResponse.of(application.getJob(),null,application.getStatus()==vn.thoxay.entity.ApplicationStatus.ACCEPTED), false));
+        var unpaid = em.createQuery("select distinct j from JobApplication a join a.job j where (a.worker.id=:id or j.contractor.id=:id) and a.status=vn.thoxay.entity.ApplicationStatus.ACCEPTED "
+            + "and j.status=vn.thoxay.entity.JobStatus.COMPLETED and not exists (select p.id from JobPayment p where p.application.id=a.id) order by j.id", Job.class)
+            .setParameter("id", id).getResultList();
+        for (Job job : unpaid) result.add(new RoleBlocker("UNPAID_WORK", JobResponse.of(job,null,true), job.getContractor().getId().equals(id)));
+        return result;
     }
     @Transactional public PushPreferences notifications(PushPreferences request) {
         User user = locked(); user.setJobPushEnabled(request.jobPushEnabled()); user.setChatPushEnabled(request.chatPushEnabled());

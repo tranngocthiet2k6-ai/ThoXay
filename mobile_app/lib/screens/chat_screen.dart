@@ -414,7 +414,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                           ),
                         ),
                         Text(
-                          statusLabel(widget.job.status),
+                          statusLabel(widget.job.displayStatus),
                           style: TextStyle(fontSize: 12, color: palette.muted),
                         ),
                       ],

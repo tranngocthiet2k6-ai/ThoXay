@@ -20,7 +20,9 @@ void revealMapJobList(
     }
     final viewport = RenderAbstractViewport.maybeOf(box);
     final position = Scrollable.maybeOf(target)?.position;
-    if (viewport == null || position == null || !position.hasContentDimensions) {
+    if (viewport == null ||
+        position == null ||
+        !position.hasContentDimensions) {
       return;
     }
     final listIsMounted = listKey.currentContext != null;
@@ -100,7 +102,7 @@ Future<void> showJobMapSummary(
             ),
             const SizedBox(height: 8),
             Text(
-              '${statusLabel(job.status)}${job.distanceKm == null ? "" : " · ${job.distanceKm!.toStringAsFixed(1)} km"}',
+              '${statusLabel(job.displayStatus)}${job.distanceKm == null ? "" : " · ${job.distanceKm!.toStringAsFixed(1)} km"}',
             ),
             const SizedBox(height: 8),
             Text(

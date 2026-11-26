@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS jobs (
   latitude DOUBLE PRECISION NOT NULL CHECK (latitude BETWEEN -90 AND 90),
   longitude DOUBLE PRECISION NOT NULL CHECK (longitude BETWEEN -180 AND 180),
   required_workers INTEGER NOT NULL CHECK (required_workers > 0),
+  recruitment_closed BOOLEAN NOT NULL DEFAULT FALSE,
   starts_on DATE, ends_on DATE, terms_version INTEGER NOT NULL DEFAULT 1,
   CONSTRAINT chk_job_schedule CHECK ((starts_on IS NULL AND ends_on IS NULL) OR (starts_on IS NOT NULL AND ends_on IS NOT NULL AND ends_on>=starts_on AND ends_on-starts_on<=365)),
   status VARCHAR(30) NOT NULL DEFAULT 'OPEN' CHECK (status IN ('OPEN','IN_PROGRESS','COMPLETED','CANCELLED')),

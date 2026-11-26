@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../services/api_service.dart';
+import '../screens/role_switch_blockers_screen.dart';
 import '../theme/app_theme.dart';
 import 'app_snack_bar.dart';
 import 'bouncing_button.dart';
@@ -23,6 +24,7 @@ class RoleSwitchTile extends StatefulWidget {
 class _RoleSwitchTileState extends State<RoleSwitchTile> {
   bool _busy = false;
   String? _error;
+  bool _blocked = false;
   Future<void> _switch(bool worker) async {
     if (_busy || !widget.enabled) return;
     final confirmed = await showDialog<bool>(
@@ -49,6 +51,7 @@ class _RoleSwitchTileState extends State<RoleSwitchTile> {
     setState(() {
       _busy = true;
       _error = null;
+      _blocked = false;
     });
     widget.onBusy?.call(true);
     try {
@@ -65,7 +68,12 @@ class _RoleSwitchTileState extends State<RoleSwitchTile> {
         ),
       );
     } on ApiException catch (e) {
-      if (mounted) setState(() => _error = e.message);
+      if (mounted) {
+        setState(() {
+          _error = e.message;
+          _blocked = e.statusCode == 409;
+        });
+      }
     } catch (_) {
       if (mounted) {
         setState(
@@ -132,6 +140,30 @@ class _RoleSwitchTileState extends State<RoleSwitchTile> {
                   _error!,
                   style: TextStyle(color: AppPalette.of(context).errorStrong),
                 ),
+              ),
+            ),
+          if (_blocked)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: OutlinedButton.icon(
+                onPressed: _busy || !widget.enabled
+                    ? null
+                    : () async {
+                        await Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) =>
+                                RoleSwitchBlockersScreen(api: widget.api),
+                          ),
+                        );
+                        if (mounted) {
+                          setState(() {
+                            _error = null;
+                            _blocked = false;
+                          });
+                        }
+                      },
+                icon: const Icon(Icons.assignment_outlined),
+                label: const Text('Xem công việc cần xử lý'),
               ),
             ),
         ],

@@ -78,4 +78,24 @@ class RoleSwitchApiTest {
         mvc.perform(put("/api/users/me/settings/role").contentType("application/json").content("{\"role\":\"ROLE_CONTRACTOR\"}")).andExpect(status().isUnauthorized());
         change(token,"ROLE_WORKER").andExpect(status().isOk()); assertThat(worker.getSecurityVersion()).isZero(); assertThat(owner.getRole()).isEqualTo(Role.ROLE_CONTRACTOR);
     }
+    @Test void stoppedJobWithoutAcceptedWorkersDoesNotTrapOwnerInContractorRole() throws Exception {
+        var j=job(JobStatus.OPEN); j.setRecruitmentClosed(true); jobs.saveAndFlush(j);
+        change(token(owner),"ROLE_WORKER").andExpect(status().isOk());
+    }
+    @Test void blockersIdentifyUnpaidJobAndContactForEachSideWithoutLeakingOtherJobs() throws Exception {
+        var j=job(JobStatus.COMPLETED); application(j,ApplicationStatus.ACCEPTED);
+        String path="/api/users/me/settings/role-blockers";
+        mvc.perform(get(path).header("Authorization","Bearer "+token(worker)))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(1))
+            .andExpect(jsonPath("$[0].reason").value("UNPAID_WORK"))
+            .andExpect(jsonPath("$[0].owner").value(false))
+            .andExpect(jsonPath("$[0].job.id").value(j.getId()))
+            .andExpect(jsonPath("$[0].job.contractorPhone").value(owner.getPhoneNumber()));
+        mvc.perform(get(path).header("Authorization","Bearer "+token(owner)))
+            .andExpect(status().isOk()).andExpect(jsonPath("$[0].owner").value(true));
+        var outsider=user("0977200014",Role.ROLE_WORKER);
+        mvc.perform(get(path).header("Authorization","Bearer "+token(outsider)))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(0));
+        mvc.perform(get(path)).andExpect(status().isUnauthorized());
+    }
 }

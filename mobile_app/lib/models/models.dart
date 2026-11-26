@@ -67,7 +67,9 @@ class Job {
   bool get canRecruit =>
       !recruitmentClosed && (status == 'OPEN' || status == 'IN_PROGRESS');
   String get displayStatus =>
-      recruitmentClosed && status == 'OPEN' ? 'RECRUITMENT_CLOSED' : status;
+      recruitmentClosed && (status == 'OPEN' || status == 'IN_PROGRESS')
+      ? 'RECRUITMENT_CLOSED'
+      : status;
   factory Job.fromJson(Map<String, dynamic> json) => Job(
     id: (json['id'] as num).toInt(),
     contractorId: (json['contractorId'] as num).toInt(),

@@ -284,8 +284,9 @@ class _ContractorHomeContentState extends State<ContractorHomeContent> {
       );
     } on ApiException catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(AppSnackBar(content: Text(e.message)));
+        ScaffoldMessenger.of(context).showSnackBar(
+          AppSnackBar(content: Text(e.message), kind: NoticeKind.error),
+        );
       }
     } finally {
       if (mounted) setState(() => _stoppingJobId = null);

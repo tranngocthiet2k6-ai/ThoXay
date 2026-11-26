@@ -156,6 +156,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(api.closed, isFalse);
     expect(find.text('Không kết nối được máy chủ'), findsOneWidget);
+    expect(find.byIcon(Icons.error_outline), findsOneWidget);
     expect(find.text('Dừng tuyển'), findsOneWidget);
     await tester.pumpWidget(const SizedBox());
     api.dispose();

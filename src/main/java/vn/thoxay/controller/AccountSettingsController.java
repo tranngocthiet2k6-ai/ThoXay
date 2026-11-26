@@ -17,6 +17,7 @@ public class AccountSettingsController {
     public record PushPreferences(@NotNull Boolean jobPushEnabled, @NotNull Boolean chatPushEnabled) { }
     public record RoleRequest(@NotBlank @Pattern(regexp="ROLE_WORKER|ROLE_CONTRACTOR") String role) { }
     @PutMapping("/role") public AuthResponse role(@Valid @RequestBody RoleRequest request) { return settings.role(request); }
+    @GetMapping("/role-blockers") public java.util.List<AccountSettingsService.RoleBlocker> roleBlockers() { return settings.roleBlockers(); }
     @PutMapping("/password") public AuthResponse password(@Valid @RequestBody PasswordRequest request) { return settings.password(request); }
     @PutMapping("/phone") public AuthResponse phone(@Valid @RequestBody PhoneRequest request) { return settings.phone(request); }
     @GetMapping("/notifications") public PushPreferences notifications() { return settings.notifications(); }

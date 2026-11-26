@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../models/models.dart';
+import '../models/role_blocker.dart';
 import '../models/tier_guide.dart';
 import '../models/chat_message.dart';
 import '../models/chat_inbox.dart';
@@ -766,6 +767,10 @@ class ApiService extends ChangeNotifier {
       });
   Future<void> switchRole(String role) =>
       _updateCredentials('role', {'role': role});
+  Future<List<RoleBlocker>> roleBlockers() async =>
+      (await _request('GET', '/api/users/me/settings/role-blockers') as List)
+          .map((row) => RoleBlocker.fromJson(row as Map<String, dynamic>))
+          .toList();
   Future<TierGuide> tierGuide() async => TierGuide.fromJson(
     await _request('GET', '/api/reputation/tiers') as Map<String, dynamic>,
   );

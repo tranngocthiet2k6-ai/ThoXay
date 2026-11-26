@@ -148,6 +148,13 @@ class JobCard extends StatelessWidget {
                       style: TextStyle(fontSize: 10, color: palette.muted),
                     ),
                     const SizedBox(height: 8),
+                    if (job.recruitmentClosed) ...[
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: JobStatusBadge(status: job.displayStatus),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
                     Wrap(
                       spacing: 12,
                       runSpacing: 6,
@@ -248,8 +255,8 @@ class JobCard extends StatelessWidget {
                         ),
                       ),
                       if (job.contractorVerified) const KycBadge(),
-                      if (job.recruitmentClosed && job.status != 'OPEN')
-                        const Chip(label: Text('Đã dừng tuyển')),
+                      if (job.recruitmentClosed && job.status == 'IN_PROGRESS')
+                        const Chip(label: Text('Đang thi công')),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -360,6 +367,7 @@ class JobStatusBadge extends StatelessWidget {
       'OPEN' => AppPalette.of(context).successStrong,
       'IN_PROGRESS' => AppPalette.of(context).blue,
       'COMPLETED' => AppPalette.of(context).purple,
+      'RECRUITMENT_CLOSED' => AppPalette.of(context).muted,
       _ => AppPalette.of(context).errorStrong,
     };
     return Container(
@@ -427,8 +435,8 @@ Future<T?> showJobDetails<T>(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 JobStatusBadge(status: job.displayStatus),
-                if (job.recruitmentClosed && job.status != 'OPEN')
-                  const Chip(label: Text('Đã dừng tuyển')),
+                if (job.recruitmentClosed && job.status == 'IN_PROGRESS')
+                  const Chip(label: Text('Đang thi công')),
                 const SizedBox(height: 16),
                 Text(
                   job.title,
