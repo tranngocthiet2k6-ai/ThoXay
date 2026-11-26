@@ -407,8 +407,8 @@ abstract final class AppTheme {
               ? const Color(0xff1e40af)
               : accent,
           side: BorderSide(
-            color: outdoor ? palette.ink : palette.border,
-            width: outdoor ? 2 : 1,
+            color: palette.inputBorder,
+            width: outdoor ? 2 : 1.2,
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -435,9 +435,19 @@ abstract final class AppTheme {
       chipTheme: ChipThemeData(
         backgroundColor: palette.surface,
         selectedColor: container,
-        side: outdoor
-            ? BorderSide(color: palette.border, width: 2)
-            : BorderSide.none,
+        side: WidgetStateBorderSide.resolveWith((states) {
+          final highlighted =
+              states.contains(WidgetState.selected) ||
+              states.contains(WidgetState.focused);
+          return BorderSide(
+            color: states.contains(WidgetState.disabled)
+                ? palette.inputBorder.withValues(alpha: .5)
+                : highlighted
+                ? inputAccent
+                : palette.inputBorder,
+            width: outdoor || highlighted ? 2 : 1.2,
+          );
+        }),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         checkmarkColor: palette.ink,
         secondaryLabelStyle: TextStyle(
