@@ -11,10 +11,17 @@ class ContractorApi extends ApiService {
   bool closed = false, failStop = false, completed = false;
   int stopCalls = 0;
   Map<String, dynamic>? createdBody;
+  Map<String, dynamic>? updatedBody;
 
   @override
   Future<Job> createJob(Map<String, dynamic> body) async {
     createdBody = body;
+    return job;
+  }
+
+  @override
+  Future<Job> updateJob(int id, Map<String, dynamic> body) async {
+    updatedBody = body;
     return job;
   }
 
@@ -88,9 +95,22 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(FilledButton, 'Đăng công trình mới'));
     await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('300.000 VND'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('300.000 VND'));
+    await tester.pumpAndSettle();
+    expect(
+      tester
+          .widget<TextFormField>(
+            find.widgetWithText(TextFormField, 'Lương mỗi ngày'),
+          )
+          .controller!
+          .text,
+      '300000',
+    );
     for (final field in {
       'Tên công trình': 'Xây nhà',
-      'Lương mỗi ngày (đồng)': '500000',
+      'Lương mỗi ngày': '500000',
       'Địa chỉ công trình': 'Quận 1',
     }.entries) {
       await tester.enterText(
@@ -112,10 +132,11 @@ void main() {
     await tester.pumpAndSettle();
     await tester.ensureVisible(find.text('Dự toán quỹ lương'));
     await tester.pumpAndSettle();
-    expect(find.text(money(3500000)), findsOneWidget);
+    expect(find.text('3.500.000 VND'), findsOneWidget);
     expect(find.textContaining('1 thợ × 7 ngày.'), findsOneWidget);
     await tester.tap(find.text('Đăng việc'));
     await tester.pumpAndSettle();
+    expect(api.createdBody?['salaryPerDay'], 500000);
     final today = DateUtils.dateOnly(DateTime.now());
     expect(
       api.createdBody?['startsOn'],
@@ -142,6 +163,30 @@ void main() {
     await tester.ensureVisible(find.text('Dừng tuyển'));
     await tester.pumpAndSettle();
   }
+
+  testWidgets('editing keeps the existing salary and can save a quick amount', (
+    tester,
+  ) async {
+    final api = ContractorApi();
+    await tester.pumpWidget(MaterialApp(home: ContractorHomeScreen(api: api)));
+    await tester.pumpAndSettle();
+    await openManagement(tester);
+    await tester.ensureVisible(find.text('Sửa công trình'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Sửa công trình'));
+    await tester.pumpAndSettle();
+    final salary = find.widgetWithText(TextFormField, 'Lương mỗi ngày');
+    expect(tester.widget<TextFormField>(salary).controller!.text, '500000');
+    await tester.ensureVisible(find.text('250.000 VND'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('250.000 VND'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Lưu thay đổi'));
+    await tester.pumpAndSettle();
+    expect(api.updatedBody?['salaryPerDay'], 250000);
+    await tester.pumpWidget(const SizedBox());
+    api.dispose();
+  });
 
   testWidgets(
     'stopping recruitment requires confirmation and updates the job',
@@ -278,14 +323,19 @@ void main() {
       );
       await tester.pumpAndSettle();
       await tester.enterText(
-        find.widgetWithText(TextFormField, 'Lương mỗi ngày (đồng)'),
+        find.widgetWithText(TextFormField, 'Lương mỗi ngày'),
         'Infinity',
       );
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
       await tester.tap(find.text('Đăng việc'));
       await tester.pumpAndSettle();
-      expect(find.text('Lương từ 1 đến 1.000.000.000 đồng'), findsOneWidget);
+      expect(
+        find.text(
+          'Lương phải trên 200.000 và không quá 1.000.000.000 VND/ngày',
+        ),
+        findsOneWidget,
+      );
       await tester.pumpWidget(const SizedBox());
       api.dispose();
     },

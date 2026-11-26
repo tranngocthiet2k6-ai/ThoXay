@@ -23,6 +23,7 @@ import '../widgets/call_button.dart';
 import '../widgets/chat_button.dart';
 import '../widgets/job_completion_dialog.dart';
 import '../widgets/job_schedule_picker.dart';
+import '../widgets/job_salary_field.dart';
 import '../widgets/stop_recruiting_button.dart';
 import 'location_picker_screen.dart';
 import '../widgets/loading_jobs.dart';
@@ -579,7 +580,7 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
     if (j != null) {
       _title.text = j.title;
       _description.text = j.description;
-      _salary.text = j.salaryPerDay.toString();
+      _salary.text = j.salaryPerDay.toStringAsFixed(0);
       _address.text = j.address;
       _workers.text = '${j.requiredWorkers}';
       _type = j.jobType;
@@ -650,7 +651,7 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
         'title': _title.text.trim(),
         'description': _description.text.trim(),
         'jobType': _type,
-        'salaryPerDay': double.parse(_salary.text.trim()),
+        'salaryPerDay': JobSalaryField.validAmount(_salary.text)!.toDouble(),
         'address': _address.text.trim(),
         'latitude': _position!.latitude,
         'longitude': _position!.longitude,
@@ -730,22 +731,7 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
                   onChanged: _busy ? null : (t) => setState(() => _type = t!),
                 ),
                 const SizedBox(height: 16),
-                TextFormField(
-                  controller: _salary,
-                  enabled: !_busy,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Lương mỗi ngày (đồng)',
-                    hintText: '500000',
-                    prefixIcon: Icon(Icons.payments_outlined),
-                  ),
-                  validator: (v) {
-                    final n = double.tryParse(v?.trim() ?? '');
-                    return n == null || !n.isFinite || n < 1 || n > 1000000000
-                        ? 'Lương từ 1 đến 1.000.000.000 đồng'
-                        : null;
-                  },
-                ),
+                JobSalaryField(controller: _salary, enabled: !_busy),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _workers,
@@ -821,14 +807,8 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
                       ValueListenableBuilder<TextEditingValue>(
                         valueListenable: _workers,
                         builder: (context, _, child) {
-                          final parsedRate = double.tryParse(_salary.text);
                           final rate =
-                              parsedRate != null &&
-                                  parsedRate.isFinite &&
-                                  parsedRate >= 0 &&
-                                  parsedRate <= 1000000000
-                              ? parsedRate
-                              : 0.0;
+                              JobSalaryField.validAmount(_salary.text) ?? 0;
                           final count = (int.tryParse(_workers.text) ?? 0)
                               .clamp(0, 10000);
                           final days =
@@ -844,7 +824,10 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  money(rate * count * days),
+                                  money(
+                                    (rate * count * days).toDouble(),
+                                    currency: 'VND',
+                                  ),
                                   style: TextStyle(
                                     color: Theme.of(context)
                                         .colorScheme

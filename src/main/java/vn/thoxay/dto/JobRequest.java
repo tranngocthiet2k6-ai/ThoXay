@@ -6,7 +6,8 @@ public record JobRequest(
     @NotBlank @Size(max = 200) String title,
     @Size(max = 20000) String description,
     @NotBlank @Pattern(regexp = "Thợ chính|Phụ hồ", message = "Chọn Thợ chính hoặc Phụ hồ") String jobType,
-    @NotNull @DecimalMin("1") @DecimalMax("1000000000") Double salaryPerDay,
+    @NotNull @DecimalMin(value = "200000", inclusive = false, message = "Lương phải trên 200.000 VND/ngày")
+    @DecimalMax(value = "1000000000", message = "Lương không quá 1.000.000.000 VND/ngày") Double salaryPerDay,
     @NotBlank @Size(max = 255) String address,
     @NotNull @DecimalMin("-90") @DecimalMax("90") Double latitude,
     @NotNull @DecimalMin("-180") @DecimalMax("180") Double longitude,

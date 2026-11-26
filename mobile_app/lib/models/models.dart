@@ -233,5 +233,5 @@ String statusLabel(String status) => switch (status) {
   _ => status,
 };
 
-String money(double amount) =>
-    '${amount.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d)(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')} đ';
+String money(double amount, {String currency = 'đ'}) =>
+    '${amount.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d)(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')} $currency';

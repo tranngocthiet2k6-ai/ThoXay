@@ -8,6 +8,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import vn.thoxay.entity.*;
 import vn.thoxay.repository.UserRepository;
+import vn.thoxay.repository.JobRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import vn.thoxay.security.JwtUtil;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -17,10 +19,37 @@ class JobApiTest {
     @Autowired MockMvc mvc;
     @Autowired UserRepository users;
     @Autowired JwtUtil jwt;
+    @Autowired JobRepository jobs;
+    @Autowired ObjectMapper json;
     private final String request = """
         {"title":"Xây nhà phố","description":"Bao cơm trưa","jobType":"Thợ chính",
         "salaryPerDay":500000,"address":"Quận 1","latitude":10.7769,"longitude":106.7009,"requiredWorkers":2}
         """;
+
+    @Test void rejectsSalaryAtOrBelow200000WhenPosting() throws Exception {
+        User owner = user("0922222226", Role.ROLE_CONTRACTOR);
+        for (String amount : new String[]{"0", "199999", "200000"}) {
+            mvc.perform(post("/api/jobs").header("Authorization", token(owner)).contentType("application/json")
+                .content(request.replace("500000", amount)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("salaryPerDay: Lương phải trên 200.000 VND/ngày"));
+        }
+    }
+
+    @Test void enforcesSalaryBoundaryOnUpdateAndAcceptsAmountsAboveIt() throws Exception {
+        User owner = user("0922222227", Role.ROLE_CONTRACTOR);
+        var response = mvc.perform(post("/api/jobs").header("Authorization", token(owner)).contentType("application/json")
+            .content(request.replace("500000", "200001")))
+            .andExpect(status().isCreated()).andExpect(jsonPath("$.salaryPerDay").value(200001)).andReturn();
+        long id = json.readTree(response.getResponse().getContentAsString()).get("id").asLong();
+        for (String amount : new String[]{"199999", "200000", "1000000001"}) {
+            mvc.perform(put("/api/jobs/" + id).header("Authorization", token(owner)).contentType("application/json")
+                .content(request.replace("500000", amount))).andExpect(status().isBadRequest());
+        }
+        org.assertj.core.api.Assertions.assertThat(jobs.findById(id).orElseThrow().getSalaryPerDay()).isEqualTo(200001);
+        mvc.perform(put("/api/jobs/" + id).header("Authorization", token(owner)).contentType("application/json").content(request))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.salaryPerDay").value(500000));
+    }
 
     @Test void contractorCreatesAndWorkerFindsJobWithDistance() throws Exception {
         User owner = user("0922222221", Role.ROLE_CONTRACTOR);
