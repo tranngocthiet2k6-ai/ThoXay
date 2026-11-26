@@ -24,6 +24,7 @@ import '../widgets/chat_button.dart';
 import '../widgets/job_completion_dialog.dart';
 import '../widgets/job_schedule_picker.dart';
 import '../widgets/job_salary_field.dart';
+import '../widgets/job_form_dialog.dart';
 import '../widgets/stop_recruiting_button.dart';
 import 'location_picker_screen.dart';
 import '../widgets/loading_jobs.dart';
@@ -675,190 +676,179 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
   @override
   Widget build(BuildContext context) => PopScope(
     canPop: !_busy && !_gps,
-    child: AlertDialog(
+    child: JobFormDialog(
       title: Text(
         widget.job == null ? 'Đăng công trình mới' : 'Chỉnh sửa công trình',
       ),
-      content: SizedBox(
-        width: 480,
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(
-            parent: AlwaysScrollableScrollPhysics(),
-          ),
-          child: Form(
-            key: _form,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+      content: Form(
+        key: _form,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextFormField(
+              controller: _title,
+              enabled: !_busy,
+              maxLength: 200,
+              decoration: const InputDecoration(
+                labelText: 'Tên công trình',
+                hintText: 'Ví dụ: Xây nhà phố 2 tầng',
+                prefixIcon: Icon(Icons.home_work_outlined),
+              ),
+              validator: (v) =>
+                  (v?.trim().isEmpty ?? true) ? 'Nhập tên công trình' : null,
+            ),
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: _description,
+              enabled: !_busy,
+              minLines: 2,
+              maxLines: 5,
+              maxLength: 20000,
+              decoration: const InputDecoration(
+                labelText: 'Mô tả công việc',
+                hintText: 'Công việc cần làm, giờ làm và đãi ngộ cho thợ',
+                hintMaxLines: 3,
+                alignLabelWithHint: true,
+              ),
+            ),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<String>(
+              initialValue: _type,
+              decoration: const InputDecoration(
+                labelText: 'Loại thợ',
+                prefixIcon: Icon(Icons.handyman_outlined),
+              ),
+              items: [
+                'Thợ chính',
+                'Phụ hồ',
+              ].map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
+              onChanged: _busy ? null : (t) => setState(() => _type = t!),
+            ),
+            const SizedBox(height: 16),
+            JobSalaryField(controller: _salary, enabled: !_busy),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _workers,
+              enabled: !_busy,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Số lượng thợ cần tuyển',
+                hintText: 'Ví dụ: 3',
+                prefixIcon: Icon(Icons.groups_outlined),
+              ),
+              validator: (v) {
+                final n = int.tryParse(v?.trim() ?? '');
+                return n == null || n < 1 || n > 10000
+                    ? 'Số thợ từ 1 đến 10.000'
+                    : null;
+              },
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _address,
+              enabled: !_busy,
+              maxLength: 255,
+              decoration: const InputDecoration(
+                labelText: 'Địa chỉ công trình',
+                hintText: 'Số nhà, đường, phường/xã…',
+                prefixIcon: Icon(Icons.location_on_outlined),
+              ),
+              validator: (v) => (v?.trim().isEmpty ?? true)
+                  ? 'Nhập địa chỉ công trình'
+                  : null,
+            ),
+            const SizedBox(height: 12),
+            JobLocationPin(
+              center: _position ?? const GeoPoint(10.7769, 106.7009),
+              selected: _position,
+              onPicked: _busy
+                  ? null
+                  : (point) => setState(() => _position = point),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              _position == null
+                  ? 'Chưa chọn vị trí công trình'
+                  : 'Vị trí: ${_position!.latitude.toStringAsFixed(5)}, ${_position!.longitude.toStringAsFixed(5)}',
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
               children: [
-                TextFormField(
-                  controller: _title,
-                  enabled: !_busy,
-                  maxLength: 200,
-                  decoration: const InputDecoration(
-                    labelText: 'Tên công trình',
-                    hintText: 'Ví dụ: Xây nhà phố 2 tầng',
-                    prefixIcon: Icon(Icons.home_work_outlined),
-                  ),
-                  validator: (v) => (v?.trim().isEmpty ?? true)
-                      ? 'Nhập tên công trình'
-                      : null,
+                OutlinedButton.icon(
+                  onPressed: _busy || _gps ? null : _chooseOnMap,
+                  icon: const Icon(Icons.map_outlined),
+                  label: const Text('Chọn trên bản đồ'),
                 ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _description,
-                  enabled: !_busy,
-                  minLines: 2,
-                  maxLines: 5,
-                  maxLength: 20000,
-                  decoration: const InputDecoration(
-                    labelText: 'Mô tả công việc',
-                    hintText: 'Công việc cần làm, giờ làm và đãi ngộ cho thợ',
-                    hintMaxLines: 3,
-                    alignLabelWithHint: true,
-                  ),
+                OutlinedButton.icon(
+                  onPressed: _busy || _gps ? null : _locate,
+                  icon: const Icon(Icons.my_location),
+                  label: Text(_gps ? 'Đang lấy GPS…' : 'Lấy GPS'),
                 ),
-                const SizedBox(height: 12),
-                DropdownButtonFormField<String>(
-                  initialValue: _type,
-                  decoration: const InputDecoration(
-                    labelText: 'Loại thợ',
-                    prefixIcon: Icon(Icons.handyman_outlined),
-                  ),
-                  items: ['Thợ chính', 'Phụ hồ']
-                      .map((t) => DropdownMenuItem(value: t, child: Text(t)))
-                      .toList(),
-                  onChanged: _busy ? null : (t) => setState(() => _type = t!),
-                ),
-                const SizedBox(height: 16),
-                JobSalaryField(controller: _salary, enabled: !_busy),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _workers,
-                  enabled: !_busy,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Số lượng thợ cần tuyển',
-                    hintText: 'Ví dụ: 3',
-                    prefixIcon: Icon(Icons.groups_outlined),
-                  ),
-                  validator: (v) {
-                    final n = int.tryParse(v?.trim() ?? '');
-                    return n == null || n < 1 || n > 10000
-                        ? 'Số thợ từ 1 đến 10.000'
-                        : null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _address,
-                  enabled: !_busy,
-                  maxLength: 255,
-                  decoration: const InputDecoration(
-                    labelText: 'Địa chỉ công trình',
-                    hintText: 'Số nhà, đường, phường/xã…',
-                    prefixIcon: Icon(Icons.location_on_outlined),
-                  ),
-                  validator: (v) => (v?.trim().isEmpty ?? true)
-                      ? 'Nhập địa chỉ công trình'
-                      : null,
-                ),
-                const SizedBox(height: 12),
-                JobLocationPin(
-                  center: _position ?? const GeoPoint(10.7769, 106.7009),
-                  selected: _position,
-                  onPicked: _busy
-                      ? null
-                      : (point) => setState(() => _position = point),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  _position == null
-                      ? 'Chưa chọn vị trí công trình'
-                      : 'Vị trí: ${_position!.latitude.toStringAsFixed(5)}, ${_position!.longitude.toStringAsFixed(5)}',
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    OutlinedButton.icon(
-                      onPressed: _busy || _gps ? null : _chooseOnMap,
-                      icon: const Icon(Icons.map_outlined),
-                      label: const Text('Chọn trên bản đồ'),
-                    ),
-                    OutlinedButton.icon(
-                      onPressed: _busy || _gps ? null : _locate,
-                      icon: const Icon(Icons.my_location),
-                      label: Text(_gps ? 'Đang lấy GPS…' : 'Lấy GPS'),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                JobSchedulePicker(
-                  value: _schedule,
-                  enabled: !_busy,
-                  onChanged: (range) => setState(() => _schedule = range),
-                ),
-                const SizedBox(height: 16),
-                ValueListenableBuilder<TextEditingValue>(
-                  valueListenable: _salary,
-                  builder: (context, _, child) =>
-                      ValueListenableBuilder<TextEditingValue>(
-                        valueListenable: _workers,
-                        builder: (context, _, child) {
-                          final rate =
-                              JobSalaryField.validAmount(_salary.text) ?? 0;
-                          final count = (int.tryParse(_workers.text) ?? 0)
-                              .clamp(0, 10000);
-                          final days =
-                              _schedule.end.difference(_schedule.start).inDays +
-                              1;
-                          return FigmaCard(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                const Text(
-                                  'Dự toán quỹ lương',
-                                  style: TextStyle(fontWeight: FontWeight.w700),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  money(
-                                    (rate * count * days).toDouble(),
-                                    currency: 'VND',
-                                  ),
-                                  style: TextStyle(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .primary,
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                                ),
-                                Text(
-                                  '$count thợ × $days ngày. Đây là dự toán; đăng việc chưa tự khóa tiền. Thanh toán cần chấm công/nghiệm thu theo quy định.',
-                                  style: const TextStyle(fontSize: 11),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                ),
-                if (_error != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 12),
-                    child: Text(
-                      _error!,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                    ),
-                  ),
               ],
             ),
-          ),
+            const SizedBox(height: 24),
+            JobSchedulePicker(
+              value: _schedule,
+              enabled: !_busy,
+              onChanged: (range) => setState(() => _schedule = range),
+            ),
+            const SizedBox(height: 16),
+            ValueListenableBuilder<TextEditingValue>(
+              valueListenable: _salary,
+              builder: (context, _, child) =>
+                  ValueListenableBuilder<TextEditingValue>(
+                    valueListenable: _workers,
+                    builder: (context, _, child) {
+                      final rate =
+                          JobSalaryField.validAmount(_salary.text) ?? 0;
+                      final count = (int.tryParse(_workers.text) ?? 0).clamp(
+                        0,
+                        10000,
+                      );
+                      final days =
+                          _schedule.end.difference(_schedule.start).inDays + 1;
+                      return FigmaCard(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            const Text(
+                              'Dự toán quỹ lương',
+                              style: TextStyle(fontWeight: FontWeight.w700),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              money(
+                                (rate * count * days).toDouble(),
+                                currency: 'VND',
+                              ),
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontSize: 24,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            Text(
+                              '$count thợ × $days ngày. Đây là dự toán; đăng việc chưa tự khóa tiền. Thanh toán cần chấm công/nghiệm thu theo quy định.',
+                              style: const TextStyle(fontSize: 11),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+            ),
+            if (_error != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Text(
+                  _error!,
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
+              ),
+          ],
         ),
       ),
       actions: [

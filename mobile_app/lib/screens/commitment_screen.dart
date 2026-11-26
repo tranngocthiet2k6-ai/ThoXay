@@ -106,6 +106,7 @@ class CommitmentSummary extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         CommercialHero(
+          padding: EdgeInsets.all(compact ? 16 : 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -128,13 +129,21 @@ class CommitmentSummary extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 16),
-              Text(
-                '${money(document.selectedRate.toDouble())}/ngày',
-                style: const TextStyle(
-                  fontSize: 28,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800,
-                ),
+              Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  Text(
+                    money(document.selectedRate.toDouble(), currency: 'VND'),
+                    style: TextStyle(
+                      fontSize: compact ? 24 : 28,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const Text('/ngày', style: TextStyle(color: Colors.white70)),
+                ],
               ),
               const SizedBox(height: 12),
               Row(
@@ -164,6 +173,7 @@ class CommitmentSummary extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         FigmaCard(
+          padding: EdgeInsets.all(compact ? 12 : 16),
           child: Column(
             children: [
               party(
@@ -184,6 +194,7 @@ class CommitmentSummary extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         FigmaCard(
+          padding: EdgeInsets.all(compact ? 12 : 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

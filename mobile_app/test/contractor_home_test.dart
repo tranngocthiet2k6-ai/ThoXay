@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tho_xay_mobile/models/models.dart';
 import 'package:tho_xay_mobile/screens/contractor_home_screen.dart';
 import 'package:tho_xay_mobile/services/api_service.dart';
+import 'package:tho_xay_mobile/theme/app_theme.dart';
 import 'package:tho_xay_mobile/models/scheduling.dart';
 import 'package:tho_xay_mobile/widgets/figma_job_map.dart';
 
@@ -85,6 +86,36 @@ class ContractorApi extends ApiService {
 }
 
 void main() {
+  testWidgets('posting form uses the available phone width', (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(360, 740);
+    addTearDown(tester.view.reset);
+    final api = ContractorApi();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.forRole('ROLE_CONTRACTOR'),
+        home: ContractorHomeScreen(api: api),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Đăng công trình mới'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Đăng công trình mới'));
+    await tester.pumpAndSettle();
+    expect(
+      tester
+          .getSize(find.widgetWithText(TextFormField, 'Tên công trình'))
+          .width,
+      greaterThanOrEqualTo(312),
+    );
+    expect(
+      find.widgetWithText(FilledButton, 'Đăng việc').hitTestable(),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox());
+    api.dispose();
+  });
   testWidgets('posting uses the chosen dates and updates the payroll preview', (
     tester,
   ) async {

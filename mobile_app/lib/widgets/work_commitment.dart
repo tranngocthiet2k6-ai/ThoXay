@@ -1,4 +1,5 @@
 import 'bouncing_button.dart';
+import 'job_form_dialog.dart';
 import '../screens/commitment_screen.dart';
 
 import 'package:flutter/material.dart';
@@ -140,8 +141,7 @@ class _WorkCommitmentDialogState extends State<WorkCommitmentDialog> {
   }
 
   @override
-  Widget build(BuildContext context) => AlertDialog(
-    scrollable: true,
+  Widget build(BuildContext context) => JobFormDialog(
     title: const Text('Cam kết nhận việc'),
     content: SizedBox(
       width: 560,
@@ -155,8 +155,14 @@ class _WorkCommitmentDialogState extends State<WorkCommitmentDialog> {
               enabled: !_busy,
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(
-                labelText: 'Lương mong muốn/ngày (không bắt buộc)',
-                suffixText: 'đ',
+                labelText: 'Lương mong muốn/ngày',
+                suffixIcon: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 12),
+                  child: Center(widthFactor: 1, child: Text('VND')),
+                ),
+                helperText:
+                    'Không bắt buộc. Để trống để dùng lương đăng tuyển.',
+                helperMaxLines: 3,
               ),
               onChanged: (_) => setState(() {
                 _dirty = true;

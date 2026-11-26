@@ -6,6 +6,7 @@ import 'package:tho_xay_mobile/models/wallet.dart';
 import 'package:tho_xay_mobile/screens/job_payments_screen.dart';
 import 'package:tho_xay_mobile/screens/calendar_screen.dart';
 import 'package:tho_xay_mobile/services/api_service.dart';
+import 'package:tho_xay_mobile/theme/app_theme.dart';
 import 'package:tho_xay_mobile/widgets/work_commitment.dart';
 
 final scheduledJob = Job(
@@ -105,6 +106,65 @@ class NegotiatedPaymentApi extends ApiService {
 }
 
 void main() {
+  for (final (width, textScale) in [
+    (320.0, 1.0),
+    (360.0, 1.0),
+    (430.0, 1.0),
+    (320.0, 1.5),
+  ]) {
+    testWidgets(
+      'commitment uses phone width $width at text scale $textScale and keeps actions visible',
+      (tester) async {
+        tester.view.devicePixelRatio = 1;
+        tester.view.physicalSize = Size(width, 740);
+        addTearDown(tester.view.reset);
+        final api = SchedulingApi();
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: AppTheme.forRole('ROLE_WORKER'),
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(context)
+                  .copyWith(textScaler: TextScaler.linear(textScale)),
+              child: child!,
+            ),
+            home: Builder(
+              builder: (context) => Scaffold(
+                body: TextButton(
+                  onPressed: () => showWorkProposal(context, api, scheduledJob),
+                  child: const Text('Mở'),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.tap(find.text('Mở'));
+        await tester.pumpAndSettle();
+        expect(
+          tester.getSize(find.byKey(const ValueKey('proposal-rate'))).width,
+          greaterThanOrEqualTo(width - 48),
+        );
+        final submit = find.widgetWithText(FilledButton, 'Đồng ý & ứng tuyển');
+        expect(submit.hitTestable(), findsOneWidget);
+        // The scrollable terms remain reachable independently of the footer.
+        await tester.ensureVisible(
+          find.byKey(const ValueKey('commitment-consent')),
+        );
+        await tester.pumpAndSettle();
+        expect(submit.hitTestable(), findsOneWidget);
+        expect(tester.takeException(), isNull);
+        await tester.ensureVisible(find.byKey(const ValueKey('proposal-rate')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const ValueKey('proposal-rate')));
+        tester.view.viewInsets = const FakeViewPadding(bottom: 300);
+        await tester.pumpAndSettle();
+        expect(submit.hitTestable(), findsOneWidget);
+        expect(tester.getBottomRight(submit).dy, lessThanOrEqualTo(440));
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox());
+        api.dispose();
+      },
+    );
+  }
   testWidgets(
     'payment confirmation uses negotiated rate rather than advertised salary',
     (tester) async {
