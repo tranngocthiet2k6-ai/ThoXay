@@ -2,7 +2,7 @@
 
 ## Ứng dụng di động kết nối lao động phổ thông và chủ thầu Thợ Xây
 
-Báo cáo phân tích, thiết kế và cài đặt hệ thống Thợ Xây theo cấu trúc bốn chương. Nội dung đối chiếu với mã nguồn trong kho dự án tại thời điểm ngày 26 tháng 11 năm 2026. Đối tượng sử dụng gồm người thợ, chủ thầu và quản trị viên. Sản phẩm hỗ trợ tìm việc theo vị trí, tuyển dụng có cam kết, theo dõi ngày công, nghiệm thu, đánh giá và ghi nhận thanh toán nội bộ.
+Báo cáo phân tích, thiết kế và cài đặt hệ thống Thợ Xây theo cấu trúc bốn chương. Nội dung đối chiếu với mã nguồn trong kho dự án tại thời điểm ngày 26 tháng 11 năm 2026. Đối tượng sử dụng gồm người thợ, chủ thầu và quản trị viên. Sản phẩm hỗ trợ tìm việc theo vị trí, tuyển dụng có cam kết, theo dõi ngày công, nghiệm thu, đánh giá và ghi nhận thanh toán nội bộ. Ảnh giao diện được cập nhật ngày 26/11/2026 theo logo và bố cục ứng dụng hiện tại.
 
 Thông tin trường, khoa, sinh viên và giảng viên hướng dẫn chưa được cung cấp nên không được suy đoán trong bản báo cáo. Bản thảo này tập trung vào nội dung chuyên môn; trang bìa hành chính có thể bổ sung theo mẫu của cơ sở đào tạo.
 
@@ -1186,19 +1186,19 @@ Flyway quản lý migration trong src/main/resources/db/migration. Các migratio
 
 ## 3.6. Thiết kế giao diện
 
-Giao diện ưu tiên tiếng Việt, hành động rõ ràng và phân biệt ngữ cảnh thợ–chủ thầu. Màu nền navy được dùng cho các vùng tổng quan; cam là điểm nhấn phía thợ và xanh là điểm nhấn phía chủ thầu. Thanh điều hướng giữ các nhóm công việc chính; thông tin dài như chi tiết công trình, cam kết và lịch sử được mở trong màn hình hoặc bảng chi tiết phù hợp.
+Giao diện hiện tại dùng nền sáng, logo biểu tượng Thợ Xây trên thanh tiêu đề và thanh điều hướng năm mục. Màu nhấn của thợ là vàng hổ phách #D97706; chủ thầu dùng xanh dương #1D4ED8. Trang chủ có lời chào, thống kê, tìm kiếm và bản đồ; khu vực ví hoặc hồ sơ có thể dùng bề mặt tối để phân cấp thông tin. Giao diện có các chế độ sáng, tối và Outdoor.
 
-Các hình dưới đây là 20 ảnh giao diện thực thi có sẵn trong docs/figma_screens, được manifest ghi nhận chụp từ localhost với dữ liệu DEMO ngày 04/11/2026 UTC. Tên thư mục giữ lại từ lịch sử thiết kế; các PNG này được mô tả là ảnh chạy ứng dụng, không phải ảnh chụp mới tại ngày viết báo cáo. Những bổ sung sau ngày chụp như bậc BRONZE và nhóm thợ quen được giải thích bằng mã nguồn, không sửa ảnh để tạo cảm giác đã chụp phiên bản mới.
+Các hình dưới đây là 20 ảnh chụp mới ngày 26/11/2026 từ phiên bản ứng dụng build bằng mã nguồn hiện tại, chạy tại localhost với database DEMO riêng. Bộ ảnh dùng logo biểu tượng mới, màu vai trò và bố cục điều hướng hiện tại. Manifest trong docs/giao_dien_hien_tai_20261126 ghi nguồn, thời điểm, kích thước và SHA-256 của từng ảnh. Ảnh giao diện cũ ngày 04/11/2026 đã được thay khỏi bản báo cáo này.
 
 Số tiền, danh tính và lịch sử trong ảnh phục vụ minh họa. GPS ở ảnh radar được mô phỏng để kiểm tra hiển thị, không được dùng làm kết quả nghiệm thu định vị ngoài thực địa. Bản đồ giữ attribution OpenStreetMap. Mỗi cặp hình có mô tả hành vi và điều kiện nghiệp vụ tương ứng.
 
-### Đăng nhập và vai trò và Tìm việc của Thợ
+### Đăng nhập và Tìm việc của Thợ
 
-![Hình 3.11 và 3.12. Đăng nhập và vai trò và Tìm việc của Thợ — giao diện DEMO](bao_cao_hinh/giao-dien-01.png)
+![Hình 3.11 và 3.12. Đăng nhập và Tìm việc của Thợ — giao diện DEMO](bao_cao_hinh/giao-dien-01.png)
 
-Hình 3.11. Hai thẻ chọn vai trò nằm ngang, form gọn và icon trường nhập. Lựa chọn này chỉ thay giao diện, quyền thực tế do JWT và server xác định.
+Hình 3.11. Màn hình đăng nhập mới hiển thị logo biểu tượng, hai mục Đăng nhập/Đăng ký, số điện thoại, mật khẩu và liên kết hỗ trợ. Vai trò sau đăng nhập do tài khoản và server xác định; các thẻ chọn vai trò cũ không còn xuất hiện ở màn hình này.
 
-Hình 3.12. Lời chào, bộ lọc ngang, bản đồ có ghim lương và thẻ công trình. Lương, khoảng cách, chủ thầu và huy hiệu KYC lấy từ API; không ghi cứng số liệu trong bản thiết kế.
+Hình 3.12. Trang tìm việc mới dùng thanh tiêu đề có logo, lời chào và công tắc nhận việc, bộ lọc, bản đồ OSM, thẻ công trình và thanh điều hướng năm mục với QR ở giữa.
 
 ### Chi tiết công trình và Việc và chấm công
 
@@ -1212,7 +1212,7 @@ Hình 3.14. Lịch tuần, GPS hoặc QR, hai ảnh tổng quan và chi tiết c
 
 ![Hình 3.15 và 3.16. Ví của Thợ và Nạp ví VietQR — giao diện DEMO](bao_cao_hinh/giao-dien-03.png)
 
-Hình 3.15. Số dư khả dụng, ẩn hiện tiền, ký quỹ, cảnh báo dưới 200.000đ, biểu đồ tuần chọn được ngày và lịch sử có dấu cộng trừ. Thu nhập chỉ tính các khoản đã thanh toán.
+Hình 3.15. Ví hiện tại hiển thị số dư khả dụng, nút ẩn/hiện, Nạp VietQR, Rút tiền, thu nhập tháng và danh sách giao dịch. Thu nhập chi tiết và các ngăn tiền được quản lý theo dữ liệu ví của tài khoản.
 
 Hình 3.16. Chọn nhanh mệnh giá và xem QR do server sinh. Nội dung đối soát phải duy nhất theo yêu cầu, không thay bằng chuỗi tĩnh của bản vẽ; chế độ demo ghi rõ không chuyển tiền thật.
 
@@ -1220,7 +1220,7 @@ Hình 3.16. Chọn nhanh mệnh giá và xem QR do server sinh. Nội dung đố
 
 ![Hình 3.17 và 3.18. Hồ sơ của Thợ và Trò chuyện của Thợ — giao diện DEMO](bao_cao_hinh/giao-dien-04.png)
 
-Hình 3.17. Ba cột thống kê, uy tín, tiến trình bậc, ảnh tay nghề và chụp CCCD hai mặt. Điểm trong bản vẽ không thay thế điểm thực trong database.
+Hình 3.17. Hồ sơ mới hiển thị avatar, số việc hoàn thành, sao, chỉ số đúng giờ khi có dữ liệu, bậc nghề và các tiện ích. Chức năng tay nghề, ngân hàng, trợ giúp và cài đặt được truy cập từ các ô riêng.
 
 Hình 3.18. Bong bóng phân biệt hai phía và thẻ cam kết ghim đầu cuộc trò chuyện. Chỉ cặp đã ACCEPTED có quyền trao đổi; không giả lập trạng thái đã xem từng tin.
 
@@ -1228,9 +1228,9 @@ Hình 3.18. Bong bóng phân biệt hai phía và thẻ cam kết ghim đầu cu
 
 ![Hình 3.19 và 3.20. Bảng xếp hạng và Trang chủ Chủ thầu — giao diện DEMO](bao_cao_hinh/giao-dien-05.png)
 
-Hình 3.19. Bảng xếp hạng theo dữ liệu API, có podium và danh sách. Ảnh chụp trước V26; mô hình hiện tại bổ sung bậc BRONZE, với quy tắc mới được mô tả ở mục 4.2.
+Hình 3.19. Bảng xếp hạng hiện tại dùng dữ liệu API và bộ bậc Đồng, Bạc, Vàng, Kim Cương; podium được tách khỏi bậc nghề của từng thợ.
 
-Hình 3.20. Ba chỉ số công trình thực tế, nút đăng việc, bản đồ xem trước, tìm kiếm và thẻ công trình có quản lý mở rộng.
+Hình 3.20. Trang chủ Chủ thầu mới có logo biểu tượng, lời chào, ba ô thống kê, nút Đăng công trình mới màu xanh dương, bản đồ và thanh điều hướng Công trình, Đội thợ, Quét QR, Ví tiền, Hồ sơ.
 
 ### Tạo công trình và Duyệt ứng viên
 
@@ -1252,9 +1252,9 @@ Hình 3.24. Số dư, tài khoản ký quỹ và chi trả tuần từ ledger đ
 
 ![Hình 3.25 và 3.26. Hồ sơ và thợ quen và Trò chuyện của Chủ thầu — giao diện DEMO](bao_cao_hinh/giao-dien-08.png)
 
-Hình 3.25. Thông tin doanh nghiệp, KYC và danh sách thợ đã lưu. Nút mời chuẩn bị liên kết công trình để chia sẻ, không tự gửi thông báo hay nhận việc thay Thợ.
+Hình 3.25. Hồ sơ chủ thầu hiện tại dùng logo mới và màu xanh dương, avatar, trạng thái xác minh, các tiện ích và thông tin kinh nghiệm. Quản lý thợ quen và nhóm được truy cập qua mục Đội thợ trong thanh điều hướng.
 
-Hình 3.26. Bong bóng Xanh lục bảo và cam kết ghim. Lịch sử, gửi lại, tin chưa đọc và kiểm soát người tham gia dùng các API và WebSocket hiện có.
+Hình 3.26. Giao diện chat của chủ thầu dùng màu xanh dương theo vai trò. Lịch sử, tin chưa đọc và quyền tham gia do API và WebSocket hiện tại kiểm soát.
 
 ### Phiếu cam kết điện tử và Radar và QR toàn màn hình
 
@@ -1358,7 +1358,7 @@ Bảng 4.3. Đối chiếu kiểm thử và giới hạn bằng chứng
 | --- | --- | --- |
 | Maven verify trong biên bản cập nhật | 25/11/2026 | 159 bài được báo cáo: 156 đạt, 3 bỏ qua; không có thất bại/lỗi. Ba bài tích hợp PostgreSQL chưa chạy. |
 | flutter test trong biên bản cập nhật | 26/11/2026 | 281 đạt, 2 chưa đạt tại server_warmup_test.dart; không tuyên bố toàn bộ Flutter test thành công. |
-| 20 PNG giao diện và manifest | 04/11/2026 UTC | Ảnh chạy localhost DEMO; có file, hash và viewport. Không phải ảnh thiết bị thật tại ngày soạn. |
+| 20 PNG giao diện mới và manifest | 26/11/2026 UTC | Ảnh chạy localhost DEMO; có file, hash và viewport. Không phải ảnh thiết bị thật tại ngày soạn. |
 | Chuyển triển khai AWS theo README | 25–26/11/2026 | Có cấu hình EC2/Nginx/PostgreSQL và biên bản chuyển dữ liệu; phiên này không đo lại dịch vụ online. |
 | Kiểm tra bản báo cáo này | Trong tác vụ biên soạn | Kiểm tra cấu trúc, hình nhúng, từ điển dữ liệu, tham chiếu và kết xuất trang. Không tính là test ứng dụng. |
 
@@ -1418,7 +1418,7 @@ Về trải nghiệm, cần thử nghiệm với thợ và chủ thầu trong c�
 
 [S7] deploy/aws/README.md; nginx.conf.template và các script, cấu hình triển khai trong deploy/aws; README.md. Nguồn sơ đồ triển khai tại checkpoint. Không truy cập bí mật trong tệp môi trường.
 
-[S8] docs/figma_screens/manifest.json và 20 PNG đi kèm. Ảnh chạy localhost DEMO, mốc chụp được manifest ghi ngày 04/11/2026 UTC. Ảnh được giữ nguyên nội dung, chỉ ghép thành cặp để dàn trang.
+[S8] docs/giao_dien_hien_tai_20261126/manifest.json và 20 PNG đi kèm. Ảnh được chụp mới ngày 26/11/2026 từ localhost DEMO bằng bản build mã nguồn hiện tại; GPS phục vụ minh họa được mô phỏng trong trình duyệt.
 
 [S9] docs/CAP_NHAT_BAO_CAO_2026_11_26.md; TESTING.md; src/test và mobile_app/test. Nguồn kết quả kiểm thử lịch sử và phạm vi kiểm tra. Phiên biên soạn không chạy lại bộ test ứng dụng.
 
