@@ -27,43 +27,10 @@ class FigmaScreenTheme extends StatelessWidget {
   final Widget child;
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context), p = AppPalette.of(context);
+    final theme = Theme.of(context);
     return Theme(
       data: theme.copyWith(
         textTheme: theme.textTheme.apply(fontFamily: 'Inter'),
-        inputDecorationTheme: theme.inputDecorationTheme.copyWith(
-          filled: true,
-          fillColor: p.surface,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 14,
-            vertical: 14,
-          ),
-          labelStyle: TextStyle(
-            fontFamily: 'Inter',
-            fontSize: 12,
-            color: p.ink,
-          ),
-          hintStyle: TextStyle(
-            fontFamily: 'Inter',
-            fontSize: 14,
-            color: p.muted,
-          ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(
-              color: theme.colorScheme.primary,
-              width: 1.5,
-            ),
-          ),
-        ),
       ),
       child: child,
     );

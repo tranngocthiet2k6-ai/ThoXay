@@ -696,6 +696,8 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
                   maxLength: 200,
                   decoration: const InputDecoration(
                     labelText: 'Tên công trình',
+                    hintText: 'Ví dụ: Xây nhà phố 2 tầng',
+                    prefixIcon: Icon(Icons.home_work_outlined),
                   ),
                   validator: (v) => (v?.trim().isEmpty ?? true)
                       ? 'Nhập tên công trình'
@@ -709,13 +711,19 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
                   maxLines: 5,
                   maxLength: 20000,
                   decoration: const InputDecoration(
-                    labelText: 'Mô tả công việc, giờ làm, đãi ngộ',
+                    labelText: 'Mô tả công việc',
+                    hintText: 'Công việc cần làm, giờ làm và đãi ngộ cho thợ',
+                    hintMaxLines: 3,
+                    alignLabelWithHint: true,
                   ),
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
                   initialValue: _type,
-                  decoration: const InputDecoration(labelText: 'Loại thợ'),
+                  decoration: const InputDecoration(
+                    labelText: 'Loại thợ',
+                    prefixIcon: Icon(Icons.handyman_outlined),
+                  ),
                   items: ['Thợ chính', 'Phụ hồ']
                       .map((t) => DropdownMenuItem(value: t, child: Text(t)))
                       .toList(),
@@ -729,6 +737,7 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
                   decoration: const InputDecoration(
                     labelText: 'Lương mỗi ngày (đồng)',
                     hintText: '500000',
+                    prefixIcon: Icon(Icons.payments_outlined),
                   ),
                   validator: (v) {
                     final n = double.tryParse(v?.trim() ?? '');
@@ -744,6 +753,8 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
                     labelText: 'Số lượng thợ cần tuyển',
+                    hintText: 'Ví dụ: 3',
+                    prefixIcon: Icon(Icons.groups_outlined),
                   ),
                   validator: (v) {
                     final n = int.tryParse(v?.trim() ?? '');
@@ -759,6 +770,8 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
                   maxLength: 255,
                   decoration: const InputDecoration(
                     labelText: 'Địa chỉ công trình',
+                    hintText: 'Số nhà, đường, phường/xã…',
+                    prefixIcon: Icon(Icons.location_on_outlined),
                   ),
                   validator: (v) => (v?.trim().isEmpty ?? true)
                       ? 'Nhập địa chỉ công trình'

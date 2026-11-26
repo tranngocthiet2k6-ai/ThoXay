@@ -58,6 +58,11 @@ class AppPalette extends ThemeExtension<AppPalette> {
       tone(AppColors.muted, const Color(0xffb5c2d6), const Color(0xff262626));
   Color get border =>
       tone(AppColors.border, const Color(0xff475569), const Color(0xff182230));
+  Color get inputBorder => tone(
+    const Color(0xff7b8ba2),
+    const Color(0xff8292aa),
+    const Color(0xff182230),
+  );
   Color get soft => tone(AppColors.soft, const Color(0xff253147), Colors.white);
   Color get success => tone(AppColors.success, const Color(0xff86efac));
   Color get successStrong =>
@@ -179,6 +184,20 @@ abstract final class AppTheme {
           ? BorderSide(color: palette.border, width: 2)
           : BorderSide.none,
     );
+    final inputOutline = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(14),
+      borderSide: BorderSide(
+        color: palette.inputBorder,
+        width: outdoor ? 2 : 1.2,
+      ),
+    );
+    final inputAccent = outdoor
+        ? palette.ink
+        : palette.dark
+        ? worker || role == null
+              ? const Color(0xfffbbf24)
+              : const Color(0xff93c5fd)
+        : accent;
     return ThemeData(
       useMaterial3: true,
       brightness: brightness,
@@ -284,31 +303,52 @@ abstract final class AppTheme {
         fillColor: palette.soft,
         constraints: const BoxConstraints(minHeight: 52),
         prefixIconColor: WidgetStateColor.resolveWith(
-          (states) =>
-              states.contains(WidgetState.focused) ? accent : palette.muted,
+          (states) => states.contains(WidgetState.error)
+              ? palette.error
+              : states.contains(WidgetState.focused)
+              ? inputAccent
+              : palette.muted,
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 14,
         ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: palette.border, width: outdoor ? 2 : 1),
+        labelStyle: WidgetStateTextStyle.resolveWith(
+          (states) => TextStyle(
+            color: states.contains(WidgetState.error)
+                ? palette.error
+                : palette.muted,
+            fontWeight: FontWeight.w500,
+          ),
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+        hintStyle: TextStyle(color: palette.muted, fontWeight: FontWeight.w400),
+        border: inputOutline,
+        enabledBorder: inputOutline,
+        disabledBorder: inputOutline.copyWith(
           borderSide: BorderSide(
-            color: outdoor ? palette.border : Colors.transparent,
+            color: palette.inputBorder.withValues(alpha: .5),
             width: outdoor ? 2 : 1,
           ),
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: accent, width: 2),
+        focusedBorder: inputOutline.copyWith(
+          borderSide: BorderSide(color: inputAccent, width: 2),
         ),
-        floatingLabelStyle: TextStyle(
-          color: outdoor ? palette.ink : accent,
-          fontWeight: FontWeight.w700,
+        errorBorder: inputOutline.copyWith(
+          borderSide: BorderSide(
+            color: palette.error,
+            width: outdoor ? 2 : 1.3,
+          ),
+        ),
+        focusedErrorBorder: inputOutline.copyWith(
+          borderSide: BorderSide(color: palette.error, width: 2),
+        ),
+        floatingLabelStyle: WidgetStateTextStyle.resolveWith(
+          (states) => TextStyle(
+            color: states.contains(WidgetState.error)
+                ? palette.error
+                : inputAccent,
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
