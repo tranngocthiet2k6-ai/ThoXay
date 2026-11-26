@@ -155,7 +155,7 @@ Các sơ đồ dưới đây dùng hình người cho tác nhân, hình ellipse 
 
 Mỗi đặc tả ghi tác nhân, tiền điều kiện, luồng chính, luồng thay thế và hậu điều kiện. Các mã UC được dùng lại trong bảng truy vết ở Chương 4. Với chức năng cần quyền, việc kiểm tra ở service vẫn bắt buộc dù giao diện đã giới hạn thao tác.
 
-#### UC01 Đăng ký và đăng nhập
+**UC01 Đăng ký và đăng nhập**
 
 Tác nhân: Thợ, chủ thầu; Admin dùng form đăng nhập riêng.
 
@@ -172,7 +172,7 @@ Luồng thay thế và ngoại lệ: Số điện thoại trùng hoặc DTO sai:
 
 Hậu điều kiện: Tài khoản mới được tạo với mật khẩu băm; hoặc phiên hợp lệ được cấp. Không cấp quyền từ lựa chọn vai trò trên giao diện.
 
-#### UC02 Cập nhật hồ sơ và CCCD
+**UC02 Cập nhật hồ sơ và CCCD**
 
 Tác nhân: Thợ hoặc chủ thầu.
 
@@ -189,7 +189,7 @@ Luồng thay thế và ngoại lệ: Thiếu một mặt khi cập nhật CCCD, 
 
 Hậu điều kiện: Thông tin chính mình được cập nhật; CCCD mới chưa được tự xác thực.
 
-#### UC03 Đăng và sửa công trình
+**UC03 Đăng và sửa công trình**
 
 Tác nhân: Chủ thầu.
 
@@ -206,7 +206,7 @@ Luồng thay thế và ngoại lệ: Thiếu tọa độ hoặc lương/số lư
 
 Hậu điều kiện: Công trình sẵn sàng được tìm thấy khi còn tuyển; thay điều khoản yêu cầu đồng thuận lại.
 
-#### UC04 Tìm việc theo vị trí
+**UC04 Tìm việc theo vị trí**
 
 Tác nhân: Thợ.
 
@@ -223,7 +223,7 @@ Luồng thay thế và ngoại lệ: GPS không khả dụng: dùng lựa chọn
 
 Hậu điều kiện: Người dùng thấy thông tin tuyển dụng phù hợp; không tự mở số điện thoại riêng khi chưa được nhận.
 
-#### UC05 Ứng tuyển và đề xuất lương
+**UC05 Ứng tuyển và đề xuất lương**
 
 Tác nhân: Thợ.
 
@@ -240,7 +240,7 @@ Luồng thay thế và ngoại lệ: Đơn đã tồn tại, công trình hết 
 
 Hậu điều kiện: Có một đơn PENDING; chưa có quyền chat/liên lạc như đơn ACCEPTED.
 
-#### UC06 Duyệt ứng viên và chốt cam kết
+**UC06 Duyệt ứng viên và chốt cam kết**
 
 Tác nhân: Chủ công trình.
 
@@ -257,7 +257,7 @@ Luồng thay thế và ngoại lệ: Hết chỗ, lịch trùng, thợ Offline/k
 
 Hậu điều kiện: Đơn được xử lý nguyên tử; hai bên có thể liên lạc khi ACCEPTED.
 
-#### UC07 Tổ đội và lịch nhận việc
+**UC07 Tổ đội và lịch nhận việc**
 
 Tác nhân: Thợ/tổ trưởng; chủ thầu khi duyệt.
 
@@ -274,7 +274,7 @@ Luồng thay thế và ngoại lệ: Một thành viên không hợp lệ hoặc
 
 Hậu điều kiện: Toàn tổ được nhận hoặc không ai được nhận từ quyết định đó; lịch không bị duyệt trùng.
 
-#### UC08 Trao đổi trong công trình
+**UC08 Trao đổi trong công trình**
 
 Tác nhân: Thợ được nhận và chủ công trình.
 
@@ -291,7 +291,7 @@ Luồng thay thế và ngoại lệ: Chưa được nhận hoặc truy cập đ�
 
 Hậu điều kiện: Tin nằm trong lịch sử đúng quan hệ; ảnh vẫn có kiểm tra quyền; con trỏ đọc không lùi.
 
-#### UC09 Chấm công GPS hoặc QR
+**UC09 Chấm công GPS hoặc QR**
 
 Tác nhân: Thợ được nhận.
 
@@ -308,7 +308,7 @@ Luồng thay thế và ngoại lệ: Ngoài vùng, GPS kém, QR hết hạn ho�
 
 Hậu điều kiện: Có ca theo ngày nghiệp vụ; bằng chứng phương thức và thời điểm được lưu.
 
-#### UC10 Gửi ảnh và nghiệm thu ngày công
+**UC10 Gửi ảnh và nghiệm thu ngày công**
 
 Tác nhân: Thợ và chủ công trình; Admin có tra cứu quản trị.
 
@@ -325,7 +325,7 @@ Luồng thay thế và ngoại lệ: Ảnh/version thay đổi sau lúc xem: tr�
 
 Hậu điều kiện: Ngày công có kết quả nghiệm thu có dấu vết; chỉ ảnh đã duyệt mới được tính theo điều kiện thanh toán.
 
-#### UC11 Hoàn thành công trình và đánh giá
+**UC11 Hoàn thành công trình và đánh giá**
 
 Tác nhân: Chủ công trình.
 
@@ -342,7 +342,7 @@ Luồng thay thế và ngoại lệ: Thiếu/thừa thợ hoặc sao ngoài kho�
 
 Hậu điều kiện: Điểm và trạng thái nhất quán; đơn PENDING còn lại bị từ chối; không tự phát sinh chuyển tiền.
 
-#### UC12 Ví, đối soát và thanh toán
+**UC12 Ví, đối soát và thanh toán**
 
 Tác nhân: Thợ/chủ thầu; Admin duyệt nạp/rút.
 
@@ -359,7 +359,7 @@ Luồng thay thế và ngoại lệ: Số dư thiếu, khóa lặp khác payload
 
 Hậu điều kiện: Sổ ví và số dư nhất quán; mỗi payment không bị ghi lặp; giữ khả năng đối chiếu lịch sử.
 
-#### UC13 Quản trị tài khoản và công trình
+**UC13 Quản trị tài khoản và công trình**
 
 Tác nhân: Admin.
 
@@ -376,7 +376,7 @@ Luồng thay thế và ngoại lệ: Thiếu hai ảnh, ảnh chưa tải hoặc
 
 Hậu điều kiện: Trạng thái quản trị được lưu; tài khoản khóa không dùng tiếp JWT; điểm còn lại được tính lại khi xóa công trình.
 
-#### UC14 Gửi và xử lý sự cố hoặc SOS
+**UC14 Gửi và xử lý sự cố hoặc SOS**
 
 Tác nhân: Người tham gia công trình; Admin xử lý.
 
@@ -421,13 +421,13 @@ Báo cáo ảnh bắt đầu PENDING; chủ thầu chuyển APPROVED hoặc CHAN
 
 Biểu đồ tuần tự trình bày thứ tự tương tác giữa giao diện, controller, service và tầng lưu trữ. Thời gian đi từ trên xuống; mũi tên nét liền là lời gọi, nét đứt là kết quả. Các hình chỉ thể hiện những bước quyết định đến nghiệp vụ; kiểm tra DTO và xử lý ngoại lệ được mô tả bằng nội dung kèm theo.
 
-### Đăng nhập và cấp JWT
+**Đăng nhập và cấp JWT**
 
 ![Hình 3.1. Tuần tự đăng nhập và xác thực phiên API](bao_cao_hinh/tuan-tu-dang-nhap.png)
 
 Flutter gửi số điện thoại và mật khẩu tới API xác thực. Backend đối chiếu mật khẩu BCrypt, kiểm tra trạng thái tài khoản rồi cấp JWT. Ở yêu cầu tiếp theo, bộ lọc xác minh token và đọc trạng thái tài khoản hiện tại. Do đó, khóa tài khoản có hiệu lực với cả token cũ. Khi phiên không hợp lệ, ứng dụng xử lý lỗi và đưa người dùng về luồng đăng nhập. Đăng nhập trang Admin sử dụng form và session riêng, không thay thế bằng việc tự đính JWT vào HTML.
 
-### Ứng tuyển và duyệt nhận thợ
+**Ứng tuyển và duyệt nhận thợ**
 
 ![Hình 3.2. Tuần tự duyệt nhận và chốt cam kết](bao_cao_hinh/tuan-tu-duyet-tho.png)
 
@@ -435,13 +435,13 @@ Sau khi có đơn PENDING, chủ thầu gửi quyết định cùng dữ liệu 
 
 Khóa công trình bảo đảm hai yêu cầu cạnh tranh cùng nhìn một số lượng đã nhận theo thứ tự tuần tự. Nếu kiểm tra chỗ trống trước khi khóa rồi ghi sau, cả hai yêu cầu có thể cùng nhận chỗ cuối. Với tổ đội, khóa các worker theo thứ tự ID giúp giảm nguy cơ deadlock và giữ nguyên tính nguyên tử cho cả nhóm. Yêu cầu có phiên bản điều khoản cũ bị từ chối để người dùng đọc lại.
 
-### Hoàn thành và cập nhật đánh giá
+**Hoàn thành và cập nhật đánh giá**
 
 ![Hình 3.3. Tuần tự hoàn thành và tính lại điểm thợ](bao_cao_hinh/tuan-tu-hoan-thanh.png)
 
 JobCompletionService khóa công trình và kiểm tra đúng chủ thầu. Tập workerId trong ratings phải bằng đúng tập thợ ACCEPTED, không trùng và không thiếu. Service khóa các thợ theo thứ tự ID, lưu điểm, chuyển công trình COMPLETED rồi tính lại trung bình từ các công trình đã hoàn thành. Các đơn PENDING còn lại được chuyển REJECTED. Gửi lại đúng bộ điểm đã lưu trả kết quả hiện tại; gửi bộ điểm khác bị từ chối với xung đột. Thanh toán được thực hiện qua dịch vụ ví riêng sau bước này.
 
-### Chấm công và nghiệm thu
+**Chấm công và nghiệm thu**
 
 ![Hình 3.4. Tuần tự ca làm và nghiệm thu ảnh](bao_cao_hinh/tuan-tu-nghiem-thu.png)
 
@@ -509,7 +509,7 @@ Backend trước đây được chạy trên Render; cấu hình hiện tại đ
 
 ## 3.5. Thiết kế cơ sở dữ liệu
 
-### Phạm vi dữ liệu và quan hệ chính
+**Phạm vi dữ liệu và quan hệ chính**
 
 Thiết kế sử dụng PostgreSQL. Mô hình được lập từ catalog V23 có sẵn trong PROJECT_INVENTORY.json, sau đó đối chiếu các migration V24–V27 và entity hiện tại. Kết quả gồm 34 bảng nghiệp vụ, 273 cột. flyway_schema_history là bảng kỹ thuật theo dõi nâng cấp và không tính trong số bảng nghiệp vụ. Đây là kiểm kê theo mã nguồn và catalog lưu trong kho, không phải phép truy vấn mới vào database vận hành. [S6]
 
@@ -523,11 +523,11 @@ Ba bảng cốt lõi users, jobs và job_applications thể hiện tài khoản,
 
 Các hình ERD chọn trường định danh và quan hệ tiêu biểu để đọc được ở khổ in; từ điển bên dưới liệt kê đầy đủ cột của 34 bảng. Một đường quan hệ thể hiện tham chiếu dữ liệu; các tùy chọn ON DELETE, NULL và ràng buộc cụ thể được giữ trong schema/migration thay vì suy ra từ vị trí của các khối trên hình.
 
-### Từ điển dữ liệu
+**Từ điển dữ liệu**
 
 Trong các bảng dưới đây, “Có” ở cột bắt buộc nghĩa là NOT NULL; “Không” nghĩa là cho phép NULL. Kiểu varchar được rút gọn từ character varying, timestamptz là timestamp with time zone. Giá trị mặc định được nêu khi có trong catalog hoặc migration. Nội dung BYTEA là dữ liệu ảnh đã chuẩn hóa, không phải đường dẫn ảnh công khai.
 
-#### Bảng 01 attendance_records
+**Bảng 01 attendance_records**
 
 Một ca/ngày theo đơn, check-in/out và chứng cứ GPS/QR.
 
@@ -551,7 +551,7 @@ Bảng 3.2. Từ điển attendance_records
 
 Ràng buộc chính: CHECK (((checked_out_at IS NULL) OR (checked_out_at >= checked_in_at))); CHECK (((checkin_method)::text = ANY ((ARRAY['GPS'::character varying, 'QR'::character varying])::text[]))); CHECK (((checkout_method)::text = ANY ((ARRAY['GPS'::character varying, 'QR'::character varying])::text[]))); FOREIGN KEY (application_id) REFERENCES job_applications(id) ON DELETE CASCADE; PRIMARY KEY (id); UNIQUE (application_id, work_day).
 
-#### Bảng 02 attendance_shift_codes
+**Bảng 02 attendance_shift_codes**
 
 Hash mã ca làm đang còn hiệu lực cho một công trình.
 
@@ -565,7 +565,7 @@ Bảng 3.3. Từ điển attendance_shift_codes
 
 Ràng buộc chính: FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE; PRIMARY KEY (job_id).
 
-#### Bảng 03 chat_read_states
+**Bảng 03 chat_read_states**
 
 Con trỏ tin đã đọc tăng đơn điệu theo người/công trình/đối tác.
 
@@ -581,7 +581,7 @@ Bảng 3.4. Từ điển chat_read_states
 
 Ràng buộc chính: CHECK ((user_id <> peer_id)); CHECK ((last_read_message_id >= 0)); FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE; FOREIGN KEY (peer_id) REFERENCES users(id) ON DELETE CASCADE; FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE; PRIMARY KEY (id); UNIQUE (user_id, job_id, peer_id).
 
-#### Bảng 04 contractor_group_members
+**Bảng 04 contractor_group_members**
 
 Gắn thợ đã lưu vào nhóm của chủ thầu; không phải thành viên tổ đội ứng tuyển.
 
@@ -595,7 +595,7 @@ Bảng 3.5. Từ điển contractor_group_members
 
 Ràng buộc chính: PRIMARY KEY (id); UNIQUE (group_id, saved_worker_id); FOREIGN KEY (group_id) REFERENCES contractor_groups(id) ON DELETE CASCADE; FOREIGN KEY (saved_worker_id) REFERENCES saved_workers(id) ON DELETE CASCADE.
 
-#### Bảng 05 contractor_groups
+**Bảng 05 contractor_groups**
 
 Nhóm thợ quen riêng do chủ thầu tổ chức, tên duy nhất trong phạm vi chủ sở hữu.
 
@@ -609,7 +609,7 @@ Bảng 3.6. Từ điển contractor_groups
 
 Ràng buộc chính: PRIMARY KEY (id); UNIQUE (owner_id, name); FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE; CHECK (length(trim(name)) BETWEEN 1 AND 80).
 
-#### Bảng 06 crew_batches
+**Bảng 06 crew_batches**
 
 Một đợt ứng tuyển nguyên tổ vào công trình.
 
@@ -625,7 +625,7 @@ Bảng 3.7. Từ điển crew_batches
 
 Ràng buộc chính: CHECK (((status)::text = ANY ((ARRAY['PENDING'::character varying, 'ACCEPTED'::character varying, 'REJECTED'::character varying])::text[]))); FOREIGN KEY (crew_id) REFERENCES crews(id); FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE; PRIMARY KEY (id); UNIQUE (crew_id, job_id).
 
-#### Bảng 07 crew_members
+**Bảng 07 crew_members**
 
 Lời mời và trạng thái xác nhận của các tài khoản thợ thực.
 
@@ -641,7 +641,7 @@ Bảng 3.8. Từ điển crew_members
 
 Ràng buộc chính: CHECK (((status)::text = ANY ((ARRAY['INVITED'::character varying, 'CONFIRMED'::character varying, 'DECLINED'::character varying])::text[]))); FOREIGN KEY (crew_id) REFERENCES crews(id) ON DELETE CASCADE; FOREIGN KEY (worker_id) REFERENCES users(id) ON DELETE CASCADE; PRIMARY KEY (id); UNIQUE (crew_id, worker_id).
 
-#### Bảng 08 crews
+**Bảng 08 crews**
 
 Tổ đội do một thợ làm tổ trưởng.
 
@@ -656,7 +656,7 @@ Bảng 3.9. Từ điển crews
 
 Ràng buộc chính: FOREIGN KEY (leader_id) REFERENCES users(id); PRIMARY KEY (id).
 
-#### Bảng 09 device_tokens
+**Bảng 09 device_tokens**
 
 FCM token thiết bị, hash để định danh và last-seen.
 
@@ -672,7 +672,7 @@ Bảng 3.10. Từ điển device_tokens
 
 Ràng buộc chính: FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE; PRIMARY KEY (id); UNIQUE (token_hash).
 
-#### Bảng 10 incident_audit
+**Bảng 10 incident_audit**
 
 Lịch sử trạng thái xử lý sự cố và ghi chú của Admin.
 
@@ -689,7 +689,7 @@ Bảng 3.11. Từ điển incident_audit
 
 Ràng buộc chính: FOREIGN KEY (actor_id) REFERENCES users(id) ON DELETE SET NULL; FOREIGN KEY (incident_id) REFERENCES incidents(id) ON DELETE CASCADE; PRIMARY KEY (id).
 
-#### Bảng 11 incident_evidence
+**Bảng 11 incident_evidence**
 
 Một ảnh JPEG bằng chứng đã chuẩn hóa trên mỗi sự cố; chỉ người báo hoặc Admin đọc.
 
@@ -703,7 +703,7 @@ Bảng 3.12. Từ điển incident_evidence
 
 Ràng buộc chính: CHECK ((octet_length(content) <= 2097152)); FOREIGN KEY (incident_id) REFERENCES incidents(id) ON DELETE CASCADE; PRIMARY KEY (incident_id).
 
-#### Bảng 12 incidents
+**Bảng 12 incidents**
 
 Báo cáo riêng tư với snapshot công trình/người báo và độ ưu tiên.
 
@@ -734,7 +734,7 @@ Bảng 3.13. Từ điển incidents
 
 Ràng buộc chính: CHECK ((((reported_latitude IS NULL) AND (reported_longitude IS NULL)) OR ((reported_latitude IS NOT NULL) AND (reported_longitude IS NOT NULL) AND ((reported_latitude >= ('-90'::integer)::double precision) AND (reported_latitude <= (90)::double precision)) AND ((reported_longitude >= ('-180'::integer)::double precision) AND (reported_longitude <= (180)::double precision))))); CHECK (((status)::text = ANY ((ARRAY['NEW'::character varying, 'IN_REVIEW'::character varying, 'RESOLVED'::character varying])::text[]))); CHECK (((type)::text = ANY ((ARRAY['SOS'::character varying, 'SAFETY'::character varying, 'PAYMENT_DISPUTE'::character varying, 'OTHER'::character varying])::text[]))); FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE SET NULL; FOREIGN KEY (reporter_id) REFERENCES users(id) ON DELETE SET NULL; PRIMARY KEY (id); UNIQUE (reporter_id, client_request_id).
 
-#### Bảng 13 job_applications
+**Bảng 13 job_applications**
 
 Đơn ứng tuyển cá nhân, thương lượng, đồng thuận, cam kết chốt, sao và hủy việc.
 
@@ -764,7 +764,7 @@ Bảng 3.14. Từ điển job_applications
 
 Ràng buộc chính: CHECK ((((proposed_daily_rate IS NULL) OR ((proposed_daily_rate >= 1) AND (proposed_daily_rate <= 1000000000))) AND ((agreed_daily_rate IS NULL) OR ((agreed_daily_rate >= 1) AND (agreed_daily_rate <= 1000000000))))); CHECK (((worker_rating IS NULL) OR (((worker_rating >= 1) AND (worker_rating <= 5)) AND ((status)::text = 'ACCEPTED'::text)))); CHECK (((status)::text = ANY ((ARRAY['PENDING'::character varying, 'ACCEPTED'::character varying, 'REJECTED'::character varying, 'CANCELLED'::character varying])::text[]))); FOREIGN KEY (crew_batch_id) REFERENCES crew_batches(id) ON DELETE SET NULL; FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE; FOREIGN KEY (worker_id) REFERENCES users(id); PRIMARY KEY (id); UNIQUE (job_id, worker_id).
 
-#### Bảng 14 job_payments
+**Bảng 14 job_payments**
 
 Thanh toán công trình một lần cho mỗi đơn, công/tip/thưởng đã chốt.
 
@@ -788,7 +788,7 @@ Bảng 3.15. Từ điển job_payments
 
 Ràng buộc chính: CHECK (((work_days >= 1) AND (work_days <= 366))); CHECK ((bonus >= 0)); CHECK (((base = (work_days * daily_rate)) AND (total = ((base + tip) + bonus)))); CHECK ((daily_rate > 0)); CHECK ((tip >= 0)); FOREIGN KEY (application_id) REFERENCES job_applications(id) ON DELETE SET NULL; FOREIGN KEY (contractor_id) REFERENCES users(id) ON DELETE CASCADE; FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE SET NULL; FOREIGN KEY (worker_id) REFERENCES users(id) ON DELETE CASCADE; PRIMARY KEY (id); UNIQUE (application_id).
 
-#### Bảng 15 jobs
+**Bảng 15 jobs**
 
 Công trình, chủ thầu, mức lương, tọa độ, lịch và yêu cầu chấm công.
 
@@ -815,7 +815,7 @@ Bảng 3.16. Từ điển jobs
 
 Ràng buộc chính: CHECK ((((starts_on IS NULL) AND (ends_on IS NULL)) OR ((starts_on IS NOT NULL) AND (ends_on IS NOT NULL) AND (ends_on >= starts_on) AND ((ends_on - starts_on) <= 365)))); CHECK (((job_type)::text = ANY ((ARRAY['Thợ chính'::character varying, 'Phụ hồ'::character varying])::text[]))); CHECK (((latitude >= ('-90'::integer)::double precision) AND (latitude <= (90)::double precision))); CHECK (((longitude >= ('-180'::integer)::double precision) AND (longitude <= (180)::double precision))); CHECK ((required_workers > 0)); CHECK ((salary_per_day > (0)::double precision)); CHECK (((status)::text = ANY ((ARRAY['OPEN'::character varying, 'IN_PROGRESS'::character varying, 'COMPLETED'::character varying, 'CANCELLED'::character varying])::text[]))); FOREIGN KEY (contractor_id) REFERENCES users(id); PRIMARY KEY (id).
 
-#### Bảng 16 kyc_images
+**Bảng 16 kyc_images**
 
 Ảnh CCCD riêng tư đã được chuẩn hóa, truy cập có kiểm tra quyền.
 
@@ -829,7 +829,7 @@ Bảng 3.17. Từ điển kyc_images
 
 Ràng buộc chính: FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE; PRIMARY KEY (id).
 
-#### Bảng 17 message_attachments
+**Bảng 17 message_attachments**
 
 Nội dung ảnh tin nhắn, cùng giao dịch với message và xóa cascade.
 
@@ -842,7 +842,7 @@ Bảng 3.18. Từ điển message_attachments
 
 Ràng buộc chính: CHECK ((octet_length(content) <= 2097152)); FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE; PRIMARY KEY (message_id).
 
-#### Bảng 18 messages
+**Bảng 18 messages**
 
 Tin chữ/ảnh/GPS giữa hai người gắn với công trình.
 
@@ -864,7 +864,7 @@ Bảng 3.19. Từ điển messages
 
 Ràng buộc chính: CHECK (((((kind)::text = 'TEXT'::text) AND (latitude IS NULL) AND (longitude IS NULL) AND (image_hash IS NULL)) OR (((kind)::text = 'IMAGE'::text) AND (latitude IS NULL) AND (longitude IS NULL) AND (image_hash IS NOT NULL) AND (length((image_hash)::text) = 64)) OR (((kind)::text = 'LOCATION'::text) AND (latitude IS NOT NULL) AND (longitude IS NOT NULL) AND ((latitude >= ('-90'::integer)::double precision) AND (latitude <= (90)::double precision)) AND ((longitude >= ('-180'::integer)::double precision) AND (longitude <= (180)::double precision)) AND (image_hash IS NULL)))); CHECK ((sender_id <> recipient_id)); CHECK ((length(TRIM(BOTH FROM content)) > 0)); FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE; FOREIGN KEY (recipient_id) REFERENCES users(id); FOREIGN KEY (sender_id) REFERENCES users(id); PRIMARY KEY (id); UNIQUE (sender_id, client_message_id).
 
-#### Bảng 19 notifications
+**Bảng 19 notifications**
 
 Lịch sử thông báo và outbox thử gửi FCM.
 
@@ -887,7 +887,7 @@ Bảng 3.20. Từ điển notifications
 
 Ràng buộc chính: FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE SET NULL; FOREIGN KEY (recipient_id) REFERENCES users(id) ON DELETE CASCADE; PRIMARY KEY (id); UNIQUE (event_key).
 
-#### Bảng 20 portfolio_photos
+**Bảng 20 portfolio_photos**
 
 Ảnh tay nghề upload riêng tư, tối đa 12 ảnh mỗi chủ hồ sơ.
 
@@ -903,7 +903,7 @@ Bảng 3.21. Từ điển portfolio_photos
 
 Ràng buộc chính: CHECK ((octet_length(content) <= 2097152)); FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE; PRIMARY KEY (id).
 
-#### Bảng 21 receiving_bank_audit
+**Bảng 21 receiving_bank_audit**
 
 Lịch sử cấu hình nhận tiền và người thực hiện.
 
@@ -923,7 +923,7 @@ Bảng 3.22. Từ điển receiving_bank_audit
 
 Ràng buộc chính: FOREIGN KEY (actor_id) REFERENCES users(id) ON DELETE SET NULL; PRIMARY KEY (id).
 
-#### Bảng 22 receiving_bank_settings
+**Bảng 22 receiving_bank_settings**
 
 Cấu hình ngân hàng nhận tiền duy nhất, mặc định không bật QR.
 
@@ -941,7 +941,7 @@ Bảng 3.23. Từ điển receiving_bank_settings
 
 Ràng buộc chính: CHECK (((NOT enabled) OR ((bank_bin IS NOT NULL) AND (bank_name IS NOT NULL) AND (account_no IS NOT NULL) AND (account_name IS NOT NULL)))); CHECK ((id = 1)); PRIMARY KEY (id).
 
-#### Bảng 23 reputation_events
+**Bảng 23 reputation_events**
 
 Sự kiện hoàn thành/hủy việc và điểm uy tín sau thay đổi.
 
@@ -961,7 +961,7 @@ Bảng 3.24. Từ điển reputation_events
 
 Ràng buộc chính: FOREIGN KEY (application_id) REFERENCES job_applications(id) ON DELETE SET NULL; FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE SET NULL; FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE; PRIMARY KEY (id); UNIQUE (application_id, type).
 
-#### Bảng 24 saved_jobs
+**Bảng 24 saved_jobs**
 
 Công trình yêu thích riêng của thợ.
 
@@ -976,7 +976,7 @@ Bảng 3.25. Từ điển saved_jobs
 
 Ràng buộc chính: FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE; FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE; PRIMARY KEY (id); UNIQUE (owner_id, job_id).
 
-#### Bảng 25 saved_workers
+**Bảng 25 saved_workers**
 
 Thợ quen riêng của chủ thầu.
 
@@ -991,7 +991,7 @@ Bảng 3.26. Từ điển saved_workers
 
 Ràng buộc chính: CHECK ((owner_id <> worker_id)); FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE; FOREIGN KEY (worker_id) REFERENCES users(id) ON DELETE CASCADE; PRIMARY KEY (id); UNIQUE (owner_id, worker_id).
 
-#### Bảng 26 user_avatars
+**Bảng 26 user_avatars**
 
 Ảnh đại diện đã chuẩn hóa, tối đa một bản ghi cho mỗi tài khoản.
 
@@ -1005,7 +1005,7 @@ Bảng 3.27. Từ điển user_avatars
 
 Ràng buộc chính: PRIMARY KEY (id); UNIQUE (user_id); FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE.
 
-#### Bảng 27 user_project_images
+**Bảng 27 user_project_images**
 
 URL ảnh dự án legacy có thứ tự, giữ tương thích dữ liệu cũ.
 
@@ -1019,7 +1019,7 @@ Bảng 3.28. Từ điển user_project_images
 
 Ràng buộc chính: FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE; PRIMARY KEY (user_id, sort_order).
 
-#### Bảng 28 user_skills
+**Bảng 28 user_skills**
 
 Danh sách kỹ năng có thứ tự của tài khoản.
 
@@ -1033,7 +1033,7 @@ Bảng 3.29. Từ điển user_skills
 
 Ràng buộc chính: FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE; PRIMARY KEY (user_id, sort_order).
 
-#### Bảng 29 users
+**Bảng 29 users**
 
 Tài khoản, vai trò, trạng thái, hồ sơ, KYC và thông số uy tín.
 
@@ -1068,7 +1068,7 @@ Bảng 3.30. Từ điển users
 
 Ràng buộc chính: CHECK (((NOT is_verified) OR ((((COALESCE(cccd_front_image, ''::character varying))::text ~~ 'https://_%'::text) OR ((COALESCE(cccd_front_image, ''::character varying))::text ~~ '/admin/kyc/images/%'::text)) AND (((COALESCE(cccd_back_image, ''::character varying))::text ~~ 'https://_%'::text) OR ((COALESCE(cccd_back_image, ''::character varying))::text ~~ '/admin/kyc/images/%'::text))))); CHECK (((rating >= (0)::double precision) AND (rating <= (5)::double precision))); CHECK (((reputation_score >= 0) AND (reputation_score <= 100))); CHECK (((role)::text = ANY ((ARRAY['ROLE_WORKER'::character varying, 'ROLE_CONTRACTOR'::character varying, 'ROLE_ADMIN'::character varying])::text[]))); PRIMARY KEY (id); UNIQUE (phone_number).
 
-#### Bảng 30 wallet_accounts
+**Bảng 30 wallet_accounts**
 
 Số dư chính, ký quỹ và tiền giữ chỗ rút của từng tài khoản.
 
@@ -1083,7 +1083,7 @@ Bảng 3.31. Từ điển wallet_accounts
 
 Ràng buộc chính: CHECK (((main_balance >= 0) AND (escrow_balance >= 0) AND (held_balance >= 0) AND (((main_balance + escrow_balance) + held_balance) <= '1000000000000'::bigint))); FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE; PRIMARY KEY (user_id).
 
-#### Bảng 31 wallet_entries
+**Bảng 31 wallet_entries**
 
 Sổ giao dịch với delta từng ngăn tiền, số dư sau và khóa tham chiếu chống lặp.
 
@@ -1109,7 +1109,7 @@ Bảng 3.32. Từ điển wallet_entries
 
 Ràng buộc chính: CHECK ((amount > 0)); CHECK ((escrow_after >= 0)); CHECK ((held_after >= 0)); CHECK ((main_after >= 0)); FOREIGN KEY (payment_id) REFERENCES job_payments(id) ON DELETE SET NULL; FOREIGN KEY (request_id) REFERENCES wallet_requests(id) ON DELETE SET NULL; FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE; PRIMARY KEY (id); UNIQUE (reference).
 
-#### Bảng 32 wallet_requests
+**Bảng 32 wallet_requests**
 
 Yêu cầu nạp/rút, trạng thái Admin và snapshot VietQR.
 
@@ -1138,7 +1138,7 @@ Bảng 3.33. Từ điển wallet_requests
 
 Ràng buộc chính: CHECK (((amount >= 1000) AND (amount <= 100000000))); CHECK (((kind)::text = ANY ((ARRAY['TOP_UP'::character varying, 'WITHDRAW'::character varying])::text[]))); CHECK (((status)::text = ANY ((ARRAY['PENDING'::character varying, 'APPROVED'::character varying, 'REJECTED'::character varying])::text[]))); FOREIGN KEY (processed_by) REFERENCES users(id) ON DELETE SET NULL; FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE; PRIMARY KEY (id); UNIQUE (external_reference); UNIQUE (user_id, client_request_id).
 
-#### Bảng 33 work_logs
+**Bảng 33 work_logs**
 
 Ảnh báo cáo cuối ca, phản hồi nghiệm thu và version chống ghi đè.
 
@@ -1159,7 +1159,7 @@ Bảng 3.34. Từ điển work_logs
 
 Ràng buộc chính: CHECK (((detail_photo IS NULL) OR (octet_length(detail_photo) <= 2097152))); CHECK ((octet_length(photo) <= 2097152)); CHECK (((status)::text = ANY ((ARRAY['PENDING'::character varying, 'APPROVED'::character varying, 'CHANGES_REQUESTED'::character varying])::text[]))); FOREIGN KEY (attendance_id) REFERENCES attendance_records(id) ON DELETE CASCADE; PRIMARY KEY (id); UNIQUE (attendance_id).
 
-#### Bảng 34 worker_calendar_blocks
+**Bảng 34 worker_calendar_blocks**
 
 Ngày bận do thợ tự khai, khóa duy nhất theo thợ/ngày.
 
@@ -1174,7 +1174,7 @@ Bảng 3.35. Từ điển worker_calendar_blocks
 
 Ràng buộc chính: FOREIGN KEY (worker_id) REFERENCES users(id) ON DELETE CASCADE; PRIMARY KEY (id); UNIQUE (worker_id, work_day).
 
-### Toàn vẹn và truy vấn dữ liệu
+**Toàn vẹn và truy vấn dữ liệu**
 
 Ràng buộc UNIQUE(job_id, worker_id) ngăn trùng ứng tuyển. Điểm worker_rating chỉ hợp lệ trong khoảng 1–5 và gắn với đơn ACCEPTED. Hồ sơ xác thực phải có đủ hai mặt CCCD hợp lệ; callback entity và ràng buộc database phối hợp bảo vệ trạng thái đó. Tài khoản không có đủ ảnh, kể cả Admin seed, không được tự coi là đã xác thực.
 
@@ -1192,7 +1192,7 @@ Các hình dưới đây là 20 ảnh chụp mới ngày 26/11/2026 từ phiên 
 
 Số tiền, danh tính và lịch sử trong ảnh phục vụ minh họa. GPS ở ảnh radar được mô phỏng để kiểm tra hiển thị, không được dùng làm kết quả nghiệm thu định vị ngoài thực địa. Bản đồ giữ attribution OpenStreetMap. Mỗi cặp hình có mô tả hành vi và điều kiện nghiệp vụ tương ứng.
 
-### Đăng nhập và Tìm việc của Thợ
+**Đăng nhập và Tìm việc của Thợ**
 
 ![Hình 3.11 và 3.12. Đăng nhập và Tìm việc của Thợ — giao diện DEMO](bao_cao_hinh/giao-dien-01.png)
 
@@ -1200,7 +1200,7 @@ Hình 3.11. Màn hình đăng nhập mới hiển thị logo biểu tượng, ha
 
 Hình 3.12. Trang tìm việc mới dùng thanh tiêu đề có logo, lời chào và công tắc nhận việc, bộ lọc, bản đồ OSM, thẻ công trình và thanh điều hướng năm mục với QR ở giữa.
 
-### Chi tiết công trình và Việc và chấm công
+**Chi tiết công trình và Việc và chấm công**
 
 ![Hình 3.13 và 3.14. Chi tiết công trình và Việc và chấm công — giao diện DEMO](bao_cao_hinh/giao-dien-02.png)
 
@@ -1208,7 +1208,7 @@ Hình 3.13. Khung chi tiết có vị trí, chỉ đường, mức lương và t
 
 Hình 3.14. Lịch tuần, GPS hoặc QR, hai ảnh tổng quan và chi tiết cuối ca, SOS. Quy tắc triển khai giữ GPS 200m, accuracy tối đa 100m và QR hết hạn sau 5 phút.
 
-### Ví của Thợ và Nạp ví VietQR
+**Ví của Thợ và Nạp ví VietQR**
 
 ![Hình 3.15 và 3.16. Ví của Thợ và Nạp ví VietQR — giao diện DEMO](bao_cao_hinh/giao-dien-03.png)
 
@@ -1216,7 +1216,7 @@ Hình 3.15. Ví hiện tại hiển thị số dư khả dụng, nút ẩn/hiệ
 
 Hình 3.16. Chọn nhanh mệnh giá và xem QR do server sinh. Nội dung đối soát phải duy nhất theo yêu cầu, không thay bằng chuỗi tĩnh của bản vẽ; chế độ demo ghi rõ không chuyển tiền thật.
 
-### Hồ sơ của Thợ và Trò chuyện của Thợ
+**Hồ sơ của Thợ và Trò chuyện của Thợ**
 
 ![Hình 3.17 và 3.18. Hồ sơ của Thợ và Trò chuyện của Thợ — giao diện DEMO](bao_cao_hinh/giao-dien-04.png)
 
@@ -1224,7 +1224,7 @@ Hình 3.17. Hồ sơ mới hiển thị avatar, số việc hoàn thành, sao, c
 
 Hình 3.18. Bong bóng phân biệt hai phía và thẻ cam kết ghim đầu cuộc trò chuyện. Chỉ cặp đã ACCEPTED có quyền trao đổi; không giả lập trạng thái đã xem từng tin.
 
-### Bảng xếp hạng và Trang chủ Chủ thầu
+**Bảng xếp hạng và Trang chủ Chủ thầu**
 
 ![Hình 3.19 và 3.20. Bảng xếp hạng và Trang chủ Chủ thầu — giao diện DEMO](bao_cao_hinh/giao-dien-05.png)
 
@@ -1232,7 +1232,7 @@ Hình 3.19. Bảng xếp hạng hiện tại dùng dữ liệu API và bộ bậ
 
 Hình 3.20. Trang chủ Chủ thầu mới có logo biểu tượng, lời chào, ba ô thống kê, nút Đăng công trình mới màu xanh dương, bản đồ và thanh điều hướng Công trình, Đội thợ, Quét QR, Ví tiền, Hồ sơ.
 
-### Tạo công trình và Duyệt ứng viên
+**Tạo công trình và Duyệt ứng viên**
 
 ![Hình 3.21 và 3.22. Tạo công trình và Duyệt ứng viên — giao diện DEMO](bao_cao_hinh/giao-dien-06.png)
 
@@ -1240,7 +1240,7 @@ Hình 3.21. Nhập loại thợ, lương, số lượng, lịch và chọn ghim.
 
 Hình 3.22. Lọc trạng thái, xem kinh nghiệm, uy tín, ảnh tay nghề và lương đề xuất. Duyệt nhận vẫn khóa giao dịch để kiểm tra số lượng, lịch và cam kết.
 
-### Nghiệm thu công việc và Ví và chi trả của Chủ thầu
+**Nghiệm thu công việc và Ví và chi trả của Chủ thầu**
 
 ![Hình 3.23 và 3.24. Nghiệm thu công việc và Ví và chi trả của Chủ thầu — giao diện DEMO](bao_cao_hinh/giao-dien-07.png)
 
@@ -1248,7 +1248,7 @@ Hình 3.23. Đối chiếu GPS và hai ảnh riêng tư. Chốt sao và hoàn th
 
 Hình 3.24. Số dư, tài khoản ký quỹ và chi trả tuần từ ledger đang tải. Ký quỹ tài khoản không được trình bày như ngân sách đã khóa cho một công trình riêng.
 
-### Hồ sơ và thợ quen và Trò chuyện của Chủ thầu
+**Hồ sơ và thợ quen và Trò chuyện của Chủ thầu**
 
 ![Hình 3.25 và 3.26. Hồ sơ và thợ quen và Trò chuyện của Chủ thầu — giao diện DEMO](bao_cao_hinh/giao-dien-08.png)
 
@@ -1256,7 +1256,7 @@ Hình 3.25. Hồ sơ chủ thầu hiện tại dùng logo mới và màu xanh d�
 
 Hình 3.26. Giao diện chat của chủ thầu dùng màu xanh dương theo vai trò. Lịch sử, tin chưa đọc và quyền tham gia do API và WebSocket hiện tại kiểm soát.
 
-### Phiếu cam kết điện tử và Radar và QR toàn màn hình
+**Phiếu cam kết điện tử và Radar và QR toàn màn hình**
 
 ![Hình 3.27 và 3.28. Phiếu cam kết điện tử và Radar và QR toàn màn hình — giao diện DEMO](bao_cao_hinh/giao-dien-09.png)
 
@@ -1264,13 +1264,13 @@ Hình 3.27. Hiển thị mã, mức lương chốt, hai bên và KYC thật, tim
 
 Hình 3.28. Bản đồ OSM, geofence 200m, khoảng cách Haversine, độ chính xác GPS, mở camera QR ca làm 5 phút và đồng hồ theo ca thực; chưa chấm công thì thời gian bằng không.
 
-### Thông báo và xử lý sự cố
+**Thông báo và xử lý sự cố**
 
 ![Hình 3.29. Thông báo và xử lý sự cố — giao diện DEMO](bao_cao_hinh/giao-dien-19.png)
 
 Hiển thị biến động ví và thông báo thật, chọn công trình, gửi SOS hoặc khiếu nại kèm một ảnh bằng chứng riêng tư. SOS ưu tiên cho Admin, không tự gọi cứu hộ.
 
-### Control Center quản trị
+**Control Center quản trị**
 
 ![Hình 3.30. Control Center quản trị — giao diện DEMO](bao_cao_hinh/giao-dien-20.png)
 
@@ -1300,13 +1300,13 @@ Bảng 4.1. Giới thiệu tổng quan về công cụ, kỹ thuật, công ngh�
 | Git / GitHub Actions | Cấu hình workflow trong kho | Lịch sử mã, kiểm tra và artifact triển khai. |
 | Vercel / EC2 / Nginx / Docker | Ubuntu 24.04; cấu hình deploy/aws | Phục vụ Flutter Web, API/Admin và PostgreSQL. |
 
-### Tổ chức mã nguồn
+**Tổ chức mã nguồn**
 
 Backend nằm ở thư mục gốc, mã Java trong src/main/java/vn/thoxay; template Admin trong src/main/resources/templates; cấu hình và migration trong src/main/resources. Mobile nằm trong mobile_app với các thư mục models, services, screens, widgets và theme. Kiểm thử backend nằm trong src/test; kiểm thử Flutter trong mobile_app/test. Cấu hình triển khai AWS nằm trong deploy/aws, workflow nằm trong .github/workflows.
 
 Mã nguồn không đặt mật khẩu database, khóa JWT và tệp Firebase riêng vào báo cáo. .env.example mô tả tên biến cần cấu hình; .local chứa cấu hình và artifact cục bộ đã được loại khỏi Git. Báo cáo và tài liệu bảo vệ được tạo thủ công theo yêu cầu; không đưa việc sinh tài liệu vào build, test hoặc Git hook của ứng dụng.
 
-### Kỹ thuật bảo mật và xử lý đồng thời
+**Kỹ thuật bảo mật và xử lý đồng thời**
 
 Mật khẩu được băm BCrypt. API sử dụng JWT và session stateless; Web Admin sử dụng session cùng cơ chế CSRF. Service kiểm tra vai trò và chủ sở hữu ngay trước hành vi nghiệp vụ. security_version hỗ trợ thu hồi hiệu lực phiên theo thay đổi bảo mật; trạng thái active được kiểm tra để chặn tài khoản bị khóa dùng token cũ.
 
@@ -1314,7 +1314,7 @@ Khóa PESSIMISTIC_WRITE được dùng cho công trình trong các thao tác c�
 
 Ảnh nhạy cảm được kiểm tra, chuẩn hóa và lưu trong các bảng riêng. Khi tải ảnh, endpoint kiểm tra quyền theo người dùng hoặc quan hệ công việc. Admin chỉ tải CCCD khi mở modal, cần tải thành công hai mặt mới cho xác thực, gửi kèm hai URL đã xem và xóa src khi đóng. Cơ chế này giảm tình huống xác thực dựa vào ảnh cũ; nó không thay thế quy trình eKYC chuyên nghiệp.
 
-### Chạy và kiểm tra ứng dụng
+**Chạy và kiểm tra ứng dụng**
 
 Môi trường phát triển cần Java 17 trở lên, Flutter theo phiên bản ghim và PostgreSQL. Maven Wrapper dùng để biên dịch và kiểm thử backend. Script start-local.ps1 hỗ trợ khởi động local theo README; thông tin kết nối database và JWT được truyền qua biến môi trường hoặc cấu hình cục bộ. Flutter nhận API_BASE_URL ở thời điểm build/run, không thêm /api vào cuối origin vì các endpoint đã có tiền tố này.
 
@@ -1322,7 +1322,7 @@ Các lệnh kiểm tra ứng dụng gồm .\mvnw.cmd verify, flutter analyze, fl
 
 ## 4.2. Các chức năng đã cài đặt được
 
-### Kết quả theo nhóm chức năng
+**Kết quả theo nhóm chức năng**
 
 Bảng 4.2. Kết quả theo nhóm chức năng
 
@@ -1338,7 +1338,7 @@ Bảng 4.2. Kết quả theo nhóm chức năng
 | F13 | UC13 | AdminService; admin controllers và templates | KYC, khóa tài khoản, quản lý; Hình 3.30. |
 | F14 | UC14 | IncidentService, IncidentEvidence, IncidentAudit | Sự cố/SOS và phản hồi; Hình 3.29. |
 
-### Một số quy tắc cài đặt đáng chú ý
+**Một số quy tắc cài đặt đáng chú ý**
 
 Quy tắc duyệt nhận có thể quan sát trong ApplicationService: service khóa công trình, kiểm tra quyền chủ thầu, khóa worker, kiểm tra lịch và cam kết rồi mới cập nhật trạng thái. Công trình có trạng thái IN_PROGRESS vẫn có thể nhận người thay thế khi số ACCEPTED chưa đủ. Đây là khác biệt cần giữ so với mô tả ban đầu chỉ tìm công trình OPEN.
 
@@ -1350,7 +1350,7 @@ Chấm công GPS yêu cầu trong 200 m quanh công trình và accuracy không q
 
 Ví chia ba ngăn main, escrow và held. Chuyển vào ký quỹ chỉ di chuyển giữa các ngăn, không tạo thu nhập. Mốc 200.000 đồng là cảnh báo ký quỹ trong ứng dụng, chưa phải khoản bảo đảm cho từng công trình và chưa có cơ chế tự phạt tiền khi hủy. Yêu cầu nạp được Admin duyệt sau đối soát; hiển thị QR không tự chứng minh đã nhận tiền.
 
-### Đối chiếu kiểm thử và giới hạn bằng chứng
+**Đối chiếu kiểm thử và giới hạn bằng chứng**
 
 Bảng 4.3. Đối chiếu kiểm thử và giới hạn bằng chứng
 
@@ -1374,7 +1374,7 @@ Kết quả cài đặt cần được đánh giá trong phạm vi bằng chứn
 
 # KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN
 
-## Những kết quả đã đạt được của đề tài
+**Những kết quả đã đạt được của đề tài**
 
 Đề tài đã hình thành một mô hình dữ liệu thống nhất cho người dùng, công trình và đơn ứng tuyển, cùng các phân hệ hỗ trợ vòng đời làm việc. Ứng dụng Flutter có các màn hình cho thợ và chủ thầu; Web Admin cung cấp công cụ quản lý hồ sơ, công trình, đối soát ví và sự cố. Backend áp dụng phân quyền, kiểm tra trạng thái và giao dịch để bảo vệ các quyết định nghiệp vụ.
 
@@ -1382,7 +1382,7 @@ Những kết quả kỹ thuật có thể đối chiếu trực tiếp gồm t�
 
 Đề tài cũng xây dựng được nền tảng kiểm chứng qua kiểm thử tự động, cấu hình chạy local và bộ triển khai AWS. Giá trị của kết quả nằm ở khả năng mở mã để giải thích hành vi và tái hiện các điều kiện, không ở các số liệu hiệu quả kinh doanh chưa được đo.
 
-## Hạn chế
+**Hạn chế**
 
 - Chưa có khảo sát người dùng đủ mẫu và thử nghiệm thực địa dài hạn để lượng hóa hiệu quả kết nối hoặc giảm tranh chấp.
 - GPS có thể bị giả lập; accuracy và geofence chỉ kiểm tra dữ liệu vị trí được gửi, chưa tạo bằng chứng hiện diện tuyệt đối. Ca qua đêm chưa được hỗ trợ đầy đủ.
@@ -1392,7 +1392,7 @@ Những kết quả kỹ thuật có thể đối chiếu trực tiếp gồm t�
 - Biên bản kiểm thử gần nhất còn ghi hai trường hợp Flutter chưa đạt và ba bài tích hợp PostgreSQL bỏ qua; chưa có bằng chứng tải lớn, đánh giá xâm nhập hoặc diễn tập phục hồi toàn hệ thống.
 - Backend và database cùng VPS tạo một điểm lỗi chung; tên miền theo IP cần được ổn định cho triển khai lâu dài. Quy trình lưu giữ, xóa và phân quyền vận hành dữ liệu nhạy cảm cần hoàn thiện trước khi mở rộng sử dụng.
 
-## Hướng phát triển
+**Hướng phát triển**
 
 Ưu tiên ngắn hạn là xử lý các kiểm thử chưa đạt, chạy các bài PostgreSQL còn bỏ qua trong môi trường thích hợp và nghiệm thu luồng end-to-end trên thiết bị thật. Cần kiểm tra có hệ thống các tình huống mất mạng, gửi lại yêu cầu, thay ảnh khi đang duyệt và cạnh tranh nhiều yêu cầu cùng lúc. Song song, bổ sung theo dõi lỗi, cảnh báo, sao lưu ngoài VPS và diễn tập phục hồi.
 
