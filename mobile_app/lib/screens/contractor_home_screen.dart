@@ -22,6 +22,7 @@ import '../widgets/job_card.dart';
 import '../widgets/call_button.dart';
 import '../widgets/chat_button.dart';
 import '../widgets/job_completion_dialog.dart';
+import '../widgets/job_schedule_picker.dart';
 import '../widgets/stop_recruiting_button.dart';
 import 'location_picker_screen.dart';
 import '../widgets/loading_jobs.dart';
@@ -568,13 +569,12 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
   final _workers = TextEditingController(text: '1');
   String _type = 'Thợ chính';
   GeoPoint? _position;
-  late DateTimeRange _schedule = DateTimeRange(
-    start: DateTime.now(),
-    end: DateTime.now(),
-  );
+  late DateTimeRange _schedule;
   @override
   void initState() {
     super.initState();
+    final today = DateUtils.dateOnly(DateTime.now());
+    _schedule = DateTimeRange(start: today, end: today);
     final j = widget.job;
     if (j != null) {
       _title.text = j.title;
@@ -584,8 +584,6 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
       _workers.text = '${j.requiredWorkers}';
       _type = j.jobType;
       _position = GeoPoint(j.latitude, j.longitude);
-      final now = DateTime.now();
-      final today = DateTime(now.year, now.month, now.day);
       final start = j.startsOn == null || j.startsOn!.isBefore(today)
           ? today
           : j.startsOn!;
@@ -781,25 +779,10 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
                       : 'Vị trí: ${_position!.latitude.toStringAsFixed(5)}, ${_position!.longitude.toStringAsFixed(5)}',
                 ),
                 const SizedBox(height: 12),
-                OutlinedButton.icon(
-                  onPressed: _busy
-                      ? null
-                      : () async {
-                          final now = DateTime.now();
-                          final range = await showDateRangePicker(
-                            context: context,
-                            initialDateRange: _schedule,
-                            firstDate: DateTime(now.year, now.month, now.day),
-                            lastDate: now.add(const Duration(days: 365)),
-                          );
-                          if (range != null && mounted) {
-                            setState(() => _schedule = range);
-                          }
-                        },
-                  icon: const Icon(Icons.date_range),
-                  label: Text(
-                    'Lịch: ${isoDay(_schedule.start)} – ${isoDay(_schedule.end)}',
-                  ),
+                JobSchedulePicker(
+                  value: _schedule,
+                  enabled: !_busy,
+                  onChanged: (range) => setState(() => _schedule = range),
                 ),
                 const SizedBox(height: 8),
                 Wrap(

@@ -3,11 +3,21 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tho_xay_mobile/models/models.dart';
 import 'package:tho_xay_mobile/screens/contractor_home_screen.dart';
 import 'package:tho_xay_mobile/services/api_service.dart';
+import 'package:tho_xay_mobile/models/scheduling.dart';
+import 'package:tho_xay_mobile/widgets/figma_job_map.dart';
 
 class ContractorApi extends ApiService {
   String decision = 'PENDING';
   bool closed = false, failStop = false, completed = false;
   int stopCalls = 0;
+  Map<String, dynamic>? createdBody;
+
+  @override
+  Future<Job> createJob(Map<String, dynamic> body) async {
+    createdBody = body;
+    return job;
+  }
+
   Job get job => Job(
     id: 1,
     contractorId: 2,
@@ -68,6 +78,58 @@ class ContractorApi extends ApiService {
 }
 
 void main() {
+  testWidgets('posting uses the chosen dates and updates the payroll preview', (
+    tester,
+  ) async {
+    final api = ContractorApi();
+    await tester.pumpWidget(MaterialApp(home: ContractorHomeScreen(api: api)));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Đăng công trình mới'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Đăng công trình mới'));
+    await tester.pumpAndSettle();
+    for (final field in {
+      'Tên công trình': 'Xây nhà',
+      'Lương mỗi ngày (đồng)': '500000',
+      'Địa chỉ công trình': 'Quận 1',
+    }.entries) {
+      await tester.enterText(
+        find.widgetWithText(TextFormField, field.key),
+        field.value,
+      );
+    }
+    await tester.ensureVisible(find.byType(JobLocationPin));
+    await tester.pumpAndSettle();
+    await tester.tapAt(tester.getCenter(find.byType(JobLocationPin)));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Bắt đầu ngày mai'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Bắt đầu ngày mai'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Làm 7 ngày'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Làm 7 ngày'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Dự toán quỹ lương'));
+    await tester.pumpAndSettle();
+    expect(find.text(money(3500000)), findsOneWidget);
+    expect(find.textContaining('1 thợ × 7 ngày.'), findsOneWidget);
+    await tester.tap(find.text('Đăng việc'));
+    await tester.pumpAndSettle();
+    final today = DateUtils.dateOnly(DateTime.now());
+    expect(
+      api.createdBody?['startsOn'],
+      isoDay(DateTime(today.year, today.month, today.day + 1)),
+    );
+    expect(
+      api.createdBody?['endsOn'],
+      isoDay(DateTime(today.year, today.month, today.day + 7)),
+    );
+    expect(find.text('Đã đăng công trình mới.'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+    api.dispose();
+  });
+
   Future<void> openManagement(WidgetTester tester) async {
     await tester.scrollUntilVisible(
       find.text('Quản lý công trình'),
