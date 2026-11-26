@@ -7,6 +7,7 @@ import 'package:tho_xay_mobile/services/location_service.dart';
 import 'package:tho_xay_mobile/widgets/call_button.dart';
 import 'package:tho_xay_mobile/models/scheduling.dart';
 import 'package:tho_xay_mobile/widgets/job_application_actions.dart';
+import 'package:tho_xay_mobile/widgets/job_card.dart';
 
 class FixedLocation extends LocationService {
   @override
@@ -128,6 +129,37 @@ class WorkerApi extends ApiService {
 }
 
 void main() {
+  for (final decision in ['REJECTED', 'CANCELLED']) {
+    testWidgets('$decision is history, not completed work', (tester) async {
+      final api = WorkerApi()
+        ..applied = true
+        ..applicationStatus = decision
+        ..jobStatus = 'COMPLETED';
+      await tester.pumpWidget(
+        MaterialApp(
+          home: WorkerHomeScreen(api: api, location: FixedLocation()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Việc của tôi').last);
+      await tester.pumpAndSettle();
+      final finished = find.widgetWithText(TextButton, 'Hoàn thành');
+      await tester.scrollUntilVisible(
+        finished,
+        180,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(finished);
+      await tester.pumpAndSettle();
+      expect(find.byType(JobCard), findsNothing);
+      await tester.tap(find.widgetWithText(TextButton, 'Tất cả'));
+      await tester.pumpAndSettle();
+      expect(find.byType(JobCard), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+      api.dispose();
+    });
+  }
   testWidgets(
     'sticky search filters local results without changing server filters',
     (tester) async {

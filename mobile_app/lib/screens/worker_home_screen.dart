@@ -85,7 +85,7 @@ class _WorkerHomeContentState extends State<WorkerHomeContent> {
         (a) => switch (_workStatus) {
           0 => a.status == 'ACCEPTED' && a.job.status != 'COMPLETED',
           1 => a.status == 'PENDING',
-          2 => a.job.status == 'COMPLETED',
+          2 => a.status == 'ACCEPTED' && a.job.status == 'COMPLETED',
           _ => true,
         },
       )

@@ -6,7 +6,7 @@ import 'package:tho_xay_mobile/services/api_service.dart';
 
 class ContractorApi extends ApiService {
   String decision = 'PENDING';
-  bool closed = false, failStop = false;
+  bool closed = false, failStop = false, completed = false;
   int stopCalls = 0;
   Job get job => Job(
     id: 1,
@@ -21,7 +21,11 @@ class ContractorApi extends ApiService {
     latitude: 10,
     longitude: 106,
     requiredWorkers: 1,
-    status: closed && decision == 'ACCEPTED' ? 'IN_PROGRESS' : 'OPEN',
+    status: completed
+        ? 'COMPLETED'
+        : closed && decision == 'ACCEPTED'
+        ? 'IN_PROGRESS'
+        : 'OPEN',
     recruitmentClosed: closed,
   );
   JobApplication get application => JobApplication(
@@ -53,6 +57,12 @@ class ContractorApi extends ApiService {
     if (failStop) throw const ApiException('Không kết nối được máy chủ');
     closed = true;
     if (decision == 'PENDING') decision = 'REJECTED';
+    return job;
+  }
+
+  @override
+  Future<Job> completeJob(int jobId, Map<int, int> ratings) async {
+    completed = true;
     return job;
   }
 }
@@ -139,6 +149,35 @@ void main() {
     expect(api.stopCalls, 1);
     expect(find.text('Dừng tuyển'), findsNothing);
     expect(find.text('Đã dừng tuyển'), findsWidgets);
+    await tester.pumpWidget(const SizedBox());
+    api.dispose();
+  });
+
+  testWidgets('completing from details closes the stale job sheet', (
+    tester,
+  ) async {
+    final api = ContractorApi()
+      ..closed = true
+      ..decision = 'ACCEPTED';
+    await tester.pumpWidget(MaterialApp(home: ContractorHomeScreen(api: api)));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Xem chi tiết'),
+      180,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Xem chi tiết'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Hoàn thành công trình'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Chấm 5 sao cho Nguyễn Văn Thợ'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Hoàn thành & lưu điểm'));
+    await tester.pumpAndSettle();
+    expect(api.completed, isTrue);
+    expect(find.text('Thông tin công việc'), findsNothing);
+    expect(find.text('Hoàn thành công trình'), findsNothing);
     await tester.pumpWidget(const SizedBox());
     api.dispose();
   });

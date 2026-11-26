@@ -9,6 +9,7 @@ import '../widgets/content_skeleton.dart';
 import '../widgets/design_motion.dart';
 import '../widgets/job_card.dart';
 import '../widgets/job_completion_dialog.dart';
+import '../widgets/stop_recruiting_button.dart';
 import 'attendance_screen.dart';
 import 'job_payments_screen.dart';
 
@@ -143,9 +144,8 @@ class _RoleSwitchBlockersScreenState extends State<RoleSwitchBlockersScreen> {
                   ),
                 if (item.owner && !item.unpaid) ...[
                   if (job.canRecruit)
-                    OutlinedButton(
+                    StopRecruitingButton(
                       onPressed: _busy ? null : () => _stop(item),
-                      child: const Text('Dừng tuyển'),
                     ),
                   OutlinedButton(
                     onPressed: _busy

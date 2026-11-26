@@ -22,6 +22,7 @@ import '../widgets/job_card.dart';
 import '../widgets/call_button.dart';
 import '../widgets/chat_button.dart';
 import '../widgets/job_completion_dialog.dart';
+import '../widgets/stop_recruiting_button.dart';
 import 'location_picker_screen.dart';
 import '../widgets/loading_jobs.dart';
 import '../widgets/content_skeleton.dart';
@@ -210,17 +211,14 @@ class _ContractorHomeContentState extends State<ContractorHomeContent> {
       ),
       IncidentActions(api: widget.api, job: job),
       if (job.canRecruit)
-        OutlinedButton.icon(
+        StopRecruitingButton(
+          busy: _stoppingJobId == job.id,
           onPressed: _stoppingJobId != null
               ? null
               : () {
                   closeDetails?.call();
                   _stopRecruiting(job);
                 },
-          icon: const Icon(Icons.person_off_outlined),
-          label: Text(
-            _stoppingJobId == job.id ? 'Đang dừng tuyển…' : 'Dừng tuyển',
-          ),
         ),
       if (job.status == 'OPEN' && !job.recruitmentClosed)
         OutlinedButton.icon(
@@ -240,7 +238,10 @@ class _ContractorHomeContentState extends State<ContractorHomeContent> {
         ),
       if (job.status == 'IN_PROGRESS')
         OutlinedButton.icon(
-          onPressed: () => _complete(job),
+          onPressed: () {
+            closeDetails?.call();
+            _complete(job);
+          },
           icon: const Icon(Icons.task_alt),
           label: const Text('Hoàn thành công trình'),
         ),
