@@ -38,3 +38,11 @@ cho phần ghi nhận trong kho mã.
 
 Bản gốc được giữ dự phòng trước khi thay nội dung tại vị trí người dùng đang
 sử dụng. Các script biên soạn và kiểm tra chỉ chạy thủ công cho tác vụ này.
+
+## Sửa đối tượng chèn nhầm trên trang bìa
+
+Sau bàn giao, bản Word đang mở có thêm một đối tượng PowerPoint nhúng trên
+trang bìa. Đã tạo bản `Mo_ta_de_tai_Tho_Xay_da_sua_bia.docx`, gỡ đúng đối
+tượng này, giữ nguyên toàn bộ nút văn bản và 44 bảng. Kết xuất bằng Word vẫn
+đủ 72 trang; trang bìa được kiểm tra trực quan. Bản trước sửa và PowerPoint
+nhúng được giữ dự phòng cục bộ.
