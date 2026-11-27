@@ -269,6 +269,8 @@ void main() {
         find.widgetWithText(TextFormField, 'Tiền thưởng (VND)'),
         '20000',
       );
+      await tester.ensureVisible(find.byType(CheckboxListTile));
+      await tester.pumpAndSettle();
       await tester.tap(find.byType(CheckboxListTile));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Xác nhận thanh toán'));
@@ -276,6 +278,103 @@ void main() {
       expect(api.paid?['workDays'], 2);
       expect(api.paid?['tip'], 50000);
       expect(find.text('Đã thanh toán'), findsOneWidget);
+      api.dispose();
+    },
+  );
+
+  testWidgets(
+    'tip and bonus presets update independently and allow custom amounts on a phone',
+    (tester) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(360, 740);
+      addTearDown(tester.view.reset);
+      final api = WalletApi()..main = 2000000;
+      final job = (WorkerApi()..jobStatus = 'COMPLETED').job;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: JobPaymentsScreen(api: api, job: job),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Thanh toán cho Thợ'));
+      await tester.tap(find.text('Thanh toán cho Thợ'));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Số ngày công đã xác nhận'),
+        '1',
+      );
+      final tipPresets = find.byKey(const ValueKey('tip-presets'));
+      final bonusPresets = find.byKey(const ValueKey('bonus-presets'));
+      final tip25 = find.descendant(
+        of: tipPresets,
+        matching: find.widgetWithText(ChoiceChip, '25.000 VND'),
+      );
+      await tester.ensureVisible(tip25);
+      await tester.pumpAndSettle();
+      await tester.tap(tip25);
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<TextFormField>(
+              find.widgetWithText(TextFormField, 'Tiền tip (VND)'),
+            )
+            .controller!
+            .text,
+        '25000',
+      );
+      expect(
+        tester
+            .widget<TextFormField>(
+              find.widgetWithText(TextFormField, 'Tiền thưởng (VND)'),
+            )
+            .controller!
+            .text,
+        '0',
+      );
+      final bonus50 = find.descendant(
+        of: bonusPresets,
+        matching: find.widgetWithText(ChoiceChip, '50.000 VND'),
+      );
+      await tester.ensureVisible(bonus50);
+      await tester.pumpAndSettle();
+      await tester.tap(bonus50);
+      await tester.pumpAndSettle();
+      expect(find.text('Tổng thanh toán: 575.000 đ'), findsOneWidget);
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Tiền thưởng (VND)'),
+        '35000',
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.descendant(
+          of: bonusPresets,
+          matching: find.byWidgetPredicate(
+            (w) => w is ChoiceChip && w.selected,
+          ),
+        ),
+        findsNothing,
+      );
+      expect(find.text('Tổng thanh toán: 560.000 đ'), findsOneWidget);
+      final tip0 = find.descendant(
+        of: tipPresets,
+        matching: find.widgetWithText(ChoiceChip, '0 VND'),
+      );
+      await tester.ensureVisible(tip0);
+      await tester.pumpAndSettle();
+      await tester.tap(tip0);
+      await tester.pumpAndSettle();
+      expect(find.text('Tổng thanh toán: 535.000 đ'), findsOneWidget);
+      expect(api.paid, isNull);
+      await tester.ensureVisible(find.byType(CheckboxListTile));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(CheckboxListTile));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Xác nhận thanh toán'));
+      await tester.pumpAndSettle();
+      expect(api.paid?['tip'], 0);
+      expect(api.paid?['bonus'], 35000);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
       api.dispose();
     },
   );

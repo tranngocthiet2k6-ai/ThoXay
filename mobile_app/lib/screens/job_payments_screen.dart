@@ -247,6 +247,34 @@ class _PayDialogState extends State<_PayDialog> {
       },
     ),
   );
+
+  Widget _quickAmounts(TextEditingController controller, String name) =>
+      Padding(
+        padding: const EdgeInsets.only(top: 8),
+        child: Wrap(
+          key: ValueKey('$name-presets'),
+          spacing: 8,
+          runSpacing: 4,
+          children: [
+            for (final amount in [0, 25000, 50000, 100000, 200000])
+              ChoiceChip(
+                label: Text(money(amount.toDouble(), currency: 'VND')),
+                selected: int.tryParse(controller.text) == amount,
+                onSelected: _busy
+                    ? null
+                    : (_) => setState(() {
+                        final text = '$amount';
+                        controller.value = TextEditingValue(
+                          text: text,
+                          selection: TextSelection.collapsed(
+                            offset: text.length,
+                          ),
+                        );
+                      }),
+              ),
+          ],
+        ),
+      );
   @override
   Widget build(BuildContext context) => PopScope(
     canPop: !_busy,
@@ -266,7 +294,9 @@ class _PayDialogState extends State<_PayDialog> {
               ),
               _number(_days, 'Số ngày công đã xác nhận', 1, 366),
               _number(_tip, 'Tiền tip (VND)', 0, 100000000),
+              _quickAmounts(_tip, 'tip'),
               _number(_bonus, 'Tiền thưởng (VND)', 0, 100000000),
+              _quickAmounts(_bonus, 'bonus'),
               const SizedBox(height: 20),
               Text(
                 'Tổng thanh toán: ${money(_total.toDouble())}',
