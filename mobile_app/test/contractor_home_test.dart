@@ -85,6 +85,45 @@ class ContractorApi extends ApiService {
   }
 }
 
+class StaffedContractorApi extends ContractorApi {
+  @override
+  Job get job => Job(
+    id: 1,
+    contractorId: 2,
+    contractorName: 'Chủ thầu',
+    contractorPhone: null,
+    title: 'Xây tường',
+    description: 'Cam kết cũ',
+    jobType: 'Thợ chính, Phụ hồ',
+    salaryPerDay: 250000,
+    address: 'Quận 1',
+    latitude: 10,
+    longitude: 106,
+    requiredWorkers: 5,
+    skilledWorkers: 2,
+    helpers: 3,
+    status: 'IN_PROGRESS',
+    startsOn: DateUtils.dateOnly(DateTime.now())
+        .subtract(const Duration(days: 1)),
+    endsOn: DateUtils.dateOnly(DateTime.now()).add(const Duration(days: 2)),
+  );
+  @override
+  Future<List<JobApplication>> jobApplications(int jobId) async => [
+    application,
+    JobApplication(
+      id: 2,
+      job: job,
+      workerId: 4,
+      workerName: 'Thợ thứ hai',
+      workerPhone: null,
+      workerRating: 5,
+      workerVerified: false,
+      workerActive: true,
+      status: 'ACCEPTED',
+    ),
+  ];
+}
+
 void main() {
   testWidgets('posting form uses the available phone width', (tester) async {
     tester.view.devicePixelRatio = 1;
@@ -243,6 +282,61 @@ void main() {
     await tester.pumpWidget(const SizedBox());
     api.dispose();
   });
+
+  testWidgets(
+    'staffed job edits only quantities and preserves old dates and pay',
+    (tester) async {
+      final api = StaffedContractorApi()..decision = 'ACCEPTED';
+      await tester.pumpWidget(
+        MaterialApp(home: ContractorHomeScreen(api: api)),
+      );
+      await tester.pumpAndSettle();
+      await openManagement(tester);
+      await tester.ensureVisible(find.text('Sửa công trình'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Sửa công trình'));
+      await tester.pumpAndSettle();
+      expect(find.text('Điều chỉnh số lượng thợ'), findsOneWidget);
+      expect(find.textContaining('Đã nhận 2 thợ.'), findsOneWidget);
+      expect(
+        find.widgetWithText(TextFormField, 'Lương mỗi ngày'),
+        findsNothing,
+      );
+      await tester.enterText(
+        find.byKey(const ValueKey('quantity-Thợ chính')),
+        '1',
+      );
+      final dialog = find.byType(Dialog);
+      await tester.tap(
+        find.descendant(of: dialog, matching: find.text('Phụ hồ')),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Lưu thay đổi'));
+      await tester.pumpAndSettle();
+      expect(api.updatedBody, isNull);
+      expect(
+        find.textContaining('Tổng số cần tuyển phải ít nhất 2 người.'),
+        findsOneWidget,
+      );
+      await tester.tap(
+        find.descendant(of: dialog, matching: find.text('Phụ hồ')),
+      );
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const ValueKey('quantity-Phụ hồ')),
+        '1',
+      );
+      await tester.tap(find.text('Lưu thay đổi'));
+      await tester.pumpAndSettle();
+      expect(api.updatedBody?['requiredWorkers'], 2);
+      expect(api.updatedBody?['salaryPerDay'], 250000);
+      expect(api.updatedBody?['description'], 'Cam kết cũ');
+      expect(api.updatedBody?['startsOn'], isoDay(api.job.startsOn!));
+      expect(api.updatedBody?['endsOn'], isoDay(api.job.endsOn!));
+      await tester.pumpWidget(const SizedBox());
+      api.dispose();
+    },
+  );
 
   testWidgets(
     'stopping recruitment requires confirmation and updates the job',

@@ -94,6 +94,7 @@ class _ContractorHomeContentState extends State<ContractorHomeContent> {
 
   bool _loading = false;
   int? _stoppingJobId;
+  bool _openingEdit = false;
   bool _mapExpanded = false;
   final _mapKey = GlobalKey();
   final _jobListKey = GlobalKey();
@@ -167,12 +168,30 @@ class _ContractorHomeContentState extends State<ContractorHomeContent> {
   }
 
   Future<void> _edit(Job job) async {
-    final changed = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => _CreateJobDialog(api: widget.api, job: job),
-    );
-    if (changed == true && mounted) await _refresh();
+    if (_openingEdit) return;
+    setState(() => _openingEdit = true);
+    try {
+      final applications = await widget.api.jobApplications(job.id);
+      if (!mounted) return;
+      final accepted = applications.where((a) => a.status == 'ACCEPTED').length;
+      final changed = await showDialog<bool>(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => _CreateJobDialog(
+          api: widget.api,
+          job: job,
+          acceptedWorkers: accepted,
+        ),
+      );
+      if (changed == true && mounted) await _refresh();
+    } on ApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(AppSnackBar(content: Text(e.message)));
+      }
+    } finally {
+      if (mounted) setState(() => _openingEdit = false);
+    }
   }
 
   Future<void> _applicants(Job job) async {
@@ -224,9 +243,9 @@ class _ContractorHomeContentState extends State<ContractorHomeContent> {
                   _stopRecruiting(job);
                 },
         ),
-      if (job.status == 'OPEN' && !job.recruitmentClosed)
+      if (job.canRecruit)
         OutlinedButton.icon(
-          onPressed: () => _edit(job),
+          onPressed: _openingEdit ? null : () => _edit(job),
           icon: const Icon(Icons.edit_location_alt_outlined),
           label: const Text('Sửa công trình'),
         ),
@@ -557,14 +576,21 @@ class _ContractorHomeContentState extends State<ContractorHomeContent> {
 }
 
 class _CreateJobDialog extends StatefulWidget {
-  const _CreateJobDialog({required this.api, this.job});
+  const _CreateJobDialog({
+    required this.api,
+    this.job,
+    this.acceptedWorkers = 0,
+  });
   final ApiService api;
   final Job? job;
+  final int acceptedWorkers;
   @override
   State<_CreateJobDialog> createState() => _CreateJobDialogState();
 }
 
 class _CreateJobDialogState extends State<_CreateJobDialog> {
+  bool get _staffingOnly =>
+      widget.acceptedWorkers > 0 || widget.job?.status == 'IN_PROGRESS';
   final _form = GlobalKey<FormState>();
   final _title = TextEditingController(),
       _description = TextEditingController();
@@ -599,6 +625,9 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
           ? start
           : j.endsOn!;
       _schedule = DateTimeRange(start: start, end: end);
+      if (_staffingOnly && j.startsOn != null && j.endsOn != null) {
+        _schedule = DateTimeRange(start: j.startsOn!, end: j.endsOn!);
+      }
     }
     _skilled.addListener(_updateWorkerTotal);
     _helpers.addListener(_updateWorkerTotal);
@@ -662,6 +691,13 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
 
   Future<void> _submit() async {
     if (!_form.currentState!.validate()) return;
+    if (_staffingOnly && int.parse(_workers.text) < widget.acceptedWorkers) {
+      setState(
+        () => _error =
+            'Đã nhận ${widget.acceptedWorkers} thợ. Tổng số cần tuyển phải ít nhất ${widget.acceptedWorkers} người.',
+      );
+      return;
+    }
     if (_position == null) {
       setState(
         () => _error = 'Chọn vị trí công trình bằng GPS hoặc chạm trên bản đồ.',
@@ -689,6 +725,19 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
         'startsOn': isoDay(_schedule.start),
         'endsOn': isoDay(_schedule.end),
       };
+      if (_staffingOnly) {
+        final job = widget.job!;
+        body.addAll({
+          'title': job.title,
+          'description': job.description,
+          'salaryPerDay': job.salaryPerDay,
+          'address': job.address,
+          'latitude': job.latitude,
+          'longitude': job.longitude,
+          'startsOn': job.startsOn == null ? null : isoDay(job.startsOn!),
+          'endsOn': job.endsOn == null ? null : isoDay(job.endsOn!),
+        });
+      }
       if (widget.job == null) {
         await widget.api.createJob(body);
       } else {
@@ -707,7 +756,11 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
     canPop: !_busy && !_gps,
     child: JobFormDialog(
       title: Text(
-        widget.job == null ? 'Đăng công trình mới' : 'Chỉnh sửa công trình',
+        widget.job == null
+            ? 'Đăng công trình mới'
+            : _staffingOnly
+            ? 'Điều chỉnh số lượng thợ'
+            : 'Chỉnh sửa công trình',
       ),
       content: Form(
         key: _form,
@@ -715,33 +768,46 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            TextFormField(
-              controller: _title,
-              enabled: !_busy,
-              maxLength: 200,
-              decoration: const InputDecoration(
-                labelText: 'Tên công trình',
-                hintText: 'Ví dụ: Xây nhà phố 2 tầng',
-                prefixIcon: Icon(Icons.home_work_outlined),
+            if (_staffingOnly) ...[
+              Text(
+                widget.job!.title,
+                style: Theme.of(context).textTheme.titleMedium,
               ),
-              validator: (v) =>
-                  (v?.trim().isEmpty ?? true) ? 'Nhập tên công trình' : null,
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _description,
-              enabled: !_busy,
-              minLines: 2,
-              maxLines: 5,
-              maxLength: 20000,
-              decoration: const InputDecoration(
-                labelText: 'Mô tả công việc',
-                hintText: 'Công việc cần làm, giờ làm và đãi ngộ cho thợ',
-                hintMaxLines: 3,
-                alignLabelWithHint: true,
+              const SizedBox(height: 12),
+              Text(
+                'Đã nhận ${widget.acceptedWorkers} thợ. Tổng số cần tuyển không được thấp hơn số đã nhận. Lương, lịch và cam kết đã chốt được giữ nguyên.',
               ),
-            ),
-            const SizedBox(height: 12),
+              const SizedBox(height: 16),
+            ],
+            if (!_staffingOnly) ...[
+              TextFormField(
+                controller: _title,
+                enabled: !_busy,
+                maxLength: 200,
+                decoration: const InputDecoration(
+                  labelText: 'Tên công trình',
+                  hintText: 'Ví dụ: Xây nhà phố 2 tầng',
+                  prefixIcon: Icon(Icons.home_work_outlined),
+                ),
+                validator: (v) =>
+                    (v?.trim().isEmpty ?? true) ? 'Nhập tên công trình' : null,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _description,
+                enabled: !_busy,
+                minLines: 2,
+                maxLines: 5,
+                maxLength: 20000,
+                decoration: const InputDecoration(
+                  labelText: 'Mô tả công việc',
+                  hintText: 'Công việc cần làm, giờ làm và đãi ngộ cho thợ',
+                  hintMaxLines: 3,
+                  alignLabelWithHint: true,
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
             JobStaffingFields(
               skilledController: _skilled,
               helpersController: _helpers,
@@ -758,58 +824,60 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
               }),
             ),
             const SizedBox(height: 16),
-            JobSalaryField(controller: _salary, enabled: !_busy),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _address,
-              enabled: !_busy,
-              maxLength: 255,
-              decoration: const InputDecoration(
-                labelText: 'Địa chỉ công trình',
-                hintText: 'Số nhà, đường, phường/xã…',
-                prefixIcon: Icon(Icons.location_on_outlined),
+            if (!_staffingOnly) ...[
+              JobSalaryField(controller: _salary, enabled: !_busy),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _address,
+                enabled: !_busy,
+                maxLength: 255,
+                decoration: const InputDecoration(
+                  labelText: 'Địa chỉ công trình',
+                  hintText: 'Số nhà, đường, phường/xã…',
+                  prefixIcon: Icon(Icons.location_on_outlined),
+                ),
+                validator: (v) => (v?.trim().isEmpty ?? true)
+                    ? 'Nhập địa chỉ công trình'
+                    : null,
               ),
-              validator: (v) => (v?.trim().isEmpty ?? true)
-                  ? 'Nhập địa chỉ công trình'
-                  : null,
-            ),
-            const SizedBox(height: 12),
-            JobLocationPin(
-              center: _position ?? const GeoPoint(10.7769, 106.7009),
-              selected: _position,
-              onPicked: _busy
-                  ? null
-                  : (point) => setState(() => _position = point),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              _position == null
-                  ? 'Chưa chọn vị trí công trình'
-                  : 'Vị trí: ${_position!.latitude.toStringAsFixed(5)}, ${_position!.longitude.toStringAsFixed(5)}',
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                OutlinedButton.icon(
-                  onPressed: _busy || _gps ? null : _chooseOnMap,
-                  icon: const Icon(Icons.map_outlined),
-                  label: const Text('Chọn trên bản đồ'),
-                ),
-                OutlinedButton.icon(
-                  onPressed: _busy || _gps ? null : _locate,
-                  icon: const Icon(Icons.my_location),
-                  label: Text(_gps ? 'Đang lấy GPS…' : 'Lấy GPS'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            JobSchedulePicker(
-              value: _schedule,
-              enabled: !_busy,
-              onChanged: (range) => setState(() => _schedule = range),
-            ),
+              const SizedBox(height: 12),
+              JobLocationPin(
+                center: _position ?? const GeoPoint(10.7769, 106.7009),
+                selected: _position,
+                onPicked: _busy
+                    ? null
+                    : (point) => setState(() => _position = point),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                _position == null
+                    ? 'Chưa chọn vị trí công trình'
+                    : 'Vị trí: ${_position!.latitude.toStringAsFixed(5)}, ${_position!.longitude.toStringAsFixed(5)}',
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  OutlinedButton.icon(
+                    onPressed: _busy || _gps ? null : _chooseOnMap,
+                    icon: const Icon(Icons.map_outlined),
+                    label: const Text('Chọn trên bản đồ'),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: _busy || _gps ? null : _locate,
+                    icon: const Icon(Icons.my_location),
+                    label: Text(_gps ? 'Đang lấy GPS…' : 'Lấy GPS'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              JobSchedulePicker(
+                value: _schedule,
+                enabled: !_busy,
+                onChanged: (range) => setState(() => _schedule = range),
+              ),
+            ],
             const SizedBox(height: 16),
             ValueListenableBuilder<TextEditingValue>(
               valueListenable: _salary,

@@ -52,6 +52,8 @@ class DiscoveryApi extends ApiService {
   @override
   Future<List<Job>> contractorJobs() async => [fixture];
   @override
+  Future<List<JobApplication>> jobApplications(int id) async => [];
+  @override
   Future<Job> updateJob(int id, Map<String, dynamic> body) async {
     updated = body;
     return fixture;

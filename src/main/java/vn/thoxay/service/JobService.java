@@ -62,9 +62,21 @@ public class JobService {
     @Transactional
     public JobResponse update(Long id,JobRequest request) {
         var job=jobs.findLockedById(id).orElseThrow(() -> new vn.thoxay.exception.ApiException(org.springframework.http.HttpStatus.NOT_FOUND,"Công trình không tồn tại"));
-        current.requireOwner(job.getContractor().getId(),Role.ROLE_CONTRACTOR); validateDates(request);
-        if(job.isRecruitmentClosed() || job.getStatus()!=vn.thoxay.entity.JobStatus.OPEN || applications.countByJobIdAndStatus(id,ApplicationStatus.ACCEPTED)>0)
-            throw new vn.thoxay.exception.ApiException(org.springframework.http.HttpStatus.CONFLICT,"Chỉ sửa công trình chưa nhận thợ");
+        current.requireOwner(job.getContractor().getId(),Role.ROLE_CONTRACTOR);
+        if(job.isRecruitmentClosed() || (job.getStatus()!=JobStatus.OPEN && job.getStatus()!=JobStatus.IN_PROGRESS))
+            throw new vn.thoxay.exception.ApiException(org.springframework.http.HttpStatus.CONFLICT,"Công trình đã dừng tuyển hoặc kết thúc, không thể chỉnh sửa");
+        long accepted = applications.countByJobIdAndStatus(id,ApplicationStatus.ACCEPTED);
+        if(accepted > 0 || job.getStatus()==JobStatus.IN_PROGRESS) {
+            if(!sameWorkTerms(job,request))
+                throw new vn.thoxay.exception.ApiException(org.springframework.http.HttpStatus.CONFLICT,"Công trình đã nhận thợ. Chỉ được điều chỉnh số lượng; giữ nguyên lương, lịch và nội dung đã cam kết");
+            if(request.requiredWorkers() < accepted)
+                throw new vn.thoxay.exception.ApiException(org.springframework.http.HttpStatus.CONFLICT,"Đã nhận "+accepted+" thợ. Tổng số cần tuyển phải ít nhất "+accepted+" người");
+            job.setJobType(request.jobType()); job.setRequiredWorkers(request.requiredWorkers()); setStaffing(job,request);
+            if(accepted > 0 && request.requiredWorkers()==accepted) job.setStatus(JobStatus.IN_PROGRESS);
+            // Staffing does not change an accepted worker's individual terms or consent version.
+            return JobResponse.of(job,null);
+        }
+        validateDates(request);
         job.setTitle(request.title().trim()); job.setDescription(request.description()); job.setJobType(request.jobType());
         job.setSalaryPerDay(request.salaryPerDay()); job.setAddress(request.address().trim());
         job.setLatitude(request.latitude()); job.setLongitude(request.longitude()); job.setRequiredWorkers(request.requiredWorkers());
@@ -92,6 +104,17 @@ public class JobService {
         job.setSkilledWorkers(request.skilledWorkers());
         job.setHelpers(request.helpers());
     }
+    private boolean sameWorkTerms(Job job, JobRequest request) {
+        return java.util.Objects.equals(job.getTitle().trim(),request.title().trim())
+            && java.util.Objects.equals(normalized(job.getDescription()),normalized(request.description()))
+            && Double.compare(job.getSalaryPerDay(),request.salaryPerDay())==0
+            && java.util.Objects.equals(job.getAddress().trim(),request.address().trim())
+            && Double.compare(job.getLatitude(),request.latitude())==0
+            && Double.compare(job.getLongitude(),request.longitude())==0
+            && java.util.Objects.equals(job.getStartsOn(),request.startsOn())
+            && java.util.Objects.equals(job.getEndsOn(),request.endsOn());
+    }
+    private String normalized(String value) { return value == null ? "" : value.trim(); }
     @Transactional(readOnly = true)
     public List<JobResponse> nearby(double lat, double lng, double radius, String jobType, String sort) {
         if (!current.require(Role.ROLE_WORKER).isAvailable()) return List.of();
