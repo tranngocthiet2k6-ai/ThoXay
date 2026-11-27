@@ -85,6 +85,50 @@ class JobApiTest {
             .andExpect(jsonPath("message").value(vn.thoxay.exception.AccountLockedException.MESSAGE));
     }
 
+    @Test void createsEditsAndFindsMixedStaffingUnderBothTradeFilters() throws Exception {
+        User owner = user("0922222230", Role.ROLE_CONTRACTOR);
+        User worker = user("0922222231", Role.ROLE_WORKER);
+        var body = (com.fasterxml.jackson.databind.node.ObjectNode) json.readTree(request);
+        body.put("jobType", "Thợ chính, Phụ hồ").put("requiredWorkers", 5).put("skilledWorkers", 2).put("helpers", 3);
+        var result = mvc.perform(post("/api/jobs").header("Authorization", token(owner)).contentType("application/json")
+            .content(body.toString())).andExpect(status().isCreated())
+            .andExpect(jsonPath("$.skilledWorkers").value(2)).andExpect(jsonPath("$.helpers").value(3))
+            .andExpect(jsonPath("$.requiredWorkers").value(5)).andReturn();
+        long id = json.readTree(result.getResponse().getContentAsString()).get("id").asLong();
+        for (String type : new String[]{"Thợ chính", "Phụ hồ"})
+            mvc.perform(get("/api/jobs/nearby").param("lat", "10.7769").param("lng", "106.7009").param("radius", "10")
+                .param("jobType", type).header("Authorization", token(worker)))
+                .andExpect(status().isOk()).andExpect(jsonPath("$[0].id").value(id))
+                .andExpect(jsonPath("$[0].skilledWorkers").value(2)).andExpect(jsonPath("$[0].helpers").value(3));
+        body.put("jobType", "Phụ hồ").put("skilledWorkers", 0).put("helpers", 4).put("requiredWorkers", 4);
+        mvc.perform(put("/api/jobs/" + id).header("Authorization", token(owner)).contentType("application/json")
+            .content(body.toString())).andExpect(status().isOk()).andExpect(jsonPath("$.skilledWorkers").value(0))
+            .andExpect(jsonPath("$.helpers").value(4)).andExpect(jsonPath("$.requiredWorkers").value(4));
+        mvc.perform(get("/api/jobs/nearby").param("lat", "10.7769").param("lng", "106.7009").param("jobType", "Thợ chính")
+            .header("Authorization", token(worker))).andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(0));
+        // An older client can still edit a single-trade job; counts follow its total.
+        mvc.perform(put("/api/jobs/" + id).header("Authorization", token(owner)).contentType("application/json").content(request))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.skilledWorkers").value(2)).andExpect(jsonPath("$.helpers").value(0));
+    }
+
+    @Test void rejectsIncompleteNegativeEmptyOverflowOrContradictoryStaffing() throws Exception {
+        User owner = user("0922222232", Role.ROLE_CONTRACTOR);
+        String[] staffing = {
+            "\"skilledWorkers\":1", "\"helpers\":1", "\"skilledWorkers\":-1,\"helpers\":3",
+            "\"skilledWorkers\":0,\"helpers\":0", "\"skilledWorkers\":2,\"helpers\":3",
+            "\"skilledWorkers\":10000,\"helpers\":1", "\"skilledWorkers\":0,\"helpers\":2"
+        };
+        for (String fields : staffing) {
+            var body = (com.fasterxml.jackson.databind.node.ObjectNode) json.readTree(request);
+            body.setAll((com.fasterxml.jackson.databind.node.ObjectNode) json.readTree("{" + fields + "}"));
+            mvc.perform(post("/api/jobs").header("Authorization", token(owner)).contentType("application/json")
+                .content(body.toString())).andExpect(status().isBadRequest());
+        }
+        mvc.perform(post("/api/jobs").header("Authorization", token(owner)).contentType("application/json")
+            .content(request.replace("Thợ chính", "Thợ chính, Phụ hồ"))).andExpect(status().isBadRequest());
+        org.assertj.core.api.Assertions.assertThat(jobs.findByContractorIdOrderByCreatedAtDesc(owner.getId())).isEmpty();
+    }
+
     private String token(User user) { return "Bearer " + jwt.generateToken(user.getPhoneNumber()); }
     private User user(String phone, Role role) {
         User user = new User(); user.setPhoneNumber(phone); user.setPassword("hash");

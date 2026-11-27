@@ -102,6 +102,14 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(FilledButton, 'Đăng công trình mới'));
     await tester.pumpAndSettle();
+    final skilledRect = tester.getRect(
+      find.byKey(const ValueKey('quantity-Thợ chính')),
+    );
+    final helpersRect = tester.getRect(
+      find.byKey(const ValueKey('quantity-Phụ hồ')),
+    );
+    expect(skilledRect.top, helpersRect.top);
+    expect(skilledRect.right, lessThan(helpersRect.left));
     expect(
       tester
           .getSize(find.widgetWithText(TextFormField, 'Tên công trình'))
@@ -125,6 +133,19 @@ void main() {
     await tester.ensureVisible(find.text('Đăng công trình mới'));
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(FilledButton, 'Đăng công trình mới'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Tăng số Thợ chính'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Giảm số Thợ chính'));
+    await tester.tap(find.text('Phụ hồ').last);
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey('quantity-Thợ chính')),
+      '2',
+    );
+    await tester.enterText(find.byKey(const ValueKey('quantity-Phụ hồ')), '4');
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Giảm số Phụ hồ'));
     await tester.pumpAndSettle();
     await tester.ensureVisible(find.text('300.000 VND'));
     await tester.pumpAndSettle();
@@ -163,11 +184,15 @@ void main() {
     await tester.pumpAndSettle();
     await tester.ensureVisible(find.text('Dự toán quỹ lương'));
     await tester.pumpAndSettle();
-    expect(find.text('3.500.000 VND'), findsOneWidget);
-    expect(find.textContaining('1 thợ × 7 ngày.'), findsOneWidget);
+    expect(find.text('17.500.000 VND'), findsOneWidget);
+    expect(find.textContaining('5 thợ × 7 ngày.'), findsOneWidget);
     await tester.tap(find.text('Đăng việc'));
     await tester.pumpAndSettle();
     expect(api.createdBody?['salaryPerDay'], 500000);
+    expect(api.createdBody?['jobType'], 'Thợ chính, Phụ hồ');
+    expect(api.createdBody?['skilledWorkers'], 2);
+    expect(api.createdBody?['helpers'], 3);
+    expect(api.createdBody?['requiredWorkers'], 5);
     final today = DateUtils.dateOnly(DateTime.now());
     expect(
       api.createdBody?['startsOn'],

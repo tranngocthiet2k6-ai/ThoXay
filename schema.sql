@@ -40,12 +40,21 @@ CREATE TABLE IF NOT EXISTS jobs (
   contractor_id BIGINT NOT NULL REFERENCES users(id),
   title VARCHAR(200) NOT NULL,
   description TEXT,
-  job_type VARCHAR(50) NOT NULL CHECK (job_type IN ('Thợ chính','Phụ hồ')),
+  job_type VARCHAR(50) NOT NULL CHECK (job_type IN ('Thợ chính','Phụ hồ','Thợ chính, Phụ hồ')),
   salary_per_day DOUBLE PRECISION NOT NULL CHECK (salary_per_day > 0),
   address VARCHAR(255) NOT NULL,
   latitude DOUBLE PRECISION NOT NULL CHECK (latitude BETWEEN -90 AND 90),
   longitude DOUBLE PRECISION NOT NULL CHECK (longitude BETWEEN -180 AND 180),
   required_workers INTEGER NOT NULL CHECK (required_workers > 0),
+  skilled_workers INTEGER,
+  helpers INTEGER,
+  CONSTRAINT chk_job_staffing CHECK (
+    (skilled_workers IS NULL AND helpers IS NULL AND job_type IN ('Thợ chính','Phụ hồ')) OR
+    (skilled_workers IS NOT NULL AND helpers IS NOT NULL
+      AND skilled_workers BETWEEN 0 AND 10000 AND helpers BETWEEN 0 AND 10000
+      AND skilled_workers + helpers = required_workers AND required_workers BETWEEN 1 AND 10000
+      AND job_type = CASE WHEN skilled_workers > 0 THEN
+        CASE WHEN helpers > 0 THEN 'Thợ chính, Phụ hồ' ELSE 'Thợ chính' END ELSE 'Phụ hồ' END)),
   recruitment_closed BOOLEAN NOT NULL DEFAULT FALSE,
   starts_on DATE, ends_on DATE, terms_version INTEGER NOT NULL DEFAULT 1,
   CONSTRAINT chk_job_schedule CHECK ((starts_on IS NULL AND ends_on IS NULL) OR (starts_on IS NOT NULL AND ends_on IS NOT NULL AND ends_on>=starts_on AND ends_on-starts_on<=365)),

@@ -28,6 +28,17 @@ public class Job {
     private double longitude;
     @Column(name = "required_workers", nullable = false)
     private int requiredWorkers;
+    @Column(name = "skilled_workers")
+    private Integer skilledWorkers;
+    @Column(name = "helpers")
+    private Integer helpers;
+
+    public int getSkilledWorkers() {
+        return skilledWorkers != null ? skilledWorkers : ("Thợ chính".equals(jobType) ? requiredWorkers : 0);
+    }
+    public int getHelpers() {
+        return helpers != null ? helpers : ("Phụ hồ".equals(jobType) ? requiredWorkers : 0);
+    }
     @Enumerated(EnumType.STRING) @Column(nullable = false, length = 30)
     private JobStatus status = JobStatus.OPEN;
     @Column(name = "recruitment_closed", nullable = false) @org.hibernate.annotations.ColumnDefault("false")

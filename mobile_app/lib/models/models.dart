@@ -54,8 +54,17 @@ class Job {
     this.contractorVerified = false,
     this.attendanceRequired = false,
     this.recruitmentClosed = false,
-  });
+    int? skilledWorkers,
+    int? helpers,
+  }) : skilledWorkers =
+           skilledWorkers ?? (jobType == 'Thợ chính' ? requiredWorkers : 0),
+       helpers = helpers ?? (jobType == 'Phụ hồ' ? requiredWorkers : 0);
   final int id, contractorId, requiredWorkers;
+  final int skilledWorkers, helpers;
+  String get staffingSummary => [
+    if (skilledWorkers > 0) '$skilledWorkers thợ chính',
+    if (helpers > 0) '$helpers phụ hồ',
+  ].join(' · ');
   final String? contractorPhone;
   final String contractorName, title, description, jobType, address, status;
   final double salaryPerDay, latitude, longitude;
@@ -83,6 +92,8 @@ class Job {
     latitude: (json['latitude'] as num).toDouble(),
     longitude: (json['longitude'] as num).toDouble(),
     requiredWorkers: (json['requiredWorkers'] as num).toInt(),
+    skilledWorkers: (json['skilledWorkers'] as num?)?.toInt(),
+    helpers: (json['helpers'] as num?)?.toInt(),
     status: json['status'] as String,
     distanceKm: (json['distanceKm'] as num?)?.toDouble(),
     startsOn: json['startsOn'] == null

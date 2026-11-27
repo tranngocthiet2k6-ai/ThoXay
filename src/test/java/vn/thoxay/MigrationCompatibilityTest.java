@@ -85,6 +85,23 @@ class MigrationCompatibilityTest {
         try(var c=connect();var s=c.createStatement();var r=s.executeQuery("SELECT attendance_required FROM "+schema+".jobs")) {
             assertThat(r.next()).isTrue();assertThat(r.getBoolean(1)).isFalse();
         }
+        try(var c=connect()) {
+            c.setSchema(schema);
+            // Re-running the manual upgrade must preserve an existing legacy job.
+            ScriptUtils.executeSqlScript(c,new ClassPathResource("db/migration/V29__job_staffing.sql"));
+            ScriptUtils.executeSqlScript(c,new ClassPathResource("db/migration/V29__job_staffing.sql"));
+            try(var s=c.createStatement();var r=s.executeQuery("SELECT job_type,required_workers,skilled_workers,helpers FROM jobs")) {
+                assertThat(r.next()).isTrue();assertThat(r.getString(1)).isEqualTo("Thợ chính");
+                assertThat(r.getInt(2)).isEqualTo(1);assertThat(r.getObject(3)).isNull();assertThat(r.getObject(4)).isNull();
+            }
+            try(var s=c.createStatement()) {
+                s.executeUpdate("UPDATE jobs SET job_type='Thợ chính, Phụ hồ',required_workers=5,skilled_workers=2,helpers=3");
+                org.assertj.core.api.Assertions.assertThatThrownBy(() -> s.executeUpdate("UPDATE jobs SET helpers=4"))
+                    .isInstanceOf(SQLException.class);
+                org.assertj.core.api.Assertions.assertThatThrownBy(() -> s.executeUpdate("UPDATE jobs SET skilled_workers=NULL"))
+                    .isInstanceOf(SQLException.class);
+            }
+        }
         try(var c=connect();var s=c.createStatement();var r=s.executeQuery("SELECT content,kind,latitude,longitude,image_hash FROM "+schema+".messages")) {
             assertThat(r.next()).isTrue();assertThat(r.getString(1)).isEqualTo("Legacy text");assertThat(r.getString(2)).isEqualTo("TEXT");
             assertThat(r.getObject(3)).isNull();assertThat(r.getObject(4)).isNull();assertThat(r.getObject(5)).isNull();

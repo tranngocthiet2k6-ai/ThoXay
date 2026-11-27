@@ -170,7 +170,7 @@ class JobCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
-                            '${job.jobType} · Cần ${job.requiredWorkers} thợ',
+                            'Cần ${job.staffingSummary}',
                             style: TextStyle(
                               fontSize: 10,
                               color: AppTheme.brandInk(context),
@@ -263,7 +263,7 @@ class JobCard extends StatelessWidget {
                   Text(
                     previewOnly
                         ? job.address
-                        : '${job.address} · ${job.jobType} · ${job.requiredWorkers} thợ',
+                        : '${job.address} · ${job.staffingSummary}',
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(fontSize: 11, color: palette.muted),
@@ -452,7 +452,9 @@ Future<T?> showJobDetails<T>(
                   ),
                 ),
                 const SizedBox(height: 16),
-                Text('${job.jobType} · Cần ${job.requiredWorkers} người'),
+                Text(
+                  'Cần ${job.staffingSummary} · Tổng ${job.requiredWorkers} người',
+                ),
                 if (job.attendanceRequired)
                   const Padding(
                     padding: EdgeInsets.only(top: 12),

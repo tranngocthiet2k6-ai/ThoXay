@@ -55,6 +55,7 @@ public class JobService {
         job.setSalaryPerDay(request.salaryPerDay()); job.setAddress(request.address().trim());
         job.setLatitude(request.latitude()); job.setLongitude(request.longitude());
         job.setRequiredWorkers(request.requiredWorkers());
+        setStaffing(job, request);
         job.setStartsOn(request.startsOn()); job.setEndsOn(request.endsOn());
         return JobResponse.of(jobs.save(job), null);
     }
@@ -67,6 +68,7 @@ public class JobService {
         job.setTitle(request.title().trim()); job.setDescription(request.description()); job.setJobType(request.jobType());
         job.setSalaryPerDay(request.salaryPerDay()); job.setAddress(request.address().trim());
         job.setLatitude(request.latitude()); job.setLongitude(request.longitude()); job.setRequiredWorkers(request.requiredWorkers());
+        setStaffing(job, request);
         job.setStartsOn(request.startsOn()); job.setEndsOn(request.endsOn()); job.setTermsVersion(job.getTermsVersion()+1);
         for(var a:applications.findByJobIdOrderByAppliedAtDesc(id)) if(a.getStatus()==ApplicationStatus.PENDING)
             notifications.create(a.getWorker(),job,"terms:"+a.getId()+":"+job.getTermsVersion(),"JOB_TERMS_CHANGED","Điều khoản công trình đã đổi","Mở đơn ứng tuyển và xác nhận lại điều khoản trước khi được duyệt.");
@@ -84,12 +86,18 @@ public class JobService {
         if((from==null)!=(to==null) || (from!=null&&(to.isBefore(from)||java.time.temporal.ChronoUnit.DAYS.between(from,to)>365||from.isBefore(java.time.LocalDate.now(clock)))))
             throw new vn.thoxay.exception.ApiException(org.springframework.http.HttpStatus.BAD_REQUEST,"Chọn lịch từ hôm nay, đủ ngày bắt đầu/kết thúc và tối đa 366 ngày");
     }
+    private void setStaffing(Job job, JobRequest request) {
+        if (!request.isStaffingValid())
+            throw new vn.thoxay.exception.ApiException(org.springframework.http.HttpStatus.BAD_REQUEST,"Số lượng từng loại thợ không hợp lệ");
+        job.setSkilledWorkers(request.skilledWorkers());
+        job.setHelpers(request.helpers());
+    }
     @Transactional(readOnly = true)
     public List<JobResponse> nearby(double lat, double lng, double radius, String jobType, String sort) {
         if (!current.require(Role.ROLE_WORKER).isAvailable()) return List.of();
         var results = jobs.findNearby(lat, lng, radius).stream()
             .filter(j -> j.getEndsOn()==null||!j.getEndsOn().isBefore(java.time.LocalDate.now(clock)))
-            .filter(j -> jobType == null || jobType.equals(j.getJobType()))
+            .filter(j -> jobType == null || ("Thợ chính".equals(jobType) ? j.getSkilledWorkers() > 0 : j.getHelpers() > 0))
             .map(j -> JobResponse.of(j, distance(lat, lng, j.getLatitude(), j.getLongitude()), false));
         if ("SALARY_DESC".equals(sort)) results = results.sorted(Comparator.comparingDouble(JobResponse::salaryPerDay)
             .reversed().thenComparingDouble(JobResponse::distanceKm).thenComparing(JobResponse::id));

@@ -24,6 +24,7 @@ import '../widgets/chat_button.dart';
 import '../widgets/job_completion_dialog.dart';
 import '../widgets/job_schedule_picker.dart';
 import '../widgets/job_salary_field.dart';
+import '../widgets/job_staffing_fields.dart';
 import '../widgets/job_form_dialog.dart';
 import '../widgets/stop_recruiting_button.dart';
 import 'location_picker_screen.dart';
@@ -569,7 +570,9 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
       _description = TextEditingController();
   final _salary = TextEditingController(), _address = TextEditingController();
   final _workers = TextEditingController(text: '1');
-  String _type = 'Thợ chính';
+  final _skilled = TextEditingController(text: '1');
+  final _helpers = TextEditingController(text: '1');
+  bool _skilledSelected = true, _helpersSelected = false;
   GeoPoint? _position;
   late DateTimeRange _schedule;
   @override
@@ -584,7 +587,10 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
       _salary.text = j.salaryPerDay.toStringAsFixed(0);
       _address.text = j.address;
       _workers.text = '${j.requiredWorkers}';
-      _type = j.jobType;
+      _skilledSelected = j.skilledWorkers > 0;
+      _helpersSelected = j.helpers > 0;
+      _skilled.text = '${j.skilledWorkers > 0 ? j.skilledWorkers : 1}';
+      _helpers.text = '${j.helpers > 0 ? j.helpers : 1}';
       _position = GeoPoint(j.latitude, j.longitude);
       final start = j.startsOn == null || j.startsOn!.isBefore(today)
           ? today
@@ -594,13 +600,32 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
           : j.endsOn!;
       _schedule = DateTimeRange(start: start, end: end);
     }
+    _skilled.addListener(_updateWorkerTotal);
+    _helpers.addListener(_updateWorkerTotal);
+    _updateWorkerTotal();
+  }
+
+  void _updateWorkerTotal() {
+    final skilled = _skilledSelected ? int.tryParse(_skilled.text) ?? 0 : 0;
+    final helpers = _helpersSelected ? int.tryParse(_helpers.text) ?? 0 : 0;
+    _workers.text = '${skilled + helpers}';
   }
 
   bool _busy = false, _gps = false;
   String? _error;
   @override
   void dispose() {
-    for (final c in [_title, _description, _salary, _address, _workers]) {
+    _skilled.removeListener(_updateWorkerTotal);
+    _helpers.removeListener(_updateWorkerTotal);
+    for (final c in [
+      _title,
+      _description,
+      _salary,
+      _address,
+      _workers,
+      _skilled,
+      _helpers,
+    ]) {
       c.dispose();
     }
     super.dispose();
@@ -651,7 +676,11 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
       final body = <String, dynamic>{
         'title': _title.text.trim(),
         'description': _description.text.trim(),
-        'jobType': _type,
+        'jobType': _skilledSelected
+            ? (_helpersSelected ? 'Thợ chính, Phụ hồ' : 'Thợ chính')
+            : 'Phụ hồ',
+        'skilledWorkers': _skilledSelected ? int.parse(_skilled.text) : 0,
+        'helpers': _helpersSelected ? int.parse(_helpers.text) : 0,
         'salaryPerDay': JobSalaryField.validAmount(_salary.text)!.toDouble(),
         'address': _address.text.trim(),
         'latitude': _position!.latitude,
@@ -713,37 +742,23 @@ class _CreateJobDialogState extends State<_CreateJobDialog> {
               ),
             ),
             const SizedBox(height: 12),
-            DropdownButtonFormField<String>(
-              initialValue: _type,
-              decoration: const InputDecoration(
-                labelText: 'Loại thợ',
-                prefixIcon: Icon(Icons.handyman_outlined),
-              ),
-              items: [
-                'Thợ chính',
-                'Phụ hồ',
-              ].map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
-              onChanged: _busy ? null : (t) => setState(() => _type = t!),
+            JobStaffingFields(
+              skilledController: _skilled,
+              helpersController: _helpers,
+              skilledSelected: _skilledSelected,
+              helpersSelected: _helpersSelected,
+              enabled: !_busy,
+              onSkilledChanged: (selected) => setState(() {
+                _skilledSelected = selected;
+                _updateWorkerTotal();
+              }),
+              onHelpersChanged: (selected) => setState(() {
+                _helpersSelected = selected;
+                _updateWorkerTotal();
+              }),
             ),
             const SizedBox(height: 16),
             JobSalaryField(controller: _salary, enabled: !_busy),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _workers,
-              enabled: !_busy,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Số lượng thợ cần tuyển',
-                hintText: 'Ví dụ: 3',
-                prefixIcon: Icon(Icons.groups_outlined),
-              ),
-              validator: (v) {
-                final n = int.tryParse(v?.trim() ?? '');
-                return n == null || n < 1 || n > 10000
-                    ? 'Số thợ từ 1 đến 10.000'
-                    : null;
-              },
-            ),
             const SizedBox(height: 16),
             TextFormField(
               controller: _address,
@@ -1003,6 +1018,7 @@ class _ApplicantsSheetState extends State<_ApplicantsSheet> {
                       Text(
                         'Đã nhận $accepted / ${widget.job.requiredWorkers} thợ',
                       ),
+                      Text('Cần tuyển: ${widget.job.staffingSummary}'),
                     ],
                   ),
                 ),

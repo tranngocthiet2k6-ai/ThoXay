@@ -84,6 +84,7 @@ public class CommitmentService {
             +"\nCông trình: "+j.getTitle()+"\nChủ thầu: "+j.getContractor().getFullName()+"\nĐịa điểm: "+j.getAddress()
             +"\nLịch: "+(j.getStartsOn()==null?"Công trình cũ chưa có lịch":j.getStartsOn()+" đến "+j.getEndsOn())
             +"\nLoại việc: "+j.getJobType()+"\nYêu cầu: "+Objects.toString(j.getDescription(),"")
+            +"\nSố lượng cần tuyển: "+j.getSkilledWorkers()+" thợ chính, "+j.getHelpers()+" phụ hồ"
             +"\nLương gốc/ngày: "+original(j)+" VND\nLương thợ đề xuất: "+(proposed==null?"Không có":proposed+" VND")
             +"\nLương chốt/ngày: "+(agreed==null?"Chủ thầu sẽ chọn giá gốc hoặc đề xuất":agreed+" VND")
             +"\nNgày công thực tế và ảnh công việc được chủ thầu nghiệm thu trước khi thanh toán."
