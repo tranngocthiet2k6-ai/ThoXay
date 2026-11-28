@@ -13,5 +13,6 @@ public class WorkLog {
  @Column(nullable=false,length=500) private String feedback="";
  @Column(nullable=false) private Instant createdAt=Instant.now();
  private Instant reviewedAt;
+ @Column(nullable=false) private long correctionRevision;
  @Version @Column(nullable=false) private Long version;
 }

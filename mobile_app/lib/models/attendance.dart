@@ -17,7 +17,13 @@ class AttendanceEntry {
       logVersion = (j['logVersion'] as num?)?.toInt(),
       hasDetailPhoto = j['hasDetailPhoto'] as bool? ?? false,
       checkinMethod = j['checkinMethod'] as String? ?? '',
-      checkoutMethod = j['checkoutMethod'] as String? ?? '';
+      checkoutMethod = j['checkoutMethod'] as String? ?? '',
+      version = (j['version'] as num?)?.toInt() ?? 0,
+      correctionId = (j['correctionId'] as num?)?.toInt(),
+      correctionStatus = j['correctionStatus'] as String?,
+      correctionReason = j['correctionReason'] as String? ?? '',
+      correctionFeedback = j['correctionFeedback'] as String? ?? '',
+      canUndoCheckout = j['canUndoCheckout'] as bool? ?? false;
   final int id, applicationId;
   final String workerName, caption, feedback;
   final DateTime day, checkedInAt;
@@ -26,6 +32,12 @@ class AttendanceEntry {
   final String? reviewStatus;
   final bool hasDetailPhoto;
   final String checkinMethod, checkoutMethod;
+  final int version;
+  final int? correctionId;
+  final String? correctionStatus;
+  final String correctionReason, correctionFeedback;
+  final bool canUndoCheckout;
+  bool get correctionPending => correctionStatus == 'PENDING';
   String? get detailPhotoPath => logId == null || !hasDetailPhoto
       ? null
       : '/api/work-logs/$logId/photo?detail=true';

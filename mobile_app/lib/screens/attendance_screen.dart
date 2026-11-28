@@ -1,3 +1,5 @@
+import '../widgets/checkout_confirmation.dart';
+import '../widgets/checkout_correction_actions.dart';
 import '../widgets/bouncing_button.dart';
 import '../widgets/week_schedule.dart';
 import '../widgets/attendance_settlement_actions.dart';
@@ -42,6 +44,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   AttendancePage? _data;
   List<AttendanceEntry> _items = [];
   bool _loading = true, _busy = false, _choosing = false;
+  bool _confirming = false;
   String? _error;
   DateTime _day = DateTime.now().toUtc().add(const Duration(hours: 7));
   int _page = 0, _generation = 0;
@@ -90,7 +93,23 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   }
 
   Future<void> _mark(bool checkout, {String? qr}) async {
-    if (_busy) return;
+    if (_busy || _confirming) return;
+    _confirming = true;
+    try {
+      if (checkout) {
+        final row = _items
+            .where((row) => isoDay(row.day) == isoDay(_data!.today))
+            .firstOrNull;
+        if (row == null ||
+            !await confirmCheckout(context, row.checkedInAt) ||
+            !mounted) {
+          return;
+        }
+      }
+    } finally {
+      _confirming = false;
+    }
+    if (!mounted) return;
     setState(() {
       _busy = true;
       _error = null;
@@ -227,7 +246,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           (row) =>
               row.logId != null &&
               row.logVersion != null &&
-              row.reviewStatus != 'APPROVED',
+              row.reviewStatus != 'APPROVED' &&
+              row.checkedOutAt != null &&
+              !row.correctionPending,
         )
         .toList();
     final selected =
@@ -524,7 +545,17 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                           if (row.feedback.isNotEmpty)
                             Text('Phản hồi: ${row.feedback}'),
                         ],
+                        CheckoutCorrectionActions(
+                          api: widget.api,
+                          row: row,
+                          job: widget.job,
+                          worker: _worker,
+                          today: _data!.today,
+                          enabled: !_busy && !_loading,
+                          onChanged: () => _load(),
+                        ),
                         if (_worker &&
+                            !row.correctionPending &&
                             row.checkedOutAt != null &&
                             row.reviewStatus != 'APPROVED')
                           OutlinedButton.icon(
@@ -533,6 +564,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                             label: const Text('Gửi ảnh cuối ngày'),
                           ),
                         if (!_worker &&
+                            !row.correctionPending &&
+                            row.checkedOutAt != null &&
                             row.logId != null &&
                             row.logVersion != null &&
                             row.reviewStatus != 'APPROVED')

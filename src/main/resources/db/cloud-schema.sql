@@ -41,12 +41,21 @@ CREATE TABLE IF NOT EXISTS jobs (
   contractor_id BIGINT NOT NULL REFERENCES users(id),
   title VARCHAR(200) NOT NULL,
   description TEXT,
-  job_type VARCHAR(50) NOT NULL CHECK (job_type IN ('Thợ chính','Phụ hồ')),
+  job_type VARCHAR(50) NOT NULL CHECK (job_type IN ('Thợ chính','Phụ hồ','Thợ chính, Phụ hồ')),
   salary_per_day DOUBLE PRECISION NOT NULL CHECK (salary_per_day > 0),
   address VARCHAR(255) NOT NULL,
   latitude DOUBLE PRECISION NOT NULL CHECK (latitude BETWEEN -90 AND 90),
   longitude DOUBLE PRECISION NOT NULL CHECK (longitude BETWEEN -180 AND 180),
   required_workers INTEGER NOT NULL CHECK (required_workers > 0),
+  skilled_workers INTEGER,
+  helpers INTEGER,
+  CONSTRAINT chk_job_staffing CHECK (
+    (skilled_workers IS NULL AND helpers IS NULL AND job_type IN ('Thợ chính','Phụ hồ')) OR
+    (skilled_workers IS NOT NULL AND helpers IS NOT NULL
+      AND skilled_workers BETWEEN 0 AND 10000 AND helpers BETWEEN 0 AND 10000
+      AND skilled_workers + helpers = required_workers AND required_workers BETWEEN 1 AND 10000
+      AND job_type = CASE WHEN skilled_workers > 0 THEN
+        CASE WHEN helpers > 0 THEN 'Thợ chính, Phụ hồ' ELSE 'Thợ chính' END ELSE 'Phụ hồ' END)),
   recruitment_closed BOOLEAN NOT NULL DEFAULT FALSE,
   starts_on DATE, ends_on DATE, terms_version INTEGER NOT NULL DEFAULT 1,
   CONSTRAINT chk_job_schedule CHECK ((starts_on IS NULL AND ends_on IS NULL) OR (starts_on IS NOT NULL AND ends_on IS NOT NULL AND ends_on>=starts_on AND ends_on-starts_on<=365)),
@@ -216,11 +225,24 @@ CREATE TABLE IF NOT EXISTS attendance_records (
  id BIGSERIAL PRIMARY KEY,application_id BIGINT NOT NULL REFERENCES job_applications(id) ON DELETE CASCADE,
  work_day DATE NOT NULL,checked_in_at TIMESTAMPTZ NOT NULL,checked_out_at TIMESTAMPTZ,
  checkin_method VARCHAR(10) NOT NULL CHECK(checkin_method IN ('GPS','QR')),
- checkout_method VARCHAR(10) CHECK(checkout_method IN ('GPS','QR')),
+ checkout_method VARCHAR(10) CHECK(checkout_method IN ('GPS','QR','ADJUSTED')),
  checkin_latitude DOUBLE PRECISION,checkin_longitude DOUBLE PRECISION,checkin_accuracy DOUBLE PRECISION,
  checkout_latitude DOUBLE PRECISION,checkout_longitude DOUBLE PRECISION,checkout_accuracy DOUBLE PRECISION,
+ latest_correction_id BIGINT,version BIGINT NOT NULL DEFAULT 0,correction_revision BIGINT NOT NULL DEFAULT 0,
  UNIQUE(application_id,work_day),CHECK(checked_out_at IS NULL OR checked_out_at>=checked_in_at)
 );
+CREATE TABLE IF NOT EXISTS attendance_corrections (
+ id BIGSERIAL PRIMARY KEY,
+ attendance_id BIGINT NOT NULL REFERENCES attendance_records(id) ON DELETE CASCADE,
+ original_checked_out_at TIMESTAMPTZ NOT NULL, original_method VARCHAR(10) NOT NULL,
+ original_latitude DOUBLE PRECISION, original_longitude DOUBLE PRECISION, original_accuracy DOUBLE PRECISION,
+ status VARCHAR(30) NOT NULL CHECK (status IN ('AUTO_UNDONE','PENDING','APPROVED','REJECTED')),
+ reason VARCHAR(500) NOT NULL, requested_at TIMESTAMPTZ NOT NULL, requested_by BIGINT NOT NULL,
+ reviewed_at TIMESTAMPTZ, reviewed_by BIGINT, feedback VARCHAR(500) NOT NULL DEFAULT '',
+ corrected_checked_out_at TIMESTAMPTZ
+);
+CREATE INDEX IF NOT EXISTS idx_attendance_corrections_attendance ON attendance_corrections(attendance_id,id DESC);
+
 CREATE TABLE IF NOT EXISTS attendance_shift_codes (
  job_id BIGINT PRIMARY KEY REFERENCES jobs(id) ON DELETE CASCADE,token_hash VARCHAR(64) NOT NULL,
  expires_at TIMESTAMPTZ NOT NULL
@@ -231,7 +253,7 @@ CREATE TABLE IF NOT EXISTS work_logs (
  detail_photo BYTEA CHECK(detail_photo IS NULL OR octet_length(detail_photo)<=2097152),
  status VARCHAR(30) NOT NULL DEFAULT 'PENDING' CHECK(status IN ('PENDING','APPROVED','CHANGES_REQUESTED')),
  feedback VARCHAR(500) NOT NULL DEFAULT '',created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
- reviewed_at TIMESTAMPTZ,version BIGINT NOT NULL DEFAULT 0
+ reviewed_at TIMESTAMPTZ,version BIGINT NOT NULL DEFAULT 0,correction_revision BIGINT NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS receiving_bank_settings (

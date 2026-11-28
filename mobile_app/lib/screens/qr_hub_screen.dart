@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../widgets/checkout_confirmation.dart';
+
 import 'package:image_picker/image_picker.dart';
 
 import '../services/device_photo_picker.dart';
@@ -196,11 +199,13 @@ class _QrHubScreenState extends State<QrHubScreen> {
     }
     if (!mounted || !widget.active) return;
     final checkout = today != null;
-    final yes = await _confirm(
-      checkout ? 'Xác nhận kết thúc ca' : 'Xác nhận vào ca',
-      '${application.job.title}\n${checkout ? "Ghi giờ ra" : "Ghi giờ vào"} bằng mã QR chủ thầu cấp. Backend kiểm tra hiệu lực mã và ghi giờ chính thức.',
-      checkout ? 'Kết thúc ca' : 'Vào ca',
-    );
+    final yes = checkout
+        ? await confirmCheckout(context, today.checkedInAt)
+        : await _confirm(
+            'Xác nhận vào ca',
+            '${application.job.title}\nGhi nhận giờ vào bằng mã QR chủ thầu cấp.',
+            'Vào ca',
+          );
     if (!yes || !mounted) return;
     await widget.api.markAttendance(
       application.id,

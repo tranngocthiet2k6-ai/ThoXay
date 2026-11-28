@@ -224,11 +224,24 @@ CREATE TABLE IF NOT EXISTS attendance_records (
  id BIGSERIAL PRIMARY KEY,application_id BIGINT NOT NULL REFERENCES job_applications(id) ON DELETE CASCADE,
  work_day DATE NOT NULL,checked_in_at TIMESTAMPTZ NOT NULL,checked_out_at TIMESTAMPTZ,
  checkin_method VARCHAR(10) NOT NULL CHECK(checkin_method IN ('GPS','QR')),
- checkout_method VARCHAR(10) CHECK(checkout_method IN ('GPS','QR')),
+ checkout_method VARCHAR(10) CHECK(checkout_method IN ('GPS','QR','ADJUSTED')),
  checkin_latitude DOUBLE PRECISION,checkin_longitude DOUBLE PRECISION,checkin_accuracy DOUBLE PRECISION,
  checkout_latitude DOUBLE PRECISION,checkout_longitude DOUBLE PRECISION,checkout_accuracy DOUBLE PRECISION,
+ latest_correction_id BIGINT,version BIGINT NOT NULL DEFAULT 0,correction_revision BIGINT NOT NULL DEFAULT 0,
  UNIQUE(application_id,work_day),CHECK(checked_out_at IS NULL OR checked_out_at>=checked_in_at)
 );
+CREATE TABLE IF NOT EXISTS attendance_corrections (
+ id BIGSERIAL PRIMARY KEY,
+ attendance_id BIGINT NOT NULL REFERENCES attendance_records(id) ON DELETE CASCADE,
+ original_checked_out_at TIMESTAMPTZ NOT NULL, original_method VARCHAR(10) NOT NULL,
+ original_latitude DOUBLE PRECISION, original_longitude DOUBLE PRECISION, original_accuracy DOUBLE PRECISION,
+ status VARCHAR(30) NOT NULL CHECK (status IN ('AUTO_UNDONE','PENDING','APPROVED','REJECTED')),
+ reason VARCHAR(500) NOT NULL, requested_at TIMESTAMPTZ NOT NULL, requested_by BIGINT NOT NULL,
+ reviewed_at TIMESTAMPTZ, reviewed_by BIGINT, feedback VARCHAR(500) NOT NULL DEFAULT '',
+ corrected_checked_out_at TIMESTAMPTZ
+);
+CREATE INDEX IF NOT EXISTS idx_attendance_corrections_attendance ON attendance_corrections(attendance_id,id DESC);
+
 CREATE TABLE IF NOT EXISTS attendance_shift_codes (
  job_id BIGINT PRIMARY KEY REFERENCES jobs(id) ON DELETE CASCADE,token_hash VARCHAR(64) NOT NULL,
  expires_at TIMESTAMPTZ NOT NULL
@@ -239,7 +252,7 @@ CREATE TABLE IF NOT EXISTS work_logs (
  detail_photo BYTEA CHECK(detail_photo IS NULL OR octet_length(detail_photo)<=2097152),
  status VARCHAR(30) NOT NULL DEFAULT 'PENDING' CHECK(status IN ('PENDING','APPROVED','CHANGES_REQUESTED')),
  feedback VARCHAR(500) NOT NULL DEFAULT '',created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
- reviewed_at TIMESTAMPTZ,version BIGINT NOT NULL DEFAULT 0
+ reviewed_at TIMESTAMPTZ,version BIGINT NOT NULL DEFAULT 0,correction_revision BIGINT NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS receiving_bank_settings (

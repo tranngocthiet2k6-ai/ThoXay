@@ -40,6 +40,12 @@ class AttendanceApi extends ApiService {
       reviewed = false,
       withPhoto = false;
   int reviews = 0;
+  int corrections = 0;
+  int correctionReviews = 0;
+  String? correctionStatus;
+  bool canUndo = true;
+  bool? approvedCorrection;
+  DateTime? correctedEnd;
   String? qr;
   double? accuracy;
   AttendancePage data() => AttendancePage.fromJson({
@@ -61,6 +67,12 @@ class AttendanceApi extends ApiService {
               ? (reviewed ? 'APPROVED' : 'PENDING')
               : null,
           'feedback': '',
+          'version': 1,
+          'canUndoCheckout':
+              checkedOut && canUndo && correctionStatus != 'PENDING',
+          'correctionId': correctionStatus == null ? null : 8,
+          'correctionStatus': correctionStatus,
+          'correctionReason': correctionStatus == null ? '' : 'Bấm nhầm',
         },
     ],
   });
@@ -90,6 +102,33 @@ class AttendanceApi extends ApiService {
   @override
   Future<Uint8List> privateImage(String path) async =>
       TileProvider.transparentImage;
+  @override
+  Future<String> correctCheckout(AttendanceEntry row, String reason) async {
+    expect(reason.trim(), isNotEmpty);
+    corrections++;
+    correctionStatus = canUndo && !reviewed ? 'AUTO_UNDONE' : 'PENDING';
+    if (correctionStatus == 'AUTO_UNDONE') checkedOut = false;
+    return correctionStatus!;
+  }
+
+  @override
+  Future<void> reviewCheckoutCorrection(
+    AttendanceEntry row,
+    bool approved, {
+    DateTime? correctedCheckedOutAt,
+    String feedback = '',
+  }) async {
+    correctionReviews++;
+    approvedCorrection = approved;
+    correctedEnd = correctedCheckedOutAt;
+    correctionStatus = approved ? 'APPROVED' : 'REJECTED';
+    if (approved && correctedCheckedOutAt == null) checkedOut = false;
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> checkoutCorrections(
+    int attendanceId,
+  ) async => [];
   @override
   Future<void> reviewWorkLog(
     int id,
@@ -139,6 +178,14 @@ void main() {
     expect(find.text('Kết thúc ca GPS'), findsOneWidget);
     await tester.tap(find.text('Kết thúc ca GPS'));
     await tester.pumpAndSettle();
+    expect(api.checkedOut, isFalse);
+    await tester.tap(find.text('Tiếp tục làm'));
+    await tester.pumpAndSettle();
+    expect(api.checkedOut, isFalse);
+    await tester.tap(find.text('Kết thúc ca GPS'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Xác nhận kết thúc ca'));
+    await tester.pumpAndSettle();
     expect(api.checkedOut, isTrue);
     await tester.scrollUntilVisible(
       find.text('Gửi ảnh cuối ngày'),
@@ -146,6 +193,135 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     expect(find.text('Gửi ảnh cuối ngày'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+    api.dispose();
+  });
+  testWidgets(
+    'worker can undo accidental checkout and continue the same shift',
+    (tester) async {
+      final api = AttendanceApi()
+        ..checkedIn = true
+        ..checkedOut = true;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: AttendanceScreen(api: api, job: fixture, applicationId: 3),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text('Báo kết thúc nhầm'),
+        150,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.ensureVisible(find.text('Báo kết thúc nhầm'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Báo kết thúc nhầm'));
+      await tester.pumpAndSettle();
+      expect(api.corrections, 0);
+      await tester.tap(find.text('Hoàn tác kết thúc ca'));
+      await tester.pumpAndSettle();
+      expect(api.corrections, 0);
+      expect(find.text('Nhập lý do điều chỉnh'), findsOneWidget);
+      await tester.enterText(
+        find.byType(TextFormField),
+        'Bấm nhầm kết thúc ca',
+      );
+      await tester.tap(find.text('Hoàn tác kết thúc ca'));
+      await tester.pumpAndSettle();
+      expect(api.corrections, 1);
+      expect(api.checkedOut, isFalse);
+      expect(find.text('Kết thúc ca GPS'), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+      api.dispose();
+    },
+  );
+  testWidgets(
+    'overdue checkout submits request without reopening and blocks photo review',
+    (tester) async {
+      final api = AttendanceApi()
+        ..checkedIn = true
+        ..checkedOut = true
+        ..canUndo = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: AttendanceScreen(api: api, job: fixture, applicationId: 3),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text('Báo kết thúc nhầm'),
+        150,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.ensureVisible(find.text('Báo kết thúc nhầm'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Báo kết thúc nhầm'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextFormField), 'Tôi vẫn đang làm');
+      await tester.tap(find.text('Gửi yêu cầu điều chỉnh'));
+      await tester.pumpAndSettle();
+      expect(api.checkedOut, isTrue);
+      expect(find.text('Chờ duyệt điều chỉnh chấm công'), findsOneWidget);
+      expect(find.text('Gửi ảnh cuối ngày'), findsNothing);
+      await tester.pumpWidget(const SizedBox());
+      api.dispose();
+    },
+  );
+  testWidgets(
+    'contractor explicitly approves reopening and pending correction hides review',
+    (tester) async {
+      final api = AttendanceApi()
+        ..checkedIn = true
+        ..checkedOut = true
+        ..withPhoto = true
+        ..correctionStatus = 'PENDING';
+      await tester.pumpWidget(
+        MaterialApp(
+          home: AttendanceScreen(api: api, job: fixture),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Nghiệm thu & Mở khóa thanh toán'), findsNothing);
+      await tester.scrollUntilVisible(
+        find.text('Duyệt điều chỉnh'),
+        150,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.ensureVisible(find.text('Duyệt điều chỉnh'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Duyệt điều chỉnh'));
+      await tester.pumpAndSettle();
+      expect(api.correctionReviews, 0);
+      await tester.tap(find.text('Xác nhận'));
+      await tester.pumpAndSettle();
+      expect(api.correctionReviews, 1);
+      expect(api.approvedCorrection, isTrue);
+      expect(api.checkedOut, isFalse);
+      await tester.pumpWidget(const SizedBox());
+      api.dispose();
+    },
+  );
+  testWidgets('manual checkout also asks for confirmation before sending QR', (
+    tester,
+  ) async {
+    final api = AttendanceApi()..checkedIn = true;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: AttendanceScreen(api: api, job: fixture, applicationId: 3),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Nhập mã ca làm'));
+    await tester.tap(find.text('Nhập mã ca làm'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextFormField), 'b' * 43);
+    await tester.tap(find.text('Xác nhận chấm công'));
+    await tester.pumpAndSettle();
+    expect(api.checkedOut, isFalse);
+    expect(api.qr, isNull);
+    await tester.tap(find.text('Tiếp tục làm'));
+    await tester.pumpAndSettle();
+    expect(api.checkedOut, isFalse);
     await tester.pumpWidget(const SizedBox());
     api.dispose();
   });

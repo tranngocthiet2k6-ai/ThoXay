@@ -132,6 +132,41 @@ class ApiService extends ChangeNotifier {
       },
     ) as Map<String, dynamic>,
   );
+  Future<String> correctCheckout(AttendanceEntry row, String reason) async {
+    final result = await _request(
+      'POST',
+      '/api/attendance/${row.id}/checkout-corrections',
+      body: {'version': row.version, 'reason': reason},
+    ) as Map<String, dynamic>;
+    return result['status'] as String;
+  }
+
+  Future<void> reviewCheckoutCorrection(
+    AttendanceEntry row,
+    bool approved, {
+    DateTime? correctedCheckedOutAt,
+    String feedback = '',
+  }) async {
+    await _request(
+      'PUT',
+      '/api/attendance/${row.id}/checkout-corrections/${row.correctionId}',
+      body: {
+        'version': row.version,
+        'approved': approved,
+        'correctedCheckedOutAt': correctedCheckedOutAt
+            ?.toUtc()
+            .toIso8601String(),
+        'feedback': feedback,
+      },
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> checkoutCorrections(
+    int attendanceId,
+  ) async => (await _request(
+    'GET',
+    '/api/attendance/$attendanceId/checkout-corrections',
+  ) as List).cast<Map<String, dynamic>>();
   Future<AttendancePage> uploadWorkLog(
     int id,
     DateTime day,

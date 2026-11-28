@@ -1,3 +1,5 @@
+import '../widgets/checkout_confirmation.dart';
+import '../widgets/checkout_correction_actions.dart';
 import '../widgets/modern_controls.dart';
 import '../widgets/bouncing_button.dart';
 
@@ -111,17 +113,22 @@ class _AttendanceRadarScreenState extends State<AttendanceRadarScreen> {
 
   Future<void> _mark({bool qr = false}) async {
     if (_busy) return;
-    String? token;
-    if (qr) {
-      token = await Navigator.of(context).push<String>(
-        MaterialPageRoute(
-          builder: (_) => ShiftScannerScreen(jobId: widget.job.id),
-        ),
-      );
-      if (token == null || !mounted) return;
-    }
+    final row = _today;
     setState(() => _busy = true);
     try {
+      String? token;
+      if (qr) {
+        token = await Navigator.of(context).push<String>(
+          MaterialPageRoute(
+            builder: (_) => ShiftScannerScreen(jobId: widget.job.id),
+          ),
+        );
+        if (token == null || !mounted) return;
+      }
+      if (row != null &&
+          (!await confirmCheckout(context, row.checkedInAt) || !mounted)) {
+        return;
+      }
       // A fresh sensor reading accompanies every GPS action; the server decides validity.
       final p = qr
           ? null
@@ -345,6 +352,16 @@ class _AttendanceRadarScreenState extends State<AttendanceRadarScreen> {
                 ),
               ),
             ),
+            if (row != null && _data != null)
+              CheckoutCorrectionActions(
+                api: widget.api,
+                row: row,
+                job: widget.job,
+                worker: true,
+                today: _data!.today,
+                enabled: !_busy,
+                onChanged: _refresh,
+              ),
             const SizedBox(height: 12),
             OutlinedButton.icon(
               onPressed: _busy || done ? null : () => _mark(qr: true),

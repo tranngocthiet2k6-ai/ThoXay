@@ -13,4 +13,7 @@ public class AttendanceRecord {
  @Column(nullable=false,length=10) private String checkinMethod;
  @Column(length=10) private String checkoutMethod;
  private Double checkinLatitude,checkinLongitude,checkinAccuracy,checkoutLatitude,checkoutLongitude,checkoutAccuracy;
+ private Long latestCorrectionId;
+ @Column(nullable=false) private long correctionRevision;
+ @Version @Column(nullable=false) private Long version;
 }

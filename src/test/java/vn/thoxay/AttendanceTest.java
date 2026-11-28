@@ -28,6 +28,83 @@ class AttendanceTest {
  static class TestClock extends Clock {Instant now=Instant.parse("2030-03-01T01:00:00Z");public ZoneId getZone(){return ZoneId.of("Asia/Ho_Chi_Minh");}public Clock withZone(ZoneId zone){return Clock.fixed(now,zone);}public Instant instant(){return now;}}
  @Autowired TestClock clock;@Autowired MockMvc mvc;@Autowired ObjectMapper json;@Autowired UserRepository users;@Autowired JobRepository jobs;@Autowired JobApplicationRepository applications;@Autowired JwtUtil jwt;@Autowired AttendanceRepository records;@Autowired ShiftCodeRepository codes;@Autowired WalletAccountRepository wallets;@Autowired WorkLogRepository logs;
  User worker,owner,outsider;Job job;JobApplication app;
+ @Autowired AttendanceCorrectionRepository corrections;
+ @Test void quickUndoPreservesCheckinAndOriginalEvidenceWithoutCreatingAnotherShift()throws Exception{
+  mark("check-in",gps(),200);var start=record().getCheckedInAt();clock.now=clock.now.plusSeconds(15);mark("check-out",gps(),200);
+  var end=record().getCheckedOutAt();clock.now=clock.now.plusSeconds(120);
+  correct(worker,record().getVersion(),200,"AUTO_UNDONE");
+  assertThat(record().getCheckedOutAt()).isNull();assertThat(record().getCheckedInAt()).isEqualTo(start);
+  var audit=corrections.findByAttendanceIdOrderByIdDesc(record().getId()).get(0);
+  assertThat(audit.getOriginalCheckedOutAt()).isEqualTo(end);assertThat(audit.getOriginalLatitude()).isEqualTo(10);
+  assertThat(audit.getRequestedBy()).isEqualTo(worker.getId());
+  mark("check-in",gps(),200);clock.now=clock.now.plusSeconds(3600);mark("check-out",gps(),200);
+  assertThat(records.total(app.getId())).isEqualTo(1);assertThat(record().getCheckedInAt()).isEqualTo(start);
+  mvc.perform(get("/api/applications/"+app.getId()+"/attendance").header("Authorization",token(worker)))
+   .andExpect(status().isOk()).andExpect(jsonPath("$.items[0].correctionId").value(audit.getId()));
+  mvc.perform(get("/api/attendance/"+record().getId()+"/checkout-corrections").header("Authorization",token(owner)))
+   .andExpect(status().isOk()).andExpect(jsonPath("$[0].originalCheckedOutAt").value(end.toString()));
+  mvc.perform(get("/api/attendance/"+record().getId()+"/checkout-corrections").header("Authorization",token(outsider))).andExpect(status().isNotFound());
+ }
+ @Test void overdueCorrectionNeedsOwnerAndStaleOrDuplicateRequestsCannotChangeIt()throws Exception{
+  mark("check-in",gps(),200);mark("check-out",gps(),200);var version=record().getVersion();clock.now=clock.now.plusSeconds(121);
+  correct(outsider,version,404,null);correct(worker,version,200,"PENDING");correct(worker,version,409,null);
+  decision(outsider,true,null,"",403);decision(worker,true,null,"",403);
+  var end=record().getCheckedOutAt();assertThat(end).isNotNull();
+  mvc.perform(uploadRequest()).andExpect(status().isConflict());
+  decision(owner,true,null,"Cho tiếp tục ca",200);assertThat(record().getCheckedOutAt()).isNull();
+  decision(owner,true,null,"",409);assertThat(corrections.findByAttendanceIdOrderByIdDesc(record().getId())).hasSize(1);
+ }
+ @Test void approvedDayRequiresOwnerDecisionAndInvalidatesPhotoReviewBeforePayment()throws Exception{
+  mark("check-in",gps(),200);mark("check-out",gps(),200);long log=upload();review(log,true,"");
+  long oldPhotoVersion=logs.findById(log).orElseThrow().getVersion();correct(worker,record().getVersion(),200,"PENDING");
+  assertThat(records.approved(app.getId())).isZero();
+  mvc.perform(put("/api/work-logs/"+log+"/review").header("Authorization",token(owner)).contentType("application/json")
+   .content(json.writeValueAsString(Map.of("approved",true,"feedback","","version",oldPhotoVersion)))).andExpect(status().isConflict());
+  clock.now=clock.now.plusSeconds(600);decision(owner,true,clock.now,"Đối chiếu giờ đúng",200);
+  assertThat(record().getCheckoutMethod()).isEqualTo("ADJUSTED");assertThat(logs.findById(log).orElseThrow().getStatus()).isEqualTo("CHANGES_REQUESTED");
+  assertThat(logs.findById(log).orElseThrow().getVersion()).isGreaterThan(oldPhotoVersion);assertThat(records.approved(app.getId())).isZero();
+  correct(worker,record().getVersion(),200,"PENDING"); // An owner-adjusted checkout never permits self-undo.
+  decision(owner,false,null,"Giờ đã đối chiếu",200);
+  review(log,true,"");assertThat(records.approved(app.getId())).isEqualTo(1);
+ }
+ @Test void rejectionKeepsOriginalCheckoutAndRequiresReason()throws Exception{
+  mark("check-in",gps(),200);mark("check-out",gps(),200);clock.now=clock.now.plusSeconds(121);
+  var original=record().getCheckedOutAt();correct(worker,record().getVersion(),200,"PENDING");
+  decision(owner,false,null,"",409);decision(owner,false,null,"Đã xác nhận thợ về đúng giờ",200);
+  assertThat(record().getCheckedOutAt()).isEqualTo(original);
+  assertThat(corrections.findById(record().getLatestCorrectionId()).orElseThrow().getStatus()).isEqualTo("REJECTED");
+ }
+ @Test void previousDayCannotReopenButOwnerCanCorrectAnActualEndTime()throws Exception{
+  mark("check-in",gps(),200);mark("check-out",gps(),200);var original=record();
+  clock.now=clock.now.plusSeconds(86400);
+  correctionRequest(original.getId(),worker,original.getVersion(),200);
+  correctionDecision(original,owner,true,null,409);
+  correctionDecision(original,owner,true,original.getCheckedInAt().minusSeconds(1),409);
+  correctionDecision(original,owner,true,clock.now.plusSeconds(10),409);
+  correctionDecision(original,owner,true,clock.now,409);
+  correctionDecision(original,owner,true,original.getCheckedInAt().plusSeconds(3600),200);
+ }
+ @Test void settledAttendanceCannotBeChangedEvenDuringQuickUndoWindow()throws Exception{
+  mark("check-in",gps(),200);mark("check-out",gps(),200);long log=upload();review(log,true,"");
+  app.setWorkerRating(5);applications.saveAndFlush(app);job.setStatus(JobStatus.COMPLETED);jobs.saveAndFlush(job);
+  var wallet=new WalletAccount();wallet.setUser(owner);wallet.setMainBalance(1000000);wallets.saveAndFlush(wallet);pay(1,200);
+  correct(worker,record().getVersion(),409,null);assertThat(corrections.findByAttendanceIdOrderByIdDesc(record().getId())).isEmpty();
+ }
+ AttendanceRecord record(){return records.findByApplicationIdAndWorkDay(app.getId(),LocalDate.of(2030,3,1)).orElseThrow();}
+ void correct(User actor,long version,int expected,String state)throws Exception{
+  var result=correctionRequest(record().getId(),actor,version,expected);if(state!=null)assertThat(json.readTree(result.getResponse().getContentAsString()).get("status").asText()).isEqualTo(state);
+ }
+ org.springframework.test.web.servlet.MvcResult correctionRequest(long id,User actor,long version,int expected)throws Exception{
+  return mvc.perform(post("/api/attendance/"+id+"/checkout-corrections").header("Authorization",token(actor)).contentType("application/json")
+   .content(json.writeValueAsString(Map.of("version",version,"reason","Bấm nhầm kết thúc ca")))).andExpect(status().is(expected)).andReturn();
+ }
+ void decision(User actor,boolean approved,Instant end,String feedback,int expected)throws Exception{
+  var row=record();var body=new HashMap<String,Object>();body.put("version",row.getVersion());body.put("approved",approved);body.put("correctedCheckedOutAt",end);body.put("feedback",feedback);
+  mvc.perform(put("/api/attendance/"+row.getId()+"/checkout-corrections/"+row.getLatestCorrectionId()).header("Authorization",token(actor)).contentType("application/json").content(json.writeValueAsString(body))).andExpect(status().is(expected));
+ }
+ void correctionDecision(AttendanceRecord row,User actor,boolean approved,Instant end,int expected)throws Exception{
+  decision(actor,approved,end,"Đối chiếu chấm công",expected);
+ }
  @BeforeEach void setup(){clock.now=Instant.parse("2030-03-01T01:00:00Z");worker=user("0983333311",Role.ROLE_WORKER);owner=user("0983333312",Role.ROLE_CONTRACTOR);outsider=user("0983333313",Role.ROLE_WORKER);job=new Job();job.setContractor(owner);job.setTitle("Chấm công QA");job.setAddress("QA");job.setJobType("Thợ chính");job.setSalaryPerDay(350000);job.setRequiredWorkers(2);job.setLatitude(10);job.setLongitude(106);job.setStatus(JobStatus.IN_PROGRESS);job.setStartsOn(LocalDate.now(clock));job.setEndsOn(LocalDate.now(clock).plusDays(1));job.setAttendanceRequired(true);jobs.saveAndFlush(job);app=new JobApplication();app.setJob(job);app.setWorker(worker);app.setStatus(ApplicationStatus.ACCEPTED);app.setAgreedDailyRate(350000L);applications.saveAndFlush(app);}
  @Test void newlyPostedJobsRequireAttendanceForSettlement()throws Exception{
   mvc.perform(post("/api/jobs").header("Authorization",token(owner)).contentType("application/json").content(json.writeValueAsString(Map.of("title","Việc mới","jobType","Thợ chính","salaryPerDay",350000,"address","QA","latitude",10,"longitude",106,"requiredWorkers",1,"startsOn",LocalDate.now(clock),"endsOn",LocalDate.now(clock)))))

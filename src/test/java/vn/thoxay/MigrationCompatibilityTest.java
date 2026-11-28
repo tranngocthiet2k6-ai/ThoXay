@@ -42,6 +42,29 @@ class MigrationCompatibilityTest {
         }
         assertThat(migrations().validateWithResult().validationSuccessful).isTrue();
     }
+    @Test void checkoutUpgradePreservesExistingTimesAndCanBeRepeated() throws Exception {
+        Flyway.configure().configuration(migrations().getConfiguration()).target("29").load().migrate();
+        try(var c=connect();var s=c.createStatement()) {
+            c.setSchema(schema);
+            s.executeUpdate("INSERT INTO users(phone_number,password,full_name,role) VALUES ('0999999901','qa-hash','Owner','ROLE_CONTRACTOR'),('0999999902','qa-hash','Worker','ROLE_WORKER')");
+            s.executeUpdate("INSERT INTO jobs(contractor_id,title,job_type,salary_per_day,address,latitude,longitude,required_workers) SELECT id,'QA shift','Thợ chính',350000,'QA',10,106,1 FROM users WHERE role='ROLE_CONTRACTOR'");
+            s.executeUpdate("INSERT INTO job_applications(job_id,worker_id,status) SELECT j.id,u.id,'ACCEPTED' FROM jobs j,users u WHERE u.role='ROLE_WORKER'");
+            s.executeUpdate("INSERT INTO attendance_records(application_id,work_day,checked_in_at,checked_out_at,checkin_method,checkout_method) SELECT id,'2030-03-01','2030-03-01T01:00:00Z','2030-03-01T09:00:00Z','GPS','QR' FROM job_applications");
+        }
+        migrations().migrate();
+        try(var c=connect()) {
+            c.setSchema(schema);
+            ScriptUtils.executeSqlScript(c,new ClassPathResource("db/migration/V30__attendance_checkout_corrections.sql"));
+            ScriptUtils.executeSqlScript(c,new ClassPathResource("db/migration/V30__attendance_checkout_corrections.sql"));
+            try(var s=c.createStatement();var r=s.executeQuery("SELECT checked_out_at,checkout_method,version,latest_correction_id FROM attendance_records")) {
+                assertThat(r.next()).isTrue();
+                assertThat(r.getTimestamp(1).toInstant()).isEqualTo(java.time.Instant.parse("2030-03-01T09:00:00Z"));
+                assertThat(r.getString(2)).isEqualTo("QR");assertThat(r.getLong(3)).isZero();assertThat(r.getObject(4)).isNull();
+            }
+            try(var s=c.createStatement()) { assertThat(s.executeUpdate("UPDATE attendance_records SET checkout_method='ADJUSTED'")).isEqualTo(1); }
+        }
+        assertThat(migrations().migrate().migrationsExecuted).isZero();
+    }
     @Test void adoptsLegacySchemaWithoutChangingExistingUser() throws Exception {
         try (var c = connect()) {
             c.setSchema(schema);

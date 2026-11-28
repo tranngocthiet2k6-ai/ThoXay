@@ -182,8 +182,8 @@ void main() {
       Navigator.pop(tester.element(find.byType(AttendanceScreen)));
       await tester.pumpAndSettle();
       await scan(tester);
-      expect(find.text('Xác nhận kết thúc ca'), findsOneWidget);
-      await tester.tap(find.text('Kết thúc ca'));
+      expect(find.text('Bạn muốn kết thúc ca làm?'), findsOneWidget);
+      await tester.tap(find.text('Xác nhận kết thúc ca'));
       await tester.pumpAndSettle();
       expect(api.marks, 2);
       expect(api.checkedOut, isTrue);
