@@ -6,7 +6,7 @@ import '../widgets/figma_components.dart';
 import '../widgets/figma_job_map.dart';
 import '../widgets/job_map_summary.dart';
 import '../widgets/incident_actions.dart';
-import '../widgets/weather_card.dart';
+import '../widgets/job_weather_panel.dart';
 import 'attendance_screen.dart';
 import '../widgets/design_motion.dart';
 import '../widgets/work_commitment.dart';
@@ -376,6 +376,15 @@ class _ContractorHomeContentState extends State<ContractorHomeContent> {
                         ),
                         if (_weatherJob != null) ...[
                           const SizedBox(height: 16),
+                          JobWeatherPanel(
+                            api: widget.api,
+                            jobs: _jobs,
+                            selected: _weatherJob!,
+                            refreshToken: _jobs,
+                            onChanged: (job) =>
+                                setState(() => _weatherJobId = job.id),
+                          ),
+                          const SizedBox(height: 16),
                           SizedBox(
                             key: _mapKey,
                             child: JobMapPreview(
@@ -398,61 +407,6 @@ class _ContractorHomeContentState extends State<ContractorHomeContent> {
                     ),
                   ),
                 ),
-                if (_weatherJob != null)
-                  SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                    sliver: SliverToBoxAdapter(
-                      child: ExpansionTile(
-                        title: const Text(
-                          'Thời tiết công trình',
-                          style: TextStyle(fontSize: 12),
-                        ),
-                        children: [
-                          Column(
-                            children: [
-                              if (_jobs.length > 1)
-                                DropdownButtonFormField<int>(
-                                  initialValue: _weatherJob!.id,
-                                  isExpanded: true,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Thời tiết công trình',
-                                  ),
-                                  items: _jobs
-                                      .map(
-                                        (j) => DropdownMenuItem(
-                                          value: j.id,
-                                          child: Text(
-                                            j.title,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                      )
-                                      .toList(),
-                                  onChanged: (id) =>
-                                      setState(() => _weatherJobId = id),
-                                ),
-                              ExpansionTile(
-                                title: const Text(
-                                  'Thời tiết khu vực',
-                                  style: TextStyle(fontSize: 12),
-                                ),
-                                children: [
-                                  WeatherCard(
-                                    api: widget.api,
-                                    latitude: _weatherJob!.latitude,
-                                    longitude: _weatherJob!.longitude,
-                                    areaLabel: _weatherJob!.title,
-                                    refreshToken: _jobs,
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
                 SliverPersistentHeader(
                   pinned: true,
                   delegate: JobSearchHeader(

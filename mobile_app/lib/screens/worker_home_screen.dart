@@ -439,25 +439,40 @@ class _WorkerHomeContentState extends State<WorkerHomeContent> {
                             ),
                           ),
                         ],
-                        if (_tab == 0 &&
-                            _position != null &&
-                            _advancedFilters) ...[
+                        if (_tab == 0) ...[
                           const SizedBox(height: 16),
-                          ExpansionTile(
-                            title: const Text(
-                              'Thời tiết khu vực',
-                              style: TextStyle(fontSize: 12),
-                            ),
+                          Row(
                             children: [
-                              WeatherCard(
-                                api: widget.api,
-                                latitude: _position!.latitude,
-                                longitude: _position!.longitude,
-                                areaLabel: 'Khu vực đang tìm việc',
-                                refreshToken: _jobs,
+                              Expanded(
+                                child: Text(
+                                  'Thời tiết nơi tìm việc',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium,
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: _loading ? null : _selectPosition,
+                                child: Text(
+                                  _position == null
+                                      ? 'Chọn khu vực'
+                                      : 'Đổi khu vực',
+                                ),
                               ),
                             ],
                           ),
+                          if (_position == null)
+                            const Text(
+                              'Chọn khu vực trên bản đồ để xem thời tiết.',
+                            )
+                          else
+                            WeatherCard(
+                              api: widget.api,
+                              latitude: _position!.latitude,
+                              longitude: _position!.longitude,
+                              areaLabel: 'Khu vực đang tìm việc',
+                              refreshToken: _jobs,
+                            ),
                         ],
                         if (_tab == 0 &&
                             _available == true &&

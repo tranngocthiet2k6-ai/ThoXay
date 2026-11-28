@@ -45,7 +45,7 @@ void main() {
       await tester.tap(expand);
       await tester.pumpAndSettle();
       await tester.scrollUntilVisible(
-        find.byType(JobCard).first,
+        find.byType(JobCard),
         350,
         scrollable: find.byType(Scrollable).first,
         maxScrolls: 10,
