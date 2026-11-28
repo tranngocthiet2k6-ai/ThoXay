@@ -1,4 +1,6 @@
 import '../widgets/checkout_confirmation.dart';
+import '../widgets/worker_rating_field.dart';
+import '../widgets/job_completion_dialog.dart';
 import '../widgets/checkout_correction_actions.dart';
 import '../widgets/bouncing_button.dart';
 import '../widgets/week_schedule.dart';
@@ -48,7 +50,12 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   String? _error;
   DateTime _day = DateTime.now().toUtc().add(const Duration(hours: 7));
   int _page = 0, _generation = 0;
-  int? _selectedLogId;
+  List<JobApplication> _participants = [];
+  final Map<int, int> _ratings = {};
+  Job get _currentJob => _participants.firstOrNull?.job ?? widget.job;
+  bool get _completed =>
+      _currentJob.status == 'COMPLETED' ||
+      _participants.any((a) => a.jobRating != null);
   bool get _worker => widget.applicationId != null;
   @override
   void initState() {
@@ -74,9 +81,18 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               _day,
               page: more ? _page + 1 : 0,
             );
+      final participants = _worker
+          ? <JobApplication>[]
+          : (await widget.api.jobApplications(widget.job.id))
+                .where((a) => a.status == 'ACCEPTED')
+                .toList();
       if (mounted && generation == _generation) {
         setState(() {
           _data = data;
+          _participants = participants;
+          _ratings.removeWhere(
+            (id, _) => !participants.any((a) => a.workerId == id),
+          );
           _items = more ? [..._items, ...data.items] : data.items;
           _page = more ? _page + 1 : 0;
         });
@@ -205,7 +221,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   Future<void> _review(AttendanceEntry row, bool approved) async {
     final feedback = await showDialog<String>(
       context: context,
-      builder: (_) => _ReviewDialog(approved: approved),
+      builder: (_) => _ReviewDialog(approved: approved, row: row),
     );
     if (feedback == null || !mounted) return;
     setState(() => _busy = true);
@@ -241,30 +257,28 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     }
     final checkout = today != null && today.checkedOutAt == null;
     final done = today?.checkedOutAt != null;
-    final pending = _items
-        .where(
-          (row) =>
-              row.logId != null &&
-              row.logVersion != null &&
-              row.reviewStatus != 'APPROVED' &&
-              row.checkedOutAt != null &&
-              !row.correctionPending,
-        )
-        .toList();
-    final selected =
-        pending.where((row) => row.logId == _selectedLogId).firstOrNull ??
-        pending.firstOrNull;
     return Scaffold(
       bottomNavigationBar: _worker
           ? null
           : AttendanceSettlementActions(
               api: widget.api,
-              job: widget.job,
+              job: _currentJob,
               busy: _busy || _loading,
-              reviewLabel: selected == null
-                  ? null
-                  : '${selected.workerName} · ${isoDay(selected.day)}',
-              onReview: selected == null ? null : () => _review(selected, true),
+              canComplete:
+                  !_completed &&
+                  _error == null &&
+                  _participants.isNotEmpty &&
+                  _ratings.length == _participants.length,
+              onComplete: () async {
+                final done = await showJobCompletionDialog(
+                  context,
+                  widget.api,
+                  _currentJob,
+                  initialRatings: _ratings,
+                );
+                if (done == true && mounted) await _load();
+                return done;
+              },
             ),
       appBar: AppBar(
         title: Text(_worker ? 'Chấm công của tôi' : 'Chấm công & nghiệm thu'),
@@ -308,6 +322,34 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             ),
             padding: const EdgeInsets.all(24),
             children: [
+              if (_worker && today != null && done)
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          'Ca hôm nay đã kết thúc lúc ${_time(today.checkedOutAt)}',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const Text(
+                          'Nếu bấm nhầm, báo ngay tại đây để mở lại ca hoặc gửi chủ thầu duyệt.',
+                        ),
+                        CheckoutCorrectionActions(
+                          key: ValueKey('today-correction-${today.id}'),
+                          api: widget.api,
+                          row: today,
+                          job: widget.job,
+                          worker: true,
+                          today: _data!.today,
+                          enabled: !_busy && !_loading,
+                          onChanged: () => _load(),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               if (_worker) ...[
                 WeekSchedule(jobs: [widget.job], today: _data?.today),
                 const SizedBox(height: 16),
@@ -429,6 +471,35 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 ),
               ),
               const SizedBox(height: 16),
+              if (!_worker && _participants.isNotEmpty) ...[
+                Text(
+                  'Đánh giá từng thợ',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const Text(
+                  'Chọn sao ngay dưới tên từng người. Điểm được chốt một lần khi hoàn thành công trình.',
+                ),
+                for (final application in _participants)
+                  Card(
+                    key: ValueKey('worker-rating-${application.workerId}'),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: WorkerRatingField(
+                        application: application,
+                        value: _completed
+                            ? application.jobRating
+                            : _ratings[application.workerId],
+                        locked: _completed,
+                        onChanged: _busy || _loading
+                            ? null
+                            : (stars) => setState(
+                                () => _ratings[application.workerId] = stars,
+                              ),
+                      ),
+                    ),
+                  ),
+                const SizedBox(height: 16),
+              ],
               Text(
                 _worker
                     ? 'Báo cáo tiến độ cuối ngày'
@@ -545,15 +616,16 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                           if (row.feedback.isNotEmpty)
                             Text('Phản hồi: ${row.feedback}'),
                         ],
-                        CheckoutCorrectionActions(
-                          api: widget.api,
-                          row: row,
-                          job: widget.job,
-                          worker: _worker,
-                          today: _data!.today,
-                          enabled: !_busy && !_loading,
-                          onChanged: () => _load(),
-                        ),
+                        if (!(_worker && done && today?.id == row.id))
+                          CheckoutCorrectionActions(
+                            api: widget.api,
+                            row: row,
+                            job: widget.job,
+                            worker: _worker,
+                            today: _data!.today,
+                            enabled: !_busy && !_loading,
+                            onChanged: () => _load(),
+                          ),
                         if (_worker &&
                             !row.correctionPending &&
                             row.checkedOutAt != null &&
@@ -573,28 +645,19 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                             spacing: 8,
                             runSpacing: 8,
                             children: [
-                              OutlinedButton.icon(
+                              FilledButton.icon(
+                                key: ValueKey('review-log-${row.logId}'),
                                 onPressed: _busy
                                     ? null
-                                    : () => setState(
-                                        () => _selectedLogId = row.logId,
-                                      ),
-                                icon: Icon(
-                                  selected?.logId == row.logId
-                                      ? Icons.radio_button_checked
-                                      : Icons.radio_button_off,
-                                ),
-                                label: Text(
-                                  selected?.logId == row.logId
-                                      ? 'Đang chọn nghiệm thu'
-                                      : 'Chọn nghiệm thu',
-                                ),
+                                    : () => _review(row, true),
+                                icon: const Icon(Icons.fact_check_outlined),
+                                label: const Text('Nghiệm thu & phản hồi'),
                               ),
                               OutlinedButton(
                                 onPressed: _busy
                                     ? null
                                     : () => _review(row, false),
-                                child: const Text('Yêu cầu bổ sung'),
+                                child: const Text('Yêu cầu bổ sung ảnh'),
                               ),
                             ],
                           ),
@@ -665,8 +728,9 @@ class _CodeInputState extends State<_CodeInput> {
 }
 
 class _ReviewDialog extends StatefulWidget {
-  const _ReviewDialog({required this.approved});
+  const _ReviewDialog({required this.approved, required this.row});
   final bool approved;
+  final AttendanceEntry row;
   @override
   State<_ReviewDialog> createState() => _ReviewDialogState();
 }
@@ -690,6 +754,10 @@ class _ReviewDialogState extends State<_ReviewDialog> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          Text(
+            'Người nhận phản hồi: ${widget.row.workerName}\nMã đơn ứng tuyển #${widget.row.applicationId}\nNgày công: ${isoDay(widget.row.day)}',
+          ),
+          const SizedBox(height: 12),
           Text(
             widget.approved
                 ? 'Bạn xác nhận đã xem ảnh và đối chiếu kết quả công việc của ngày này. Ngày đã nghiệm thu không thể thay ảnh.'

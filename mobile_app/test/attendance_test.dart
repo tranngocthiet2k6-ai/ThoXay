@@ -86,6 +86,20 @@ class AttendanceApi extends ApiService {
     int page = 0,
   }) async => data();
   @override
+  Future<List<JobApplication>> jobApplications(int id) async => [
+    JobApplication(
+      id: 3,
+      job: fixture,
+      workerId: 3,
+      workerName: 'Thợ QA',
+      workerPhone: null,
+      workerRating: 5,
+      workerVerified: false,
+      workerActive: true,
+      status: 'ACCEPTED',
+    ),
+  ];
+  @override
   Future<AttendancePage> markAttendance(
     int id,
     bool checkout, {
@@ -365,13 +379,13 @@ void main() {
     );
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(
-      find.text('Nghiệm thu & Mở khóa thanh toán'),
+      find.byKey(const ValueKey('review-log-5')),
       180,
       scrollable: find.byType(Scrollable).first,
     );
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.text('Nghiệm thu & Mở khóa thanh toán'));
-    await tester.tap(find.text('Nghiệm thu & Mở khóa thanh toán'));
+    await tester.ensureVisible(find.byKey(const ValueKey('review-log-5')));
+    await tester.tap(find.byKey(const ValueKey('review-log-5')));
     await tester.pumpAndSettle();
     expect(api.reviews, 0);
     await tester.tap(find.text('Xác nhận'));

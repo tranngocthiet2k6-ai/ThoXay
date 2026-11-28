@@ -3,6 +3,7 @@ import 'bouncing_button.dart';
 import 'package:flutter/material.dart';
 
 import 'content_skeleton.dart';
+import 'worker_rating_field.dart';
 
 import '../models/models.dart';
 import '../services/api_service.dart';
@@ -10,17 +11,24 @@ import '../services/api_service.dart';
 Future<bool?> showJobCompletionDialog(
   BuildContext context,
   ApiService api,
-  Job job,
-) => showDialog<bool>(
+  Job job, {
+  Map<int, int> initialRatings = const {},
+}) => showDialog<bool>(
   context: context,
   barrierDismissible: false,
-  builder: (_) => _JobCompletionDialog(api: api, job: job),
+  builder: (_) =>
+      _JobCompletionDialog(api: api, job: job, initialRatings: initialRatings),
 );
 
 class _JobCompletionDialog extends StatefulWidget {
-  const _JobCompletionDialog({required this.api, required this.job});
+  const _JobCompletionDialog({
+    required this.api,
+    required this.job,
+    required this.initialRatings,
+  });
   final ApiService api;
   final Job job;
+  final Map<int, int> initialRatings;
   @override
   State<_JobCompletionDialog> createState() => _JobCompletionDialogState();
 }
@@ -30,9 +38,11 @@ class _JobCompletionDialogState extends State<_JobCompletionDialog> {
   final Map<int, int> _ratings = {};
   bool _loading = true, _saving = false;
   String? _error;
+  bool _alreadyCompleted = false;
   @override
   void initState() {
     super.initState();
+    _ratings.addAll(widget.initialRatings);
     _load();
   }
 
@@ -44,9 +54,17 @@ class _JobCompletionDialogState extends State<_JobCompletionDialog> {
     try {
       final list = await widget.api.jobApplications(widget.job.id);
       if (mounted) {
-        setState(
-          () => _workers = list.where((a) => a.status == 'ACCEPTED').toList(),
-        );
+        setState(() {
+          _workers = list.where((a) => a.status == 'ACCEPTED').toList();
+          _alreadyCompleted =
+              widget.job.status == 'COMPLETED' ||
+              _workers.any(
+                (a) => a.job.status == 'COMPLETED' || a.jobRating != null,
+              );
+          _ratings.removeWhere(
+            (id, _) => !_workers.any((a) => a.workerId == id),
+          );
+        });
       }
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.message);
@@ -56,6 +74,7 @@ class _JobCompletionDialogState extends State<_JobCompletionDialog> {
   }
 
   Future<void> _complete() async {
+    if (_saving || _alreadyCompleted) return;
     setState(() {
       _saving = true;
       _error = null;
@@ -95,44 +114,24 @@ class _JobCompletionDialogState extends State<_JobCompletionDialog> {
                   padding: EdgeInsets.all(24),
                   child: ContentSkeleton(compact: true),
                 ),
+              if (_alreadyCompleted)
+                const Text(
+                  'Công trình đã hoàn thành. Đánh giá đã chốt và không thể chấm lại.',
+                ),
               for (final application in _workers)
                 Padding(
                   padding: const EdgeInsets.only(top: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        application.workerName,
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      Wrap(
-                        children: [
-                          for (int stars = 1; stars <= 5; stars++)
-                            IconButton(
-                              tooltip:
-                                  'Chấm $stars sao cho ${application.workerName}',
-                              visualDensity: VisualDensity.compact,
-                              onPressed: _saving
-                                  ? null
-                                  : () => setState(
-                                      () => _ratings[application.workerId] =
-                                          stars,
-                                    ),
-                              icon: Icon(
-                                (_ratings[application.workerId] ?? 0) >= stars
-                                    ? Icons.star
-                                    : Icons.star_border,
-                                color: Colors.amber.shade800,
-                              ),
-                            ),
-                        ],
-                      ),
-                      Text(
-                        _ratings.containsKey(application.workerId)
-                            ? '${_ratings[application.workerId]} / 5 sao'
-                            : 'Chưa chọn điểm',
-                      ),
-                    ],
+                  child: WorkerRatingField(
+                    application: application,
+                    value: _alreadyCompleted
+                        ? application.jobRating
+                        : _ratings[application.workerId],
+                    locked: _alreadyCompleted,
+                    onChanged: _saving
+                        ? null
+                        : (stars) => setState(
+                            () => _ratings[application.workerId] = stars,
+                          ),
                   ),
                 ),
               if (!_loading && _workers.isEmpty && _error == null)
@@ -154,18 +153,19 @@ class _JobCompletionDialogState extends State<_JobCompletionDialog> {
           onPressed: _saving ? null : () => Navigator.pop(context),
           child: const Text('Hủy'),
         ),
-        BouncingButton(
-          child: FilledButton(
-            onPressed:
-                _loading ||
-                    _saving ||
-                    _workers.isEmpty ||
-                    _ratings.length != _workers.length
-                ? null
-                : _complete,
-            child: Text(_saving ? 'Đang lưu…' : 'Hoàn thành & lưu điểm'),
+        if (!_alreadyCompleted)
+          BouncingButton(
+            child: FilledButton(
+              onPressed:
+                  _loading ||
+                      _saving ||
+                      _workers.isEmpty ||
+                      _ratings.length != _workers.length
+                  ? null
+                  : _complete,
+              child: Text(_saving ? 'Đang lưu…' : 'Hoàn thành & lưu điểm'),
+            ),
           ),
-        ),
       ],
     ),
   );

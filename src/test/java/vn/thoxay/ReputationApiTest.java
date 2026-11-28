@@ -33,17 +33,19 @@ class ReputationApiTest {
         worker.setVerified(false); users.saveAndFlush(worker); assertThat(users.findById(worker.getId()).orElseThrow().getWorkerTier()).isEqualTo(WorkerTier.GOLD);
     }
     @Test void completionAwardsOnceCapsScoreAndPublishesOnlyActualReviews() throws Exception {
-        worker.setReputationScore(99); users.saveAndFlush(worker);
+        worker.setReputationScore(80); users.saveAndFlush(worker);
         Job job = new Job(); job.setContractor(owner); job.setTitle("Công trình đánh giá"); job.setJobType("Phụ hồ"); job.setSalaryPerDay(300000d);
         job.setAddress("TP.HCM"); job.setLatitude(10d); job.setLongitude(106d); job.setRequiredWorkers(1); job.setStatus(JobStatus.IN_PROGRESS); jobs.saveAndFlush(job);
         JobApplication a = new JobApplication(); a.setWorker(worker); a.setJob(job); a.setStatus(ApplicationStatus.ACCEPTED); applications.saveAndFlush(a);
         String body = "{\"ratings\":[{\"workerId\":" + worker.getId() + ",\"stars\":4}]}";
-        for (int i=0;i<2;i++) mvc.perform(put("/api/jobs/"+job.getId()+"/complete").header("Authorization", token(owner)).contentType("application/json").content(body)).andExpect(status().isOk());
-        User saved = users.findById(worker.getId()).orElseThrow(); assertThat(saved.getReputationScore()).isEqualTo(100); assertThat(saved.getCompletedJobs()).isEqualTo(1); assertThat(saved.getRating()).isEqualTo(4);
-        assertThat(events.count()).isEqualTo(1); assertThat(events.findAll().get(0).getDelta()).isEqualTo(1);
+        for (int i=0;i<10;i++) mvc.perform(put("/api/jobs/"+job.getId()+"/complete").header("Authorization", token(owner)).contentType("application/json").content(body)).andExpect(status().isOk());
+        mvc.perform(put("/api/jobs/"+job.getId()+"/complete").header("Authorization", token(owner)).contentType("application/json")
+            .content(body.replace("\"stars\":4", "\"stars\":5"))).andExpect(status().isConflict());
+        User saved = users.findById(worker.getId()).orElseThrow(); assertThat(saved.getReputationScore()).isEqualTo(82); assertThat(saved.getCompletedJobs()).isEqualTo(1); assertThat(saved.getRating()).isEqualTo(4);
+        assertThat(events.count()).isEqualTo(1); assertThat(events.findAll().get(0).getDelta()).isEqualTo(2);
         mvc.perform(get("/api/workers/"+worker.getId()+"/reviews").header("Authorization", token(owner))).andExpect(status().isOk())
             .andExpect(jsonPath("$.items[0].stars").value(4)).andExpect(jsonPath("$.items[0].reviewedAt").isNotEmpty()).andExpect(jsonPath("$.items[0].phoneNumber").doesNotExist());
-        mvc.perform(get("/api/users/me/reputation").header("Authorization", token(worker))).andExpect(jsonPath("$.items[0].delta").value(1));
+        mvc.perform(get("/api/users/me/reputation").header("Authorization", token(worker))).andExpect(jsonPath("$.items[0].delta").value(2));
         mvc.perform(get("/api/users/me/reputation").header("Authorization", token(owner))).andExpect(jsonPath("$.items.length()").value(0));
         mvc.perform(get("/api/workers/leaderboard").header("Authorization", token(owner))).andExpect(jsonPath("$[0].workerId").value(worker.getId())).andExpect(jsonPath("$[0].phoneNumber").doesNotExist());
     }
