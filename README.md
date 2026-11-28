@@ -221,8 +221,10 @@ chế [cache mặc định của flutter_map](https://docs.fleaflet.dev/layers/t
 và trình duyệt; chỉ tải vùng đang xem, không có chức năng tải hàng loạt/offline,
 theo [chính sách tile OpenStreetMap](https://operations.osmfoundation.org/policies/tiles/).
 Nền bản đồ cần mạng; khi tải lỗi vẫn có ghim, lựa chọn tọa độ và danh sách.
-Trên Android/iOS, ảnh bản đồ đi qua `/map-tiles/{z}/{x}/{y}.png` trên cùng
+Trên web và Android/iOS, ảnh bản đồ đi qua `/map-tiles/{z}/{x}/{y}.png` trên cùng
 origin API để tránh phụ thuộc kết nối trực tiếp từ điện thoại tới máy chủ tile.
+Khi triển khai web ở domain khác, cập nhật origin được phép trong CORS của
+đường tile; mẫu Nginx hiện cho phép `https://thoxay.vercel.app`.
 Nginx trong `deploy/aws/` giới hạn đường dẫn tile, xác minh HTTPS, gửi định danh
 ThoXay và giữ cache theo header nguồn (mặc định 7 ngày, tối đa 128 MB).
 API và ảnh hồ sơ không dùng cache tile. Flutter thử lại lỗi kết nối ngắn hạn

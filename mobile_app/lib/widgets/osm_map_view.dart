@@ -2,7 +2,7 @@ import 'dart:async';
 
 import '../theme/app_theme.dart';
 import '../services/map_tile_client.dart';
-import '../services/api_service.dart';
+import '../services/map_tile_source.dart';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
@@ -45,12 +45,7 @@ class OsmMapView extends StatefulWidget {
 }
 
 class _OsmMapViewState extends State<OsmMapView> with WidgetsBindingObserver {
-  static const _configuredTiles = String.fromEnvironment('MAP_TILE_URL');
-  static String get _tiles => _configuredTiles.isNotEmpty
-      ? _configuredTiles
-      : kIsWeb
-      ? 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
-      : '${ApiService.defaultBaseUrl.replaceFirst(RegExp(r'/+$'), '')}/map-tiles/{z}/{x}/{y}.png';
+  static final _source = MapTileSource(isWeb: kIsWeb);
   final _controller = MapController();
   late final TileProvider _provider;
   MapTileClient? _tileClient;
@@ -69,11 +64,7 @@ class _OsmMapViewState extends State<OsmMapView> with WidgetsBindingObserver {
       _tileClient = MapTileClient();
       _provider = NetworkTileProvider(
         httpClient: _tileClient,
-        headers: kIsWeb
-            ? {}
-            : {
-                'User-Agent': 'ThoXay (vn.thoxay.tho_xay_mobile; https://thoxay.vercel.app)',
-              },
+        headers: _source.headers,
         attemptDecodeOfHttpErrorResponses: false,
       );
     }
@@ -245,7 +236,7 @@ class _OsmMapViewState extends State<OsmMapView> with WidgetsBindingObserver {
           children: [
             TileLayer(
               reset: _tileReset.stream,
-              urlTemplate: _tiles,
+              urlTemplate: _source.urlTemplate,
               tileProvider: _provider,
               userAgentPackageName: 'vn.thoxay.tho_xay_mobile',
               maxNativeZoom: 19,

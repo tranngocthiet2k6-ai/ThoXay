@@ -37,7 +37,7 @@ class _RecoveringTiles extends TileProvider {
 
 void main() {
   testWidgets(
-    'native maps use the same reachable API origin and keep tile caching',
+    'web and native maps use the same reachable API origin and keep tile caching',
     (tester) async {
       await tester.pumpWidget(
         MaterialApp(
