@@ -758,6 +758,12 @@ class _WorkerHomeContentState extends State<WorkerHomeContent> {
                                   Text(
                                     'Đánh giá công trình: ${application.jobRating}/5 ★',
                                   ),
+                                if (application.awaitingPayment)
+                                  const Chip(
+                                    label: Text('Đã đánh giá · Chờ thanh toán'),
+                                  ),
+                                if (application.paidAt != null)
+                                  const Chip(label: Text('Đã nhận thanh toán')),
                                 if (application.status == 'CANCELLED')
                                   Text(
                                     'Lý do: ${application.cancellationReason ?? "Đã hủy việc"}\nĐã trừ ${application.cancellationPenalty} điểm uy tín.',
@@ -768,6 +774,7 @@ class _WorkerHomeContentState extends State<WorkerHomeContent> {
                                     ),
                                   ),
                                 if (application.status == 'ACCEPTED' &&
+                                    application.jobRating == null &&
                                     application.job.status == 'IN_PROGRESS')
                                   OutlinedButton.icon(
                                     onPressed: _loading || _cancelling

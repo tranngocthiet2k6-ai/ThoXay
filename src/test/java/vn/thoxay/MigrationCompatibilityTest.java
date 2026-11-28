@@ -65,6 +65,35 @@ class MigrationCompatibilityTest {
         }
         assertThat(migrations().migrate().migrationsExecuted).isZero();
     }
+    @Test void legacyUnpaidCompletionReturnsToInProgressWithoutChangingMoneyOrRepeatingMigration()throws Exception {
+        Flyway.configure().configuration(migrations().getConfiguration()).target("30").load().migrate();
+        try(var c=connect();var s=c.createStatement()) {
+            c.setSchema(schema);
+            s.executeUpdate("INSERT INTO users(phone_number,password,full_name,role,rating,completed_jobs,reputation_score,worker_tier) VALUES ('0999999981','hash','Owner','ROLE_CONTRACTOR',5,0,100,'BRONZE'),('0999999982','hash','Worker','ROLE_WORKER',3,2,80,'SILVER')");
+            s.executeUpdate("INSERT INTO jobs(contractor_id,title,job_type,salary_per_day,address,latitude,longitude,required_workers,status) SELECT u.id,v.title,'Thợ chính',250000,'QA',10,106,1,'COMPLETED' FROM users u CROSS JOIN (VALUES ('legacy-paid'),('legacy-unpaid')) v(title) WHERE u.role='ROLE_CONTRACTOR'");
+            s.executeUpdate("INSERT INTO job_applications(job_id,worker_id,status,worker_rating,reviewed_at) SELECT j.id,u.id,'ACCEPTED',CASE WHEN j.title='legacy-paid' THEN 4 ELSE 2 END,'2030-03-01T09:00:00Z' FROM jobs j,users u WHERE u.role='ROLE_WORKER'");
+            s.executeUpdate("INSERT INTO job_payments(application_id,job_id,contractor_id,worker_id,job_title,work_days,daily_rate,base,tip,bonus,total) SELECT a.id,j.id,j.contractor_id,a.worker_id,j.title,1,250000,250000,0,0,250000 FROM job_applications a JOIN jobs j ON j.id=a.job_id WHERE j.title='legacy-paid'");
+        }
+        migrations().migrate();
+        try(var c=connect()) {
+            c.setSchema(schema);
+            for(int i=0;i<2;i++) ScriptUtils.executeSqlScript(c,new ClassPathResource("db/migration/V31__complete_only_after_payment.sql"));
+            try(var s=c.createStatement();var r=s.executeQuery("SELECT title,status,ratings_finalized_at FROM jobs ORDER BY title")) {
+                assertThat(r.next()).isTrue();assertThat(r.getString(2)).isEqualTo("COMPLETED");assertThat(r.getTimestamp(3)).isNotNull();
+                assertThat(r.next()).isTrue();assertThat(r.getString(2)).isEqualTo("IN_PROGRESS");assertThat(r.getTimestamp(3)).isNotNull();
+            }
+            try(var s=c.createStatement();var r=s.executeQuery("SELECT rating,completed_jobs,reputation_score,worker_tier FROM users WHERE role='ROLE_WORKER'")) {
+                assertThat(r.next()).isTrue();assertThat(r.getDouble(1)).isEqualTo(4);assertThat(r.getInt(2)).isEqualTo(1);
+                assertThat(r.getInt(3)).isEqualTo(80);assertThat(r.getString(4)).isEqualTo("SILVER");
+            }
+            try(var s=c.createStatement();var r=s.executeQuery("SELECT COUNT(*),SUM(total) FROM job_payments")) {
+                assertThat(r.next()).isTrue();assertThat(r.getInt(1)).isEqualTo(1);assertThat(r.getLong(2)).isEqualTo(250000);
+            }
+            try(var s=c.createStatement();var r=s.executeQuery("SELECT COUNT(*) FROM job_applications WHERE paid_at IS NOT NULL")) {
+                assertThat(r.next()).isTrue();assertThat(r.getInt(1)).isEqualTo(1);
+            }
+        }
+    }
     @Test void adoptsLegacySchemaWithoutChangingExistingUser() throws Exception {
         try (var c = connect()) {
             c.setSchema(schema);

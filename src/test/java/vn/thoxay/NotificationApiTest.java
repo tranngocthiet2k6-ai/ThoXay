@@ -66,7 +66,7 @@ class NotificationApiTest {
         mvc.perform(get("/api/notifications").header("Authorization", token(worker)).param("limit", "1"))
             .andExpect(status().isOk()).andExpect(jsonPath("$.items.length()").value(1))
             .andExpect(jsonPath("$.hasMore").value(true)).andExpect(jsonPath("$.unreadCount").value(2))
-            .andExpect(jsonPath("$.items[0].type").value("JOB_COMPLETED"));
+            .andExpect(jsonPath("$.items[0].type").value("JOB_RATINGS_FINALIZED"));
         mvc.perform(put("/api/notifications/" + chat.getId() + "/read").header("Authorization", token(worker))).andExpect(status().isNotFound());
         mvc.perform(put("/api/notifications/read-all").header("Authorization", token(worker))).andExpect(status().isNoContent());
         mvc.perform(get("/api/notifications").header("Authorization", token(worker))).andExpect(jsonPath("$.unreadCount").value(0));

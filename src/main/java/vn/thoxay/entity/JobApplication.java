@@ -24,6 +24,7 @@ public class JobApplication {
     @Column(name = "worker_rating")
     private Integer workerRating;
     @Column(name = "reviewed_at") private java.time.Instant reviewedAt;
+    private java.time.Instant paidAt;
     @Column(name = "cancellation_reason", length = 500) private String cancellationReason;
     @Column(name = "cancelled_at") private java.time.Instant cancelledAt;
     @Column(name = "cancellation_penalty", nullable = false) @org.hibernate.annotations.ColumnDefault("0")

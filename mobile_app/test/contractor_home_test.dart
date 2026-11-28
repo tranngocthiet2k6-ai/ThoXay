@@ -40,11 +40,12 @@ class ContractorApi extends ApiService {
     longitude: 106,
     requiredWorkers: 1,
     status: completed
-        ? 'COMPLETED'
+        ? 'IN_PROGRESS'
         : closed && decision == 'ACCEPTED'
         ? 'IN_PROGRESS'
         : 'OPEN',
-    recruitmentClosed: closed,
+    recruitmentClosed: closed || completed,
+    ratingsFinalizedAt: completed ? DateTime.utc(2030, 3, 1) : null,
   );
   JobApplication get application => JobApplication(
     id: 1,
@@ -380,7 +381,7 @@ void main() {
       await tester.tap(find.text('Xác nhận dừng tuyển'));
       await tester.pumpAndSettle();
       expect(api.decision, 'ACCEPTED');
-      expect(find.text('Hoàn thành công trình'), findsOneWidget);
+      expect(find.text('Chốt đánh giá'), findsOneWidget);
       expect(find.text('Dừng tuyển'), findsNothing);
       await tester.pumpWidget(const SizedBox());
       api.dispose();
@@ -426,15 +427,15 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Xem chi tiết'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Hoàn thành công trình'));
+    await tester.tap(find.text('Chốt đánh giá'));
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Chấm 5 sao cho Nguyễn Văn Thợ'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Hoàn thành & lưu điểm'));
+    await tester.tap(find.text('Chốt đánh giá & mở thanh toán'));
     await tester.pumpAndSettle();
     expect(api.completed, isTrue);
     expect(find.text('Thông tin công việc'), findsNothing);
-    expect(find.text('Hoàn thành công trình'), findsNothing);
+    expect(find.text('Chốt đánh giá'), findsNothing);
     await tester.pumpWidget(const SizedBox());
     api.dispose();
   });

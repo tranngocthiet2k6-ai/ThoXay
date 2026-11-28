@@ -56,6 +56,7 @@ CREATE TABLE IF NOT EXISTS jobs (
       AND job_type = CASE WHEN skilled_workers > 0 THEN
         CASE WHEN helpers > 0 THEN 'Thợ chính, Phụ hồ' ELSE 'Thợ chính' END ELSE 'Phụ hồ' END)),
   recruitment_closed BOOLEAN NOT NULL DEFAULT FALSE,
+  ratings_finalized_at TIMESTAMPTZ,
   starts_on DATE, ends_on DATE, terms_version INTEGER NOT NULL DEFAULT 1,
   CONSTRAINT chk_job_schedule CHECK ((starts_on IS NULL AND ends_on IS NULL) OR (starts_on IS NOT NULL AND ends_on IS NOT NULL AND ends_on>=starts_on AND ends_on-starts_on<=365)),
   status VARCHAR(30) NOT NULL DEFAULT 'OPEN' CHECK (status IN ('OPEN','IN_PROGRESS','COMPLETED','CANCELLED')),
@@ -69,7 +70,7 @@ CREATE TABLE IF NOT EXISTS job_applications (
   cancellation_reason VARCHAR(500), cancelled_at TIMESTAMPTZ,
   cancellation_penalty INTEGER NOT NULL DEFAULT 0,
   worker_rating INTEGER CONSTRAINT chk_worker_rating CHECK (worker_rating IS NULL OR (worker_rating BETWEEN 1 AND 5 AND status = 'ACCEPTED')),
-  reviewed_at TIMESTAMPTZ,
+  reviewed_at TIMESTAMPTZ,paid_at TIMESTAMPTZ,
   proposed_daily_rate BIGINT CHECK(proposed_daily_rate IS NULL OR proposed_daily_rate BETWEEN 1 AND 1000000000),
   wage_note VARCHAR(500), agreed_daily_rate BIGINT CHECK(agreed_daily_rate IS NULL OR agreed_daily_rate BETWEEN 1 AND 1000000000),
   consent_version INTEGER, accepted_terms_at TIMESTAMPTZ,

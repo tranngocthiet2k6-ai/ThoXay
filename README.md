@@ -190,12 +190,14 @@ Tài khoản mới và seed đều chưa xác thực. Ràng buộc database và 
 cho giữ `is_verified=true` khi thiếu mặt trước hoặc mặt sau, áp dụng mọi vai
 trò. `ROLE_ADMIN` vẫn đăng nhập quản trị bằng vai trò dù chưa xác thực CCCD.
 
-Chủ thầu bấm **Hoàn thành công trình** khi công trình đang thi công, chọn 1–5
-sao cho từng thợ đã được nhận, rồi xác nhận. Điểm được lưu tại
+Chủ thầu bấm **Chốt đánh giá** khi công trình đang thi công, chọn 1–5
+sao cho từng thợ đã được nhận, rồi xác nhận. Công trình giữ **Đang thi công**
+và hiển thị **Chờ thanh toán** khi còn thợ chưa nhận tiền; chỉ chuyển
+**Hoàn thành** khi đã thanh toán thành công cho toàn bộ thợ được nhận. Điểm được lưu tại
 `job_applications.worker_rating`; `users.rating` là trung bình các điểm thực tế
 từ công trình đã hoàn thành, không cộng điểm khởi tạo 5.0 vào mẫu số.
 Gửi lại cùng yêu cầu không tính điểm hai lần. Xóa công trình có đánh giá sẽ
-tính lại trung bình. Các đơn chờ còn lại được từ chối khi công trình hoàn thành.
+tính lại trung bình. Các đơn chờ còn lại được từ chối khi chốt đánh giá.
 
 Đơn ACCEPTED hiển thị điện thoại và nút gọi qua `tel:` trên Flutter bằng
 [url_launcher](https://pub.dev/packages/url_launcher). Máy tính cần ứng dụng
@@ -391,7 +393,8 @@ thợ đang hoạt động; không trả ngày sinh, điện thoại hoặc ản
 
 Áp dụng `migrations/007_reputation.sql` sau migration 006 (script local tự chạy).
 Thợ khởi đầu 100 điểm; hoàn thành công trình cộng 2, tối đa 100. Điểm sao 1–5
-do chủ công trình chốt khi hoàn thành, lấy trung bình từ các đánh giá thực tế.
+do chủ công trình chốt trước thanh toán; trung bình sao và số công trình được
+cập nhật khi công trình đã thanh toán đủ và chuyển hoàn thành.
 Gửi lại cùng đánh giá không cộng điểm lần nữa. Dữ liệu cũ được tính lại số
 công trình và sao; không cộng thưởng ngược cho công trình đã hoàn thành.
 
@@ -448,7 +451,10 @@ và đổi trạng thái được khóa để tránh dùng dữ liệu trạng t
 ## Thu nhập, Ví và Ký quỹ
 
 Menu ví trên Flutter mở Thu nhập theo Ngày/Tuần/Tháng hoặc Ví điện tử.
-Chủ thầu thanh toán tiền công, tip và thưởng sau khi hoàn thành công trình;
+Chủ thầu thanh toán tiền công, tip và thưởng sau khi chốt đánh giá;
+giao dịch thanh toán cuối cùng mới hoàn thành công trình và ghi nhận thưởng uy tín.
+Migration `031_complete_only_after_payment.sql` đưa công trình cũ còn nợ tiền
+về đang thi công và giữ nguyên đánh giá, tiền đã chuyển và sự kiện uy tín.
 Admin đối soát nạp/rút tại `/admin/wallet`. Chi tiết quy tắc, API, hạn mức và
 migration 010 trong [docs/WALLET.md](docs/WALLET.md). Chưa có cổng thanh toán
 ngân hàng tự động; nạp/rút là yêu cầu chờ đối soát thực tế.

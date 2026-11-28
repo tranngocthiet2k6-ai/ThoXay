@@ -66,7 +66,9 @@ class ApplicationCancellationApiTest {
         mvc.perform(get("/api/jobs/nearby?lat=10&lng=106").header("Authorization",token(replacement))).andExpect(jsonPath("$.length()").value(0));
         mvc.perform(put("/api/jobs/"+job.getId()+"/complete").header("Authorization",token(owner)).contentType("application/json")
             .content("{\"ratings\":[{\"workerId\":"+replacement.getId()+",\"stars\":5}]}" )).andExpect(status().isOk());
-        assertThat(users.findById(replacement.getId()).orElseThrow().getCompletedJobs()).isEqualTo(1);
+        assertThat(users.findById(replacement.getId()).orElseThrow().getCompletedJobs()).isZero();
+        assertThat(jobs.findById(job.getId()).orElseThrow().getStatus()).isEqualTo(JobStatus.IN_PROGRESS);
+        assertThat(jobs.findById(job.getId()).orElseThrow().getRatingsFinalizedAt()).isNotNull();
         assertThat(users.findById(worker.getId()).orElseThrow().getCompletedJobs()).isZero();
         assertThat(applications.findById(application.getId()).orElseThrow().getWorkerRating()).isNull();
     }
@@ -79,7 +81,7 @@ class ApplicationCancellationApiTest {
         var history=events.findAll(); assertThat(history).hasSize(1); assertThat(history.get(0).getJob()).isNull(); assertThat(history.get(0).getApplication()).isNull();
         assertThat(history.get(0).getJobTitle()).isEqualTo("Công trình cần thay thế");
     }
-    @Test void completionRacingCancellationCommitsOnlyOneOutcome() throws Exception {
+    @Test void ratingsFinalizationRacingCancellationCommitsOnlyOneOutcome() throws Exception {
         worker.setReputationScore(80); users.saveAndFlush(worker);
         ExecutorService pool=Executors.newFixedThreadPool(2); CountDownLatch start=new CountDownLatch(1);
         try {
@@ -90,7 +92,8 @@ class ApplicationCancellationApiTest {
             JobApplication saved=applications.findById(application.getId()).orElseThrow();
             if (saved.getStatus()==ApplicationStatus.CANCELLED) { assertThat(ca).isEqualTo(200); assertThat(co).isEqualTo(400); assertThat(saved.getWorkerRating()).isNull(); }
             else { assertThat(ca).isEqualTo(409); assertThat(co).isEqualTo(200); assertThat(saved.getWorkerRating()).isEqualTo(5); }
-            assertThat(events.count()).isEqualTo(1); assertThat(users.findById(worker.getId()).orElseThrow().getReputationScore()).isEqualTo(saved.getStatus()==ApplicationStatus.CANCELLED ? 65 : 82);
+            assertThat(events.count()).isEqualTo(saved.getStatus()==ApplicationStatus.CANCELLED ? 1 : 0);
+            assertThat(users.findById(worker.getId()).orElseThrow().getReputationScore()).isEqualTo(saved.getStatus()==ApplicationStatus.CANCELLED ? 65 : 80);
         } finally { pool.shutdownNow(); }
     }
     private void parallel(Callable<Integer> a, Callable<Integer> b) throws Exception {

@@ -257,14 +257,17 @@ void main() {
       expect(
         tester
             .widget<FilledButton>(
-              find.widgetWithText(FilledButton, 'Hoàn thành & lưu điểm'),
+              find.widgetWithText(
+                FilledButton,
+                'Chốt đánh giá & mở thanh toán',
+              ),
             )
             .onPressed,
         isNull,
       );
       await tester.tap(find.byTooltip('Chấm 3 sao cho Thợ A'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Hoàn thành & lưu điểm'));
+      await tester.tap(find.text('Chốt đánh giá & mở thanh toán'));
       await tester.pumpAndSettle();
       expect(api.submitted, {3: 3});
       expect(completed, isTrue);

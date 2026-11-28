@@ -55,7 +55,8 @@ class StopRecruitingApiTest {
             .andExpect(status().isOk()).andExpect(jsonPath("$[0].job.contractorPhone").value(owner.getPhoneNumber()));
         mvc.perform(put("/api/jobs/" + job.getId() + "/complete").header("Authorization", token(owner))
             .contentType("application/json").content("{\"ratings\":[{\"workerId\":" + worker.getId() + ",\"stars\":5}]}"))
-            .andExpect(status().isOk()).andExpect(jsonPath("status").value("COMPLETED"));
+            .andExpect(status().isOk()).andExpect(jsonPath("status").value("IN_PROGRESS"))
+            .andExpect(jsonPath("ratingsFinalizedAt").isNotEmpty());
     }
 
     @Test void hidesEmptyClosedJobAndBlocksIndividualCrewApplicationsAndInvitations() throws Exception {

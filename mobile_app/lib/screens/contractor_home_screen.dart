@@ -211,7 +211,7 @@ class _ContractorHomeContentState extends State<ContractorHomeContent> {
       ScaffoldMessenger.of(context).showSnackBar(
         AppSnackBar(
           content: const Text(
-            'Đã hoàn thành công trình và lưu đánh giá cho thợ.',
+            'Đã chốt đánh giá. Công trình vẫn đang làm đến khi thanh toán đủ cho thợ.',
           ),
         ),
       );
@@ -249,24 +249,28 @@ class _ContractorHomeContentState extends State<ContractorHomeContent> {
           icon: const Icon(Icons.edit_location_alt_outlined),
           label: const Text('Sửa công trình'),
         ),
-      if (job.status == 'COMPLETED')
+      if (job.ratingsFinalized || job.status == 'COMPLETED')
         OutlinedButton.icon(
-          onPressed: () => Navigator.of(context).push(
-            MaterialPageRoute<void>(
-              builder: (_) => JobPaymentsScreen(api: widget.api, job: job),
-            ),
-          ),
+          onPressed: () async {
+            closeDetails?.call();
+            await Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => JobPaymentsScreen(api: widget.api, job: job),
+              ),
+            );
+            if (mounted) await _refresh();
+          },
           icon: const Icon(Icons.payments_outlined),
           label: const Text('Thanh toán thu nhập'),
         ),
-      if (job.status == 'IN_PROGRESS')
+      if (job.status == 'IN_PROGRESS' && !job.ratingsFinalized)
         OutlinedButton.icon(
           onPressed: () {
             closeDetails?.call();
             _complete(job);
           },
           icon: const Icon(Icons.task_alt),
-          label: const Text('Hoàn thành công trình'),
+          label: const Text('Chốt đánh giá'),
         ),
     ],
   );

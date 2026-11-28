@@ -54,6 +54,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   final Map<int, int> _ratings = {};
   Job get _currentJob => _participants.firstOrNull?.job ?? widget.job;
   bool get _completed =>
+      _currentJob.ratingsFinalized ||
       _currentJob.status == 'COMPLETED' ||
       _participants.any((a) => a.jobRating != null);
   bool get _worker => widget.applicationId != null;
@@ -264,6 +265,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               api: widget.api,
               job: _currentJob,
               busy: _busy || _loading,
+              onPaymentChanged: () => _load(),
               canComplete:
                   !_completed &&
                   _error == null &&
@@ -477,7 +479,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const Text(
-                  'Chọn sao ngay dưới tên từng người. Điểm được chốt một lần khi hoàn thành công trình.',
+                  'Chọn sao ngay dưới tên từng người. Đánh giá chốt một lần; công trình hoàn thành sau khi thanh toán đủ cho thợ.',
                 ),
                 for (final application in _participants)
                   Card(

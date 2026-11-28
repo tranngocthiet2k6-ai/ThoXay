@@ -23,7 +23,9 @@ class TargetedAttendanceApi extends AttendanceApi {
     latitude: 10,
     longitude: 106,
     requiredWorkers: 2,
-    status: completed ? 'COMPLETED' : 'IN_PROGRESS',
+    status: 'IN_PROGRESS',
+    ratingsFinalizedAt: completed ? DateTime.utc(2030, 3, 1) : null,
+    recruitmentClosed: completed,
   );
   @override
   Future<List<JobApplication>> jobApplications(int id) async => [
@@ -167,13 +169,13 @@ void main() {
         await tester.tap(star);
         await tester.pumpAndSettle();
       }
-      await tester.tap(find.text('Hoàn thành & lưu đánh giá'));
+      await tester.tap(find.text('Chốt đánh giá'));
       await tester.pumpAndSettle();
       expect(api.submitted, isNull);
-      await tester.tap(find.text('Hoàn thành & lưu điểm'));
+      await tester.tap(find.text('Chốt đánh giá & mở thanh toán'));
       await tester.pumpAndSettle();
       expect(api.submitted, {3: 3, 4: 5});
-      expect(find.text('Hoàn thành & lưu đánh giá'), findsNothing);
+      expect(find.text('Chốt đánh giá'), findsNothing);
       expect(find.text('Mở thanh toán ngày công'), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
       await tester.pumpWidget(
@@ -182,7 +184,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.text('Hoàn thành & lưu đánh giá'), findsNothing);
+      expect(find.text('Chốt đánh giá'), findsNothing);
       expect(
         tester
             .widget<IconButton>(

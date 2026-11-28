@@ -22,6 +22,8 @@ class JobLifecycleApiTest {
     @Autowired JobRepository jobs;
     @Autowired JobApplicationRepository applications;
     @Autowired JwtUtil jwt;
+    @Autowired vn.thoxay.wallet.WalletAccountRepository wallets;
+    @Autowired org.springframework.transaction.PlatformTransactionManager transactions;
     User owner, worker, outsider, admin;
 
     @BeforeEach void setup() {
@@ -63,11 +65,13 @@ class JobLifecycleApiTest {
         applications.saveAndFlush(waiting);
         mvc.perform(put("/api/jobs/" + first.getId() + "/complete").header("Authorization", token(owner))
             .contentType("application/json").content(scores(5)))
-            .andExpect(status().isOk()).andExpect(jsonPath("status").value("COMPLETED"));
+            .andExpect(status().isOk()).andExpect(jsonPath("status").value("IN_PROGRESS"));
+        settle(first,owner);
         assertThat(applications.findById(waiting.getId()).orElseThrow().getStatus()).isEqualTo(ApplicationStatus.REJECTED);
         assertThat(complete(first, 5, owner)).isEqualTo(200);
         Job second = acceptedJob(owner, "Công trình hai");
         assertThat(complete(second, 3, owner)).isEqualTo(200);
+        settle(second,owner);
         assertThat(users.findById(worker.getId()).orElseThrow().getRating()).isEqualTo(4.0);
         assertThat(complete(first, 1, owner)).isEqualTo(409);
         mvc.perform(get("/api/applications/worker/" + worker.getId()).header("Authorization", token(worker)))
@@ -97,8 +101,8 @@ class JobLifecycleApiTest {
         ExecutorService pool = Executors.newFixedThreadPool(2);
         CountDownLatch start = new CountDownLatch(1);
         try {
-            Future<Integer> a = pool.submit(() -> { start.await(); return complete(first, 5, owner); });
-            Future<Integer> b = pool.submit(() -> { start.await(); return complete(second, 1, outsider); });
+            Future<Integer> a = pool.submit(() -> { start.await();int result=complete(first,5,owner);settle(first,owner);return result; });
+            Future<Integer> b = pool.submit(() -> { start.await();int result=complete(second,1,outsider);settle(second,outsider);return result; });
             start.countDown();
             assertThat(List.of(a.get(15, TimeUnit.SECONDS), b.get(15, TimeUnit.SECONDS))).containsOnly(200);
             assertThat(users.findById(worker.getId()).orElseThrow().getRating()).isEqualTo(3.0);
@@ -110,6 +114,7 @@ class JobLifecycleApiTest {
         Job first = acceptedJob(owner, "Sẽ xóa"), second = acceptedJob(owner, "Còn lại");
         assertThat(complete(first, 5, owner)).isEqualTo(200);
         assertThat(complete(second, 1, owner)).isEqualTo(200);
+        settle(first,owner);settle(second,owner);
         mvc.perform(post("/admin/jobs/" + first.getId() + "/delete").with(csrf())
             .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user(admin.getPhoneNumber()).roles("ADMIN")))
             .andExpect(status().is3xxRedirection());
@@ -167,6 +172,16 @@ class JobLifecycleApiTest {
     }
 
     private String scores(int stars) { return "{\"ratings\":[{\"workerId\":" + worker.getId() + ",\"stars\":" + stars + "}]}"; }
+    private void settle(Job job,User contractor)throws Exception {
+        new org.springframework.transaction.support.TransactionTemplate(transactions).executeWithoutResult(tx->{
+            var wallet=wallets.findById(contractor.getId()).orElseGet(vn.thoxay.wallet.WalletAccount::new);
+            wallet.setUser(users.findById(contractor.getId()).orElseThrow());wallet.setMainBalance(10000000);wallets.saveAndFlush(wallet);
+        });
+        for(var application:applications.findByJobIdOrderByAppliedAtDesc(job.getId()))
+            if(application.getStatus()==ApplicationStatus.ACCEPTED)
+                mvc.perform(post("/api/wallet/job-payments").header("Authorization",token(contractor)).contentType("application/json")
+                    .content("{\"applicationId\":"+application.getId()+",\"workDays\":1,\"tip\":0,\"bonus\":0}")).andExpect(status().isOk());
+    }
     private int complete(Job job, int stars, User contractor) throws Exception {
         return mvc.perform(put("/api/jobs/" + job.getId() + "/complete").header("Authorization", token(contractor))
             .contentType("application/json").content(scores(stars))).andReturn().getResponse().getStatus();

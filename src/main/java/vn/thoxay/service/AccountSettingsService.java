@@ -70,7 +70,7 @@ public class AccountSettingsService {
         if (!blockers.isEmpty()) throw new ApiException(HttpStatus.CONFLICT, switch (blockers.get(0).reason()) {
             case "OPEN_JOB" -> "Bạn còn công trình đang tuyển hoặc thi công. Hãy dừng tuyển nếu không còn thợ, hoặc hoàn tất công việc trước khi chuyển vai trò.";
             case "OPEN_APPLICATION" -> "Bạn còn đơn ứng tuyển hoặc công việc đang xử lý. Hãy hoàn tất hoặc nhờ chủ thầu xử lý đơn trước khi chuyển vai trò.";
-            default -> "Còn công trình hoàn thành chưa chốt thanh toán. Chủ thầu cần thanh toán tiền công trước khi chuyển vai trò.";
+            default -> "Còn công trình đã chốt đánh giá nhưng chưa thanh toán đủ. Chủ thầu cần thanh toán tiền công trước khi chuyển vai trò.";
         });
         user.setRole(target); user.setAvailable(false); user.setSecurityVersion(user.getSecurityVersion() + 1);
         devices.deleteByUserId(user.getId());
@@ -85,15 +85,15 @@ public class AccountSettingsService {
     private List<RoleBlocker> blockers(Long id) {
         List<RoleBlocker> result = new ArrayList<>();
         var openJobs = em.createQuery("select j from Job j where j.contractor.id=:id and j.status in (vn.thoxay.entity.JobStatus.OPEN,vn.thoxay.entity.JobStatus.IN_PROGRESS) "
-            + "and (j.recruitmentClosed=false or exists (select a.id from JobApplication a where a.job=j and a.status=vn.thoxay.entity.ApplicationStatus.ACCEPTED)) order by j.id", Job.class)
+            + "and j.ratingsFinalizedAt is null and (j.recruitmentClosed=false or exists (select a.id from JobApplication a where a.job=j and a.status=vn.thoxay.entity.ApplicationStatus.ACCEPTED)) order by j.id", Job.class)
             .setParameter("id", id).getResultList();
         for (Job job : openJobs) result.add(new RoleBlocker("OPEN_JOB", JobResponse.of(job,null,true), true));
         var openApplications = em.createQuery("select a from JobApplication a join fetch a.job where a.worker.id=:id and a.status in (vn.thoxay.entity.ApplicationStatus.PENDING,vn.thoxay.entity.ApplicationStatus.ACCEPTED) "
-            + "and a.job.status in (vn.thoxay.entity.JobStatus.OPEN,vn.thoxay.entity.JobStatus.IN_PROGRESS) order by a.id", vn.thoxay.entity.JobApplication.class)
+            + "and a.job.ratingsFinalizedAt is null and a.job.status in (vn.thoxay.entity.JobStatus.OPEN,vn.thoxay.entity.JobStatus.IN_PROGRESS) order by a.id", vn.thoxay.entity.JobApplication.class)
             .setParameter("id", id).getResultList();
         for (var application : openApplications) result.add(new RoleBlocker("OPEN_APPLICATION", JobResponse.of(application.getJob(),null,application.getStatus()==vn.thoxay.entity.ApplicationStatus.ACCEPTED), false));
         var unpaid = em.createQuery("select distinct j from JobApplication a join a.job j where (a.worker.id=:id or j.contractor.id=:id) and a.status=vn.thoxay.entity.ApplicationStatus.ACCEPTED "
-            + "and j.status=vn.thoxay.entity.JobStatus.COMPLETED and not exists (select p.id from JobPayment p where p.application.id=a.id) order by j.id", Job.class)
+            + "and (j.status=vn.thoxay.entity.JobStatus.COMPLETED or (j.status=vn.thoxay.entity.JobStatus.IN_PROGRESS and j.ratingsFinalizedAt is not null)) and not exists (select p.id from JobPayment p where p.application.id=a.id) order by j.id", Job.class)
             .setParameter("id", id).getResultList();
         for (Job job : unpaid) result.add(new RoleBlocker("UNPAID_WORK", JobResponse.of(job,null,true), job.getContractor().getId().equals(id)));
         return result;

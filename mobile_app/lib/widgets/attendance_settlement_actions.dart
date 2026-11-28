@@ -16,12 +16,14 @@ class AttendanceSettlementActions extends StatefulWidget {
     required this.job,
     this.onComplete,
     this.canComplete = true,
+    this.onPaymentChanged,
     this.busy = false,
   });
   final ApiService api;
   final Job job;
   final Future<bool?> Function()? onComplete;
   final bool canComplete;
+  final Future<void> Function()? onPaymentChanged;
   final bool busy;
   @override
   State<AttendanceSettlementActions> createState() =>
@@ -46,7 +48,10 @@ class _AttendanceSettlementActionsState
 
   @override
   Widget build(BuildContext context) {
-    final completed = _completed || widget.job.status == 'COMPLETED';
+    final completed =
+        _completed ||
+        widget.job.ratingsFinalized ||
+        widget.job.status == 'COMPLETED';
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -67,7 +72,7 @@ class _AttendanceSettlementActionsState
                       ? null
                       : _complete,
                   icon: const Icon(Icons.star_outline),
-                  label: const Text('Hoàn thành & lưu đánh giá'),
+                  label: const Text('Chốt đánh giá'),
                 ),
               ),
             if (completed)
@@ -85,6 +90,7 @@ class _AttendanceSettlementActionsState
                                 ),
                               ),
                             );
+                            if (mounted) await widget.onPaymentChanged?.call();
                           } on ApiException catch (e) {
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(

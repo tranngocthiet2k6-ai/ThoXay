@@ -94,7 +94,7 @@ class _RoleSwitchBlockersScreenState extends State<RoleSwitchBlockersScreen> {
     final job = item.job;
     final message = item.unpaid
         ? item.owner
-              ? 'Công trình đã hoàn thành. Hãy chốt và thanh toán tiền công cho các thợ chưa nhận tiền.'
+              ? 'Công trình còn chờ thanh toán. Hãy thanh toán đủ tiền công cho các thợ chưa nhận tiền.'
               : 'Chủ thầu chưa chốt thanh toán tiền công của bạn. Liên hệ chủ thầu để đối soát và nhận tiền vào ví.'
         : item.owner
         ? 'Hãy dừng tuyển nếu không cần thêm thợ. Khi còn thợ đã nhận, cần hoàn thành công trình và thanh toán trước khi chuyển vai trò.'
@@ -160,7 +160,7 @@ class _RoleSwitchBlockersScreenState extends State<RoleSwitchBlockersScreen> {
                           }),
                     child: const Text('Chấm công & nghiệm thu'),
                   ),
-                  if (job.status == 'IN_PROGRESS')
+                  if (job.status == 'IN_PROGRESS' && !job.ratingsFinalized)
                     FilledButton(
                       onPressed: _busy
                           ? null
@@ -171,7 +171,7 @@ class _RoleSwitchBlockersScreenState extends State<RoleSwitchBlockersScreen> {
                                 job,
                               );
                             }),
-                      child: const Text('Hoàn thành công trình'),
+                      child: const Text('Chốt đánh giá'),
                     ),
                 ],
                 if (!item.owner && job.contractorPhone != null) ...[

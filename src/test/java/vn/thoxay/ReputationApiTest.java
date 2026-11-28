@@ -20,6 +20,8 @@ class ReputationApiTest {
     @Autowired JobApplicationRepository applications;
     @Autowired ReputationEventRepository events;
     @Autowired JwtUtil jwt;
+    @Autowired vn.thoxay.wallet.WalletAccountRepository wallets;
+    @Autowired org.springframework.transaction.PlatformTransactionManager transactions;
     User worker, owner;
     @BeforeEach void setup() { clean(); worker = user("0964444401", Role.ROLE_WORKER); owner = user("0964444402", Role.ROLE_CONTRACTOR); }
     @AfterEach void clean() { applications.deleteAllInBatch(); jobs.deleteAllInBatch(); users.deleteAllInBatch(); }
@@ -39,6 +41,10 @@ class ReputationApiTest {
         JobApplication a = new JobApplication(); a.setWorker(worker); a.setJob(job); a.setStatus(ApplicationStatus.ACCEPTED); applications.saveAndFlush(a);
         String body = "{\"ratings\":[{\"workerId\":" + worker.getId() + ",\"stars\":4}]}";
         for (int i=0;i<10;i++) mvc.perform(put("/api/jobs/"+job.getId()+"/complete").header("Authorization", token(owner)).contentType("application/json").content(body)).andExpect(status().isOk());
+        assertThat(users.findById(worker.getId()).orElseThrow().getReputationScore()).isEqualTo(80);
+        new org.springframework.transaction.support.TransactionTemplate(transactions).executeWithoutResult(tx->{var wallet=new vn.thoxay.wallet.WalletAccount();wallet.setUser(users.findById(owner.getId()).orElseThrow());wallet.setMainBalance(1000000);wallets.saveAndFlush(wallet);});
+        mvc.perform(post("/api/wallet/job-payments").header("Authorization",token(owner)).contentType("application/json")
+            .content("{\"applicationId\":"+a.getId()+",\"workDays\":1,\"tip\":0,\"bonus\":0}")).andExpect(status().isOk());
         mvc.perform(put("/api/jobs/"+job.getId()+"/complete").header("Authorization", token(owner)).contentType("application/json")
             .content(body.replace("\"stars\":4", "\"stars\":5"))).andExpect(status().isConflict());
         User saved = users.findById(worker.getId()).orElseThrow(); assertThat(saved.getReputationScore()).isEqualTo(82); assertThat(saved.getCompletedJobs()).isEqualTo(1); assertThat(saved.getRating()).isEqualTo(4);

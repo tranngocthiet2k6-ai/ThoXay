@@ -54,9 +54,14 @@ Seed không có đủ ảnh phải verified=false, kể cả ROLE_ADMIN.
 Admin xem hai mặt trong Bootstrap modal, xác nhận kèm cả hai URL đã xem để
 chặn xác thực nhầm ảnh bị thay đổi sau khi tải dashboard. Chỉ tải ảnh khi mở
 modal; xóa src khi đóng. Chưa tải đủ hai ảnh thì nút xác thực bị vô hiệu hóa.
-`PUT /api/jobs/{id}/complete` nhận ratings gồm workerId/stars cho đúng toàn bộ
-thợ ACCEPTED, chỉ cho chủ công trình IN_PROGRESS; lưu điểm và COMPLETED cùng
-giao dịch. Gửi lại cùng đánh giá là idempotent; điểm đã chốt không sửa.
+`PUT /api/jobs/{id}/complete` chốt ratings gồm workerId/stars cho đúng toàn bộ
+thợ ACCEPTED, chỉ cho chủ công trình IN_PROGRESS; lưu ratingsFinalizedAt,
+đóng tuyển và giữ IN_PROGRESS khi còn thợ chưa được thanh toán. Gửi lại cùng
+đánh giá là idempotent; điểm đã chốt không sửa. Thanh toán thành công ghi paidAt
+trên đơn; chỉ khi toàn bộ thợ ACCEPTED đã nhận tiền mới chuyển COMPLETED,
+tính trung bình sao, số công trình và thưởng uy tín trong cùng giao dịch.
+Nâng cấp dữ liệu cũ bằng migration 031: công trình COMPLETED còn nợ tiền về
+IN_PROGRESS, giữ đánh giá đã chốt, lịch sử thanh toán và uy tín đã ghi nhận.
 Khóa các worker theo thứ tự ID trước khi tính trung bình từ điểm thực tế của
 các công trình COMPLETED. Xóa công trình có đánh giá phải tính lại trung bình.
 Thợ chưa có đánh giá giữ mặc định 5.0. Điện thoại liên lạc chỉ trả trong đơn

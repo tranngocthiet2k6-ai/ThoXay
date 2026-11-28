@@ -176,11 +176,11 @@ void main() {
           'Hiển thị & Trải nghiệm công trường',
           'Thông báo & Khu vực',
           'Hỗ trợ & Pháp lý',
-          'Thợ Xây v1.0.1',
+          'Thợ Xây v1.0.2',
         ]) {
           expect(find.text(label), findsOneWidget);
         }
-        await tester.ensureVisible(find.text('Thợ Xây v1.0.1'));
+        await tester.ensureVisible(find.text('Thợ Xây v1.0.2'));
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
         final theme = Theme.of(tester.element(find.byType(ProfileSettings)));

@@ -43,6 +43,7 @@ public class Job {
     private JobStatus status = JobStatus.OPEN;
     @Column(name = "recruitment_closed", nullable = false) @org.hibernate.annotations.ColumnDefault("false")
     private boolean recruitmentClosed;
+    private java.time.Instant ratingsFinalizedAt;
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
     @Column(name = "starts_on") private java.time.LocalDate startsOn;

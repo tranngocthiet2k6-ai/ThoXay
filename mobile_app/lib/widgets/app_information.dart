@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 abstract final class AppRelease {
   static const name = String.fromEnvironment(
     'FLUTTER_BUILD_NAME',
-    defaultValue: '1.0.1',
+    defaultValue: '1.0.2',
   );
   static const number = String.fromEnvironment(
     'FLUTTER_BUILD_NUMBER',
-    defaultValue: '2',
+    defaultValue: '3',
   );
   static const label = '$name+$number';
 }

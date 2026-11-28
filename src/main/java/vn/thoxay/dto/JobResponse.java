@@ -7,7 +7,7 @@ public record JobResponse(Long id, Long contractorId, String contractorName, Str
     String title, String description, String jobType, double salaryPerDay, String address,
     double latitude, double longitude, int requiredWorkers, String status, LocalDateTime createdAt,
     Double distanceKm, java.time.LocalDate startsOn, java.time.LocalDate endsOn, int termsVersion, boolean contractorVerified, boolean attendanceRequired, boolean recruitmentClosed,
-    int skilledWorkers, int helpers) {
+    int skilledWorkers, int helpers, java.time.Instant ratingsFinalizedAt) {
     public static JobResponse of(Job job, Double distanceKm) {
         return of(job, distanceKm, true);
     }
@@ -17,6 +17,6 @@ public record JobResponse(Long id, Long contractorId, String contractorName, Str
             job.getTitle(), job.getDescription(), job.getJobType(), job.getSalaryPerDay(), job.getAddress(),
             job.getLatitude(), job.getLongitude(), job.getRequiredWorkers(), job.getStatus().name(),
             job.getCreatedAt(), distanceKm, job.getStartsOn(), job.getEndsOn(), job.getTermsVersion(), owner.isVerified(),job.isAttendanceRequired(),job.isRecruitmentClosed(),
-            job.getSkilledWorkers(),job.getHelpers());
+            job.getSkilledWorkers(),job.getHelpers(),job.getRatingsFinalizedAt());
     }
 }

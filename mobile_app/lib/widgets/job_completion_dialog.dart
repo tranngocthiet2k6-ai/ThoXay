@@ -57,6 +57,7 @@ class _JobCompletionDialogState extends State<_JobCompletionDialog> {
         setState(() {
           _workers = list.where((a) => a.status == 'ACCEPTED').toList();
           _alreadyCompleted =
+              widget.job.ratingsFinalized ||
               widget.job.status == 'COMPLETED' ||
               _workers.any(
                 (a) => a.job.status == 'COMPLETED' || a.jobRating != null,
@@ -93,7 +94,7 @@ class _JobCompletionDialogState extends State<_JobCompletionDialog> {
   Widget build(BuildContext context) => PopScope(
     canPop: !_saving,
     child: AlertDialog(
-      title: const Text('Hoàn thành & đánh giá thợ'),
+      title: const Text('Chốt đánh giá thợ'),
       content: SizedBox(
         width: 480,
         child: SingleChildScrollView(
@@ -107,7 +108,7 @@ class _JobCompletionDialogState extends State<_JobCompletionDialog> {
               Text(widget.job.title),
               const SizedBox(height: 12),
               const Text(
-                'Chọn từ 1 đến 5 sao cho từng thợ đã tham gia. Đánh giá sẽ được lưu khi xác nhận hoàn thành.',
+                'Chọn từ 1 đến 5 sao cho từng thợ. Chốt đánh giá để mở thanh toán; công trình vẫn đang làm đến khi thanh toán đủ.',
               ),
               if (_loading)
                 const Padding(
@@ -116,7 +117,7 @@ class _JobCompletionDialogState extends State<_JobCompletionDialog> {
                 ),
               if (_alreadyCompleted)
                 const Text(
-                  'Công trình đã hoàn thành. Đánh giá đã chốt và không thể chấm lại.',
+                  'Đánh giá đã chốt và không thể chấm lại. Trạng thái hoàn thành chỉ ghi nhận sau khi thanh toán đủ.',
                 ),
               for (final application in _workers)
                 Padding(
@@ -163,7 +164,9 @@ class _JobCompletionDialogState extends State<_JobCompletionDialog> {
                       _ratings.length != _workers.length
                   ? null
                   : _complete,
-              child: Text(_saving ? 'Đang lưu…' : 'Hoàn thành & lưu điểm'),
+              child: Text(
+                _saving ? 'Đang lưu…' : 'Chốt đánh giá & mở thanh toán',
+              ),
             ),
           ),
       ],

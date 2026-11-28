@@ -54,6 +54,7 @@ class Job {
     this.contractorVerified = false,
     this.attendanceRequired = false,
     this.recruitmentClosed = false,
+    this.ratingsFinalizedAt,
     int? skilledWorkers,
     int? helpers,
   }) : skilledWorkers =
@@ -73,10 +74,16 @@ class Job {
   final int termsVersion;
   final bool contractorVerified, attendanceRequired;
   final bool recruitmentClosed;
+  final DateTime? ratingsFinalizedAt;
+  bool get ratingsFinalized => ratingsFinalizedAt != null;
   bool get canRecruit =>
-      !recruitmentClosed && (status == 'OPEN' || status == 'IN_PROGRESS');
+      !recruitmentClosed &&
+      !ratingsFinalized &&
+      (status == 'OPEN' || status == 'IN_PROGRESS');
   String get displayStatus =>
-      recruitmentClosed && (status == 'OPEN' || status == 'IN_PROGRESS')
+      recruitmentClosed &&
+          !ratingsFinalized &&
+          (status == 'OPEN' || status == 'IN_PROGRESS')
       ? 'RECRUITMENT_CLOSED'
       : status;
   factory Job.fromJson(Map<String, dynamic> json) => Job(
@@ -106,6 +113,9 @@ class Job {
     contractorVerified: json['contractorVerified'] as bool? ?? false,
     attendanceRequired: json['attendanceRequired'] as bool? ?? false,
     recruitmentClosed: json['recruitmentClosed'] as bool? ?? false,
+    ratingsFinalizedAt: json['ratingsFinalizedAt'] == null
+        ? null
+        : DateTime.parse(json['ratingsFinalizedAt'] as String),
   );
 }
 
@@ -132,6 +142,7 @@ class JobApplication {
     this.consentVersion,
     this.acceptedTermsAt,
     this.contractHash,
+    this.paidAt,
   });
   final int id, workerId;
   final Job job;
@@ -146,6 +157,12 @@ class JobApplication {
   final int? proposedDailyRate, agreedDailyRate, consentVersion;
   final String? wageNote, contractHash;
   final DateTime? acceptedTermsAt;
+  final DateTime? paidAt;
+  bool get awaitingPayment =>
+      status == 'ACCEPTED' &&
+      jobRating != null &&
+      paidAt == null &&
+      job.ratingsFinalized;
   final double workerRating;
   final bool workerVerified, workerActive;
   factory JobApplication.fromJson(Map<String, dynamic> json) => JobApplication(
@@ -174,6 +191,9 @@ class JobApplication {
     acceptedTermsAt: json['acceptedTermsAt'] == null
         ? null
         : DateTime.parse(json['acceptedTermsAt'] as String),
+    paidAt: json['paidAt'] == null
+        ? null
+        : DateTime.parse(json['paidAt'] as String),
   );
 }
 
